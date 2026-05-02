@@ -1,0 +1,70 @@
+name: Feature request
+description: Proposer une amélioration produit, technique ou opérationnelle
+title: "[Feature]: "
+labels:
+  - type: feature
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème à résoudre
+      description: Quel problème concret cette amélioration règle-t-elle ?
+      placeholder: Exemple — Les opérateurs n’ont pas une vue claire des actions prioritaires par client.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Décris l’amélioration souhaitée.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Zone concernée
+      options:
+        - Public site
+        - Admin
+        - Portal client
+        - API
+        - Supabase
+        - Auth / Clerk
+        - Cron / jobs
+        - AI / providers
+        - CI/CD
+        - Documentation
+        - Autre
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critères d’acceptation
+      placeholder: |
+        - [ ] L’opérateur peut...
+        - [ ] Le client voit...
+        - [ ] Le build passe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risques / dépendances
+      placeholder: Variables d’environnement, migration Supabase, impact Vercel, sécurité, etc.
