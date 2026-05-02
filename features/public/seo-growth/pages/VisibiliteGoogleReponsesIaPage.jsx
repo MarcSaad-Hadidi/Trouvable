@@ -34,7 +34,7 @@ function FloatingBubbles() {
     return <canvas ref={ref} className="pointer-events-none absolute inset-0 h-full w-full opacity-70" />;
 }
 
-export default function VisibiliteGoogleReponsesIaPage({ page }) {
+export default function VisibiliteGoogleReponsesIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -54,6 +54,8 @@ export default function VisibiliteGoogleReponsesIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             {/* Definition */}
             <section className="border-t border-sky-400/[0.06] bg-[#060610] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">

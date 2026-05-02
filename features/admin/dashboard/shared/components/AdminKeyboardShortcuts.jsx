@@ -70,22 +70,22 @@ export default function AdminKeyboardShortcuts() {
         <div
             role="dialog"
             aria-modal="true"
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 backdrop-blur-sm"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/30 backdrop-blur-sm"
             onClick={() => setShowHelp(false)}
         >
             <div
-                className="w-full max-w-md rounded-[22px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(17,18,22,0.98)_0%,rgba(9,10,14,0.98)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.6)]"
+                className="w-full max-w-md rounded-[22px] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.16)]"
                 onClick={(event) => event.stopPropagation()}
             >
                 <div className="flex items-start justify-between">
                     <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Raccourcis clavier</div>
-                        <h2 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">Navigation rapide</h2>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Raccourcis clavier</div>
+                        <h2 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-slate-950">Navigation rapide</h2>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowHelp(false)}
-                        className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-white/60 hover:bg-white/[0.08] hover:text-white"
+                        className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                     >
                         Esc
                     </button>
@@ -95,14 +95,14 @@ export default function AdminKeyboardShortcuts() {
                     {SHORTCUTS.map((shortcut) => (
                         <li
                             key={shortcut.href}
-                            className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
+                            className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5"
                         >
-                            <span className="text-[13px] text-white/80">{shortcut.label}</span>
+                            <span className="text-[13px] text-slate-700">{shortcut.label}</span>
                             <span className="flex items-center gap-1">
                                 {shortcut.keys.map((key) => (
                                     <kbd
                                         key={key}
-                                        className="rounded-md border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] font-semibold text-white/85"
+                                        className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700"
                                     >
                                         {key.toUpperCase()}
                                     </kbd>
@@ -112,15 +112,15 @@ export default function AdminKeyboardShortcuts() {
                     ))}
                 </ul>
 
-                <div className="mt-5 flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5">
-                    <span className="text-[13px] text-white/80">Ouvrir ce panneau</span>
-                    <kbd className="rounded-md border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] font-semibold text-white/85">
+                <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
+                    <span className="text-[13px] text-slate-700">Ouvrir ce panneau</span>
+                    <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
                         ?
                     </kbd>
                 </div>
 
-                <p className="mt-4 text-[11px] leading-relaxed text-white/45">
-                    Pressez <span className="font-semibold text-white/70">G</span> puis la touche correspondante pour naviguer.
+                <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
+                    Pressez <span className="font-semibold text-slate-700">G</span> puis la touche correspondante pour naviguer.
                 </p>
             </div>
         </div>

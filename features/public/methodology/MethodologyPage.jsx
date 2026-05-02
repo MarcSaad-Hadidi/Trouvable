@@ -96,6 +96,12 @@ export default function MethodologyPage() {
       <GeoSeoInjector
         article={METHODOLOGY_ARTICLE_SCHEMA}
         howTo={METHODOLOGY_HOWTO_SCHEMA}
+        itemList={{
+          id: `${METHODOLOGY_URL}#methodology-steps`,
+          name: "Phases de la méthodologie Trouvable",
+          pageUrl: METHODOLOGY_URL,
+          items: STEPS.map((step) => step.title),
+        }}
         baseUrl={SITE_URL}
       />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(91,115,255,0.05),transparent_55%),linear-gradient(to_bottom,#080808,#080808)]" />
@@ -121,6 +127,19 @@ export default function MethodologyPage() {
           </div>
         </section>
 
+        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
+          <div className="mx-auto max-w-[960px]">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+            <ul className="grid gap-3 md:grid-cols-4">
+              {STEPS.map((step) => (
+                <li key={step.num} className="border-l border-white/10 pl-4 text-[13px] leading-[1.65] text-white/62">
+                  <span className="font-semibold text-white/82">{step.title}.</span> {step.desc}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         <section className="border-t border-white/[0.05] px-6 py-28 sm:px-10">
           <div className="mx-auto max-w-[1000px]">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14">
@@ -143,7 +162,7 @@ export default function MethodologyPage() {
               {STEPS.map((s, i) => {
                 const Icon = s.icon;
                 return (
-                  <motion.div key={s.num} initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, delay: i * 0.08 }} className="relative flex items-stretch gap-6 pb-2">
+                  <motion.div key={s.num} initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, delay: i * 0.08 }} className="relative flex items-stretch gap-6 pb-2">
                     <div className="flex flex-col items-center">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-[#0d0d0d]" style={{ boxShadow: `0 0 20px ${s.accent}15` }}>
                         <Icon className="h-4 w-4" style={{ color: s.accent }} />

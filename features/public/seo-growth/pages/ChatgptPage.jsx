@@ -42,7 +42,7 @@ function buildChats(page) {
     ];
 }
 
-export default function ChatgptPage({ page }) {
+export default function ChatgptPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
@@ -328,6 +328,7 @@ export default function ChatgptPage({ page }) {
                 </div>
                 
                 {/* Regular content appended below the "app" */}
+                {trustBrief}
                 <div className="mt-20">
                     <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="teal" heading="Questions fréquentes" /></section>
                     <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="teal" heading="Plateformes connexes" /></section>

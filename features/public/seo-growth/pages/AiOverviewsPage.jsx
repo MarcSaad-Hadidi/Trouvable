@@ -5,7 +5,7 @@ import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronD
 import Link from 'next/link';
 import { TypewriterText, AiThinking, FaqSection, LinksSection } from './shared-primitives';
 
-export default function AiOverviewsPage({ page }) {
+export default function AiOverviewsPage({ page, trustBrief }) {
     const [isGenerating, setIsGenerating] = useState(true);
 
     useEffect(() => {
@@ -32,10 +32,16 @@ export default function AiOverviewsPage({ page }) {
                             <span className="text-[#ea4335]">e</span>
                         </div>
                         <div className="flex-1 max-w-[700px] relative">
+                            <label htmlFor="ai-overviews-demo-query" className="sr-only">
+                                Requête illustrée dans la simulation AI Overviews
+                            </label>
                             <input
+                                id="ai-overviews-demo-query"
                                 type="text"
                                 className="w-full bg-[#303134] hover:bg-[#3c4043] focus:bg-[#303134] rounded-full h-[46px] pl-6 pr-28 text-[15px] text-white outline-none border border-transparent shadow-sm transition-colors"
                                 value={page.h1}
+                                aria-label="Requête illustrée dans la simulation AI Overviews"
+                                toolparamdescription="Requête démonstrative affichée dans la simulation Google AI Overviews."
                                 readOnly
                             />
                             <div className="absolute right-4 top-0 h-full flex items-center gap-3.5 text-[#9aa0a6]">

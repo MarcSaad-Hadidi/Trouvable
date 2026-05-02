@@ -31,7 +31,7 @@ export default function MandateSection({
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6 }}
           className="mb-4 flex items-center gap-4"
         >
@@ -44,7 +44,7 @@ export default function MandateSection({
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, delay: 0.06 }}
           className="mb-3 text-[clamp(28px,4vw,48px)] font-bold leading-[1.06] tracking-[-0.04em]"
         >
@@ -54,7 +54,7 @@ export default function MandateSection({
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, delay: 0.12 }}
           className="mb-14 max-w-2xl text-[16px] leading-[1.6] text-[#a0a0a0]"
         >
@@ -65,7 +65,7 @@ export default function MandateSection({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.15 }}
             className={`flex flex-col justify-center ${reversed ? "lg:order-2" : ""}`}
           >
@@ -95,7 +95,7 @@ export default function MandateSection({
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-60px" }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, delay: 0.25 }}
             className={reversed ? "lg:order-1" : ""}
           >
@@ -106,7 +106,7 @@ export default function MandateSection({
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid gap-4 sm:grid-cols-3"
         >

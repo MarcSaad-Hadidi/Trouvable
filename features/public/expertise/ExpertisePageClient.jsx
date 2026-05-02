@@ -10,11 +10,36 @@ import GeoSeoInjector from "@/features/public/shared/GeoSeoInjector";
 import { SITE_URL } from "@/lib/site-config";
 import { ArrowRight, Briefcase, Search, Layers, BookOpen, HelpCircle, ChevronDown, Zap, Globe, Shield, TrendingUp, MapPin } from "lucide-react";
 
+function KeyTakeawaysSection({ expertise, composition, sectorNarrative }) {
+    const takeaways = [
+        expertise.description,
+        sectorNarrative,
+        composition.ctaDescription || 'Trouvable documente les signaux contrôlables et ne promet pas de rang ni de citation IA garantie.',
+    ].filter(Boolean).slice(0, 3);
+
+    return (
+        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
+            <div className="mx-auto max-w-[960px]">
+                <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-300">À retenir</div>
+                <ul className="grid gap-3 md:grid-cols-3">
+                    {takeaways.map((item) => (
+                        <li key={item} className="border-l border-violet-400/20 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+                            {item}
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
+            </div>
+        </section>
+    );
+}
+
 export default function ExpertisePageClient({ expertise, composition, linkedVilles }) {
     const heroHeadline = expertise.heroHeadline || expertise.name;
     const heroSubheadline = expertise.heroSubheadline || expertise.description;
     const sectorNarrative = expertise.sectorNarrative || composition.marketContext;
     const ctaLabel = expertise.ctaLabel || `Diagnostic ${expertise.name}`;
+    const pageUrl = `${SITE_URL}/expertises/${expertise.slug}`;
 
     return (
         <div className="min-h-screen bg-[#080808] font-[Inter] text-[#f0f0f0] antialiased">
@@ -23,10 +48,17 @@ export default function ExpertisePageClient({ expertise, composition, linkedVill
                 service={expertise}
                 faqs={expertise.faqs}
                 breadcrumbs={[{ name: "Accueil", url: "/" }, { name: "Expertises", url: null }, { name: expertise.name, url: "/expertises/" + expertise.slug }]}
+                article={{
+                    url: pageUrl,
+                    headline: `${expertise.name} et visibilité IA`,
+                    description: expertise.description,
+                    about: ['visibilité IA sectorielle', expertise.name, 'SEO local'],
+                    mentions: linkedVilles.map((ville) => `${SITE_URL}/villes/${ville.slug}`),
+                }}
                 itemList={{
-                    id: `${SITE_URL}/expertises/${expertise.slug}#expertise-list`,
+                    id: `${pageUrl}#expertise-list`,
                     name: `Axes d'execution ${expertise.name}`,
-                    pageUrl: `${SITE_URL}/expertises/${expertise.slug}`,
+                    pageUrl,
                     items: expertise.contentAngles?.slice(0, 6) || [],
                 }}
                 baseUrl={SITE_URL}
@@ -108,6 +140,8 @@ export default function ExpertisePageClient({ expertise, composition, linkedVill
                         </motion.div>
                     </div>
                 </section>
+
+                <KeyTakeawaysSection expertise={expertise} composition={composition} sectorNarrative={sectorNarrative} />
 
                 {/* SECTOR STAKES */}
                 {sectorNarrative && (

@@ -6,6 +6,7 @@ import Navbar from '@/features/public/shared/Navbar';
 import SiteFooter from '@/features/public/shared/SiteFooter';
 import ContactButton from '@/features/public/shared/ContactButton';
 import { SITE_URL } from '@/lib/site-config';
+import { fitMetaDescription, withPublicAuthor } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,20 +29,22 @@ export async function generateMetadata({ params }) {
         }
     }
 
-    return {
+    const description = fitMetaDescription(profile.seo_description || ('Profil local de ' + profile.client_name + ' sur Trouvable.'));
+
+    return withPublicAuthor({
         title: seoTitle,
-        description: profile.seo_description || ('Profil local de ' + profile.client_name + ' sur Trouvable.'),
+        description,
         metadataBase: new URL(SITE_URL),
         alternates: { canonical: '/clients/' + clientSlug },
         openGraph: {
             title: seoTitle,
-            description: profile.seo_description || ('Profil local de ' + profile.client_name + ' sur Trouvable.'),
+            description,
             url: '/clients/' + clientSlug,
             siteName: 'Trouvable',
             locale: 'fr_CA',
             type: 'website',
         }
-    };
+    });
 }
 
 export default async function ClientPage({ params }) {
@@ -78,6 +81,9 @@ export default async function ClientPage({ params }) {
                                 {profile.seo_description}
                             </p>
                         )}
+                        <div className="mt-4 text-xs uppercase tracking-[0.08em] text-white/35">
+                            Par Trouvable
+                        </div>
                     </header>
 
                     <div className="mb-12 grid md:grid-cols-2 gap-8">

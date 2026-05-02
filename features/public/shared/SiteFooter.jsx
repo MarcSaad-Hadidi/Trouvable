@@ -84,7 +84,7 @@ export default function SiteFooter() {
             <div className="w-[45%] sm:w-[30%] lg:flex-1">
               <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.1em] text-white/50">Entreprise</div>
               <ul className="space-y-2.5 list-outside list-disc ml-4 marker:text-white/30">
-                <li><Link href="/a-propos" className="text-sm text-[#9a9a9a] transition hover:text-white">La Firme</Link></li>
+                <li><Link href="/a-propos" className="text-sm text-[#9a9a9a] transition hover:text-white">À propos</Link></li>
                 <li><Link href="/notre-mesure" className="text-sm text-[#9a9a9a] transition hover:text-white">Cadre de mesure</Link></li>
                 <li><Link href="/etudes-de-cas" className="text-sm text-[#9a9a9a] transition hover:text-white">Cas Clients</Link></li>
                 <li><Link href="/etudes-de-cas/dossier-type" className="text-sm text-[#9a9a9a] transition hover:text-white">Dossier-type</Link></li>

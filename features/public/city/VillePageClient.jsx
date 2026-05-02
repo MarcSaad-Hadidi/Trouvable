@@ -114,11 +114,55 @@ function SignalsSection({ data, heading, description, config }) {
     );
 }
 
+function KeyTakeawaysSection({ ville, composition }) {
+    const takeaways = [
+        composition.heroTagline,
+        composition.marketContext,
+        ville.proofNote || 'Trouvable documente les corrections réalisées et ne promet pas de rang, de citation IA ou de volume de contact garanti.',
+    ].filter(Boolean).slice(0, 3);
+
+    return (
+        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
+            <div className="mx-auto max-w-[900px]">
+                <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">À retenir</div>
+                <ul className="grid gap-3 md:grid-cols-3">
+                    {takeaways.map((item) => (
+                        <li key={item} className="border-l border-emerald-400/20 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+                            {item}
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
+            </div>
+        </section>
+    );
+}
+
 export default function VillePageClient({ ville, composition, linkedExpertises }) {
+    const pageUrl = `${SITE_URL}/villes/${ville.slug}`;
+
     return (
         <div className="min-h-screen bg-[#080808] font-[Inter] text-[#f0f0f0] antialiased">
             <Navbar />
-            <GeoSeoInjector faqs={ville.faqs} breadcrumbs={[{ name: "Accueil", url: "/" }, { name: "Villes", url: null }, { name: ville.name, url: "/villes/" + ville.slug }]} baseUrl={SITE_URL} />
+            <GeoSeoInjector
+                faqs={ville.faqs}
+                breadcrumbs={[{ name: "Accueil", url: "/" }, { name: "Villes", url: null }, { name: ville.name, url: "/villes/" + ville.slug }]}
+                article={{
+                    url: pageUrl,
+                    headline: `Visibilité IA à ${ville.name}`,
+                    description: ville.description,
+                    datePublished: undefined,
+                    about: ['visibilité IA locale', ville.name, 'SEO local'],
+                    mentions: linkedExpertises.map((expertise) => `${SITE_URL}/expertises/${expertise.slug}`),
+                }}
+                itemList={{
+                    id: `${pageUrl}#ville-items`,
+                    name: `Signaux et étapes à ${ville.name}`,
+                    pageUrl,
+                    items: [...ville.problems, ...ville.methodology, ...ville.signals].slice(0, 12),
+                }}
+                baseUrl={SITE_URL}
+            />
             <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(to_bottom,#080808,#080808)]" />
 
             <main>
@@ -151,6 +195,8 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                         </motion.div>
                     </div>
                 </section>
+
+                <KeyTakeawaysSection ville={ville} composition={composition} />
 
                 {/* SIGNAL BAR */}
                 <section className="border-t border-white/[0.05] mt-16 px-6 py-5 sm:px-10">

@@ -74,7 +74,7 @@ export default function CasesPage() {
                     key={e.num}
                     initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
+                    viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.6, delay: i * 0.08 }}
                     className="group"
                   >
@@ -109,7 +109,7 @@ export default function CasesPage() {
             <div className="relative">
               <div className="absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-emerald-400/30 via-[#5b73ff]/20 to-transparent sm:left-8" />
               {PROCESS_MILESTONES.map((m, i) => (
-                <motion.div key={m.phase} initial={{ opacity: 0, y: 20, x: -10 }} whileInView={{ opacity: 1, y: 0, x: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, delay: i * 0.1 }} className="relative flex gap-6 pb-12 sm:gap-10">
+                <motion.div key={m.phase} initial={{ opacity: 0, y: 20, x: -10 }} whileInView={{ opacity: 1, y: 0, x: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, delay: i * 0.1 }} className="relative flex gap-6 pb-12 sm:gap-10">
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-emerald-400/25 bg-[#0a0a0a] sm:h-16 sm:w-16">
                       <span className="font-mono text-[12px] font-bold text-emerald-400 sm:text-[14px]">{String(i + 1).padStart(2, "0")}</span>

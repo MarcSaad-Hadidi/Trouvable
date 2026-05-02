@@ -39,6 +39,7 @@ function executeClientTool(name, args = {}) {
 
 const WEBMCP_TOOLS = MCP_TOOL_DEFINITIONS.map((tool) => ({
     name: tool.name,
+    title: tool.title,
     description: tool.description,
     inputSchema: tool.inputSchema,
     execute: async (args) => executeClientTool(tool.name, args),

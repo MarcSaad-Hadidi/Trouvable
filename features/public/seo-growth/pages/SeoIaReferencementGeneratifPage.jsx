@@ -19,7 +19,7 @@ function ProgressBar({ label, delay, color }) {
     </motion.div>);
 }
 
-export default function SeoIaReferencementGeneratifPage({ page }) {
+export default function SeoIaReferencementGeneratifPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
@@ -45,6 +45,8 @@ export default function SeoIaReferencementGeneratifPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             {/* Analysis panel with progress bars */}
             <section className="border-t border-emerald-400/[0.08] bg-[#060a06] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px] grid gap-6 lg:grid-cols-[1fr_320px]">

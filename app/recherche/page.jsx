@@ -1,11 +1,12 @@
 import { EXPERTISES, VILLES } from '@/lib/data/geo-architecture';
 import { SEO_GROWTH_PAGES } from '@/lib/data/seo-growth-pages';
 import { SITE_URL } from '@/lib/site-config';
+import { buildPublicMetadata } from '@/lib/seo/metadata';
 import SearchClient from './search-client';
 
 const STATIC_PAGES = [
     { title: 'Accueil', href: '/', description: 'Positionnement, mandats et FAQ.', isStatic: true },
-    { title: 'La Firme', href: '/a-propos', description: 'Identité et principes Trouvable.', isStatic: true },
+    { title: 'À propos de Trouvable', href: '/a-propos', description: 'Identité, principes et signaux de confiance Trouvable.', isStatic: true },
     { title: 'Mandats', href: '/offres', description: 'Cartographie, implantation et pilotage continu.', isStatic: true },
     { title: 'Méthodologie', href: '/methodologie', description: 'Protocole d’exécution en 4 étapes.', isStatic: true },
     { title: 'Cadre de mesure', href: '/notre-mesure', description: 'Signal, présence et business sans confusion.', isStatic: true },
@@ -13,13 +14,11 @@ const STATIC_PAGES = [
     { title: 'Contact', href: '/contact', description: 'Démarrer un appel de cadrage.', isStatic: true },
 ];
 
-export const metadata = {
+export const metadata = buildPublicMetadata({
     title: 'Recherche | Trouvable',
-    description: 'Recherche interne des pages publiques Trouvable.',
-    alternates: {
-        canonical: `${SITE_URL}/recherche`,
-    },
-};
+    description: 'Recherchez les pages publiques Trouvable : mandats, méthodologie, services GEO, villes couvertes, expertises sectorielles et ressources IA.',
+    canonical: `${SITE_URL}/recherche`,
+});
 
 function buildSearchIndex() {
     const seoGrowthItems = SEO_GROWTH_PAGES.map((page) => ({

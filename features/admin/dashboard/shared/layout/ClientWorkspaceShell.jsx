@@ -43,7 +43,7 @@ function MissionCommandHeader() {
         ok: 'bg-emerald-400',
         warning: 'bg-amber-400',
         critical: 'bg-red-400',
-        idle: 'bg-white/20',
+        idle: 'bg-slate-300',
     };
 
     const statusLabels = {
@@ -65,29 +65,29 @@ function MissionCommandHeader() {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="border-b border-white/[0.05] bg-[#090a0b]/88"
+            className="border-b border-slate-200 bg-white/88"
         >
             <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                     <div className={`w-2 h-2 rounded-full shrink-0 ${statusColors[freshnessStatus]} cmd-health-dot`} />
                     <div className="min-w-0">
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                             Mandat actif
                         </div>
-                        <div className="mt-1 text-[14px] font-semibold text-white/92 tracking-[-0.02em] sm:text-[15px] truncate">
+                        <div className="mt-1 text-[14px] font-semibold text-slate-950 tracking-[-0.02em] sm:text-[15px] truncate">
                             {client?.client_name || 'Chargement du mandat…'}
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                             {client?.business_type && (
-                                <span className="text-[11px] font-medium text-white/35">{client.business_type}</span>
+                                <span className="text-[11px] font-medium text-slate-500">{client.business_type}</span>
                             )}
                             {freshnessStatus !== 'idle' && (
                                 <>
-                                    <span className="text-white/10">·</span>
+                                    <span className="text-slate-300">·</span>
                                     <span className={`text-[11px] font-medium ${
-                                        freshnessStatus === 'critical' ? 'text-red-300/80' :
-                                        freshnessStatus === 'warning' ? 'text-amber-300/80' :
-                                        'text-white/35'
+                                        freshnessStatus === 'critical' ? 'text-red-600' :
+                                        freshnessStatus === 'warning' ? 'text-amber-700' :
+                                        'text-slate-500'
                                     }`}>
                                         {statusLabels[freshnessStatus]} · {timeSinceRun()}
                                     </span>
@@ -103,7 +103,7 @@ function MissionCommandHeader() {
                                     type="button"
                                     onClick={() => setMenuOpen(!menuOpen)}
                                     disabled={isPending}
-                                    className="p-1 rounded-md hover:bg-white/[0.05] text-white/30 hover:text-white/60 transition-all disabled:opacity-50"
+                                    className="p-1 rounded-md text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
                                     title="Changer le cycle de vie"
                                 >
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -112,13 +112,13 @@ function MissionCommandHeader() {
                                 </button>
                             )}
                             {menuOpen && (
-                                <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#0e0f11] border border-white/[0.08] rounded-lg shadow-xl py-1">
+                                <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] border border-slate-200 bg-white rounded-lg shadow-xl py-1">
                                     {allowedNext.map((targetState) => (
                                         <button
                                             key={targetState}
                                             type="button"
                                             onClick={() => handleTransition(targetState)}
-                                            className="w-full text-left px-3 py-2 text-[11px] font-medium text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors"
+                                            className="w-full text-left px-3 py-2 text-[11px] font-medium text-slate-600 hover:text-slate-950 hover:bg-slate-50 transition-colors"
                                         >
                                             → {LIFECYCLE_META[targetState]?.label || targetState}
                                         </button>
@@ -138,7 +138,7 @@ function MissionCommandHeader() {
                             href={client.website_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-white/70 transition-all hover:bg-white/[0.06] hover:text-white"
+                            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-950"
                         >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -149,7 +149,7 @@ function MissionCommandHeader() {
                     <button
                         type="button"
                         onClick={invalidateWorkspace}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/18 bg-sky-400/10 px-3.5 py-2 text-[11px] font-semibold text-sky-100 transition-all hover:bg-sky-400/16"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-2 text-[11px] font-semibold text-blue-700 transition-all hover:bg-blue-100"
                     >
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

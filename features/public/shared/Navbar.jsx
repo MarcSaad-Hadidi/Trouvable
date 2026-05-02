@@ -25,8 +25,8 @@ export default function Navbar() {
                     <Link href="/services/audit-visibilite-ia" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-audit-ia">Audit IA</Link>
                     <Link href="/methodologie" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-methodologie">Méthodologie</Link>
                     <Link href="/etudes-de-cas" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-case-studies">Cas clients</Link>
-                    <Link href="/a-propos" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-about">La Firme</Link>
-                    <Link href="/recherche" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-search">Recherche</Link>
+                    <Link href="/a-propos" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-about" toolname="navigate_page" tooldescription="Ouvrir la page À propos de Trouvable pour vérifier l'identité et les signaux de confiance.">À propos</Link>
+                    <Link href="/recherche" className="rounded-[7px] px-3 py-1.5 text-[13.5px] font-[450] text-[#a0a0a0] transition hover:bg-white/5 hover:text-white" data-agent-action="nav-search" toolname="navigate_page" tooldescription="Ouvrir la recherche publique Trouvable.">Recherche</Link>
                 </nav>
 
                 <div className="flex-1" />

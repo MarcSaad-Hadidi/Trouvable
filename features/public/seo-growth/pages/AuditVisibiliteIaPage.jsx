@@ -39,7 +39,7 @@ function HudCard({ children, delay = 0 }) {
     );
 }
 
-export default function AuditVisibiliteIaPage({ page }) {
+export default function AuditVisibiliteIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -62,6 +62,8 @@ export default function AuditVisibiliteIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-cyan-400/[0.08] bg-[#060608] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]"><HudCard><div className="p-6 sm:p-8">
                     <div className="mb-4 flex items-center gap-3"><ScanLine className="h-5 w-5 text-cyan-400" /><div className="text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-400/70">Briefing</div></div>

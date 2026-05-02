@@ -103,7 +103,7 @@ export default function ContactModal() {
     const inputClasses = "w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-[14px] text-white outline-none transition-all duration-200 placeholder:text-white/20 hover:border-white/[0.14] focus:border-[#5b73ff]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#5b73ff]/20";
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-label="Contact Modal">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-label="Formulaire de contact Trouvable">
             <div
                 className="absolute inset-0 bg-black/80 backdrop-blur-xl"
                 onClick={handleClose}
@@ -133,6 +133,8 @@ export default function ContactModal() {
                     onClick={handleClose}
                     className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-all duration-200"
                     aria-label="Fermer"
+                    toolname="close_contact_form"
+                    tooldescription="Fermer la modale de contact Trouvable."
                 >
                     <X size={15} strokeWidth={2.5} />
                 </button>
@@ -174,7 +176,14 @@ export default function ContactModal() {
 
                         <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mx-5" />
 
-                        <form ref={formRef} onSubmit={handleSubmit} className="px-7 py-6 space-y-4" data-agent-surface="contact-form">
+                        <form
+                            ref={formRef}
+                            onSubmit={handleSubmit}
+                            className="px-7 py-6 space-y-4"
+                            data-agent-surface="contact-form"
+                            toolname="submit_contact_request"
+                            tooldescription="Envoyer une demande de cadrage à Trouvable après validation anti-robot."
+                        >
                             {formStatus === 'error' && (
                                 <div className="bg-red-500/[0.06] border border-red-500/15 text-red-300/90 rounded-xl px-4 py-3 text-[13px] font-medium leading-relaxed">
                                     {apiError ? (
@@ -200,11 +209,11 @@ export default function ContactModal() {
                                     <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="name">
                                         Nom complet <span className="text-[#5b73ff]">*</span>
                                     </label>
-                                    <input id="name" type="text" name="name" required autoFocus maxLength={100} autoComplete="name" aria-label="Nom complet" value={formData.name} onChange={handleInputChange} placeholder="Votre nom" className={inputClasses} data-agent-action="contact-name-input" />
+                                    <input id="name" type="text" name="name" required autoFocus maxLength={100} autoComplete="name" aria-label="Nom complet" toolparamdescription="Nom complet de la personne qui demande le cadrage." value={formData.name} onChange={handleInputChange} placeholder="Votre nom" className={inputClasses} data-agent-action="contact-name-input" />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="phone">Téléphone</label>
-                                    <input id="phone" type="tel" name="phone" maxLength={20} autoComplete="tel-national" aria-label="Telephone" value={formData.phone} onChange={handleInputChange} placeholder="Votre numéro" className={inputClasses} data-agent-action="contact-phone-input" />
+                                    <input id="phone" type="tel" name="phone" maxLength={20} autoComplete="tel-national" aria-label="Téléphone" toolparamdescription="Numéro de téléphone optionnel pour rappeler la personne." value={formData.phone} onChange={handleInputChange} placeholder="Votre numéro" className={inputClasses} data-agent-action="contact-phone-input" />
                                 </div>
                             </div>
 
@@ -212,12 +221,12 @@ export default function ContactModal() {
                                 <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="email">
                                     Courriel <span className="text-[#5b73ff]">*</span>
                                 </label>
-                                <input id="email" type="email" name="email" required maxLength={100} autoComplete="email" aria-label="Courriel" value={formData.email} onChange={handleInputChange} placeholder="votre@courriel.ca" className={inputClasses} data-agent-action="contact-email-input" />
+                                <input id="email" type="email" name="email" required maxLength={100} autoComplete="email" aria-label="Courriel" toolparamdescription="Adresse courriel de réponse pour le cadrage Trouvable." value={formData.email} onChange={handleInputChange} placeholder="votre@courriel.ca" className={inputClasses} data-agent-action="contact-email-input" />
                             </div>
 
                             <div>
                                 <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="businessType">Type de commerce</label>
-                                <select id="businessType" name="businessType" value={formData.businessType} onChange={handleInputChange} autoComplete="organization-title" aria-label="Type de commerce" data-agent-action="contact-business-type-select" className={`${inputClasses} appearance-none cursor-pointer [&>option]:bg-[#121212] [&>option]:text-white [&>option]:py-2`} style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff40' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center' }}>
+                                <select id="businessType" name="businessType" value={formData.businessType} onChange={handleInputChange} autoComplete="organization-title" aria-label="Type de commerce" toolparamdescription="Catégorie d'entreprise ou de service concernée par la demande." data-agent-action="contact-business-type-select" className={`${inputClasses} appearance-none cursor-pointer [&>option]:bg-[#121212] [&>option]:text-white [&>option]:py-2`} style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff40' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center' }}>
                                     <option value="" className="text-white/40">Sélectionner...</option>
                                     <option value="Restaurant / Alimentation">Restaurant / Alimentation</option>
                                     <option value="Hébergement / Tourisme">Hébergement / Tourisme</option>
@@ -234,7 +243,7 @@ export default function ContactModal() {
                                 <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="message">
                                     Message <span className="text-[#5b73ff]">*</span>
                                 </label>
-                                <textarea id="message" name="message" required minLength={10} maxLength={1000} rows={3} autoComplete="off" aria-label="Message" data-agent-action="contact-message-input" value={formData.message} onChange={handleInputChange} placeholder="Parlez-nous de votre commerce et de vos objectifs..." className={`${inputClasses} resize-none`} />
+                                <textarea id="message" name="message" required minLength={10} maxLength={1000} rows={3} autoComplete="off" aria-label="Message" toolparamdescription="Contexte du site, de l'entreprise, du marché local et des objectifs de visibilité." data-agent-action="contact-message-input" value={formData.message} onChange={handleInputChange} placeholder="Parlez-nous de votre commerce et de vos objectifs..." className={`${inputClasses} resize-none`} />
                                 <div className="flex justify-end mt-1">
                                     <span className={`text-[10px] tabular-nums ${formData.message.length >= 900 ? 'text-amber-400/60' : formData.message.length >= 1000 ? 'text-red-400 font-bold' : 'text-white/15'}`}>
                                         {formData.message.length}/1000
@@ -301,6 +310,8 @@ export default function ContactModal() {
                                 disabled={formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured}
                                 aria-label="Envoyer le formulaire de contact"
                                 data-agent-action="contact-submit"
+                                toolname="submit_contact_request"
+                                tooldescription="Soumettre la demande de contact Trouvable avec les champs fournis."
                                 className="w-full group relative overflow-hidden rounded-xl font-semibold text-[14px] py-3.5 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
                                 style={{
                                     background: formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured

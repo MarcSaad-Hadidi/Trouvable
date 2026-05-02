@@ -158,6 +158,24 @@ export default function TrouvableLandingPage() {
         </div>
       </section>
 
+      <section className="border-y border-white/[0.06] bg-[#080808] px-6 py-10 sm:px-10">
+        <div className="mx-auto max-w-[1120px]">
+          <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+          <ul className="grid gap-3 md:grid-cols-3">
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Trouvable exécute les mandats de visibilité Google, SEO local et réponses IA pour des entreprises québécoises.
+            </li>
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Le travail part de signaux vérifiables : pages publiques, données structurées, FAQ, preuves et cohérence locale.
+            </li>
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Les résultats ne sont pas garantis ; chaque mandat documente ce qui est corrigé, mesuré et encore à vérifier.
+            </li>
+          </ul>
+          <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
+        </div>
+      </section>
+
       {/* PREUVE STRATÉGIQUE — SIGNAL MARCHÉ */}
       <section id="marche" className="scroll-mt-20 border-y border-white/[0.06] bg-[#09090b] px-6 py-24 sm:px-10 sm:py-32" style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 1000px' }}>
         <div className="mx-auto max-w-[1120px]">

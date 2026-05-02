@@ -1,20 +1,11 @@
-import { COMMAND_BUTTONS, cn, getToneMeta } from './tokens';
+import { COMMAND_BUTTONS, DEGRADED_STATES, cn, getToneMeta } from './tokens';
 
 /**
- * CommandEmptyState — état vide unifié du centre de commande.
+ * CommandEmptyState: unified empty/degraded state for operator pages.
  *
- * Remplace progressivement GeoEmptyPanel (GeoPremium.jsx) et SeoEmptyState
- * (SeoOpsPrimitives.jsx). Peut aussi servir de loading light.
- *
- * Props:
- *   - icon       : élément optionnel (Lucide / SVG) affiché dans le médaillon
- *   - title      : titre court (obligatoire)
- *   - description: paragraphe explicatif (optionnel)
- *   - action     : React node — bouton primaire (optionnel)
- *   - secondary  : React node — lien secondaire (optionnel)
- *   - tone       : 'neutral' | 'info' | 'warning' | 'critical' | 'ok'
- *   - dashed     : bordure en pointillés (défaut true)
- *   - className  : classes additionnelles
+ * Supports explicit states:
+ * noConnector, noRuns, staleData, partialData, parseFailed,
+ * insufficientEvidence, noActions.
  */
 export default function CommandEmptyState({
     icon = null,
@@ -22,34 +13,40 @@ export default function CommandEmptyState({
     description = null,
     action = null,
     secondary = null,
+    state = null,
     tone = 'neutral',
     dashed = true,
     className = '',
 }) {
-    const toneMeta = getToneMeta(tone);
+    const degradedState = state ? DEGRADED_STATES[state] : null;
+    const resolvedTone = degradedState?.tone || tone;
+    const resolvedTitle = title || degradedState?.title || 'Etat indisponible';
+    const resolvedDescription = description || degradedState?.description || null;
+    const toneMeta = getToneMeta(resolvedTone);
+
     return (
         <div
             className={cn(
-                'flex flex-col items-center justify-center rounded-[26px] p-8 text-center shadow-[0_18px_44px_rgba(0,0,0,0.22)] sm:p-10',
-                dashed ? 'border border-dashed border-white/10' : 'border border-white/[0.06]',
-                'bg-[#0b0d11]/76',
+                'flex flex-col items-center justify-center rounded-[20px] p-8 text-center shadow-[0_18px_44px_rgba(15,23,42,0.07)] sm:p-10',
+                dashed ? 'border border-dashed border-slate-300' : 'border border-slate-200',
+                'bg-white',
                 className,
             )}
         >
             <div
                 className={cn(
                     'inline-flex h-11 w-11 items-center justify-center rounded-full border',
-                    tone === 'neutral'
-                        ? 'border-white/[0.08] bg-white/[0.03] text-white/50'
-                        : cn(toneMeta.pill, 'bg-white/[0.03]'),
+                    resolvedTone === 'neutral'
+                        ? 'border-slate-200 bg-slate-50 text-slate-500'
+                        : toneMeta.pill,
                 )}
             >
                 {icon || <span className="text-lg">·</span>}
             </div>
-            <div className="mt-4 text-[16px] font-semibold tracking-[-0.02em] text-white/85">{title}</div>
-            {description ? (
-                <p className="mx-auto mt-2 max-w-lg text-[13px] leading-relaxed text-white/45 sm:text-[14px]">
-                    {description}
+            <div className="mt-4 text-[16px] font-semibold text-slate-900">{resolvedTitle}</div>
+            {resolvedDescription ? (
+                <p className="mx-auto mt-2 max-w-lg text-[13px] leading-relaxed text-slate-500 sm:text-[14px]">
+                    {resolvedDescription}
                 </p>
             ) : null}
             {action || secondary ? (
@@ -62,10 +59,6 @@ export default function CommandEmptyState({
     );
 }
 
-/**
- * CommandEmptyStateAction — bouton primaire standardisé pour les empty states.
- * Utilise COMMAND_BUTTONS.primary (fond blanc, contraste fort).
- */
 export function CommandEmptyStateAction({ children, className = '', ...props }) {
     return (
         <button type="button" className={cn(COMMAND_BUTTONS.primary, className)} {...props}>

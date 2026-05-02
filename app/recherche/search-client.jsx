@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -25,11 +25,6 @@ function scoreEntry(entry, normalizedQuery) {
 
 export default function SearchClient({ index, initialQuery = '' }) {
     const [query, setQuery] = useState(initialQuery);
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
     const normalizedQuery = normalizeQuery(query);
 
@@ -50,8 +45,6 @@ export default function SearchClient({ index, initialQuery = '' }) {
         if (href.startsWith('/services') || href.startsWith('/offres')) return <Zap className="h-5 w-5 text-indigo-400" />;
         return <FileText className="h-5 w-5 text-blue-400" />;
     };
-
-    if (!isMounted) return null; // Avoid hydration mismatch on initial render with dynamic query
 
     return (
         <div className="mx-auto w-full max-w-[1000px] pt-10">
@@ -104,14 +97,23 @@ export default function SearchClient({ index, initialQuery = '' }) {
             >
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="relative flex items-center overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl transition-colors focus-within:border-white/30 focus-within:bg-black/60 shadow-[0_0_40px_-15px_rgba(255,255,255,0.05)]">
+                    <label htmlFor="site-search" className="sr-only">
+                        Rechercher dans les pages publiques Trouvable
+                    </label>
                     <div className="pl-6 pr-2">
                         <Search className="h-6 w-6 text-white/40 transition-colors group-focus-within:text-white" />
                     </div>
                     <input
+                        id="site-search"
+                        name="q"
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Ex. : méthode, Montréal, avocat, services..."
+                        aria-label="Rechercher dans les pages publiques Trouvable"
+                        toolname="search_site"
+                        tooldescription="Rechercher une page publique Trouvable à partir d'une requête."
+                        toolparamdescription="Requête de recherche publique à envoyer à Trouvable."
                         className="w-full bg-transparent py-6 px-4 text-lg text-white placeholder:text-white/30 focus:outline-none"
                         autoFocus
                     />
@@ -119,6 +121,9 @@ export default function SearchClient({ index, initialQuery = '' }) {
                         <button 
                             onClick={() => setQuery('')}
                             className="mr-6 text-xs font-medium text-white/40 hover:text-white/80 transition-colors px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10"
+                            aria-label="Effacer la recherche"
+                            toolname="clear_site_search"
+                            tooldescription="Vider la requête de recherche publique."
                         >
                             EFFACER
                         </button>

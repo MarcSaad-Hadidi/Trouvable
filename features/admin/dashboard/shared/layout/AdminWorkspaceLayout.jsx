@@ -98,9 +98,9 @@ export default async function AdminWorkspaceLayout({ children }) {
                 <div className="geo-main">
                     <AdminTopCommandBar />
                     {isDevBypass ? (
-                        <div className="border-b border-amber-400/15 bg-amber-400/10 px-4 py-2 text-[11px] text-amber-100/85 md:px-5">
+                        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-[11px] text-amber-800 md:px-5">
                             Mode local de développement actif : l&apos;authentification admin est simulée uniquement sur localhost tant que{' '}
-                            <code className="text-amber-50">DEV_BYPASS_AUTH=1</code>.
+                            <code className="text-amber-900">DEV_BYPASS_AUTH=1</code>.
                         </div>
                     ) : null}
                     <div className="geo-content">{children}</div>

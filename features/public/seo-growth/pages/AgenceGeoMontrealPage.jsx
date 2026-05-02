@@ -30,7 +30,7 @@ function CityNodes() {
     return <canvas ref={ref} className="pointer-events-none absolute inset-0 h-full w-full opacity-60" />;
 }
 
-export default function AgenceGeoMontrealPage({ page }) {
+export default function AgenceGeoMontrealPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -50,6 +50,8 @@ export default function AgenceGeoMontrealPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-amber-400/[0.06] bg-[#060605] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-amber-400/12 bg-amber-400/[0.02] p-6 sm:p-8">

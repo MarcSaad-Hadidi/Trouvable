@@ -198,7 +198,7 @@ export function CtaSection({ page, accent = 'amber', headline, icon: Icon }) {
                    <motion.div
                        initial={{ opacity: 0, y: -100, scale: 0.2, rotateZ: -45 }}
                        whileInView={{ opacity: 1, y: 0, scale: 1, rotateZ: 0 }}
-                       viewport={{ once: true, margin: "-100px" }}
+                       viewport={{ once: true, amount: 0.2 }}
                        transition={{ type: "spring", bounce: 0.7, duration: 2 }}
                        className="mb-16"
                    >
@@ -225,7 +225,7 @@ export function CtaSection({ page, accent = 'amber', headline, icon: Icon }) {
                <motion.div 
                    initial={{ opacity: 0, scale: 0.95 }}
                    whileInView={{ opacity: 1, scale: 1 }}
-                   viewport={{ once: true, margin: "-100px" }}
+                   viewport={{ once: true, amount: 0.2 }}
                    transition={{ duration: 0.5 }}
                    className="relative"
                >

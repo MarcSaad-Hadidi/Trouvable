@@ -12,22 +12,22 @@ const AdminSidebarAuthPanel = dynamic(() => import('./AdminSidebarAuthPanel'), {
 });
 
 const PORTFOLIO_NAV = [
-    { id: 'dashboard', label: 'Tableau de bord', icon: 'dashboard', href: '/admin' },
-    { id: 'clients', label: 'Portefeuille', icon: 'portfolio', href: '/admin/clients' },
+    { id: 'dashboard', label: 'Home', icon: 'dashboard', href: '/admin' },
+    { id: 'clients', label: 'Clients', icon: 'portfolio', href: '/admin/clients' },
     { id: 'new', label: 'Nouveau mandat', icon: 'plus', href: '/admin/clients/onboarding' },
 ];
 
 const CLIENT_DOSSIER_NAV = [
-    { id: 'dossier', label: 'Vue dossier', icon: 'command', path: '/dossier' },
+    { id: 'dossier', label: 'Client Overview / Dossier', icon: 'command', path: '/dossier' },
     { id: 'dossier-audit', label: 'Laboratoire audit', icon: 'audit', path: '/dossier/audit' },
     { id: 'dossier-audit-comparison', label: 'Comparaison audits', icon: 'compare', path: '/dossier/audit/comparison' },
-    { id: 'dossier-activity', label: 'Activité', icon: 'pulse', path: '/dossier/activity' },
+    { id: 'dossier-activity', label: 'Activite', icon: 'pulse', path: '/dossier/activity' },
     { id: 'dossier-connectors', label: 'Connecteurs', icon: 'connectors', path: '/dossier/connectors' },
 ];
 
 const CLIENT_SEO_NAV = [
-    { id: 'seo-visibility', label: 'Visibilité SEO', icon: 'visibility', path: '/seo/visibility' },
-    { id: 'seo-health', label: 'Santé SEO', icon: 'audit', path: '/seo/health' },
+    { id: 'seo-visibility', label: 'Visibilite Google / SEO', icon: 'visibility', path: '/seo/visibility' },
+    { id: 'seo-health', label: 'Sante SEO', icon: 'audit', path: '/seo/health' },
     { id: 'seo-correction-prompts', label: 'Prompts correction IA', icon: 'prompts', path: '/seo/correction-prompts' },
     { id: 'seo-on-page', label: 'Optimisation on-page', icon: 'content', path: '/seo/on-page' },
     { id: 'seo-content', label: 'Contenu SEO', icon: 'editorial', path: '/seo/content' },
@@ -35,38 +35,37 @@ const CLIENT_SEO_NAV = [
 ];
 
 const CLIENT_GEO_NAV = [
-    { id: 'overview', label: 'Situation GEO', icon: 'overview', path: '/geo' },
+    { id: 'overview', label: 'Visibilite IA / GEO', icon: 'overview', path: '/geo' },
     { id: 'geo-crawlers', label: 'Crawlers IA', icon: 'crawler', path: '/geo/crawlers' },
-    { id: 'geo-schema', label: 'Schema & entité', icon: 'schema', path: '/geo/schema' },
-    { id: 'geo-readiness', label: 'Préparation GEO', icon: 'readiness', path: '/geo/readiness' },
-    { id: 'geo-consistency', label: 'Cohérence marque', icon: 'compare', path: '/geo/consistency' },
+    { id: 'geo-schema', label: 'Schema & entite', icon: 'schema', path: '/geo/schema' },
+    { id: 'geo-readiness', label: 'Preparation GEO', icon: 'readiness', path: '/geo/readiness' },
+    { id: 'geo-consistency', label: 'Coherence marque', icon: 'compare', path: '/geo/consistency' },
     { id: 'geo-alerts', label: 'Alertes GEO', icon: 'alerts', path: '/geo/alerts' },
-    { id: 'runs', label: 'Exécution', icon: 'pulse', path: '/geo/runs' },
-    { id: 'prompts', label: 'Requêtes GEO', icon: 'prompts', path: '/geo/prompts' },
-    { id: 'geo-compare', label: 'GEO Compare', icon: 'compare', path: '/geo/compare' },
-    { id: 'signals', label: 'Signaux', icon: 'signal', path: '/geo/signals' },
+    { id: 'runs', label: 'Executions GEO', icon: 'pulse', path: '/geo/runs' },
+    { id: 'prompts', label: 'Requetes GEO', icon: 'prompts', path: '/geo/prompts' },
+    { id: 'geo-compare', label: 'Provider compare', icon: 'compare', path: '/geo/compare' },
+    { id: 'signals', label: 'Sources & citations', icon: 'signal', path: '/geo/signals' },
     { id: 'social', label: 'Veille sociale', icon: 'social', path: '/geo/social' },
     { id: 'opportunities', label: "File d'actions", icon: 'actions', path: '/geo/opportunities' },
     { id: 'llms-txt', label: 'llms.txt', icon: 'llmstxt', path: '/geo/llms-txt' },
-    { id: 'models', label: 'Fiabilité IA', icon: 'models', path: '/geo/models' },
-    { id: 'continuous', label: 'Suivi continu', icon: 'continuous', path: '/geo/continuous' },
+    { id: 'models', label: 'Fiabilite IA', icon: 'models', path: '/geo/models' },
+    { id: 'continuous', label: 'Monitoring', icon: 'continuous', path: '/geo/continuous' },
 ];
 
 const CLIENT_AGENT_NAV = [
-    { id: 'agent', label: 'Vue AGENT', icon: 'dashboard', path: '/agent' },
-    { id: 'agent-visibility', label: 'Visibilité AGENT', icon: 'visibility', path: '/agent/visibility' },
-    { id: 'agent-readiness', label: 'Préparation AGENT', icon: 'readiness', path: '/agent/readiness' },
-    { id: 'agent-actionability', label: 'Actionnabilité AGENT', icon: 'signal', path: '/agent/actionability' },
-    { id: 'agent-protocols', label: 'Protocoles AGENT', icon: 'schema', path: '/agent/protocols' },
-    { id: 'agent-competitors', label: 'Comparatif AGENT', icon: 'compare', path: '/agent/competitors' },
-    { id: 'agent-fixes', label: 'Correctifs AGENT', icon: 'actions', path: '/agent/fixes' },
+    { id: 'agent', label: 'Agent', icon: 'dashboard', path: '/agent' },
+    { id: 'agent-visibility', label: 'Visibilite Agent', icon: 'visibility', path: '/agent/visibility' },
+    { id: 'agent-readiness', label: 'Readiness Agent', icon: 'readiness', path: '/agent/readiness' },
+    { id: 'agent-actionability', label: 'Actionability Agent', icon: 'signal', path: '/agent/actionability' },
+    { id: 'agent-protocols', label: 'Protocoles Agent', icon: 'schema', path: '/agent/protocols' },
+    { id: 'agent-competitors', label: 'Competiteurs Agent', icon: 'compare', path: '/agent/competitors' },
+    { id: 'agent-fixes', label: 'Correctifs Agent', icon: 'actions', path: '/agent/fixes' },
 ];
 
 const CLIENT_RESTITUTION_NAV = [
-    { id: 'portal', label: 'Restitution client', icon: 'portal', path: '/portal' },
-    { id: 'settings', label: 'Paramètres', icon: 'gear', path: '/dossier/settings' },
+    { id: 'portal', label: 'Reports', icon: 'portal', path: '/portal' },
+    { id: 'settings', label: 'Settings', icon: 'gear', path: '/dossier/settings' },
 ];
-
 const ICONS = {
     portfolio: (
         <svg className="w-[15px] h-[15px]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -208,11 +207,19 @@ const ICONS = {
     ),
 };
 
-function NavGroup({ label, children }) {
+const GROUP_ACCENTS = {
+    seo: 'border-blue-200 bg-blue-50 text-blue-700',
+    geo: 'border-violet-200 bg-violet-50 text-violet-700',
+    agent: 'border-orange-200 bg-orange-50 text-orange-700',
+};
+
+function NavGroup({ label, accent = null, children }) {
     return (
         <div className="space-y-0.5">
             <div className="px-4 pt-5 pb-1.5">
-                <span className="text-[9px] font-bold text-white/20 tracking-[0.14em] uppercase">{label}</span>
+                <span className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-[0.12em] uppercase ${accent ? GROUP_ACCENTS[accent] : 'border-transparent text-slate-400'}`}>
+                    {label}
+                </span>
             </div>
             {children}
         </div>
@@ -225,18 +232,18 @@ function NavItem({ href, active, icon, children }) {
             href={href}
             className={`group relative flex items-center gap-2.5 px-3 py-[7px] mx-2 rounded-lg transition-all duration-200 text-[12px] font-medium ${
                 active
-                    ? 'bg-white/[0.06] text-white'
-                    : 'text-white/40 hover:bg-white/[0.03] hover:text-white/65'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
         >
             {active && (
                 <motion.div
                     layoutId="sidebar-active-indicator"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-[#5b73ff]"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-blue-500"
                     transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                 />
             )}
-            <span className={`shrink-0 transition-colors duration-200 ${active ? 'text-[#7b8fff]' : 'text-white/25 group-hover:text-white/45'}`}>
+            <span className={`shrink-0 transition-colors duration-200 ${active ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}>
                 {icon}
             </span>
             {children}
@@ -338,7 +345,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
             <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
-                className="fixed top-3 left-3 z-30 flex items-center justify-center w-9 h-9 rounded-lg bg-[#090a0b]/90 border border-white/[0.06] text-white/45 hover:bg-white/[0.06] hover:text-white backdrop-blur-sm transition-colors lg:hidden"
+                className="fixed top-3 left-3 z-30 flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white/90 text-slate-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-slate-50 hover:text-slate-900 lg:hidden"
                 aria-label="Menu"
             >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -352,31 +359,31 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm lg:hidden"
+                        className="fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-sm lg:hidden"
                         onClick={() => setMobileOpen(false)}
                     />
                 )}
             </AnimatePresence>
 
             <nav className={`geo-sb ${mobileOpen ? 'open' : ''}`}>
-                <div className="px-4 py-4 border-b border-white/[0.05]">
+                <div className="px-4 py-4 border-b border-slate-200">
                     <div className="flex items-center justify-between gap-2">
                         <Link
                             href="/admin"
-                            className="flex items-center gap-2.5 rounded-lg -mx-1 px-1 py-0.5 transition-colors hover:bg-white/[0.03] min-w-0"
+                            className="flex items-center gap-2.5 rounded-lg -mx-1 px-1 py-0.5 transition-colors hover:bg-slate-100 min-w-0"
                         >
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#5b73ff]/20 to-[#8b5cf6]/10 border border-[#5b73ff]/15 flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-lg border border-slate-800 bg-slate-950 flex items-center justify-center shrink-0">
                                 <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" width={16} height={16} sizes="16px" className="w-4 h-4 object-contain" />
                             </div>
                             <div className="min-w-0">
-                                <div className="text-[13px] font-bold tracking-[-0.03em] text-white leading-none">Trouvable</div>
-                                <div className="text-[9px] font-semibold text-[#7b8fff]/60 tracking-[0.08em] uppercase mt-0.5">Commande</div>
+                                <div className="text-[13px] font-bold tracking-[-0.03em] text-slate-950 leading-none">Trouvable</div>
+                                <div className="text-[9px] font-semibold text-blue-600 tracking-[0.08em] uppercase mt-0.5">Operations</div>
                             </div>
                         </Link>
                         <button
                             type="button"
                             onClick={() => setMobileOpen(false)}
-                            className="p-1 rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-colors lg:hidden"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors lg:hidden"
                             aria-label="Fermer"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -410,7 +417,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                     className="overflow-hidden"
                                 >
-                                    <NavGroup label="Dossier partagé">
+                                    <NavGroup label="Dossier">
                                         {CLIENT_DOSSIER_NAV.map((item) => (
                                             <NavItem
                                                 key={item.id}
@@ -423,7 +430,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                                         ))}
                                     </NavGroup>
 
-                                    <NavGroup label="SEO Ops">
+                                    <NavGroup label="Visibilite Google / SEO" accent="seo">
                                         {CLIENT_SEO_NAV.map((item) => (
                                             <NavItem
                                                 key={item.id}
@@ -436,7 +443,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                                         ))}
                                     </NavGroup>
 
-                                    <NavGroup label="GEO Ops">
+                                    <NavGroup label="Visibilite IA / GEO" accent="geo">
                                         {CLIENT_GEO_NAV.map((item) => (
                                             <NavItem
                                                 key={item.id}
@@ -449,7 +456,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                                         ))}
                                     </NavGroup>
 
-                                    <NavGroup label="AGENT Ops">
+                                    <NavGroup label="Agent" accent="agent">
                                         {CLIENT_AGENT_NAV.map((item) => (
                                             <NavItem
                                                 key={item.id}
@@ -462,7 +469,7 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                                         ))}
                                     </NavGroup>
 
-                                    <NavGroup label="Restitution">
+                                    <NavGroup label="Reports / Settings">
                                         {CLIENT_RESTITUTION_NAV.map((item) => (
                                             <NavItem
                                                 key={item.id}
@@ -480,14 +487,14 @@ export default function AdminSidebar({ devBypass = false, devBypassEmail = '' })
                     </div>
                 </div>
 
-                <div className="border-t border-white/[0.05] p-3 space-y-2">
+                <div className="border-t border-slate-200 p-3 space-y-2">
 
                     {devBypass ? (
-                        <div className="mt-1 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2.5">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-amber-100/85">Mode local</div>
-                            <div className="mt-1 truncate text-[11px] font-medium text-white/75">{devBypassEmail || 'dev-admin@localhost'}</div>
-                            <p className="mt-1 text-[10px] leading-relaxed text-white/35">
-                                Session admin simulée pour vérification locale. Désactivez <code className="text-white/55">DEV_BYPASS_AUTH</code> pour revenir à Clerk.
+                        <div className="mt-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-amber-700">Mode local</div>
+                            <div className="mt-1 truncate text-[11px] font-medium text-slate-700">{devBypassEmail || 'dev-admin@localhost'}</div>
+                            <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                                Session admin simulée pour vérification locale. Désactivez <code className="text-slate-700">DEV_BYPASS_AUTH</code> pour revenir à Clerk.
                             </p>
                         </div>
                     ) : (

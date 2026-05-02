@@ -45,7 +45,7 @@ function normalizePromptForDisplay(raw) {
 
 function TaskTypeBadge({ value }) {
     return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/20 bg-violet-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-violet-200">
+        <span className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-violet-700">
             {TASK_TYPE_LABELS[value] || value}
         </span>
     );
@@ -67,7 +67,7 @@ function SourceBadge({ source }) {
         audit_priority_problem: 'Problème prioritaire',
     };
     return (
-        <span className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-white/70">
+        <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-700">
             {labels[source] || source}
         </span>
     );
@@ -77,17 +77,17 @@ function PromptVariantCard({ label, content, accent, onCopy, copied }) {
     return (
         <div className={`rounded-xl border ${accent} p-3`}>
             <div className="flex items-center justify-between gap-2">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">{label}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">{label}</div>
                 <button
                     type="button"
                     onClick={onCopy}
-                    className="inline-flex items-center gap-1 rounded-md border border-white/[0.1] bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/72 hover:border-white/[0.2] hover:bg-white/[0.08]"
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                 >
                     {copied ? <CheckCircle2 className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
                     {copied ? 'Copié' : 'Copier'}
                 </button>
             </div>
-            <pre className="geo-scrollbar mt-2 max-h-80 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg bg-black/40 p-3 pr-2 text-[11px] leading-relaxed text-white/88">
+            <pre className="geo-scrollbar mt-2 max-h-80 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg bg-slate-50 p-3 pr-2 text-[11px] leading-relaxed text-slate-700">
                 {content}
             </pre>
         </div>
@@ -174,26 +174,26 @@ export default function IssueActionsDrawer() {
                 type="button"
                 aria-label="Fermer"
                 onClick={closeHandoff}
-                className="flex-1 bg-black/55 backdrop-blur-sm transition-opacity"
+                className="flex-1 bg-slate-900/30 backdrop-blur-sm transition-opacity"
             />
-            <aside className="flex h-full min-h-0 w-full max-w-[520px] flex-col border-l border-white/[0.08] bg-[#0b0b0d] text-white shadow-[0_0_80px_rgba(0,0,0,0.6)]">
-                <header className="flex items-start justify-between gap-3 border-b border-white/[0.06] px-5 py-4">
+            <aside className="flex h-full min-h-0 w-full max-w-[520px] flex-col border-l border-slate-200 bg-white text-slate-900 shadow-[0_0_80px_rgba(15,23,42,0.16)]">
+                <header className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
                     <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
                             <SourceBadge source={ref?.source} />
                             {ref?.taskType ? <TaskTypeBadge value={ref.taskType} /> : null}
                         </div>
-                        <h2 className="mt-2 text-[15px] font-semibold leading-snug text-white/92">
+                        <h2 className="mt-2 text-[15px] font-semibold leading-snug text-slate-950">
                             {ref?.label || 'Générer un prompt correctif'}
                         </h2>
-                        <p className="mt-1 text-[11px] text-white/52">
+                        <p className="mt-1 text-[11px] text-slate-500">
                             Contexte pré-rempli. L&apos;opérateur n&apos;a qu&apos;à générer puis copier.
                         </p>
                     </div>
                     <button
                         type="button"
                         onClick={closeHandoff}
-                        className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-1.5 text-white/60 hover:border-white/[0.2] hover:bg-white/[0.08] hover:text-white"
+                        className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
                         aria-label="Fermer"
                     >
                         <X className="h-4 w-4" />
@@ -202,53 +202,53 @@ export default function IssueActionsDrawer() {
 
                 <div className="geo-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-4 pr-4 space-y-4 [scrollbar-gutter:stable]">
                     {ref && (
-                        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">Référence</div>
+                        <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">Référence</div>
                             <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                                 {ref.pageUrl && (
                                     <>
-                                        <dt className="text-white/50">Page</dt>
-                                        <dd className="truncate text-white/85" title={ref.pageUrl}>{ref.pageUrl}</dd>
+                                        <dt className="text-slate-500">Page</dt>
+                                        <dd className="truncate text-slate-800" title={ref.pageUrl}>{ref.pageUrl}</dd>
                                     </>
                                 )}
                                 {ref.dimension && (
                                     <>
-                                        <dt className="text-white/50">Dimension</dt>
-                                        <dd className="text-white/85">{ref.dimension}</dd>
+                                        <dt className="text-slate-500">Dimension</dt>
+                                        <dd className="text-slate-800">{ref.dimension}</dd>
                                     </>
                                 )}
                                 {ref.category && (
                                     <>
-                                        <dt className="text-white/50">Catégorie</dt>
-                                        <dd className="text-white/85">{ref.category}</dd>
+                                        <dt className="text-slate-500">Catégorie</dt>
+                                        <dd className="text-slate-800">{ref.category}</dd>
                                     </>
                                 )}
                                 {ref.checkId && (
                                     <>
-                                        <dt className="text-white/50">Check L1</dt>
-                                        <dd className="text-white/85">{ref.checkId}</dd>
+                                        <dt className="text-slate-500">Check L1</dt>
+                                        <dd className="text-slate-800">{ref.checkId}</dd>
                                     </>
                                 )}
                                 {ref.findingId && (
                                     <>
-                                        <dt className="text-white/50">Finding L2</dt>
-                                        <dd className="text-white/85">{ref.findingId}</dd>
+                                        <dt className="text-slate-500">Finding L2</dt>
+                                        <dd className="text-slate-800">{ref.findingId}</dd>
                                     </>
                                 )}
                                 {ref.issueId && (
                                     <>
-                                        <dt className="text-white/50">Issue</dt>
-                                        <dd className="truncate text-white/85" title={ref.issueId}>{ref.issueId}</dd>
+                                        <dt className="text-slate-500">Issue</dt>
+                                        <dd className="truncate text-slate-800" title={ref.issueId}>{ref.issueId}</dd>
                                     </>
                                 )}
                             </dl>
                         </section>
                     )}
 
-                    <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                    <section className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                         <div className="flex items-center justify-between gap-2">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">Variante</div>
-                            <div className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-black/20 p-0.5">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">Variante</div>
+                            <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
                                 {VARIANTS.map((v) => (
                                     <button
                                         key={v}
@@ -256,8 +256,8 @@ export default function IssueActionsDrawer() {
                                         onClick={() => setVariant(v)}
                                         className={`rounded-md px-2.5 py-1 text-[11px] font-semibold ${
                                             variant === v
-                                                ? 'bg-violet-500/20 text-violet-100'
-                                                : 'text-white/60 hover:text-white/90'
+                                                ? 'bg-violet-100 text-violet-700'
+                                                : 'text-slate-500 hover:text-slate-900'
                                         }`}
                                     >
                                         {v === 'standard' ? 'Standard' : 'Strict'}
@@ -265,7 +265,7 @@ export default function IssueActionsDrawer() {
                                 ))}
                             </div>
                         </div>
-                        <p className="mt-2 text-[11px] text-white/55">
+                        <p className="mt-2 text-[11px] text-slate-500">
                             {variant === 'strict'
                                 ? 'Contraintes renforcées : aucune extrapolation, exige inspect-first strict.'
                                 : 'Équilibrée : contraintes repo + validation + fix minimal.'}
@@ -273,7 +273,7 @@ export default function IssueActionsDrawer() {
                     </section>
 
                     {state === 'error' && (
-                        <div className="rounded-xl border border-red-500/30 bg-red-500/[0.08] p-3 text-[12px] text-red-200">
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-[12px] text-red-700">
                             <div className="flex items-center gap-2">
                                 <AlertTriangle className="h-4 w-4" />
                                 <span className="font-semibold">Erreur</span>
@@ -288,7 +288,7 @@ export default function IssueActionsDrawer() {
                                 <PromptVariantCard
                                     label="Variante standard"
                                     content={standardPromptText}
-                                    accent="border-white/[0.08] bg-white/[0.02]"
+                                    accent="border-slate-200 bg-white"
                                     onCopy={() => copyVariant('standard', standardPromptText)}
                                     copied={copiedVariant === 'standard'}
                                 />
@@ -297,18 +297,18 @@ export default function IssueActionsDrawer() {
                                 <PromptVariantCard
                                     label="Variante strict"
                                     content={strictPromptText}
-                                    accent="border-amber-400/20 bg-amber-400/[0.03]"
+                                    accent="border-amber-200 bg-amber-50"
                                     onCopy={() => copyVariant('strict', strictPromptText)}
                                     copied={copiedVariant === 'strict'}
                                 />
                             ) : null}
 
                             {contextSummary && (
-                                <details className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                                    <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.08em] text-white/50 hover:text-white/80">
+                                <details className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                    <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 hover:text-slate-900">
                                         Contexte injecté
                                     </summary>
-                                    <pre className="geo-scrollbar mt-2 max-h-60 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg bg-black/40 p-3 pr-2 text-[10.5px] leading-relaxed text-white/72">
+                                    <pre className="geo-scrollbar mt-2 max-h-60 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg bg-white p-3 pr-2 text-[10.5px] leading-relaxed text-slate-700">
                                         {JSON.stringify(contextSummary, null, 2)}
                                     </pre>
                                 </details>
@@ -317,12 +317,12 @@ export default function IssueActionsDrawer() {
                     )}
                 </div>
 
-                <footer className="flex items-center gap-2 border-t border-white/[0.06] bg-black/30 px-5 py-3">
+                <footer className="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
                     <button
                         type="button"
                         onClick={handleGenerate}
                         disabled={state === 'loading'}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-gradient-to-r from-violet-500/30 to-violet-500/20 px-3 py-2 text-[12px] font-semibold text-violet-100 hover:from-violet-500/40 hover:to-violet-500/30 disabled:opacity-60"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-600 px-3 py-2 text-[12px] font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
                     >
                         {state === 'loading' ? (
                             <>
@@ -339,7 +339,7 @@ export default function IssueActionsDrawer() {
                     <Link
                         href={fullHref}
                         onClick={closeHandoff}
-                        className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[11px] font-semibold text-white/80 hover:border-white/[0.2] hover:bg-white/[0.08] hover:text-white"
+                        className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
                     >
                         <ExternalLink className="h-3 w-3" />
                         Page complète

@@ -20,44 +20,63 @@ export default async function PortalAppLayout({ children }) {
     const userEmail = getPrimaryEmail(user);
 
     return (
-        <div className="min-h-screen bg-[#060607] text-white">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(91,115,255,0.09),transparent_40%),radial-gradient(ellipse_at_bottom_right,rgba(139,92,246,0.07),transparent_35%)]" />
+        <div className="relative min-h-screen bg-[#06070a] text-white">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none fixed inset-0 opacity-90"
+                style={{
+                    background:
+                        'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(91,115,255,0.08), transparent 60%), ' +
+                        'radial-gradient(ellipse 60% 40% at 50% 110%, rgba(167,139,250,0.05), transparent 60%)',
+                }}
+            />
 
-            <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-12 pt-6 sm:px-6 lg:px-8">
-                <header className="mb-10 rounded-[28px] border border-white/[0.07] bg-black/30 px-6 py-4 shadow-[0_24px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <Link href="/portal" className="inline-flex items-center gap-3 text-white">
-                                <Image
-                                    src="/logos/trouvable_logo_blanc1.png"
-                                    alt=""
-                                    width={40}
-                                    height={40}
-                                    sizes="40px"
-                                    className="h-10 w-10 rounded-xl border border-white/[0.08] bg-white/[0.03] p-1"
-                                />
-                                <div>
-                                    <div className="text-lg font-black tracking-[-0.04em]">Trouvable</div>
-                                    <div className="text-[11px] uppercase tracking-[0.16em] text-white/30">Espace client</div>
-                                </div>
-                            </Link>
+            <div className="relative mx-auto flex min-h-screen max-w-[1180px] flex-col px-5 sm:px-8 lg:px-12">
+                <header className="flex items-center justify-between border-b border-white/[0.07] py-6">
+                    <Link href="/portal" className="flex items-center gap-3">
+                        <Image
+                            src="/logos/trouvable_logo_blanc1.png"
+                            alt=""
+                            width={36}
+                            height={36}
+                            sizes="36px"
+                            className="h-9 w-9 rounded-md border border-white/[0.08] bg-white/[0.03] p-1"
+                        />
+                        <div className="flex flex-col leading-none">
+                            <span className="font-display text-[15px] font-semibold tracking-[-0.02em]">
+                                Trouvable
+                            </span>
+                            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.20em] text-white/35">
+                                Espace de restitution
+                            </span>
                         </div>
+                    </Link>
 
-                        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                            <div className="text-[13px] text-white/35">{userEmail || 'Compte connecté'}</div>
-                            <SignOutButton redirectUrl="/espace">
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-[13px] font-semibold text-white/55 transition-all hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-white"
-                                >
-                                    Déconnexion
-                                </button>
-                            </SignOutButton>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        {userEmail ? (
+                            <span className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-white/35 sm:inline">
+                                {userEmail}
+                            </span>
+                        ) : null}
+                        <SignOutButton redirectUrl="/espace">
+                            <button
+                                type="button"
+                                className="inline-flex items-center rounded-full border border-white/[0.10] bg-white/[0.025] px-4 py-1.5 text-[12px] font-semibold text-white/55 transition hover:border-white/[0.18] hover:bg-white/[0.06] hover:text-white"
+                            >
+                                Se déconnecter
+                            </button>
+                        </SignOutButton>
                     </div>
                 </header>
 
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 py-10 lg:py-14">{children}</main>
+
+                <footer className="border-t border-white/[0.05] py-6 font-mono text-[10px] uppercase tracking-[0.20em] text-white/25">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span>© Trouvable · Restitution confidentielle</span>
+                        <span>Lecture seule · Aucune action exécutée depuis cet espace</span>
+                    </div>
+                </footer>
             </div>
         </div>
     );

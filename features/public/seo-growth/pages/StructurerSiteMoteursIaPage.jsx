@@ -10,7 +10,7 @@ function AnimatedBlock({ children, delay, className }) {
     return (<motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ delay, type: 'spring', stiffness: 200 }} className={className}>{children}</motion.div>);
 }
 
-export default function StructurerSiteMoteursIaPage({ page }) {
+export default function StructurerSiteMoteursIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -32,6 +32,8 @@ export default function StructurerSiteMoteursIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-lime-400/[0.06] bg-[#060a06] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-lime-400/12 bg-lime-400/[0.02] p-6 sm:p-8">

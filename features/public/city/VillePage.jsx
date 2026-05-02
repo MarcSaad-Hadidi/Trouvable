@@ -2,6 +2,7 @@
 import { VILLES, EXPERTISES } from "@/lib/data/geo-architecture";
 import { resolveVilleComposition } from "@/lib/data/composition";
 import { SITE_URL } from "@/lib/site-config";
+import { fitMetaDescription, withPublicAuthor } from "@/lib/seo/metadata";
 import VillePageClient from "@/features/public/city/VillePageClient";
 
 export function generateStaticParams() {
@@ -15,9 +16,9 @@ export async function generateMetadata({ params }) {
 
     const title = `Visibilité IA à ${ville.name} | Trouvable`;
     const composition = resolveVilleComposition(ville);
-    const description = composition?.metaDescription || ville.description;
+    const description = fitMetaDescription(composition?.metaDescription || ville.description);
 
-    return {
+    return withPublicAuthor({
         title,
         description,
         alternates: { canonical: `${SITE_URL}/villes/${ville.slug}` },
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }) {
             images: [`${SITE_URL}/twitter-image`],
         },
         robots: { index: true, follow: true },
-    };
+    });
 }
 
 export default async function VillePage({ params }) {

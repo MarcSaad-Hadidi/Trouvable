@@ -13,7 +13,7 @@ function buildChats(page) {
     ];
 }
 
-export default function PerplexityPage({ page }) {
+export default function PerplexityPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [isSearching, setIsSearching] = useState(false);
@@ -229,6 +229,7 @@ export default function PerplexityPage({ page }) {
                 </div>
 
                 {/* Regular content appended below the "app" */}
+                {trustBrief}
                 <div className="mt-20">
                     <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="cyan" heading="Questions fréquentes" /></section>
                     <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="cyan" heading="Plateformes connexes" /></section>

@@ -41,7 +41,7 @@ function buildChats(page) {
     ];
 }
 
-export default function GeminiPage({ page }) {
+export default function GeminiPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
@@ -308,6 +308,7 @@ export default function GeminiPage({ page }) {
                 </div>
                 
                 {/* Regular content */}
+                {trustBrief}
                 <div className="mt-20">
                     <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="indigo" heading="Questions fréquentes" /></section>
                     <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="indigo" heading="Univers connecté" /></section>

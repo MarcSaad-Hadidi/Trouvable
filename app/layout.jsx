@@ -1,9 +1,11 @@
 ﻿import './globals.css'
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
 import WebMcpProvider from '@/components/agent/WebMcpProvider'
 import DeferredVercelTelemetry from '@/components/analytics/DeferredVercelTelemetry'
 import LazyContactModal from '@/features/public/shared/LazyContactModal'
-import { SITE_URL } from '@/lib/site-config'
+import { WEBMCP_DECLARATIVE_PAYLOAD } from '@/lib/agent-discovery/mcp-tools'
+import { SITE_AI_DISCOVERY_PATHS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site-config'
+import { withPublicAuthor } from '@/lib/seo/metadata'
 
 const inter = Inter({
     subsets: ['latin'],
@@ -17,31 +19,38 @@ const plusJakartaSans = Plus_Jakarta_Sans({
     variable: '--font-plus-jakarta-sans',
 })
 
-export const metadata = {
+const jetBrainsMono = JetBrains_Mono({
+    subsets: ['latin'],
+    display: 'swap',
+    variable: '--font-jetbrains-mono',
+    weight: ['400', '500', '600', '700'],
+})
+
+export const metadata = withPublicAuthor({
     title: 'Trouvable | Firme de visibilité Google et réponses IA',
-    description: 'Mandats d\'exécution : visibilité organique locale sur Google et crédibilité de votre entreprise dans les réponses des grands modèles. Vous déléguez, nous exécutons.',
+    description: SITE_DESCRIPTION,
     metadataBase: new URL(SITE_URL),
     alternates: {
         canonical: '/',
     },
     openGraph: {
         title: 'Trouvable | Firme de visibilité Google et réponses IA',
-        description: 'Cartographie, mandat d\'implémentation et pilotage continu : une firme dédiée à votre signal public. Le travail est fait pour vous.',
+        description: SITE_DESCRIPTION,
         url: '/',
-        siteName: 'Trouvable',
+        siteName: SITE_NAME,
         locale: 'fr_CA',
         type: 'website',
     },
     twitter: {
         card: 'summary_large_image',
         title: 'Trouvable | Firme de visibilité Google et réponses IA',
-        description: 'Mandats d\'exécution pour la visibilité organique et la cohérence dans les réponses IA. Travail fait pour vous.',
+        description: SITE_DESCRIPTION,
     },
     icons: {
         icon: '/icon.png',
         apple: '/apple-icon.png',
     },
-}
+})
 
 export const viewport = {
     width: 'device-width',
@@ -51,13 +60,21 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="fr" className={`${inter.variable} ${plusJakartaSans.variable} scroll-smooth`} suppressHydrationWarning>
+        <html lang="fr" className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
             <head>
                 {/* DNS prefetch for external origins used at runtime */}
                 <link rel="dns-prefetch" href="https://clerk-telemetry.com" />
                 <link rel="alternate" type="text/markdown" href="/markdown?path=/" />
                 <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="Trouvable - Etudes de cas" />
-                <link rel="alternate" type="text/plain" href="/.well-known/ai.txt" />
+                <link rel="alternate" type="text/plain" href={SITE_AI_DISCOVERY_PATHS.aiTxt} />
+                <link rel="alternate" type="text/plain" href={SITE_AI_DISCOVERY_PATHS.llmsTxt} />
+                <link rel="alternate" type="application/json" href={SITE_AI_DISCOVERY_PATHS.summaryJson} title="Trouvable AI summary" />
+                <link rel="alternate" type="application/json" href={SITE_AI_DISCOVERY_PATHS.serviceJson} title="Trouvable AI services" />
+                <link rel="alternate" type="application/json" href={SITE_AI_DISCOVERY_PATHS.webMcp} title="Trouvable WebMCP declaration" />
+                <script
+                    type="webmcp"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBMCP_DECLARATIVE_PAYLOAD) }}
+                />
             </head>
             <body className="font-sans">
                 <WebMcpProvider />

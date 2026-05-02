@@ -1,7 +1,7 @@
 import { COMMAND_SURFACE, COMMAND_SURFACE_SOFT, cn } from './tokens';
 
 function Block({ className }) {
-    return <div className={cn('animate-pulse rounded-2xl bg-white/[0.08]', className)} />;
+    return <div className={cn('animate-pulse rounded-2xl bg-slate-200', className)} />;
 }
 
 export default function CommandSkeleton() {

@@ -1,21 +1,12 @@
-import { executeMcpToolServer, listMcpTools } from '@/lib/agent-discovery/mcp-tools';
-import { SITE_LAST_MODIFIED_ISO, SITE_URL } from '@/lib/site-config';
+import {
+    buildMcpDescriptorPayload,
+    executeMcpToolServer,
+    listMcpTools,
+    MCP_PROTOCOL_VERSION,
+} from '@/lib/agent-discovery/mcp-tools';
+import { SITE_LAST_MODIFIED_ISO } from '@/lib/site-config';
 
 export const runtime = 'nodejs';
-
-const MCP_PROTOCOL_VERSION = '2025-11-25';
-
-function descriptorPayload() {
-    return {
-        name: 'trouvable-webmcp',
-        title: 'Trouvable WebMCP Endpoint',
-        description: 'Minimal MCP-compatible endpoint for public navigation, contact and search actions.',
-        url: `${SITE_URL}/mcp`,
-        protocol: 'mcp-jsonrpc',
-        protocolVersion: MCP_PROTOCOL_VERSION,
-        tools: listMcpTools(),
-    };
-}
 
 function jsonRpcResponse(id, result) {
     return Response.json({
@@ -59,7 +50,7 @@ function initializeResult() {
 }
 
 export function GET() {
-    return Response.json(descriptorPayload(), {
+    return Response.json(buildMcpDescriptorPayload(), {
         headers: {
             'Cache-Control': 'public, max-age=300',
             'Last-Modified': new Date(SITE_LAST_MODIFIED_ISO).toUTCString(),
