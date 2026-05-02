@@ -1,0 +1,87 @@
+name: Bug report
+description: Signaler un bug reproductible dans Trouvable
+title: "[Bug]: "
+labels:
+  - type: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de fournir un rapport clair et reproductible.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Résumé du bug
+      description: Explique ce qui ne fonctionne pas.
+      placeholder: Exemple — La page admin clients affiche une erreur 500 après login.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Zone touchée
+      options:
+        - Public site
+        - Admin
+        - Portal client
+        - API
+        - Supabase
+        - Auth / Clerk
+        - Cron / jobs
+        - AI / providers
+        - CI/CD
+        - Autre
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Aller sur...
+        2. Cliquer sur...
+        3. Observer...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Résultat attendu
+      placeholder: Ce qui devrait se passer.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Résultat actuel
+      placeholder: Ce qui se passe réellement.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environnement
+      placeholder: Local, Preview Vercel, Production
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs ou captures
+      description: Ne colle jamais de secret, token, clé API ou donnée client sensible.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J’ai vérifié qu’aucun secret n’est inclus dans ce rapport.
+          required: true
+        - label: J’ai ajouté les étapes minimales pour reproduire.
+          required: true
