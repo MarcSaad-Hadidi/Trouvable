@@ -30,3 +30,8 @@ lib/audit/scanner-temp.js
 /tmp-*.js
 /clients.json
 /build_error.log
+
+# Local CodeQL exports
+codeql-alerts.json
+codeql-alerts.md
+codeql-alerts.csv
