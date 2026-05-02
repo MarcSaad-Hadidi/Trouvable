@@ -1,7 +1,6 @@
 version: 2
 
 updates:
-  # Dependencies npm: Next.js, React, Supabase, Clerk, etc.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -10,13 +9,12 @@ updates:
       time: "08:00"
       timezone: "America/Montreal"
 
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 6
     versioning-strategy: "increase-if-necessary"
     rebase-strategy: "auto"
 
     labels:
       - "dependencies"
-      - "security"
       - "npm"
 
     commit-message:
@@ -106,7 +104,6 @@ updates:
         patterns:
           - "*"
 
-  # GitHub Actions updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -115,12 +112,11 @@ updates:
       time: "08:30"
       timezone: "America/Montreal"
 
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
 
     labels:
       - "dependencies"
       - "github-actions"
-      - "security"
 
     commit-message:
       prefix: "ci"
