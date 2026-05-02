@@ -9,49 +9,76 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   quality:
     name: Lint, Test, Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     env:
-      NODE_ENV: test
       NEXT_TELEMETRY_DISABLED: "1"
 
       # Mock env for CI/build safety
-      CLERK_ADMIN_EMAIL: test@example.com
-      CRON_SECRET: test-secret-ci
-
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       SITE_URL: http://localhost:3000
 
+      # Clerk
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dummy
       CLERK_SECRET_KEY: sk_test_dummy
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /espace
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /espace/apres-connexion
+      CLERK_ADMIN_EMAIL: test@example.com
+      ADMIN_PANEL_EMAIL: test@example.com
 
+      # Supabase
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_ANON_KEY: dummy
+      SUPABASE_SERVICE_ROLE_KEY: dummy
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy
-      SUPABASE_SERVICE_ROLE_KEY: dummy
 
-      MISTRAL_API_KEY: dummy
+      # Turnstile
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: dummy
+      TURNSTILE_SECRET_KEY: dummy
+
+      # Email
       RESEND_API_KEY: dummy
+      ADMIN_EMAIL: admin@example.com
+      FROM_EMAIL: Trouvable CI <noreply@example.com>
+
+      # AI providers
+      MISTRAL_API_KEY: dummy
+      GROQ_API_KEY: dummy
+      GEMINI_API_KEY: dummy
+      AI_PRIMARY_PROVIDER: groq
+      AI_FALLBACK_PROVIDER: gemini
+
+      # Cron
+      CRON_SECRET: test-secret-ci
+      CONTINUOUS_DAILY_FIRST_MODE: "1"
+      CONNECTOR_SAMPLE_MODE: "1"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -60,7 +87,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm run test
+        run: npm test
 
       - name: Build Next.js app
         run: npm run build
@@ -68,6 +95,7 @@ jobs:
   npm-audit:
     name: NPM audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     permissions:
       contents: read
@@ -75,12 +103,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
