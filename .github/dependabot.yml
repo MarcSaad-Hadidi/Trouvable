@@ -1,0 +1,132 @@
+version: 2
+
+updates:
+  # Dependencies npm: Next.js, React, Supabase, Clerk, etc.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Montreal"
+
+    open-pull-requests-limit: 10
+    versioning-strategy: "increase-if-necessary"
+    rebase-strategy: "auto"
+
+    labels:
+      - "dependencies"
+      - "security"
+      - "npm"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    cooldown:
+      default-days: 3
+      semver-patch-days: 1
+      semver-minor-days: 7
+      semver-major-days: 30
+
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+      nextjs-react-stack:
+        applies-to: version-updates
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "eslint-config-next"
+          - "@next/*"
+
+      auth-clerk-stack:
+        applies-to: version-updates
+        patterns:
+          - "@clerk/*"
+
+      supabase-stack:
+        applies-to: version-updates
+        patterns:
+          - "@supabase/*"
+
+      vercel-stack:
+        applies-to: version-updates
+        patterns:
+          - "@vercel/*"
+          - "vercel"
+
+      playwright-crawler-stack:
+        applies-to: version-updates
+        patterns:
+          - "playwright"
+          - "playwright-core"
+          - "@playwright/*"
+          - "@sparticuz/chromium"
+
+      ai-and-api-stack:
+        applies-to: version-updates
+        patterns:
+          - "@mistralai/*"
+          - "googleapis"
+          - "resend"
+          - "jose"
+          - "zod"
+
+      ui-stack:
+        applies-to: version-updates
+        patterns:
+          - "framer-motion"
+          - "lucide-react"
+          - "recharts"
+          - "tailwindcss"
+          - "tailwindcss-animate"
+          - "postcss"
+          - "autoprefixer"
+
+      dev-tools-minor-patch:
+        applies-to: version-updates
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
+
+      production-minor-patch:
+        applies-to: version-updates
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:30"
+      timezone: "America/Montreal"
+
+    open-pull-requests-limit: 5
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "security"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+    groups:
+      github-actions:
+        patterns:
+          - "*"
