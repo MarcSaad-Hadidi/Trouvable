@@ -9,7 +9,6 @@ import {
     COMMAND_BUTTONS,
     COMMAND_PANEL,
     CommandHeader,
-    CommandMetricCard,
     CommandPageShell,
     cn,
 } from '@/features/admin/dashboard/shared/components/command';
@@ -64,13 +63,7 @@ function AttentionBadge({ attention }) {
     );
 }
 
-const KPI_TONE = {
-    default: 'neutral',
-    blue: 'info',
-    critical: 'critical',
-    warning: 'warning',
-    success: 'ok',
-};
+
 
 function clientsListLink({ q, page, archived }) {
     const p = new URLSearchParams();
@@ -170,20 +163,56 @@ export default async function AdminClientsPage({ searchParams }) {
             <div className="geo-content flex-1 overflow-y-auto">
                 <CommandPageShell header={header}>
                     {!showArchived && rows.length > 0 && (
-                        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
-                            <CommandMetricCard label="Mandats actifs" value={count ?? rows.length} tone={KPI_TONE.blue} />
-                            <CommandMetricCard
-                                label="Critiques"
-                                value={criticalCount}
-                                tone={criticalCount > 0 ? KPI_TONE.critical : KPI_TONE.default}
-                            />
-                            <CommandMetricCard
-                                label="Actions requises"
-                                value={attentionCount}
-                                tone={attentionCount > 0 ? KPI_TONE.warning : KPI_TONE.default}
-                            />
-                            <CommandMetricCard label="Stables" value={stableCount} tone={KPI_TONE.success} />
-                            <CommandMetricCard label="Actions en file" value={totalActions} tone={KPI_TONE.default} />
+                        <div className={cn(COMMAND_PANEL, 'px-5 py-4')}>
+                            {/* Segmented Health Bar */}
+                            <div className="flex items-center gap-5 mb-3">
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 shrink-0">Santé portefeuille</div>
+                                <div className="flex-1 flex h-[6px] overflow-hidden rounded-full bg-white/[0.03]">
+                                    {[
+                                        { key: 'critical', count: criticalCount, color: '#e06060' },
+                                        { key: 'attention', count: attentionCount, color: '#d4a34a' },
+                                        { key: 'stable', count: stableCount, color: '#4ade80' },
+                                    ].map((seg) => {
+                                        const pct = ((seg.count / (count || rows.length || 1)) * 100);
+                                        if (pct === 0) return null;
+                                        return (
+                                            <div
+                                                key={seg.key}
+                                                className="h-full transition-all duration-700"
+                                                style={{ width: `${pct}%`, background: seg.color, opacity: 0.65, marginRight: 1 }}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            {/* Inline Counts */}
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[11px] text-white/40">Total</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-white/80">{count ?? rows.length}</span>
+                                </div>
+                                <div className="h-3 w-px bg-white/[0.08]" />
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-[#e06060]" style={{ opacity: 0.7 }} />
+                                    <span className="text-[11px] text-white/40">Critiques</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#f0a8a8]">{criticalCount}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-[#d4a34a]" style={{ opacity: 0.7 }} />
+                                    <span className="text-[11px] text-white/40">Attention</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#ecd29b]">{attentionCount}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-[#4ade80]" style={{ opacity: 0.7 }} />
+                                    <span className="text-[11px] text-white/40">Stables</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#a3f0bf]">{stableCount}</span>
+                                </div>
+                                <div className="h-3 w-px bg-white/[0.08]" />
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[11px] text-white/40">Actions en file</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-white/70">{totalActions}</span>
+                                </div>
+                            </div>
                         </div>
                     )}
 
