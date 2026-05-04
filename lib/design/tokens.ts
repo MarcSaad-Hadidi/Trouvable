@@ -1,3 +1,11 @@
+/**
+ * Trouvable Operator Design System v2 — Canonical JS Tokens
+ *
+ * Single source of truth for all design tokens consumed by JS/TSX components.
+ * CSS custom properties live in admin-shell.css (--t-* namespace).
+ * This file mirrors those values for use in Tailwind classes and inline styles.
+ */
+
 export type Tone = 'ok' | 'warning' | 'critical' | 'info' | 'neutral' | 'unavailable';
 export type Discipline = 'seo' | 'geo' | 'agent' | 'shared';
 
@@ -5,89 +13,101 @@ export function cn(...values: Array<string | false | null | undefined>) {
     return values.filter(Boolean).join(' ');
 }
 
+/* ── Raw Palette ── */
+
 export const COMMAND_COLORS = {
-    ok: '#16a34a',
-    warning: '#d97706',
-    critical: '#dc2626',
-    info: '#2563eb',
-    neutral: '#64748b',
-    unavailable: '#64748b',
-    violet: '#7c3aed',
-    cyan: '#0891b2',
-    orange: '#f97316',
-    indigo: '#4f46e5',
+    ok: '#4ade80',       // Semantic green — stable, validated
+    warning: '#d4a34a',  // Muted amber — attention states
+    critical: '#e06060', // Coral — errors, critical mandates
+    info: '#6b9cc5',     // Steel blue — SEO world, informational
+    neutral: '#8e8f96',  // Text-2 level grey
+    unavailable: '#4e4f55', // Text-3 level muted
+    violet: '#7c6aef',   // Trouvable brand — GEO world
+    indigo: '#6366f1',   // Brand secondary
+    steel: '#6b9cc5',    // SEO world
+    orange: '#d4874a',   // Agent world
+    agentIndigo: '#818cf8', // Agent secondary
+    cyan: '#06b6d4',     // Accent supplemental
 } as const;
 
-export const COMMAND_SURFACE = 'rounded-[24px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]';
-export const COMMAND_SURFACE_SOFT = 'rounded-[20px] border border-slate-200 bg-slate-50 shadow-[0_18px_46px_rgba(15,23,42,0.08)]';
-export const COMMAND_PANEL = 'rounded-[18px] border border-slate-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]';
-export const COMMAND_MUTED_PANEL = 'rounded-[16px] border border-slate-200 bg-slate-50';
+/* ── Surface Tokens ── */
+
+export const COMMAND_SURFACE = 'rounded-[16px] border border-white/[0.085] bg-[#080808] shadow-[0_24px_78px_rgba(0,0,0,0.46),inset_0_1px_0_rgba(255,255,255,0.04)]';
+export const COMMAND_SURFACE_SOFT = 'rounded-[16px] border border-white/[0.08] bg-[#080808] shadow-[0_22px_70px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)]';
+export const COMMAND_PANEL = 'rounded-[14px] border border-white/[0.07] bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]';
+export const COMMAND_MUTED_PANEL = 'rounded-[12px] border border-white/[0.06] bg-white/[0.03]';
+
+/* ── Service World (Discipline) Accents ── */
 
 export const DISCIPLINE_ACCENTS = {
-    seo: 'border-blue-200 bg-blue-50 text-blue-700',
-    geo: 'border-violet-200 bg-violet-50 text-violet-700',
-    agent: 'border-orange-200 bg-orange-50 text-orange-700',
-    shared: 'border-slate-200 bg-slate-50 text-slate-600',
+    seo: 'border-[#6b9cc5]/25 bg-[#6b9cc5]/10 text-[#a8cde5]',
+    geo: 'border-[#7c6aef]/30 bg-[#7c6aef]/12 text-[#b8adff]',
+    agent: 'border-[#d4874a]/25 bg-[#d4874a]/10 text-[#e8b888]',
+    shared: 'border-white/[0.1] bg-white/[0.035] text-white/72',
 } as const;
 
 export const DISCIPLINE_META = {
-    seo: { label: 'Visibilite Google / SEO', accent: COMMAND_COLORS.info, dot: 'bg-blue-500' },
-    geo: { label: 'Visibilite IA / GEO', accent: COMMAND_COLORS.violet, dot: 'bg-violet-500' },
-    agent: { label: 'Agent', accent: COMMAND_COLORS.orange, dot: 'bg-orange-500' },
-    shared: { label: 'Dossier', accent: COMMAND_COLORS.neutral, dot: 'bg-slate-400' },
+    seo: { label: 'SEO / Google', accent: COMMAND_COLORS.steel, dot: 'bg-[#6b9cc5]' },
+    geo: { label: 'IA / GEO', accent: COMMAND_COLORS.violet, dot: 'bg-[#7c6aef]' },
+    agent: { label: 'Agent', accent: COMMAND_COLORS.orange, dot: 'bg-[#d4874a]' },
+    shared: { label: 'Dossier', accent: COMMAND_COLORS.neutral, dot: 'bg-white/45' },
 } as const;
 
-export const FIELD_SURFACE = 'rounded-xl border border-slate-200 bg-white text-slate-900';
-export const ATMOSPHERE_SURFACE = 'rounded-[20px] border border-slate-200 bg-slate-50';
-export const FORGE_SURFACE = 'rounded-[20px] border border-blue-200 bg-blue-50';
+/* ── Specialty Surfaces ── */
+
+export const FIELD_SURFACE = 'rounded-xl border border-white/[0.08] bg-[#080808] text-white/86';
+export const ATMOSPHERE_SURFACE = 'rounded-[16px] border border-white/[0.08] bg-[#080808]';
+export const FORGE_SURFACE = 'rounded-[16px] border border-[#6b9cc5]/20 bg-[#6b9cc5]/[0.045]';
+
+/* ── Tone Classes ── */
 
 const TONE_CLASSES = {
     ok: {
-        pill: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-        panel: 'border-emerald-200 bg-emerald-50/70',
-        text: 'text-emerald-700',
-        softText: 'text-emerald-700/75',
-        dot: 'bg-emerald-500',
+        pill: 'border-[#4ade80]/25 bg-[#4ade80]/10 text-[#a3f0bf]',
+        panel: 'border-[#4ade80]/16 bg-[#4ade80]/[0.045]',
+        text: 'text-[#a3f0bf]',
+        softText: 'text-[#4ade80]/80',
+        dot: 'bg-[#4ade80]',
         ring: COMMAND_COLORS.ok,
     },
     warning: {
-        pill: 'border-amber-200 bg-amber-50 text-amber-700',
-        panel: 'border-amber-200 bg-amber-50/70',
-        text: 'text-amber-700',
-        softText: 'text-amber-700/75',
-        dot: 'bg-amber-500',
+        pill: 'border-[#d4a34a]/25 bg-[#d4a34a]/10 text-[#ecd29b]',
+        panel: 'border-[#d4a34a]/16 bg-[#d4a34a]/[0.045]',
+        text: 'text-[#ecd29b]',
+        softText: 'text-[#d4a34a]/80',
+        dot: 'bg-[#d4a34a]',
         ring: COMMAND_COLORS.warning,
     },
     critical: {
-        pill: 'border-red-200 bg-red-50 text-red-700',
-        panel: 'border-red-200 bg-red-50/70',
-        text: 'text-red-700',
-        softText: 'text-red-700/75',
-        dot: 'bg-red-500',
+        pill: 'border-[#e06060]/25 bg-[#e06060]/10 text-[#f0a8a8]',
+        panel: 'border-[#e06060]/18 bg-[#e06060]/[0.05]',
+        text: 'text-[#f0a8a8]',
+        softText: 'text-[#e06060]/82',
+        dot: 'bg-[#e06060]',
         ring: COMMAND_COLORS.critical,
     },
     info: {
-        pill: 'border-blue-200 bg-blue-50 text-blue-700',
-        panel: 'border-blue-200 bg-blue-50/70',
-        text: 'text-blue-700',
-        softText: 'text-blue-700/75',
-        dot: 'bg-blue-500',
+        pill: 'border-[#6b9cc5]/25 bg-[#6b9cc5]/10 text-[#a8cde5]',
+        panel: 'border-[#6b9cc5]/16 bg-[#6b9cc5]/[0.045]',
+        text: 'text-[#a8cde5]',
+        softText: 'text-[#6b9cc5]/82',
+        dot: 'bg-[#6b9cc5]',
         ring: COMMAND_COLORS.info,
     },
     neutral: {
-        pill: 'border-slate-200 bg-slate-50 text-slate-600',
-        panel: 'border-slate-200 bg-slate-50/70',
-        text: 'text-slate-800',
-        softText: 'text-slate-500',
-        dot: 'bg-slate-400',
+        pill: 'border-white/[0.1] bg-white/[0.04] text-white/62',
+        panel: 'border-white/[0.07] bg-white/[0.025]',
+        text: 'text-white/84',
+        softText: 'text-white/48',
+        dot: 'bg-white/38',
         ring: COMMAND_COLORS.neutral,
     },
     unavailable: {
-        pill: 'border-slate-200 bg-slate-100 text-slate-500',
-        panel: 'border-slate-200 bg-slate-100/70',
-        text: 'text-slate-600',
-        softText: 'text-slate-500',
-        dot: 'bg-slate-400',
+        pill: 'border-white/[0.07] bg-white/[0.025] text-white/38',
+        panel: 'border-white/[0.055] bg-white/[0.018]',
+        text: 'text-white/45',
+        softText: 'text-white/34',
+        dot: 'bg-white/24',
         ring: COMMAND_COLORS.unavailable,
     },
 } as const;
@@ -109,17 +129,21 @@ export function getToneLabel(status: Tone = 'neutral') {
     return 'Stable';
 }
 
+/* ── Typography ── */
+
 export const COMMAND_TEXT = {
-    eyebrow: 'text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500',
-    title: 'text-[clamp(1.75rem,4vw,3.25rem)] font-semibold text-slate-950',
-    subtitle: 'text-[14px] leading-relaxed text-slate-600 sm:text-[15px]',
-    section: 'text-[18px] font-semibold text-slate-900',
-    body: 'text-[13px] leading-relaxed text-slate-600',
-    meta: 'text-[11px] font-medium text-slate-500',
+    eyebrow: 'text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7c6aef]',
+    title: 'text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold tracking-[-0.04em] text-white',
+    subtitle: 'text-[13px] leading-relaxed text-white/52 sm:text-[14px]',
+    section: 'text-[15px] font-semibold tracking-[-0.01em] text-white/88',
+    body: 'text-[13px] leading-relaxed text-white/58',
+    meta: 'text-[11px] font-medium text-white/40',
 } as const;
 
+/* ── Buttons ── */
+
 export const COMMAND_BUTTONS = {
-    primary: 'inline-flex items-center justify-center gap-2 rounded-full border border-blue-600 bg-blue-600 px-4 py-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
-    secondary: 'inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
-    subtle: 'inline-flex items-center justify-center gap-2 rounded-full border border-transparent bg-transparent px-3 py-2 text-[12px] font-semibold text-slate-500 transition-colors hover:border-slate-200 hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+    primary: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-[#7c6aef]/45 bg-[#7c6aef] px-4 py-2.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#8d7bff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
+    secondary: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-white/[0.1] bg-white/[0.045] px-4 py-2.5 text-[12px] font-semibold text-white/75 no-underline transition-colors hover:border-white/[0.18] hover:bg-white/[0.075] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
+    subtle: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-transparent bg-transparent px-3 py-2 text-[12px] font-semibold text-white/50 no-underline transition-colors hover:border-white/[0.1] hover:bg-white/[0.04] hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
 } as const;

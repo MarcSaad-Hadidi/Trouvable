@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp, Terminal, Search, Mic, Paperclip, CheckCircle2, AlertTriangle, PackageOpen, Image as ImageIcon, PenSquare, Clock, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { ArrowUp, Search, Mic, Paperclip, CheckCircle2, AlertTriangle, PackageOpen, PenSquare, Clock, MessageSquare, MoreHorizontal } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
 
 function buildChats(page) {
@@ -17,7 +17,6 @@ export default function CopilotPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
-    const [animKey, setAnimKey] = useState(0);
 
     const activeConversation = chats.find(c => c.id === activeChat) || chats[0];
 
@@ -25,7 +24,6 @@ export default function CopilotPage({ page, trustBrief }) {
         const chat = chats.find(c => c.id === chatId) || chats[0];
         setActiveChat(chatId);
         setMessages([]);
-        setAnimKey(prev => prev + 1);
 
         const timer1 = setTimeout(() => { setMessages([{ role: 'user', text: chat.question }]); }, 300);
         const timer2 = setTimeout(() => { setMessages(prev => [...prev, { role: 'ai', isThinking: true }]); }, 800);

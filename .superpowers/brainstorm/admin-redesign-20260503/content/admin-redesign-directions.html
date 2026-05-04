@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trouvable Admin Redesign Directions</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --black: #050506;
+      --obsidian: #0a0a0d;
+      --graphite: #141419;
+      --line: rgba(255,255,255,.09);
+      --muted: rgba(245,247,250,.55);
+      --faint: rgba(245,247,250,.33);
+      --text: #f4f5f7;
+      --violet: #8d7aff;
+      --indigo: #5f6fff;
+      --green: #60c88f;
+      --amber: #d6a751;
+      --red: #de7373;
+      --steel: #7aa5c9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #030304;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .page {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 34px;
+    }
+    .top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--violet);
+      font-weight: 760;
+    }
+    h1 {
+      margin: 8px 0 0;
+      font-size: 34px;
+      letter-spacing: -0.025em;
+      line-height: 1.04;
+    }
+    .note {
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .choice {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+      border-radius: 18px;
+      overflow: hidden;
+      min-height: 740px;
+      cursor: pointer;
+      transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+    .choice:hover {
+      border-color: rgba(141,122,255,.34);
+      transform: translateY(-2px);
+      box-shadow: 0 22px 70px rgba(0,0,0,.42);
+    }
+    .choice.selected {
+      border-color: rgba(141,122,255,.8);
+      box-shadow: 0 0 0 1px rgba(141,122,255,.3), 0 24px 78px rgba(70,55,160,.24);
+    }
+    .mock {
+      height: 520px;
+      border-bottom: 1px solid var(--line);
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 76px 1fr;
+    }
+    .rail {
+      border-right: 1px solid rgba(255,255,255,.08);
+      background: #050506;
+      padding: 14px 10px;
+    }
+    .mark {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(141,122,255,.32);
+      border-radius: 10px;
+      margin: 0 auto 18px;
+      background: radial-gradient(circle at 50% 30%, rgba(141,122,255,.45), rgba(141,122,255,.08) 58%, transparent);
+    }
+    .rail-line {
+      height: 26px;
+      border-radius: 8px;
+      margin: 7px 0;
+      background: rgba(255,255,255,.045);
+    }
+    .rail-line.on { background: rgba(141,122,255,.24); }
+    .canvas { min-width: 0; }
+    .bar {
+      height: 46px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      background: rgba(255,255,255,.018);
+    }
+    .bar-title {
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+      font-weight: 760;
+    }
+    .chip-row { display: flex; gap: 6px; }
+    .chip {
+      width: 48px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.035);
+    }
+    .chip.v { background: rgba(141,122,255,.16); border-color: rgba(141,122,255,.22); }
+    .work { padding: 15px; }
+    .panel {
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.026);
+      border-radius: 12px;
+    }
+    .mini-title {
+      height: 12px;
+      width: 52%;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      margin-bottom: 10px;
+    }
+    .micro { height: 8px; width: 72%; border-radius: 999px; background: rgba(255,255,255,.08); }
+    .a .work {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      grid-template-rows: 116px 136px 1fr;
+      gap: 10px;
+    }
+    .a .hero { grid-column: 1 / -1; padding: 16px; background: linear-gradient(135deg, rgba(141,122,255,.13), rgba(255,255,255,.022)); }
+    .a .queue { grid-row: span 2; padding: 13px; }
+    .a .row { height: 31px; border-top: 1px solid rgba(255,255,255,.055); display:flex; align-items:center; gap:8px; }
+    .dot { width: 7px; height: 7px; border-radius: 99px; background: var(--green); }
+    .dot.a { background: var(--amber); }
+    .dot.r { background: var(--red); }
+    .a .ledger { padding: 13px; }
+    .a .bars { display: grid; gap: 8px; margin-top: 16px; }
+    .track { height: 7px; border-radius: 99px; background: rgba(255,255,255,.06); overflow:hidden; }
+    .fill { height: 100%; border-radius: inherit; background: var(--violet); }
+    .b .mock { grid-template-columns: 92px 1fr; }
+    .b .rail { background: linear-gradient(180deg, #050506, #0a0a0d); }
+    .b .work {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 92px 1fr 132px;
+      gap: 10px;
+    }
+    .b .service-tabs {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .service {
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,.022);
+    }
+    .service:nth-child(1) { box-shadow: inset 0 2px 0 var(--steel); }
+    .service:nth-child(2) { box-shadow: inset 0 2px 0 var(--violet); }
+    .service:nth-child(3) { box-shadow: inset 0 2px 0 var(--green); }
+    .b .atelier { padding: 14px; min-height: 210px; }
+    .b .timeline { grid-column: 1 / -1; padding: 13px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+    .step { border-left: 2px solid rgba(141,122,255,.45); padding-left: 9px; }
+    .c .work {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      grid-template-rows: 126px 1fr;
+      gap: 10px;
+    }
+    .c .map {
+      grid-row: span 2;
+      position: relative;
+      min-height: 375px;
+      background:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        rgba(255,255,255,.018);
+      background-size: 34px 34px;
+    }
+    .node {
+      position: absolute;
+      width: 74px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.11);
+      background: #101014;
+    }
+    .node.n1 { left: 28px; top: 42px; border-color: rgba(122,165,201,.35); }
+    .node.n2 { right: 36px; top: 92px; border-color: rgba(141,122,255,.38); }
+    .node.n3 { left: 62px; bottom: 78px; border-color: rgba(96,200,143,.35); }
+    .node.n4 { right: 24px; bottom: 38px; border-color: rgba(214,167,81,.38); }
+    .c .inspector { padding: 14px; }
+    .c .evidence { padding: 14px; }
+    .body { padding: 18px; }
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--violet);
+      font-weight: 800;
+    }
+    .letter {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(141,122,255,.38);
+      color: white;
+      background: rgba(141,122,255,.14);
+      letter-spacing: 0;
+    }
+    h2 { margin: 12px 0 8px; font-size: 20px; letter-spacing: -.018em; }
+    p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    ul { margin: 14px 0 0; padding-left: 17px; color: rgba(245,247,250,.64); font-size: 12px; line-height: 1.6; }
+    @media (max-width: 1050px) {
+      .grid { grid-template-columns: 1fr; }
+      .choice { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="top">
+      <div>
+        <div class="eyebrow">Trouvable Admin Redesign</div>
+        <h1>Choose the governing design posture</h1>
+      </div>
+      <p class="note">These are not final screens; they are direction setters. Pick the one that best matches “premium internal operator workspace” for Trouvable, or tell me what to combine.</p>
+    </section>
+
+    <section class="grid">
+      <article class="choice a" data-choice="a" onclick="toggleSelect(this)">
+        <div class="mock">
+          <div class="rail"><div class="mark"></div><div class="rail-line on"></div><div class="rail-line"></div><div class="rail-line"></div><div class="rail-line on"></div><div class="rail-line"></div></div>
+          <div class="canvas">
+            <div class="bar"><div class="bar-title">Command Ledger</div><div class="chip-row"><div class="chip v"></div><div class="chip"></div><div class="chip"></div></div></div>
+            <div class="work">
+              <div class="panel hero"><div class="mini-title"></div><div class="micro"></div><div class="bars"><div class="track"><div class="fill" style="width:68%"></div></div><div class="track"><div class="fill" style="width:42%;background:var(--steel)"></div></div></div></div>
+              <div class="panel queue"><div class="mini-title"></div><div class="row"><span class="dot r"></span><div class="micro"></div></div><div class="row"><span class="dot a"></span><div class="micro"></div></div><div class="row"><span class="dot"></span><div class="micro"></div></div><div class="row"><span class="dot a"></span><div class="micro"></div></div></div>
+              <div class="panel ledger"><div class="mini-title"></div><div class="bars"><div class="track"><div class="fill" style="width:78%;background:var(--green)"></div></div><div class="track"><div class="fill" style="width:36%;background:var(--amber)"></div></div><div class="track"><div class="fill" style="width:18%;background:var(--red)"></div></div></div></div>
+              <div class="panel ledger"><div class="mini-title"></div><div class="micro"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="kicker"><span class="letter">A</span> Quiet Command Ledger</div>
+          <h2>Dense, calm, executive, evidence-first.</h2>
+          <p>Feels like a premium operations console: black ledger surfaces, restrained accents, strong hierarchy, fast scanning, few decorative moves.</p>
+          <ul><li>Best for internal operators and serious B2B trust.</li><li>Risk: can become too severe if every page is a ledger.</li></ul>
+        </div>
+      </article>
+
+      <article class="choice b" data-choice="b" onclick="toggleSelect(this)">
+        <div class="mock">
+          <div class="rail"><div class="mark"></div><div class="rail-line"></div><div class="rail-line on"></div><div class="rail-line"></div><div class="rail-line"></div><div class="rail-line on"></div></div>
+          <div class="canvas">
+            <div class="bar"><div class="bar-title">Service Atelier</div><div class="chip-row"><div class="chip"></div><div class="chip v"></div><div class="chip"></div></div></div>
+            <div class="work">
+              <div class="service-tabs">
+                <div class="service"><div class="mini-title"></div><div class="micro"></div></div>
+                <div class="service"><div class="mini-title"></div><div class="micro"></div></div>
+                <div class="service"><div class="mini-title"></div><div class="micro"></div></div>
+              </div>
+              <div class="panel atelier"><div class="mini-title"></div><div class="bars"><div class="track"><div class="fill" style="width:58%;background:var(--steel)"></div></div><div class="track"><div class="fill" style="width:72%;background:var(--violet)"></div></div><div class="track"><div class="fill" style="width:46%;background:var(--green)"></div></div></div></div>
+              <div class="panel atelier"><div class="mini-title"></div><div class="micro"></div><br><div class="micro" style="width:48%"></div></div>
+              <div class="panel timeline"><div class="step"><div class="micro"></div></div><div class="step"><div class="micro"></div></div><div class="step"><div class="micro"></div></div><div class="step"><div class="micro"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="kicker"><span class="letter">B</span> Three Service Ateliers</div>
+          <h2>Distinct workrooms for SEO, GEO, Agent.</h2>
+          <p>Each service world has its own material, chart language, filters, actions, and page composition while the shell stays unified.</p>
+          <ul><li>Best match for your “3 separate service worlds” requirement.</li><li>Risk: needs strict tokens to avoid feeling like three products.</li></ul>
+        </div>
+      </article>
+
+      <article class="choice c" data-choice="c" onclick="toggleSelect(this)">
+        <div class="mock">
+          <div class="rail"><div class="mark"></div><div class="rail-line"></div><div class="rail-line"></div><div class="rail-line on"></div><div class="rail-line"></div><div class="rail-line"></div></div>
+          <div class="canvas">
+            <div class="bar"><div class="bar-title">Intelligence Map</div><div class="chip-row"><div class="chip v"></div><div class="chip"></div></div></div>
+            <div class="work">
+              <div class="panel map"><div class="node n1"></div><div class="node n2"></div><div class="node n3"></div><div class="node n4"></div></div>
+              <div class="panel inspector"><div class="mini-title"></div><div class="micro"></div><div class="bars"><div class="track"><div class="fill" style="width:61%;background:var(--violet)"></div></div><div class="track"><div class="fill" style="width:38%;background:var(--amber)"></div></div></div></div>
+              <div class="panel evidence"><div class="mini-title"></div><div class="row"><span class="dot"></span><div class="micro"></div></div><div class="row"><span class="dot a"></span><div class="micro"></div></div><div class="row"><span class="dot r"></span><div class="micro"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="kicker"><span class="letter">C</span> Intelligence Map</div>
+          <h2>Relationship-led, investigative, distinctive.</h2>
+          <p>Centers graphs, evidence chains, relationships between prompts, sources, competitors, pages, crawlers, and actions.</p>
+          <ul><li>Best for signature screens and memorable product personality.</li><li>Risk: can drift toward sci-fi if overused.</li></ul>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

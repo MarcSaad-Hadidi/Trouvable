@@ -78,9 +78,7 @@ export default function MandateVisualCartography() {
           style={{
             background: "conic-gradient(from 0deg, transparent 270deg, rgba(91,115,255,0.05) 330deg, rgba(91,115,255,0.5) 360deg)",
           }}
-        >
-          <div className="absolute right-0 top-0 h-1/2 w-[2px] bg-[#5b73ff] shadow-[0_0_10px_#5b73ff] origin-bottom -translate-x-1/2 translate-y-full" />
-        </motion.div>
+        />
 
         {/* Data Points */}
         {POINTS.map((p, i) => (

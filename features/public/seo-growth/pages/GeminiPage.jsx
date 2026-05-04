@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Plus, MessageSquare, Book, Sparkles, Settings, Share, MoreVertical, Mic, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
-import { FaqSection, LinksSection, CtaSection, AiThinking, TypewriterText } from './shared-primitives';
+import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
 
 function buildChats(page) {
     return [

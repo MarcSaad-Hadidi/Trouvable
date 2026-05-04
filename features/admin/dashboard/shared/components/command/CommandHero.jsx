@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { ArrowRight, Clock3, Sparkles, TriangleAlert } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function CommandHero({
 
     return (
         <motion.section variants={commandFadeUp} className={cn(COMMAND_SURFACE, 'relative overflow-hidden p-5 sm:p-6 lg:p-8')}>
-            <div className="absolute inset-y-0 right-0 w-[38%] bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,0.16),transparent_58%)]" />
+            <div className="absolute inset-y-0 right-0 w-[38%] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.03),transparent_58%)]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-40" />
 
             <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(300px,0.7fr)]">
@@ -50,7 +50,7 @@ export default function CommandHero({
                             {subtitle ? <span>{subtitle}</span> : null}
                             {websiteLabel ? (
                                 <>
-                                    <span className="text-white/[0.12]">•</span>
+                                    <span className="text-white/[0.12]">â€¢</span>
                                     <span className="truncate">{websiteLabel}</span>
                                 </>
                             ) : null}
@@ -105,12 +105,12 @@ export default function CommandHero({
                             />
                             <div className="space-y-3">
                                 <div>
-                                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Lecture stratégique</div>
+                                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Lecture stratÃ©gique</div>
                                     <div className={cn('mt-3 text-[24px] font-semibold tracking-[-0.04em]', statusTone.text)}>{status?.label}</div>
                                     <div className="mt-2 text-[13px] leading-relaxed text-white/[0.68]">{scoreCaption}</div>
                                 </div>
                                 <div className="rounded-[18px] border border-white/[0.08] bg-black/20 p-3">
-                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Fraîcheur</div>
+                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">FraÃ®cheur</div>
                                     <div className="mt-2 text-[15px] font-semibold text-white/[0.88]">{freshness?.detail}</div>
                                 </div>
                             </div>

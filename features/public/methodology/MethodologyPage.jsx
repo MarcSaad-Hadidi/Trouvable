@@ -7,7 +7,7 @@ import SiteFooter from "@/features/public/shared/SiteFooter";
 import ContactButton from "@/features/public/shared/ContactButton";
 import GeoSeoInjector from "@/features/public/shared/GeoSeoInjector";
 import Link from "next/link";
-import { ArrowRight, Layers, FileCode2, LineChart, Zap, ShieldCheck, CheckCircle2, ChevronRight } from "lucide-react";
+import { ArrowRight, Layers, FileCode2, LineChart, Zap, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { SITE_LAST_MODIFIED, SITE_LAST_MODIFIED_ISO, SITE_URL } from "@/lib/site-config";
 
 const STEPS = [
@@ -127,19 +127,6 @@ export default function MethodologyPage() {
           </div>
         </section>
 
-        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
-          <div className="mx-auto max-w-[960px]">
-            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
-            <ul className="grid gap-3 md:grid-cols-4">
-              {STEPS.map((step) => (
-                <li key={step.num} className="border-l border-white/10 pl-4 text-[13px] leading-[1.65] text-white/62">
-                  <span className="font-semibold text-white/82">{step.title}.</span> {step.desc}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
         <section className="border-t border-white/[0.05] px-6 py-28 sm:px-10">
           <div className="mx-auto max-w-[1000px]">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14">
@@ -208,6 +195,19 @@ export default function MethodologyPage() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
+          <div className="mx-auto max-w-[960px]">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+            <ul className="grid gap-3 md:grid-cols-4">
+              {STEPS.map((step) => (
+                <li key={step.num} className="border-l border-white/10 pl-4 text-[13px] leading-[1.65] text-white/62">
+                  <span className="font-semibold text-white/82">{step.title}.</span> {step.desc}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

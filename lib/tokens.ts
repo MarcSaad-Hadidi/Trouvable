@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Backward-compat shim.
  * The canonical tokens now live in lib/design/tokens.ts.
  * This file is kept so existing imports from `@/lib/tokens` continue to work.

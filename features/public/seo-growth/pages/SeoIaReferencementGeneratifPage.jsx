@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, FlaskConical, Microscope, Gauge, Beaker, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, FlaskConical, Microscope, Gauge, Beaker } from 'lucide-react';
 import ContactButton from '@/features/public/shared/ContactButton';
 import { FaqSection, LinksSection } from './shared-primitives';
 

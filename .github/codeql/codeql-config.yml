@@ -1,0 +1,4 @@
+name: Trouvable CodeQL config
+
+paths-ignore:
+  - archive/**

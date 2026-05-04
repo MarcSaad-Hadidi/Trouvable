@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, BotMessageSquare, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, Compass, MoreHorizontal, FileText, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
+import { ArrowUp, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, Compass, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
 
 /*  Sidebar conversations data  */

@@ -132,20 +132,6 @@ export default function OffersPage() {
       <main>
         <OffersHero />
 
-        <section className="border-y border-white/[0.06] bg-[#080808] px-6 py-10 sm:px-10">
-          <div className="mx-auto max-w-[1120px]">
-            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
-            <ul className="grid gap-3 md:grid-cols-3">
-              {Object.values(MANDATES).map((mandate) => (
-                <li key={mandate.id} className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
-                  <span className="font-semibold text-white/82">{mandate.title}.</span> {mandate.outcome}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
-          </div>
-        </section>
-
         <OffersTimeline />
 
         <MandateSection {...MANDATES.cartographie}>
@@ -161,6 +147,20 @@ export default function OffersPage() {
         </MandateSection>
 
         <OffersDecisionBlock />
+
+        <section className="border-y border-white/[0.06] bg-[#080808] px-6 py-10 sm:px-10">
+          <div className="mx-auto max-w-[1120px]">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+            <ul className="grid gap-3 md:grid-cols-3">
+              {Object.values(MANDATES).map((mandate) => (
+                <li key={mandate.id} className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+                  <span className="font-semibold text-white/82">{mandate.title}.</span> {mandate.outcome}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
+          </div>
+        </section>
 
         <OffersFinalCta />
       </main>

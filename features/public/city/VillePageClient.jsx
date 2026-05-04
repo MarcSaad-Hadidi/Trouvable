@@ -196,8 +196,6 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                     </div>
                 </section>
 
-                <KeyTakeawaysSection ville={ville} composition={composition} />
-
                 {/* SIGNAL BAR */}
                 <section className="border-t border-white/[0.05] mt-16 px-6 py-5 sm:px-10">
                     <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mx-auto max-w-[1100px] flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-center">
@@ -292,6 +290,8 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                         </div>
                     </section>
                 )}
+
+                <KeyTakeawaysSection ville={ville} composition={composition} />
 
                 {/* CTA - composition-driven */}
                 <section className="relative overflow-hidden border-t border-white/[0.05] bg-[#060606] px-6 py-28 sm:px-10">

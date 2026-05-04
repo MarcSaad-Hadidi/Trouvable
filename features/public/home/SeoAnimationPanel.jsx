@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import { SITE_URL } from "@/lib/site-config";
 
+const SOFT_TRANSITION = "opacity 650ms cubic-bezier(0.22,1,0.36,1), transform 650ms cubic-bezier(0.22,1,0.36,1)";
+
 function useCycleClock(cycleMs, tickMs = 40) {
   const [elapsed, setElapsed] = useState(0);
 
@@ -34,20 +36,25 @@ function inWindow(elapsed, startMs, endMs) {
 }
 
 export default function SeoAnimationPanel() {
-  const cycleMs = 8400;
+  const cycleMs = 8800;
   const elapsed = useCycleClock(cycleMs);
+  const queryStart = 250;
+  const queryDuration = 2350;
+  const mainResultStart = queryStart + queryDuration + 260;
+  const skeletonStart = mainResultStart + 650;
+
   const typedSeoQuery = getTypedSlice(
     "Meilleur expert SEO Quebec",
     elapsed,
-    250,
-    1850
+    queryStart,
+    queryDuration
   );
-  const showCaret = inWindow(elapsed, 250, 2400);
-  const showMainResult = inWindow(elapsed, 1850, 7000);
-  const showSkeletonResult = inWindow(elapsed, 2650, 7600);
+  const showCaret = inWindow(elapsed, queryStart, mainResultStart);
+  const showMainResult = inWindow(elapsed, mainResultStart, 7350);
+  const showSkeletonResult = inWindow(elapsed, skeletonStart, 7800);
 
   return (
-    <div className="relative mb-8 flex h-[320px] w-full flex-col overflow-hidden border border-white/[0.04] bg-[#202124] p-5 shadow-inner" style={{ borderRadius: '1.5rem', fontFamily: "Arial, sans-serif" }}>
+    <div className="relative mb-8 flex h-[320px] w-full flex-col overflow-hidden border border-white/[0.04] bg-[#202124] p-5 shadow-inner" style={{ borderRadius: "1.5rem", fontFamily: "Arial, sans-serif" }}>
       <div className="mb-6 mt-1 flex w-full items-center gap-4 px-1">
         <div className="flex shrink-0 items-center text-[21px] font-bold tracking-[-0.02em]">
           <span className="text-[#4285F4]">G</span>
@@ -58,9 +65,9 @@ export default function SeoAnimationPanel() {
           <span className="text-[#EA4335]">e</span>
         </div>
         <div className="flex h-11 min-w-0 flex-1 items-center rounded-full border border-[#6b7076] bg-[#1f2328] px-4 shadow-[0_1px_8px_rgba(0,0,0,0.35)]">
-          <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[14px] leading-none text-[#f1f3f4] font-medium">
+          <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[14px] font-medium leading-none text-[#f1f3f4]">
             {typedSeoQuery}
-            {showCaret && <span className="ml-0.5 inline-block animate-pulse">|</span>}
+            {showCaret && <span className="ml-0.5 inline-block animate-pulse text-[#c9d7ff]/80">|</span>}
           </div>
           <div className="ml-3 flex shrink-0 items-center border-l border-[#6b7076] pl-3 text-[#9cc0ff]">
             <Search className="h-[15px] w-[15px]" />
@@ -70,10 +77,11 @@ export default function SeoAnimationPanel() {
 
       <div className="px-2 flex flex-col gap-6">
         <div
-          className="transition-[opacity,transform] duration-300 ease-out"
+          className="transition-[opacity,transform]"
           style={{
             opacity: showMainResult ? 1 : 0,
             transform: showMainResult ? "translateY(0)" : "translateY(8px)",
+            transition: SOFT_TRANSITION,
           }}
         >
           <Link
@@ -100,10 +108,11 @@ export default function SeoAnimationPanel() {
         </div>
 
         <div
-          className="transition-[opacity,transform] duration-300 ease-out"
+          className="transition-[opacity,transform]"
           style={{
             opacity: showSkeletonResult ? 1 : 0,
             transform: showSkeletonResult ? "translateY(0)" : "translateY(10px)",
+            transition: SOFT_TRANSITION,
           }}
         >
           <div className="flex items-center gap-3 mb-2">

@@ -1,5 +1,7 @@
 'use client';
 
+import AdminTray from '@/features/admin/dashboard/shared/components/AdminTray';
+import CommandStrip from '@/features/admin/dashboard/shared/components/CommandStrip';
 import { useState, useTransition } from 'react';
 import { ClientProvider, useGeoClient } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { motion } from 'framer-motion';
@@ -65,7 +67,7 @@ function MissionCommandHeader() {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="border-b border-white/[0.05] bg-[#090a0b]/88"
+            className="border-b border-white/[0.05] bg-[#000000]/88"
         >
             <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
@@ -112,7 +114,7 @@ function MissionCommandHeader() {
                                 </button>
                             )}
                             {menuOpen && (
-                                <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#0e0f11] border border-white/[0.08] rounded-lg shadow-xl py-1">
+                                <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#0a0a0a] border border-white/[0.08] rounded-lg shadow-xl py-1">
                                     {allowedNext.map((targetState) => (
                                         <button
                                             key={targetState}
@@ -154,7 +156,6 @@ function MissionCommandHeader() {
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Actualiser
                     </button>
                 </div>
             </div>
@@ -162,11 +163,30 @@ function MissionCommandHeader() {
     );
 }
 
+function ClientShellInner({ children }) {
+    const { client } = useGeoClient();
+    
+    return (
+        <div className="flex w-full h-full">
+            <AdminTray client={client} />
+            
+            <div className="flex-1 flex flex-col min-w-0">
+                <CommandStrip />
+                <MissionCommandHeader />
+                <div className="geo-content flex-1 overflow-y-auto">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function ClientWorkspaceShell({ clientId, children }) {
     return (
         <ClientProvider clientId={clientId}>
-            <MissionCommandHeader />
-            {children}
+            <ClientShellInner>
+                {children}
+            </ClientShellInner>
         </ClientProvider>
     );
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Crosshair, BarChart3, Hammer, FileText, RotateCcw } from "lucide-react";
 
 const STEPS = [
-  { icon: Crosshair, title: "Cadrage", desc: "Objectifs, territoire, contraintes, interlocuteur unique." },
-  { icon: BarChart3, title: "Preuve", desc: "État initial documenté, repères mesurables." },
-  { icon: Hammer, title: "Exécution", desc: "Nous appliquons ; vous validez ce qui est convenu." },
-  { icon: FileText, title: "Compte rendu", desc: "Ce qui est fait, ce qui reste, ce que nous observons." },
-  { icon: RotateCcw, title: "Poursuite", desc: "Clôture du mandat ou passage au pilotage récurrent." },
+  { title: "Cadrage", desc: "Objectifs, territoire, contraintes, interlocuteur unique." },
+  { title: "Preuve", desc: "État initial documenté, repères mesurables." },
+  { title: "Exécution", desc: "Nous appliquons ; vous validez ce qui est convenu." },
+  { title: "Compte rendu", desc: "Ce qui est fait, ce qui reste, ce que nous observons." },
+  { title: "Poursuite", desc: "Clôture du mandat ou passage au pilotage récurrent." },
 ];
 
 export default function OffersTimeline() {

@@ -105,7 +105,7 @@ function validatePromptList(data, maxCount) {
     const valid = data
         .filter((item) => item && typeof item.query_text === 'string' && item.query_text.trim().length >= 8)
         .map((item) => ({
-            query_text: item.query_text.trim().replace(/^["«»"]+|["«»"]+$/g, ''),
+            query_text: item.query_text.trim().replace(/^["«»]+|["«»]+$/g, ''),
             intent_family: typeof item.intent_family === 'string' ? item.intent_family : 'discovery',
             prompt_mode: VALID_MODES.has(item.prompt_mode) ? item.prompt_mode : 'user_like',
             rationale: String(item.rationale || '').trim(),

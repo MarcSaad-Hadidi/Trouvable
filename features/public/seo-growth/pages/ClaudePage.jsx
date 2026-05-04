@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, Sparkles, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, MessageSquare, Folder, Code2, Settings, Download, MoreHorizontal, ChevronDown, AlignLeft } from 'lucide-react';
-import { FaqSection, LinksSection, CtaSection, AiThinking, TypewriterText } from './shared-primitives';
+import { Sparkles, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, MessageSquare, Folder, Code2, Settings, Download, MoreHorizontal, ChevronDown, AlignLeft } from 'lucide-react';
+import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
 
 function SoundWavesIcon({ className }) {
     return (

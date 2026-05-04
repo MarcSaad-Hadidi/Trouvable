@@ -9,7 +9,6 @@ import {
 } from './PortalTrendBaseline';
 
 function deltaDisplay(delta, unit) {
-    if (delta == null) return { text: 'n.d.', cls: 'text-white/20', sub: null };
     const suffix = unit === 'percent' ? ' pt' : '';
     if (delta > 0) return { text: `+${delta}${suffix}`, cls: 'text-emerald-400', sub: 'sur 30 jours' };
     if (delta < 0) return { text: `${delta}${suffix}`, cls: 'text-red-400/75', sub: 'sur 30 jours' };

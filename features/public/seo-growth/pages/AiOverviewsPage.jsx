@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { TypewriterText, AiThinking, FaqSection, LinksSection } from './shared-primitives';
 

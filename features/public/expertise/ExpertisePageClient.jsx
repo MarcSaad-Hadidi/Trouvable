@@ -141,8 +141,6 @@ export default function ExpertisePageClient({ expertise, composition, linkedVill
                     </div>
                 </section>
 
-                <KeyTakeawaysSection expertise={expertise} composition={composition} sectorNarrative={sectorNarrative} />
-
                 {/* SECTOR STAKES */}
                 {sectorNarrative && (
                     <section className="border-t border-white/[0.05] bg-[#060606] px-6 py-16 sm:px-10 sm:py-20">
@@ -303,6 +301,8 @@ export default function ExpertisePageClient({ expertise, composition, linkedVill
                         </div>
                     </section>
                 )}
+
+                <KeyTakeawaysSection expertise={expertise} composition={composition} sectorNarrative={sectorNarrative} />
 
                 {/* CTA */}
                 <section className="relative overflow-hidden border-t border-white/[0.05] bg-[#060606] px-6 py-24 sm:px-10 sm:py-28">

@@ -4,8 +4,6 @@ import { motion } from 'framer-motion';
 import CoverageMeter from '@/components/shared/metrics/CoverageMeter';
 import PremiumSparkline from '@/components/shared/metrics/PremiumSparkline';
 
-const ease = [0.16, 1, 0.3, 1];
-
 export default function PortalMomentumStrip({ visibility, openOpportunitiesCount = 0, sparklines = {} }) {
     const visProxy = visibility?.visibility_proxy_percent;
     const citCoverage = visibility?.citation_coverage_percent;

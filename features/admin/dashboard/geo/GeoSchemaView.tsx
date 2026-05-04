@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -98,7 +98,7 @@ export default function GeoSchemaPage() {
                                 <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400">Organization</span>
                             </div>
 
-                            <div className="relative flex-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black/20 to-transparent">
+                            <div className="relative flex-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-black/20 to-transparent">
                                 <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ opacity: 0.3 }}>
                                     <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 4" />
                                     <line x1="50%" y1="50%" x2="15%" y2="40%" stroke="#8b5cf6" strokeWidth="2" />

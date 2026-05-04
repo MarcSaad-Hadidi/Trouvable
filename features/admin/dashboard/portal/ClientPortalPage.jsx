@@ -111,7 +111,7 @@ export default async function ClientPortalPage({ params }) {
                 </div>
 
                 {clientDashboard ? (
-                    <div className="rounded-2xl border border-white/8 bg-[#060607]/80 p-4 md:p-6">
+                    <div className="rounded-2xl border border-white/8 bg-[#000000]/80 p-4 md:p-6">
                         <PortalDashboard
                             dashboard={clientDashboard}
                             membershipsCount={1}

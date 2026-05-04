@@ -51,7 +51,7 @@ function KpiOrbit({ cards }) {
     if (!cards?.length) return null;
     return (
         <div className="relative">
-            <div className="pointer-events-none absolute -inset-4 rounded-[32px] bg-[radial-gradient(ellipse_at_30%_0%,rgba(91,115,255,0.12),transparent_55%)]" />
+            <div className="pointer-events-none absolute -inset-4 rounded-[32px] bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.03),transparent_55%)]" />
             <div className="relative grid gap-3 sm:grid-cols-3">
                 {cards.map((item, i) => {
                     const body = (

@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, HelpCircle, Link2, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, HelpCircle, Link2 } from 'lucide-react';
 import ContactButton from '@/features/public/shared/ContactButton';
 
 /* ── Shared FAQ accordion (same interaction, but each page styles its wrapper differently) ── */

@@ -73,10 +73,12 @@ export default function SeoGrowthPage({ page }) {
                 howTo={howTo || undefined}
             />
             {UniquePageComponent ? (
-                <UniquePageComponent page={page} trustBrief={<SeoGrowthTrustBrief page={page} />} />
+                <UniquePageComponent page={page} trustBrief={null} />
             ) : (
                 <FallbackPage page={page} />
             )}
+
+            <SeoGrowthTrustBrief page={page} />
 
             <SiteFooter />
         </div>

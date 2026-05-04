@@ -1,4 +1,4 @@
-import { COMMAND_SURFACE_SOFT, COMMAND_TEXT, cn } from './tokens';
+﻿import { COMMAND_SURFACE_SOFT, COMMAND_TEXT, cn } from './tokens';
 
 export function CommandChartCard({
     eyebrow = 'Tendance',
@@ -37,7 +37,7 @@ export function CommandChartCard({
                     contentClassName,
                 )}
             >
-                <div className="bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.08),transparent_38%),radial-gradient(circle_at_top_right,rgba(167,139,250,0.08),transparent_42%)] p-4 sm:p-5">
+                <div className="bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.02),transparent_38%),radial-gradient(circle_at_top_right,rgba(255,255,255,0.02),transparent_42%)] p-4 sm:p-5">
                     {empty || children}
                 </div>
             </div>

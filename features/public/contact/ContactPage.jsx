@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/features/public/shared/Navbar";
 import SiteFooter from "@/features/public/shared/SiteFooter";
 import ContactButton from "@/features/public/shared/ContactButton";
-import { Mail, Phone, MapPin, Search, CheckCircle2, ChevronRight, ShieldCheck, Clock, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Search, CheckCircle2, ChevronRight, ShieldCheck, Clock } from "lucide-react";
 import { SITE_CONTACT_EMAIL, SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from "@/lib/site-contact";
 import Link from "next/link";
 

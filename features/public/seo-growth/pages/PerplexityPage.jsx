@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp, Search, Globe, Plus, PlusCircle, Monitor, Grid, SlidersHorizontal, Clock, Share, MoreHorizontal, ImageIcon, Mic, ChevronDown, Pin } from 'lucide-react';
+import { ArrowUp, Search, Globe, Plus, Monitor, Grid, SlidersHorizontal, Clock, Share, MoreHorizontal, ImageIcon, Mic, ChevronDown, Pin } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
 
 function buildChats(page) {

@@ -8,6 +8,7 @@ import {
     CommandPageShell,
     cn,
 } from '@/features/admin/dashboard/shared/components/command';
+import CommandStrip from '@/features/admin/dashboard/shared/components/CommandStrip';
 
 export const dynamic = 'force-dynamic';
 
@@ -159,101 +160,106 @@ export default async function AdminDashboard() {
     );
 
     return (
-        <CommandPageShell header={header}>
-            {enrichError && (
-                <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-200">
-                    Erreur de chargement : {enrichError}
-                </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
-                <CommandMetricCard label="Mandats actifs" value={clients.length} tone={KPI_TONE.blue} />
-                <CommandMetricCard
-                    label="Critiques"
-                    value={criticalCount}
-                    tone={criticalCount > 0 ? KPI_TONE.critical : KPI_TONE.default}
-                />
-                <CommandMetricCard
-                    label="Actions requises"
-                    value={attentionCount}
-                    tone={attentionCount > 0 ? KPI_TONE.warning : KPI_TONE.default}
-                />
-                <CommandMetricCard label="Stables" value={stableCount} tone={KPI_TONE.success} />
-                <CommandMetricCard label="Actions en file" value={totalActions} tone={KPI_TONE.default} />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <HealthBar rows={clients} />
-                <FreshnessGrid rows={clients} />
-            </div>
-
-            {priorityClients.length > 0 && (
-                <div className={cn(COMMAND_PANEL, 'overflow-hidden p-0')}>
-                    <div className="px-5 py-3.5 border-b border-white/[0.05]">
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4]">Mandats prioritaires</div>
-                    </div>
-                    <div className="divide-y divide-white/[0.04]">
-                        {priorityClients.map((c) => {
-                            const s = c.operatorSignals;
-                            return (
-                                <Link
-                                    key={c.id}
-                                    href={`/admin/clients/${c.id}/dossier`}
-                                    className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.025] transition-colors group"
-                                >
-                                    <AttentionDot attention={s?.attention} />
-                                    <div className="flex-1 min-w-0">
-                                        <span className="text-[13px] font-semibold text-white/85 group-hover:text-[#a78bfa] transition-colors truncate block">
-                                            {c.client_name}
-                                        </span>
-                                        <span className="text-[10px] text-white/25 mt-0.5 block">
-                                            {s?.activePrompts ?? 0} prompts · {s?.openOpportunities ?? 0} actions · {s?.completedRunsWindow ?? 0} exécutions / 21 j
-                                        </span>
-                                    </div>
-                                    {s?.reasons?.length > 0 && (
-                                        <div className="hidden sm:flex flex-wrap gap-1 shrink-0">
-                                            {s.reasons.slice(0, 3).map((r) => (
-                                                <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-white/30 border border-white/[0.05]">{r}</span>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <svg className="w-4 h-4 text-white/15 group-hover:text-white/35 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Link href="/admin/clients" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Portefeuille</div>
-                    <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Tous les mandats</div>
-                </Link>
-                <Link href="/admin/clients/new" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Nouveau</div>
-                    <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Créer un mandat</div>
-                </Link>
-                {latestClient && (
-                    <Link href={`/admin/clients/${latestClient.id}/dossier`} className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Dernier mandat</div>
-                        <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">{latestClient.client_name}</div>
-                    </Link>
-                )}
-                {criticalCount > 0 && criticalClient && (
-                    <Link
-                        href={`/admin/clients/${criticalClient.id}/dossier`}
-                        className="group rounded-[22px] border border-rose-300/25 bg-[linear-gradient(180deg,rgba(36,18,22,0.96)_0%,rgba(19,11,14,0.94)_100%)] px-4 py-4 transition-all hover:border-rose-300/40"
-                    >
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-200/70 mb-2">Critique</div>
-                        <div className="text-[13px] font-semibold text-rose-100 transition-colors group-hover:text-white truncate">
-                            {criticalClient.client_name}
+        <div className="flex-1 flex flex-col h-screen min-w-0">
+            <CommandStrip />
+            <div className="geo-content flex-1 overflow-y-auto">
+                <CommandPageShell header={header}>
+                    {enrichError && (
+                        <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-200">
+                            Erreur de chargement : {enrichError}
                         </div>
-                    </Link>
-                )}
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
+                        <CommandMetricCard label="Mandats actifs" value={clients.length} tone={KPI_TONE.blue} />
+                        <CommandMetricCard
+                            label="Critiques"
+                            value={criticalCount}
+                            tone={criticalCount > 0 ? KPI_TONE.critical : KPI_TONE.default}
+                        />
+                        <CommandMetricCard
+                            label="Actions requises"
+                            value={attentionCount}
+                            tone={attentionCount > 0 ? KPI_TONE.warning : KPI_TONE.default}
+                        />
+                        <CommandMetricCard label="Stables" value={stableCount} tone={KPI_TONE.success} />
+                        <CommandMetricCard label="Actions en file" value={totalActions} tone={KPI_TONE.default} />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <HealthBar rows={clients} />
+                        <FreshnessGrid rows={clients} />
+                    </div>
+
+                    {priorityClients.length > 0 && (
+                        <div className={cn(COMMAND_PANEL, 'overflow-hidden p-0')}>
+                            <div className="px-5 py-3.5 border-b border-white/[0.05]">
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4]">Mandats prioritaires</div>
+                            </div>
+                            <div className="divide-y divide-white/[0.04]">
+                                {priorityClients.map((c) => {
+                                    const s = c.operatorSignals;
+                                    return (
+                                        <Link
+                                            key={c.id}
+                                            href={`/admin/clients/${c.id}/dossier`}
+                                            className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.025] transition-colors group"
+                                        >
+                                            <AttentionDot attention={s?.attention} />
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-[13px] font-semibold text-white/85 group-hover:text-[#a78bfa] transition-colors truncate block">
+                                                    {c.client_name}
+                                                </span>
+                                                <span className="text-[10px] text-white/25 mt-0.5 block">
+                                                    {s?.activePrompts ?? 0} prompts · {s?.openOpportunities ?? 0} actions · {s?.completedRunsWindow ?? 0} exécutions / 21 j
+                                                </span>
+                                            </div>
+                                            {s?.reasons?.length > 0 && (
+                                                <div className="hidden sm:flex flex-wrap gap-1 shrink-0">
+                                                    {s.reasons.slice(0, 3).map((r) => (
+                                                        <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-white/30 border border-white/[0.05]">{r}</span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <svg className="w-4 h-4 text-white/15 group-hover:text-white/35 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Link href="/admin/clients" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Portefeuille</div>
+                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Tous les mandats</div>
+                        </Link>
+                        <Link href="/admin/clients/new" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Nouveau</div>
+                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Créer un mandat</div>
+                        </Link>
+                        {latestClient && (
+                            <Link href={`/admin/clients/${latestClient.id}/dossier`} className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.4] mb-2">Dernier mandat</div>
+                                <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">{latestClient.client_name}</div>
+                            </Link>
+                        )}
+                        {criticalCount > 0 && criticalClient && (
+                            <Link
+                                href={`/admin/clients/${criticalClient.id}/dossier`}
+                                className="group rounded-[22px] border border-rose-300/25 bg-[linear-gradient(180deg,rgba(36,18,22,0.96)_0%,rgba(19,11,14,0.94)_100%)] px-4 py-4 transition-all hover:border-rose-300/40"
+                            >
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-200/70 mb-2">Critique</div>
+                                <div className="text-[13px] font-semibold text-rose-100 transition-colors group-hover:text-white truncate">
+                                    {criticalClient.client_name}
+                                </div>
+                            </Link>
+                        )}
+                    </div>
+                </CommandPageShell>
             </div>
-        </CommandPageShell>
+        </div>
     );
 }
