@@ -2,7 +2,7 @@ import { cn } from './tokens';
 
 export default function CommandPageShell({ header = null, hero = null, children, drawer = null, className = '' }) {
     return (
-        <div className={cn('relative isolate overflow-hidden', className)}>
+        <div className={cn('relative isolate', className)}>
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-x-0 top-[18rem] h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
             </div>

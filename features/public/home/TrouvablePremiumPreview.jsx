@@ -67,20 +67,20 @@ const MARKET_STATS = [
   },
 ];
 
-const MOTION_EASE = [0.22, 1, 0.36, 1];
+const MOTION_EASE = [0.16, 1, 0.3, 1];
 
 const compareSectionMotion = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.62, ease: MOTION_EASE, staggerChildren: 0.1 },
+    transition: { duration: 0.8, ease: MOTION_EASE, staggerChildren: 0.14, delayChildren: 0.04 },
   },
 };
 
 const compareCardMotion = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.68, ease: MOTION_EASE } },
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.82, ease: MOTION_EASE } },
 };
 
 function RadarScanner() {
@@ -169,6 +169,28 @@ export default function TrouvableLandingPage() {
 
         <div>
           <PipelinePreview />
+        </div>
+      </section>
+
+      <section className="border-y border-white/[0.06] bg-[#0c0c0f] px-6 py-10 sm:px-10" aria-labelledby="geo-mtl-band-title">
+        <div className="mx-auto flex max-w-[1120px] flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="max-w-2xl">
+            <p id="geo-mtl-band-title" className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7b8fff]">
+              Ancrage local
+            </p>
+            <p className="mt-2 text-[15px] leading-[1.65] text-white/78">
+              <Link href="/agence-geo-montreal" className="font-semibold text-white underline decoration-[#5b73ff]/40 underline-offset-4 transition hover:decoration-[#7b8fff]">
+                Agence GEO à Montréal
+              </Link>
+              {' '}pour les mandats Google, ChatGPT, Perplexity et réponses IA : même méthode et mêmes livrables que sur la page pilier, avec une lecture explicite du marché local et bilingue.
+            </p>
+          </div>
+          <Link
+            href="/agence-geo-montreal"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#5b73ff]/35 bg-[#5b73ff]/10 px-5 py-3 text-sm font-medium text-[#d6dcff] transition hover:-translate-y-px hover:border-[#7b8fff]/50 hover:text-white"
+          >
+            Voir le pilier Montréal <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 

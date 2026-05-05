@@ -93,17 +93,42 @@ export function ClientProvider({ children, clientId }) {
 
 export function useGeoWorkspaceSlice(slice, options = {}) {
     const { clientId, refreshToken } = useGeoClient();
-    const { enabled = true } = options;
+    const { enabled = true, params = null } = options;
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(Boolean(enabled));
     const [error, setError] = useState(null);
+
+    const serializedParams = useMemo(() => {
+        if (!params || typeof params !== 'object') return '';
+        const searchParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(params)) {
+            if (value === undefined || value === null || value === '') continue;
+            if (Array.isArray(value)) {
+                value.forEach((item) => {
+                    if (item === undefined || item === null || item === '') return;
+                    searchParams.append(key, String(item));
+                });
+                continue;
+            }
+            searchParams.set(key, String(value));
+        }
+        return searchParams.toString();
+    }, [params]);
 
     const fetchSlice = useCallback(async (signal) => {
         if (!enabled || !clientId || !slice) { setData(null); setLoading(false); setError(null); return; }
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`/api/admin/geo/client/${clientId}/${slice}?refresh=${refreshToken}`, { cache: 'no-store', signal });
+            const query = new URLSearchParams();
+            query.set('refresh', String(refreshToken));
+            if (serializedParams) {
+                const next = new URLSearchParams(serializedParams);
+                for (const [key, value] of next.entries()) {
+                    query.set(key, value);
+                }
+            }
+            const response = await fetch(`/api/admin/geo/client/${clientId}/${slice}?${query.toString()}`, { cache: 'no-store', signal });
             const json = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
             setData(json);
@@ -113,7 +138,7 @@ export function useGeoWorkspaceSlice(slice, options = {}) {
         } finally {
             if (!signal?.aborted) setLoading(false);
         }
-    }, [clientId, enabled, refreshToken, slice]);
+    }, [clientId, enabled, refreshToken, serializedParams, slice]);
 
     useEffect(() => {
         const controller = new AbortController();

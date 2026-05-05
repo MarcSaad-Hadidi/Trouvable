@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { updateConnectorState, getClientConnectorRows } from '@/lib/connectors/repository';
 import { mapGoogleOAuthError } from '@/lib/seo/gsc-property';
+import { hasGoogleOAuthEnv, verifyGoogleOAuthState } from '@/lib/connectors/google-oauth-state';
 
 /**
  * Forward an OAuth error to the operator surface as a structured remediation
@@ -49,15 +50,16 @@ export async function GET(request) {
     // We dynamically use the request origin to avoid redirect_uri mismatches (www vs non-www, Vercel previews, etc.)
     const appUrl = new URL(request.url).origin;
 
-    let clientId, returnTo;
-    try {
-        const decoded = JSON.parse(Buffer.from(statePayload, 'base64').toString('ascii'));
-        clientId = decoded.clientId;
-        returnTo = decoded.returnTo || `/admin/clients/${clientId}`;
-    } catch {
-        clientId = statePayload;
-        returnTo = `/admin/clients/${clientId}`;
+    const verifiedState = verifyGoogleOAuthState(statePayload);
+    if (!verifiedState.valid) {
+        return NextResponse.json({
+            error: 'invalid_google_oauth_state',
+            status: 400,
+            detail: verifiedState.error,
+        }, { status: 400 });
     }
+
+    const { clientId, returnTo } = verifiedState.payload;
 
     if (errorParam) {
         return failWithError({ clientId, returnTo, appUrl, code: errorParam });
@@ -65,6 +67,15 @@ export async function GET(request) {
 
     if (!code || !clientId) {
         return NextResponse.json({ error: 'Invalid callback parameters' }, { status: 400 });
+    }
+
+    if (!hasGoogleOAuthEnv()) {
+        return failWithError({
+            clientId,
+            returnTo,
+            appUrl,
+            code: 'missing_google_oauth_env',
+        });
     }
 
     let oauth2Client;

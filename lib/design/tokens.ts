@@ -16,26 +16,26 @@ export function cn(...values: Array<string | false | null | undefined>) {
 /* ── Raw Palette ── */
 
 export const COMMAND_COLORS = {
-    ok: '#4ade80',       // Semantic green — stable, validated
-    warning: '#d4a34a',  // Muted amber — attention states
-    critical: '#e06060', // Coral — errors, critical mandates
-    info: '#6b9cc5',     // Steel blue — SEO world, informational
-    neutral: '#8e8f96',  // Text-2 level grey
-    unavailable: '#4e4f55', // Text-3 level muted
-    violet: '#7c6aef',   // Trouvable brand — GEO world
-    indigo: '#6366f1',   // Brand secondary
-    steel: '#6b9cc5',    // SEO world
-    orange: '#d4874a',   // Agent world
-    agentIndigo: '#818cf8', // Agent secondary
-    cyan: '#06b6d4',     // Accent supplemental
+    ok: '#10b981',       // High-saturation emerald
+    warning: '#f59e0b',  // Vibrant amber
+    critical: '#f43f5e', // Strong rose
+    info: '#7c6aef',     // Electric violet
+    neutral: '#9ca3af',  // Brighter grey
+    unavailable: '#4b5563', 
+    violet: '#7c6aef',   
+    indigo: '#6366f1',   
+    steel: '#38bdf8',    // Brighter sky
+    orange: '#fb923c',   // Brighter orange
+    agentIndigo: '#818cf8', 
+    cyan: '#22d3ee',     
 } as const;
 
 /* ── Surface Tokens ── */
 
-export const COMMAND_SURFACE = 'rounded-[16px] border border-white/[0.085] bg-[#080808] shadow-[0_24px_78px_rgba(0,0,0,0.46),inset_0_1px_0_rgba(255,255,255,0.04)]';
-export const COMMAND_SURFACE_SOFT = 'rounded-[16px] border border-white/[0.08] bg-[#080808] shadow-[0_22px_70px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)]';
-export const COMMAND_PANEL = 'rounded-[14px] border border-white/[0.07] bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]';
-export const COMMAND_MUTED_PANEL = 'rounded-[12px] border border-white/[0.06] bg-white/[0.03]';
+export const COMMAND_SURFACE = 'rounded-[20px] border border-white/[0.12] bg-[#060708] shadow-[0_32px_120px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]';
+export const COMMAND_SURFACE_SOFT = 'rounded-[18px] border border-white/[0.1] bg-[#080808] shadow-[0_28px_90px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]';
+export const COMMAND_PANEL = 'rounded-[16px] border border-white/[0.08] bg-[#0d0e12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]';
+export const COMMAND_MUTED_PANEL = 'rounded-[14px] border border-white/[0.07] bg-white/[0.04]';
 
 /* ── Service World (Discipline) Accents ── */
 
@@ -63,51 +63,51 @@ export const FORGE_SURFACE = 'rounded-[16px] border border-[#6b9cc5]/20 bg-[#6b9
 
 const TONE_CLASSES = {
     ok: {
-        pill: 'border-[#4ade80]/25 bg-[#4ade80]/10 text-[#a3f0bf]',
-        panel: 'border-[#4ade80]/16 bg-[#4ade80]/[0.045]',
-        text: 'text-[#a3f0bf]',
-        softText: 'text-[#4ade80]/80',
-        dot: 'bg-[#4ade80]',
+        pill: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
+        panel: 'border-emerald-500/25 bg-emerald-500/[0.06] shadow-[0_0_30px_rgba(16,185,129,0.05)]',
+        text: 'text-emerald-400 font-black',
+        softText: 'text-emerald-500/90',
+        dot: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]',
         ring: COMMAND_COLORS.ok,
     },
     warning: {
-        pill: 'border-[#d4a34a]/25 bg-[#d4a34a]/10 text-[#ecd29b]',
-        panel: 'border-[#d4a34a]/16 bg-[#d4a34a]/[0.045]',
-        text: 'text-[#ecd29b]',
-        softText: 'text-[#d4a34a]/80',
-        dot: 'bg-[#d4a34a]',
+        pill: 'border-amber-500/40 bg-amber-500/15 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
+        panel: 'border-amber-500/25 bg-amber-500/[0.06] shadow-[0_0_30px_rgba(245,158,11,0.05)]',
+        text: 'text-amber-400 font-black',
+        softText: 'text-amber-500/90',
+        dot: 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]',
         ring: COMMAND_COLORS.warning,
     },
     critical: {
-        pill: 'border-[#e06060]/25 bg-[#e06060]/10 text-[#f0a8a8]',
-        panel: 'border-[#e06060]/18 bg-[#e06060]/[0.05]',
-        text: 'text-[#f0a8a8]',
-        softText: 'text-[#e06060]/82',
-        dot: 'bg-[#e06060]',
+        pill: 'border-rose-500/40 bg-rose-500/15 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
+        panel: 'border-rose-500/30 bg-rose-500/[0.08] shadow-[0_0_40px_rgba(244,63,94,0.1)]',
+        text: 'text-rose-400 font-black',
+        softText: 'text-rose-500/95',
+        dot: 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.9)]',
         ring: COMMAND_COLORS.critical,
     },
     info: {
-        pill: 'border-[#6b9cc5]/25 bg-[#6b9cc5]/10 text-[#a8cde5]',
-        panel: 'border-[#6b9cc5]/16 bg-[#6b9cc5]/[0.045]',
-        text: 'text-[#a8cde5]',
-        softText: 'text-[#6b9cc5]/82',
-        dot: 'bg-[#6b9cc5]',
+        pill: 'border-[#7c6aef]/50 bg-[#7c6aef]/20 text-[#d4ccff] shadow-[0_0_15px_rgba(124,106,239,0.15)]',
+        panel: 'border-[#7c6aef]/30 bg-[#7c6aef]/[0.08] shadow-[0_0_30px_rgba(124,106,239,0.1)]',
+        text: 'text-[#b8adff] font-black',
+        softText: 'text-[#7c6aef]/90',
+        dot: 'bg-[#7c6aef] shadow-[0_0_12px_rgba(124,106,239,0.8)]',
         ring: COMMAND_COLORS.info,
     },
     neutral: {
-        pill: 'border-white/[0.1] bg-white/[0.04] text-white/62',
-        panel: 'border-white/[0.07] bg-white/[0.025]',
-        text: 'text-white/84',
-        softText: 'text-white/48',
-        dot: 'bg-white/38',
+        pill: 'border-white/20 bg-white/10 text-white shadow-sm',
+        panel: 'border-white/10 bg-white/[0.04]',
+        text: 'text-white font-bold',
+        softText: 'text-white/60',
+        dot: 'bg-white/60',
         ring: COMMAND_COLORS.neutral,
     },
     unavailable: {
-        pill: 'border-white/[0.07] bg-white/[0.025] text-white/38',
-        panel: 'border-white/[0.055] bg-white/[0.018]',
-        text: 'text-white/45',
-        softText: 'text-white/34',
-        dot: 'bg-white/24',
+        pill: 'border-white/10 bg-white/5 text-white/40',
+        panel: 'border-white/5 bg-white/[0.02]',
+        text: 'text-white/40',
+        softText: 'text-white/30',
+        dot: 'bg-white/20',
         ring: COMMAND_COLORS.unavailable,
     },
 } as const;

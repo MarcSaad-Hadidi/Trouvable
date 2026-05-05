@@ -94,6 +94,31 @@ export function LinksSection({ links, accent = 'amber', heading = 'Pages connexe
     );
 }
 
+/** Static H1 + editorial block above platform UI mocks (SEO / GEO). */
+export function PlatformEditorialLead({ page }) {
+    return (
+        <section className="mx-auto max-w-[1280px] px-6 pb-10 pt-[100px] sm:px-10">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white/45">{page.eyebrow}</p>
+            <h1 className="max-w-[920px] text-[clamp(28px,4.2vw,46px)] font-bold leading-[1.08] tracking-[-0.035em] text-white">{page.h1}</h1>
+            <p className="mt-5 max-w-[780px] text-[17px] leading-[1.7] text-[#c8c8c8]">{page.summary}</p>
+            <p className="mt-4 max-w-[780px] text-[15px] leading-[1.75] text-[#a3a3a3]">{page.definition}</p>
+            <p className="mt-4 max-w-[780px] text-[14px] leading-[1.7] text-[#888]">{page.clientProblem}</p>
+            <ul className="mt-6 max-w-[780px] space-y-2 border-l border-white/12 pl-4">
+                {page.problems.map((problem) => (
+                    <li key={problem} className="text-[13px] leading-[1.65] text-[#9a9a9a]">{problem}</li>
+                ))}
+            </ul>
+            <p className="mt-8 max-w-[780px] text-[13px] leading-[1.65] text-white/50">
+                Pour un cadre Montréal et Québec :{' '}
+                <Link href="/agence-geo-montreal" className="font-medium text-[#aebaff] underline decoration-white/15 underline-offset-4 hover:text-white">
+                    agence GEO à Montréal
+                </Link>
+                .
+            </p>
+        </section>
+    );
+}
+
 /* ── Scrollbar styles & Shared CTA section ── */
 export function ScrollbarStyles() {
     return (

@@ -41,27 +41,30 @@ const mergeRows = [
 ];
 
 const sideSlots = [
-  { name: "Étape 1 : Cartographie", tone: "good", active: true },
+  { name: "Étape 1 : Cartographie", tone: "good" },
   { name: "Étape 2 : Priorités Google", tone: "warn" },
   { name: "Étape 3 : Cohérence réponses IA", tone: "bad" },
   { name: "Étape 4 : Validation", tone: "good" },
   { name: "Étape 5 : Pilotage", tone: "violet" },
 ];
 
-const MOTION_EASE = [0.22, 1, 0.36, 1];
+const LIVRABLE_ITEMS = ["Synthèse direction", "Plan d'action", "Compte rendu périodique"];
+
+// ease-out curve for motion variants
+const MOTION_EASE = [0.16, 1, 0.3, 1];
 
 const previewContainer = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.68, ease: MOTION_EASE, staggerChildren: 0.08 },
+    transition: { duration: 0.52, ease: MOTION_EASE, staggerChildren: 0.07, delayChildren: 0.02 },
   },
 };
 
 const previewItem = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.54, ease: MOTION_EASE } },
+  hidden: { opacity: 0, y: 5 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.46, ease: MOTION_EASE } },
 };
 
 function PanelFallback() {
@@ -149,12 +152,20 @@ export function PipelinePreview() {
   const totalPhases = 12;
 
   useEffect(() => {
-    const id = window.setInterval(() => setPhase((p) => (p + 1) % totalPhases), 1000);
+    const id = window.setInterval(() => setPhase((p) => (p + 1) % totalPhases), 1650);
     return () => window.clearInterval(id);
   }, []);
 
   const currentStep = Math.min(Math.floor(phase / 3), pipelineSteps.length - 1);
   const doneCount = Math.floor((phase + 1) / 3);
+  const revealedSideCount = Math.min(sideSlots.length, Math.floor(phase / 2) + 1);
+  const sideActiveIndex =
+    revealedSideCount < sideSlots.length
+      ? Math.max(0, revealedSideCount - 1)
+      : doneCount >= 4
+        ? 4
+        : Math.min(currentStep, 3);
+  const livrableVisibleCount = Math.min(LIVRABLE_ITEMS.length, Math.max(0, revealedSideCount - 2));
 
   return (
     <motion.div
@@ -179,19 +190,44 @@ export function PipelinePreview() {
       </motion.div>
 
       <motion.div className="grid min-h-[420px] grid-cols-[200px_1fr_190px] lg:grid-cols-[200px_1fr_190px] max-lg:grid-cols-1" variants={previewItem}>
-        <motion.div className="border-r border-white/8 px-0 py-4 max-lg:hidden" variants={previewContainer}>
+        <motion.div className="border-r border-white/8 px-0 py-4 max-lg:hidden" variants={previewItem}>
           <div className="mb-4 px-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#b8b8b8]">Étapes du mandat</div>
-          {sideSlots.map((client) => (
-            <motion.div key={client.name} className={`flex items-center gap-2 px-4 py-2 text-xs transition ${client.active ? "border-l-2 border-blue-400 bg-blue-500/8 pl-3 text-white" : "text-white/55 hover:bg-white/[0.03] hover:text-white/80"}`} variants={previewItem}>
-              <div className={`h-1.5 w-1.5 rounded-full ${client.tone === "good" ? "bg-emerald-400" : client.tone === "warn" ? "bg-amber-400" : client.tone === "bad" ? "bg-red-400" : "bg-violet-400"}`} />
-              <span className="flex-1 truncate">{client.name}</span>
-              <span className={`h-1.5 w-6 rounded-full inline-block ${client.tone === "good" ? "bg-emerald-400/40" : client.tone === "warn" ? "bg-amber-400/40" : client.tone === "bad" ? "bg-red-400/40" : "bg-violet-400/40"}`} />
-            </motion.div>
-          ))}
-          <div className="mb-4 mt-6 px-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#b8b8b8]">Livrables types</div>
-          {["Synthèse direction", "Plan d'action", "Compte rendu périodique"].map((item) => (
-            <motion.div key={item} className="px-4 py-2 text-xs text-white/55 hover:bg-white/[0.03] hover:text-white/80" variants={previewItem}>{item}</motion.div>
-          ))}
+          {sideSlots.map((client, i) => {
+            const revealed = i < revealedSideCount;
+            const active = revealed && i === sideActiveIndex;
+            return (
+              <div
+                key={client.name}
+                className={`flex items-center gap-2 overflow-hidden px-4 text-xs transition-[opacity,transform,max-height,padding] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  revealed ? "max-h-14 py-2" : "pointer-events-none max-h-0 py-0 opacity-0"
+                } ${active ? "border-l-2 border-blue-400 bg-blue-500/8 pl-3 text-white" : revealed ? "text-white/55 hover:bg-white/[0.03] hover:text-white/80" : ""}`}
+                style={{ transform: revealed ? "translateX(0)" : "translateX(-10px)" }}
+              >
+                <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${client.tone === "good" ? "bg-emerald-400" : client.tone === "warn" ? "bg-amber-400" : client.tone === "bad" ? "bg-red-400" : "bg-violet-400"}`} />
+                <span className="flex-1 truncate">{client.name}</span>
+                <span className={`h-1.5 w-6 shrink-0 rounded-full ${client.tone === "good" ? "bg-emerald-400/40" : client.tone === "warn" ? "bg-amber-400/40" : client.tone === "bad" ? "bg-red-400/40" : "bg-violet-400/40"}`} />
+              </div>
+            );
+          })}
+          {revealedSideCount >= 2 && (
+            <div className="transition-opacity duration-500 ease-out" style={{ opacity: revealedSideCount >= 2 ? 1 : 0 }}>
+              <div className="mb-4 mt-6 px-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#b8b8b8]">Livrables types</div>
+              {LIVRABLE_ITEMS.map((item, j) => {
+                const show = j < livrableVisibleCount;
+                return (
+                  <div
+                    key={item}
+                    className={`overflow-hidden px-4 text-xs text-white/55 transition-[opacity,transform,max-height,padding] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      show ? "max-h-12 py-2" : "pointer-events-none max-h-0 py-0 opacity-0"
+                    }`}
+                    style={{ transform: show ? "translateX(0)" : "translateX(-8px)" }}
+                  >
+                    {item}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </motion.div>
 
         <motion.div className="px-5 py-5 md:px-7" variants={previewContainer}>
@@ -212,7 +248,7 @@ export function PipelinePreview() {
               return (
                 <motion.div key={step.id} variants={previewItem}>
                   <div
-                    className="relative overflow-hidden rounded-[10px] border px-4 py-3 transition-[opacity,border-color,background-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                    className="relative overflow-hidden rounded-[10px] border px-4 py-3 transition-[opacity,border-color,background-color] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                     style={{
                       opacity: status === "idle" ? 0.4 : 1,
                       borderColor: status === "running" ? "rgba(91,115,255,0.40)" : status === "done" ? "rgba(34,197,94,0.20)" : "rgba(255,255,255,0.07)",
@@ -227,7 +263,7 @@ export function PipelinePreview() {
                       </span>
                     </div>
                     <div
-                      className="mt-2 flex items-center gap-2 text-[11px] text-[#b7b7b7] transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                      className="mt-2 flex items-center gap-2 text-[11px] text-[#b7b7b7] transition-[opacity,transform] duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                       style={{ opacity: status === "done" ? 1 : 0, transform: status === "done" ? "translateY(0)" : "translateY(4px)" }}
                     >
                       <span className="rounded bg-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#b8b8b8]">Résultat</span>
@@ -237,15 +273,15 @@ export function PipelinePreview() {
                   {idx < pipelineSteps.length - 1 && (
                     <div className="flex h-6 items-center justify-center">
                       <motion.div
-                        className="relative h-full w-px origin-top transition-colors duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                        className="relative h-full w-px origin-top transition-colors duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                         initial={{ scaleY: 0, opacity: 0 }}
                         whileInView={{ scaleY: 1, opacity: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.62, delay: idx * 0.08, ease: MOTION_EASE }}
+                        transition={{ duration: 0.92, delay: idx * 0.11, ease: MOTION_EASE }}
                         style={{ backgroundColor: idx < currentStep ? "rgba(34,197,94,0.35)" : idx === currentStep ? "rgba(91,115,255,0.5)" : "rgba(255,255,255,0.07)" }}
                       >
                         <div
-                          className="absolute -bottom-1.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full border transition-colors duration-300"
+                          className="absolute -bottom-1.5 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full border transition-[background-color,border-color,transform,opacity] duration-500 ease-out"
                           style={{
                             backgroundColor: idx < currentStep ? "rgb(34 197 94)" : idx === currentStep ? "rgb(91 115 255)" : "#080808",
                             borderColor: idx < currentStep ? "rgb(34 197 94)" : idx === currentStep ? "rgb(91 115 255)" : "rgba(255,255,255,0.13)",
@@ -260,7 +296,7 @@ export function PipelinePreview() {
           </motion.div>
         </motion.div>
 
-        <motion.div className="border-l border-white/8 px-0 py-4 max-lg:hidden" variants={previewContainer}>
+        <motion.div className="border-l border-white/8 px-0 py-4 max-lg:hidden" variants={previewItem}>
           <div className="mb-3 flex items-center gap-2 px-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[#b8b8b8]">
             <ShieldCheck className="h-3.5 w-3.5 text-[#b7b7b7]" />
             <span>Déploiement propre</span>
@@ -269,9 +305,8 @@ export function PipelinePreview() {
             {mergeRows.map((row, idx) => (
               <motion.div
                 key={row.label}
-                className={`mx-0 flex items-center gap-2 border-b border-white/8 px-4 py-2 text-[11.5px] transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${row.type === "auto" ? "text-emerald-300" : row.type === "suggest" ? "text-blue-300" : row.type === "review" ? "text-amber-300" : "text-[#b7b7b7]"}`}
+                className={`mx-0 flex items-center gap-2 border-b border-white/8 px-4 py-2 text-[11.5px] transition-[opacity,transform] duration-[880ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${row.type === "auto" ? "text-emerald-300" : row.type === "suggest" ? "text-blue-300" : row.type === "review" ? "text-amber-300" : "text-[#b7b7b7]"}`}
                 style={{ opacity: phase >= idx + 7 ? 1 : 0, transform: phase >= idx + 7 ? "translateX(0)" : "translateX(8px)" }}
-                variants={previewItem}
               >
                 <MergeRowIcon type={row.type} />
                 <span className="flex-1">{row.label}</span>

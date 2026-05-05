@@ -59,20 +59,20 @@ export default function DossierActivityView() {
 
     return (
         <CommandPageShell header={header} className="text-white">
-            <motion.div initial="hidden" animate="visible" variants={stagger} className="mx-auto grid max-w-[1900px] gap-0 lg:grid-cols-[280px_minmax(0,1fr)_340px] lg:min-h-[min(100vh,1080px)]">
+            <motion.div initial="hidden" animate="visible" variants={stagger} className="mx-auto grid max-w-[1900px] gap-0 lg:grid-cols-[280px_minmax(0,1fr)_340px] lg:min-h-[calc(100vh-200px)]">
                 {/* Colonne A — métriques & raccourcis */}
-                <aside className="border-b border-white/[0.08] bg-white/[0.02] p-4 lg:border-b-0 lg:border-r lg:border-white/[0.08]">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">
-                        <LayoutList className="h-3.5 w-3.5" />
-                        Impulsions
+                <aside className="border-b border-white/[0.05] bg-[#060708] p-6 lg:border-b-0 lg:border-r lg:border-white/[0.05]">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30 mb-6">
+                        <LayoutList className="h-4 w-4 text-[#7c6aef]" />
+                        Statistiques Flux
                     </div>
-                    <div className="mt-4 space-y-2">
+                    <div className="space-y-3">
                         {Array.isArray(data.summaryCards) && data.summaryCards.length > 0 ? (
                             data.summaryCards.map((item) => (
-                                <div key={item.id || item.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-3">
-                                    <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/35">{item.label}</div>
-                                    <div className="mt-1 text-xl font-bold tabular-nums text-white/90">{item.value ?? '—'}</div>
-                                    {item.detail ? <div className="mt-1 text-[10px] text-white/38">{item.detail}</div> : null}
+                                <div key={item.id || item.label} className="rounded-xl border border-white/[0.05] bg-white/[0.01] px-4 py-4 group hover:bg-white/[0.02] transition-colors">
+                                    <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/20 group-hover:text-white/40 transition-colors">{item.label}</div>
+                                    <div className="mt-1 text-2xl font-bold tabular-nums text-white/90">{item.value ?? '—'}</div>
+                                    {item.detail ? <div className="mt-1 text-[10px] text-white/20 italic">"{item.detail}"</div> : null}
                                 </div>
                             ))
                         ) : (
@@ -98,14 +98,14 @@ export default function DossierActivityView() {
                 </aside>
 
                 {/* Colonne B — fil principal type terminal */}
-                <main className="min-w-0 border-b border-white/[0.06] lg:border-b-0">
-                    <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/[0.06] bg-[#06070a]/95 px-4 py-3 backdrop-blur-md">
-                        <div className="flex items-center gap-2 text-[11px] font-semibold text-white/45">
-                            <Crosshair className="h-3.5 w-3.5 text-cyan-300/80" />
-                            {items.length} ligne{items.length !== 1 ? 's' : ''} indexée{items.length !== 1 ? 's' : ''}
+                <main className="min-w-0 border-b border-white/[0.05] lg:border-b-0 bg-[#060708]">
+                    <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/[0.05] bg-[#060708]/95 px-6 py-4 backdrop-blur-md">
+                        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/30">
+                            <Crosshair className="h-4 w-4 text-emerald-400" />
+                            {items.length} Entrées de Registre
                         </div>
                     </div>
-                    <div className="max-h-[min(78vh,920px)] overflow-y-auto geo-scrollbar">
+                    <div className="max-h-[min(78vh,920px)] overflow-y-auto geo-scrollbar px-2">
                         {items.length > 0 ? (
                             <div className="divide-y divide-white/[0.05]">
                                 {items.map((item, index) => {
@@ -115,29 +115,29 @@ export default function DossierActivityView() {
                                             key={item.id}
                                             type="button"
                                             onClick={() => setFocusId(item.id)}
-                                            className={`w-full text-left px-4 py-4 transition-colors ${
-                                                active ? 'bg-cyan-500/[0.07]' : 'hover:bg-white/[0.02]'
+                                            className={`w-full text-left px-6 py-6 transition-all border-b border-white/[0.03] last:border-0 ${
+                                                active ? 'bg-emerald-500/[0.03] border-l-2 border-l-emerald-500' : 'hover:bg-white/[0.01]'
                                             }`}
                                         >
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className="font-mono text-[10px] text-white/25">{String(index + 1).padStart(3, '0')}</span>
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span className="font-mono text-[10px] text-white/10">{String(index + 1).padStart(3, '0')}</span>
                                                 {item.category ? (
-                                                    <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white/40">
+                                                    <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] bg-[#7c6aef]/10 text-[#7c6aef] border border-[#7c6aef]/20">
                                                         {item.category}
                                                     </span>
                                                 ) : null}
                                                 {item.statusLabel ? (
-                                                    <span className="rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-white/50">
+                                                    <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] bg-white/5 text-white/40 border border-white/10">
                                                         {item.statusLabel}
                                                     </span>
                                                 ) : null}
                                             </div>
-                                            <div className="mt-2 text-[14px] font-semibold text-white/92">{item.title}</div>
+                                            <div className="mt-3 text-[15px] font-bold text-white/90">{item.title}</div>
                                             {item.description ? (
-                                                <p className="mt-1 text-[12px] leading-relaxed text-white/42 line-clamp-2">{item.description}</p>
+                                                <p className="mt-1 text-[12px] leading-relaxed text-white/30 line-clamp-2 italic">"{item.description}"</p>
                                             ) : null}
                                             {item.timestamp ? (
-                                                <div className="mt-2 text-[10px] text-white/30">{formatDateTime(item.timestamp)}</div>
+                                                <div className="mt-4 text-[10px] font-mono text-white/10 uppercase tracking-widest">{formatDateTime(item.timestamp)}</div>
                                             ) : null}
                                         </button>
                                     );
@@ -152,30 +152,30 @@ export default function DossierActivityView() {
                 </main>
 
                 {/* Colonne C — inspecteur */}
-                <aside className="border-slate-400/10 bg-white/[0.02] p-4 lg:border-l lg:border-white/[0.08]">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">
-                        <PanelRight className="h-3.5 w-3.5" />
-                        Inspecteur
+                <aside className="border-l border-white/[0.05] bg-[#060708] p-6">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30 mb-6">
+                        <PanelRight className="h-4 w-4 text-[#7c6aef]" />
+                        Inspecteur de Registre
                     </div>
                     <AnimatePresence mode="wait">
                         {focused ? (
                             <motion.div
                                 key={focused.id}
-                                initial={{ opacity: 0, x: 8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -8 }}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.2 }}
-                                className="mt-4 space-y-4"
+                                className="space-y-6"
                             >
-                                <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-transparent p-4">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/35">Événement sélectionné</div>
-                                    <h2 className="mt-2 text-[16px] font-semibold leading-snug text-white">{focused.title}</h2>
+                                <div className="rounded-2xl border border-white/[0.05] bg-white/[0.01] p-6">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7c6aef] mb-4">Payload</div>
+                                    <h2 className="text-[18px] font-bold leading-snug text-white/90">{focused.title}</h2>
                                     {focused.description ? (
-                                        <p className="mt-3 text-[12px] leading-relaxed text-white/55">{focused.description}</p>
+                                        <p className="mt-4 text-[13px] leading-relaxed text-white/40 italic">"{focused.description}"</p>
                                     ) : null}
                                     {focused.timestamp ? (
-                                        <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/40 px-3 py-2 text-[11px] text-white/45">
-                                            Horodatage : {formatDateTime(focused.timestamp)}
+                                        <div className="mt-6 rounded-xl border border-white/[0.05] bg-black/40 px-4 py-3 text-[11px] font-mono text-white/20 uppercase tracking-widest">
+                                            {formatDateTime(focused.timestamp)}
                                         </div>
                                     ) : null}
                                 </div>

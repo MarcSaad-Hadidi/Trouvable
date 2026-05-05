@@ -62,6 +62,9 @@ export default function OperatorAuditLabView() {
                     <Link href={`${geoBase}/opportunities`} className={COMMAND_BUTTONS.secondary}>
                         File d’opportunités
                     </Link>
+                    <Link href={`${dossierBase}/audit/comparison`} className={COMMAND_BUTTONS.subtle}>
+                        Comparaison audits
+                    </Link>
                     <Link href={dossierBase} className={COMMAND_BUTTONS.subtle}>
                         Vue dossier
                     </Link>

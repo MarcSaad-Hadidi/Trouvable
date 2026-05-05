@@ -174,9 +174,10 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-300">
                             <MapPin className="h-3.5 w-3.5" /> {composition.heroAngle}
                         </motion.div>
-                        <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.06 }} className="text-[clamp(44px,8vw,96px)] font-bold leading-[0.98] tracking-[-0.05em] mb-5">
+                        <h1 className="text-[clamp(36px,7vw,80px)] font-bold leading-[1.08] tracking-[-0.05em] mb-5 text-white">
+                            Visibilité IA à{' '}
                             <span className="bg-gradient-to-r from-emerald-400 to-[#5b73ff] bg-clip-text text-transparent">{ville.name}</span>
-                        </motion.h1>
+                        </h1>
                         {composition.heroTagline && (
                             <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.11 }} className="mx-auto max-w-[640px] text-[18px] font-medium leading-[1.5] text-white/80 mb-4 tracking-[-0.01em]">
                                 {composition.heroTagline}
@@ -192,6 +193,11 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                             <Link href="/methodologie" className="inline-flex items-center gap-2 rounded-lg border border-white/12 px-6 py-3 text-sm font-medium text-[#a0a0a0] transition hover:border-white/25 hover:text-white">
                                 Notre approche <ArrowRight className="h-3.5 w-3.5" />
                             </Link>
+                            {ville.slug === 'montreal' && (
+                                <Link href="/agence-geo-montreal" className="inline-flex items-center gap-2 rounded-lg border border-[#5b73ff]/25 bg-[#5b73ff]/10 px-6 py-3 text-sm font-medium text-[#c8d0ff] transition hover:border-[#7b8fff]/45 hover:text-white">
+                                    Agence GEO à Montréal
+                                </Link>
+                            )}
                         </motion.div>
                     </div>
                 </section>

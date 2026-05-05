@@ -1,12 +1,10 @@
-import { redirect } from 'next/navigation';
+import SeoOverviewView from '@/features/admin/dashboard/seo/SeoOverviewView';
 
 export const metadata = {
     title: 'SEO Ops',
-    description: 'Entrée SEO Ops du mandat opérateur.',
+    description: 'Entree SEO Ops du mandat operateur.',
 };
 
-export default async function ClientSeoPage({ params }) {
-    const { clientId } = await params;
-    redirect(`/admin/clients/${clientId}/seo/visibility`);
+export default function ClientSeoPage() {
+    return <SeoOverviewView />;
 }
-

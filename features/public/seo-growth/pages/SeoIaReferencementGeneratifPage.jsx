@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, FlaskConical, Microscope, Gauge, Beaker } from 'lucide-react';
@@ -23,16 +23,14 @@ export default function SeoIaReferencementGeneratifPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-    const [revealed, setRevealed] = useState(false);
-    useEffect(() => { const t = setTimeout(() => setRevealed(true), 300); return () => clearTimeout(t); }, []);
     return (<>
         <LabGrid />
         <main>
             <motion.section ref={heroRef} style={{ opacity: op }} className="relative mt-[58px] overflow-hidden px-6 pb-20 pt-[82px] sm:px-10 sm:pt-[112px]">
                 <div className="relative z-[1] mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="mb-5 inline-flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-300"><FlaskConical className="h-3.5 w-3.5" /> {page.eyebrow}</motion.div>
-                    <h1 className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em]">
-                        {revealed ? page.h1.split(' ').map((word, wi, arr) => { const charsBefore = arr.slice(0, wi).reduce((a, w) => a + w.length + 1, 0); return (<span key={wi} className="inline-block whitespace-nowrap">{word.split('').map((ch, ci) => <motion.span key={ci} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (charsBefore + ci) * 0.02, duration: 0.15 }} className="inline-block">{ch}</motion.span>)}{wi < arr.length - 1 && <span>&nbsp;</span>}</span>); }) : <span className="opacity-0">{page.h1}</span>}
+                    <h1 className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em] text-white">
+                        {page.h1}
                     </h1>
                     <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.2, delay: 0.8 }} className="mt-4 h-px origin-left bg-gradient-to-r from-emerald-400/40 via-emerald-400/20 to-transparent" />
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-7 max-w-[680px] text-[17px] leading-[1.7] text-[#a8a8a8]">{page.summary}</motion.p>
@@ -66,9 +64,9 @@ export default function SeoIaReferencementGeneratifPage({ page, trustBrief }) {
                 <div className="mx-auto max-w-[1120px]">
                     <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mb-10"><h2 className="text-[clamp(24px,3vw,36px)] font-bold tracking-[-0.035em]">Résultats de l&apos;analyse</h2><div className="mt-2 h-px bg-gradient-to-r from-emerald-400/30 to-transparent" /></motion.div>
                     <div className="grid gap-5 lg:grid-cols-3">
-                        {[{ title: 'Anomalies relevées', items: page.problems, e: 'a', bc: 'border-red-400/15', dc: 'bg-red-400' },{ title: 'Protocole correctif', items: page.corrections, e: 'a', bc: 'border-emerald-400/15', dc: 'bg-emerald-400' },{ title: 'Livrables du mandat', items: page.deliverables, e: 'S', bc: 'border-amber-400/15', dc: 'bg-amber-400' }].map((d, pi) => (
+                        {[{ title: 'Anomalies relevées', items: page.problems, badge: '01', bc: 'border-red-400/15', dc: 'bg-red-400' },{ title: 'Protocole correctif', items: page.corrections, badge: '02', bc: 'border-emerald-400/15', dc: 'bg-emerald-400' },{ title: 'Livrables du mandat', items: page.deliverables, badge: '03', bc: 'border-amber-400/15', dc: 'bg-amber-400' }].map((d, pi) => (
                             <motion.div key={d.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: pi * 0.1 }} className={`overflow-hidden rounded-2xl border ${d.bc} bg-[#0a0a0a] hover:shadow-[0_20px_60px_rgba(52,211,153,0.04)] transition`}>
-                                <div className="border-b border-white/5 bg-white/[0.02] px-5 py-3"><div className="flex items-center gap-2"><span className="text-lg">{d.e}</span><h3 className="text-[14px] font-bold">{d.title}</h3><span className="ml-auto rounded-md bg-white/5 px-2 py-0.5 font-mono text-[10px] text-white/30">{d.items.length}</span></div></div>
+                                <div className="border-b border-white/5 bg-white/[0.02] px-5 py-3"><div className="flex items-center gap-2"><span className="font-mono text-[11px] font-bold text-emerald-400/70">{d.badge}</span><h3 className="text-[14px] font-bold">{d.title}</h3><span className="ml-auto rounded-md bg-white/5 px-2 py-0.5 font-mono text-[10px] text-white/30">{d.items.length}</span></div></div>
                                 <div className="p-5"><ul className="space-y-3">{d.items.map((item, i) => <motion.li key={item} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: pi * 0.1 + i * 0.06 }} className="flex items-start gap-3 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${d.dc}`} />{item}</motion.li>)}</ul></div>
                             </motion.div>
                         ))}
@@ -76,7 +74,7 @@ export default function SeoIaReferencementGeneratifPage({ page, trustBrief }) {
                 </div>
             </section>
             <section className="border-t border-emerald-400/[0.06] bg-[#060a06] px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="emerald" heading="Protocole de réponse" icon={Beaker} /></section>
-            <section className="border-t border-emerald-400/[0.06] px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="emerald" heading="0tudes connexes" /></section>
+            <section className="border-t border-emerald-400/[0.06] px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="emerald" heading="Études connexes" /></section>
 
         </main>
     </>);

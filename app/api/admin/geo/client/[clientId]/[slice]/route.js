@@ -3,6 +3,18 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { hasGeoSlice, loadGeoSlice } from '@/lib/operator-intelligence/geo-slice-loaders';
 
+function buildVisibilitySliceOptions(searchParams) {
+    const keys = ['range', 'segment', 'searchType', 'country', 'device', 'debugRaw'];
+    const options = {};
+    for (const key of keys) {
+        const value = searchParams.get(key);
+        if (value !== null && value !== '') {
+            options[key] = value;
+        }
+    }
+    return options;
+}
+
 function noStoreJson(payload, init = {}) {
     return NextResponse.json(payload, {
         ...init,
@@ -13,7 +25,7 @@ function noStoreJson(payload, init = {}) {
     });
 }
 
-export async function GET(_, { params }) {
+export async function GET(request, { params }) {
     const admin = await requireAdmin();
     if (!admin) {
         return noStoreJson({ error: 'Non autorise' }, { status: 401 });
@@ -29,7 +41,9 @@ export async function GET(_, { params }) {
     }
 
     try {
-        const data = await loadGeoSlice(slice, clientId);
+        const url = new URL(request.url);
+        const visibilityOpts = slice === 'visibility' ? buildVisibilitySliceOptions(url.searchParams) : {};
+        const data = await loadGeoSlice(slice, clientId, visibilityOpts);
         return noStoreJson(data);
     } catch (error) {
         console.error(`[api/admin/geo/client/${clientId}/${slice}]`, error);

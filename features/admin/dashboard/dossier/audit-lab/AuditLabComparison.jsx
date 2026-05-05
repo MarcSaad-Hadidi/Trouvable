@@ -719,17 +719,19 @@ function DryRunMode({ defaultUrlA }) {
  * Section wrapper
  * ========================================================================= */
 
-export default function AuditLabComparison({ clientId, currentAudit, defaultUrl }) {
+export default function AuditLabComparison({ clientId, currentAudit, defaultUrl, omitSectionHeader = false }) {
     const [mode, setMode] = useState('history');
 
     return (
-        <section className="rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.04] via-white/[0.01] to-transparent p-5">
-            <LabSectionHeader
-                eyebrow="Comparaison d'audits"
-                title="Lire les écarts entre deux audits ou deux sites"
-                subtitle="Score Trouvable, SEO, GEO, couverture de crawl, dimensions, problèmes et points forts — côte à côte. Trois modes selon le besoin : évolution du mandat, benchmark externe, comparaison libre."
-                right={<LabPill label="lecture comparée" tone="info" />}
-            />
+        <section className={omitSectionHeader ? 'space-y-4' : 'rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.04] via-white/[0.01] to-transparent p-5'}>
+            {!omitSectionHeader && (
+                <LabSectionHeader
+                    eyebrow="Comparaison d'audits"
+                    title="Lire les écarts entre deux audits ou deux sites"
+                    subtitle="Score Trouvable, SEO, GEO, couverture de crawl, dimensions, problèmes et points forts — côte à côte. Trois modes selon le besoin : évolution du mandat, benchmark externe, comparaison libre."
+                    right={<LabPill label="lecture comparée" tone="info" />}
+                />
+            )}
 
             <div className="mb-4 flex flex-wrap gap-1.5">
                 {MODES.map((tab) => {

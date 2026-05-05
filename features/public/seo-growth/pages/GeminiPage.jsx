@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Plus, MessageSquare, Book, Sparkles, Settings, Share, MoreVertical, Mic, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
-import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
+import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
 
 function buildChats(page) {
     return [
@@ -82,7 +82,9 @@ export default function GeminiPage({ page, trustBrief }) {
 
     return (
         <div className="min-h-screen bg-[#060609]">
-            <main className="pt-[100px] pb-24 px-6 sm:px-10">
+            <main className="pb-24">
+                <PlatformEditorialLead page={page} />
+                <div className="px-6 sm:px-10">
                 {/* Native App Window - Gemini Style */}
                 <div className="mx-auto max-w-[1280px] h-[800px] rounded-2xl border border-white/10 bg-[#131314] shadow-2xl flex overflow-hidden relative font-sans">
                     
@@ -305,6 +307,7 @@ export default function GeminiPage({ page, trustBrief }) {
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
                 
                 {/* Regular content */}

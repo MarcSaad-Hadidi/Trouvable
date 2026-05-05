@@ -11,6 +11,7 @@ const DOSSIER_LINKS = [
     { id: 'journal', label: 'Journal', path: '/dossier/activity' },
     { id: 'sources', label: 'Sources', path: '/dossier/connectors' },
     { id: 'audit', label: 'Audit / Evidence', path: '/dossier/audit' },
+    { id: 'audit-comparison', label: 'Comparaison audits', path: '/dossier/audit/comparison' },
     { id: 'portal', label: 'Portal', path: '/portal' },
     { id: 'settings', label: 'Paramètres', path: '/dossier/settings' },
 ];

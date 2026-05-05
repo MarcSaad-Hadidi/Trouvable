@@ -8,6 +8,9 @@ import {
     isShadowModeEnabled,
     resolveAuditVersion,
     getCrawlBudget,
+    getCrawlerRuntimeConfig,
+    getFullAuditTimeoutMs,
+    getSitemapDiscoveryConfig,
 } from '@/lib/audit/audit-config';
 
 export async function GET() {
@@ -23,6 +26,9 @@ export async function GET() {
         sitemapFirst: isSitemapFirstEnabled(),
         shadowMode: isShadowModeEnabled(),
         crawlBudget: getCrawlBudget(),
+        crawlSafety: getCrawlerRuntimeConfig(),
+        sitemapDiscovery: getSitemapDiscoveryConfig(),
+        fullAuditTimeoutMs: getFullAuditTimeoutMs(),
     };
 
     return NextResponse.json(payload, {

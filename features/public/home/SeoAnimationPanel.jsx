@@ -6,19 +6,24 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import { SITE_URL } from "@/lib/site-config";
 
-const SOFT_TRANSITION = "opacity 650ms cubic-bezier(0.22,1,0.36,1), transform 650ms cubic-bezier(0.22,1,0.36,1)";
-
-function useCycleClock(cycleMs, tickMs = 40) {
+function useCycleClock(cycleMs) {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    const startedAt = Date.now();
-    const id = window.setInterval(() => {
-      const dt = (Date.now() - startedAt) % cycleMs;
-      setElapsed(dt);
-    }, tickMs);
-    return () => window.clearInterval(id);
-  }, [cycleMs, tickMs]);
+    const startedAt = performance.now();
+    let raf = 0;
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      setElapsed((performance.now() - startedAt) % cycleMs);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, [cycleMs]);
 
   return elapsed;
 }
@@ -35,13 +40,30 @@ function inWindow(elapsed, startMs, endMs) {
   return elapsed >= startMs && elapsed < endMs;
 }
 
+function smoothstep(edge0, edge1, x) {
+  if (edge1 <= edge0) return x >= edge1 ? 1 : 0;
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+/** Fondu début/fin de boucle — à appliquer au contenu (texte / cartes), pas au chrome du mock. */
+function cycleEdgeOpacity(elapsed, cycleMs, fadeInMs, fadeOutMs) {
+  return smoothstep(0, fadeInMs, elapsed) * (1 - smoothstep(cycleMs - fadeOutMs, cycleMs, elapsed));
+}
+
 export default function SeoAnimationPanel() {
   const cycleMs = 8800;
   const elapsed = useCycleClock(cycleMs);
+  const fadeInMs = 420;
+  const fadeOutMs = 680;
+  const edge = cycleEdgeOpacity(elapsed, cycleMs, fadeInMs, fadeOutMs);
+
   const queryStart = 250;
   const queryDuration = 2350;
   const mainResultStart = queryStart + queryDuration + 260;
   const skeletonStart = mainResultStart + 650;
+  const mainRevealMs = 900;
+  const skeletonRevealMs = 900;
 
   const typedSeoQuery = getTypedSlice(
     "Meilleur expert SEO Quebec",
@@ -50,8 +72,13 @@ export default function SeoAnimationPanel() {
     queryDuration
   );
   const showCaret = inWindow(elapsed, queryStart, mainResultStart);
-  const showMainResult = inWindow(elapsed, mainResultStart, 7350);
-  const showSkeletonResult = inWindow(elapsed, skeletonStart, 7800);
+
+  const mainReveal = smoothstep(mainResultStart, mainResultStart + mainRevealMs, elapsed);
+  const skeletonReveal = smoothstep(skeletonStart, skeletonStart + skeletonRevealMs, elapsed);
+  const mainOpacity = edge * mainReveal;
+  const mainOffsetY = 8 * (1 - mainReveal);
+  const skeletonOpacity = edge * skeletonReveal;
+  const skeletonOffsetY = 10 * (1 - skeletonReveal);
 
   return (
     <div className="relative mb-8 flex h-[320px] w-full flex-col overflow-hidden border border-white/[0.04] bg-[#202124] p-5 shadow-inner" style={{ borderRadius: "1.5rem", fontFamily: "Arial, sans-serif" }}>
@@ -65,7 +92,10 @@ export default function SeoAnimationPanel() {
           <span className="text-[#EA4335]">e</span>
         </div>
         <div className="flex h-11 min-w-0 flex-1 items-center rounded-full border border-[#6b7076] bg-[#1f2328] px-4 shadow-[0_1px_8px_rgba(0,0,0,0.35)]">
-          <div className="min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[14px] font-medium leading-none text-[#f1f3f4]">
+          <div
+            className="min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[14px] font-medium leading-none text-[#f1f3f4]"
+            style={{ opacity: edge }}
+          >
             {typedSeoQuery}
             {showCaret && <span className="ml-0.5 inline-block animate-pulse text-[#c9d7ff]/80">|</span>}
           </div>
@@ -77,11 +107,9 @@ export default function SeoAnimationPanel() {
 
       <div className="px-2 flex flex-col gap-6">
         <div
-          className="transition-[opacity,transform]"
           style={{
-            opacity: showMainResult ? 1 : 0,
-            transform: showMainResult ? "translateY(0)" : "translateY(8px)",
-            transition: SOFT_TRANSITION,
+            opacity: mainOpacity,
+            transform: `translateY(${mainOffsetY}px)`,
           }}
         >
           <Link
@@ -108,11 +136,9 @@ export default function SeoAnimationPanel() {
         </div>
 
         <div
-          className="transition-[opacity,transform]"
           style={{
-            opacity: showSkeletonResult ? 1 : 0,
-            transform: showSkeletonResult ? "translateY(0)" : "translateY(10px)",
-            transition: SOFT_TRANSITION,
+            opacity: skeletonOpacity,
+            transform: `translateY(${skeletonOffsetY}px)`,
           }}
         >
           <div className="flex items-center gap-3 mb-2">

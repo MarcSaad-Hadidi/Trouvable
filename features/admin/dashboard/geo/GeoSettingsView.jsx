@@ -1,19 +1,42 @@
+// @ts-nocheck
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
-import { Building2, Shield, User } from 'lucide-react';
+import { 
+    Building2, 
+    Shield, 
+    User, 
+    SettingsIcon, 
+    ShieldCheckIcon, 
+    GlobeIcon, 
+    MailIcon, 
+    PhoneIcon,
+    ChevronRightIcon
+} from 'lucide-react';
 
 import { useGeoClient } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { SITE_CONTACT_EMAIL, SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from '@/lib/site-contact';
-import { COMMAND_BUTTONS, CommandHeader, CommandPageShell, COMMAND_PANEL, COMMAND_MUTED_PANEL, cn } from '@/features/admin/dashboard/shared/components/command';
+import { 
+    CommandHeader, 
+    CommandPageShell, 
+    COMMAND_BUTTONS, 
+    COMMAND_PANEL, 
+    COMMAND_SURFACE, 
+    cn 
+} from '@/features/admin/dashboard/shared/components/command';
 
-function Row({ label, children }) {
+/* ── Components ── */
+
+function SettingRow({ label, value, hint }) {
     return (
-        <div className="flex flex-col gap-2 border-b border-white/[0.06] py-3.5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-[13px] font-medium text-white/80">{label}</span>
-            <div className="text-[12px] font-medium text-white/70 sm:max-w-[58%] sm:text-right">{children}</div>
+        <div className="flex flex-col gap-2 py-5 border-b border-white/[0.04] last:border-0 group hover:bg-white/[0.01] transition-all px-4 -mx-4 rounded-xl">
+            <div className="flex flex-wrap items-center justify-between">
+                <span className="text-[13px] font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">{label}</span>
+                <span className="text-[12px] text-[#7c6aef] font-mono font-bold bg-[#7c6aef]/5 px-2 py-0.5 rounded border border-[#7c6aef]/20">{value}</span>
+            </div>
+            {hint && <p className="text-[11px] text-white/20 italic">"{hint}"</p>}
         </div>
     );
 }
@@ -23,154 +46,143 @@ export default function GeoSettingsView() {
     const { client, clientId } = useGeoClient();
     const [zone, setZone] = useState('operator');
 
-    const dossierBase = clientId ? `/admin/clients/${clientId}/dossier` : '/admin/clients';
     const editHref = clientId ? `/admin/clients/${clientId}/edit` : '/admin/clients';
-    const portalHref = clientId ? `/admin/clients/${clientId}/portal` : '/admin/clients';
-    const adminDisplayName =
-        user?.fullName?.trim() ||
-        [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() ||
-        user?.username ||
-        'Administrateur';
-    const adminEmail = user?.primaryEmailAddress?.emailAddress || 'n.d.';
+    const dossierBase = clientId ? `/admin/clients/${clientId}/dossier` : '/admin/clients';
 
-    const tabs = [
-        { id: 'operator', label: 'Opérateur', icon: User },
-        { id: 'mandate', label: 'Mandat', icon: Building2 },
-    ];
+    const adminDisplayName = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || 'Administrateur';
+    const adminEmail = user?.primaryEmailAddress?.emailAddress || 'n.d.';
 
     const header = (
         <CommandHeader
-            eyebrow="settings.dual_plane"
-            title="Réglages — deux plans"
-            subtitle="Navigation par plan vertical : opérateur d'un côté, mandat de l'autre — sans en-tête « command » ni coquille générique."
+            eyebrow="IA / GEO"
+            title="Configuration Radar"
+            subtitle="Réglages du plan de travail : opérateur d'un côté, paramètres du mandat de l'autre."
             actions={(
-                <>
-                    <Link href={editHref} className={COMMAND_BUTTONS.primary}>Éditer le profil mandat</Link>
-                    <Link href="/admin/clients/new" className={COMMAND_BUTTONS.secondary}>Nouveau client</Link>
-                    <Link href={dossierBase} className={COMMAND_BUTTONS.subtle}>Dossier</Link>
-                </>
+                <Link href={editHref} className={COMMAND_BUTTONS.primary}>
+                    Modifier Profil Mandat
+                </Link>
             )}
         />
     );
 
     return (
-        <CommandPageShell header={header} className="text-white">
-            <div className="mx-auto grid max-w-[1200px] gap-8 md:grid-cols-[220px_minmax(0,1fr)]">
-                <nav className="flex flex-row gap-2 md:flex-col md:gap-1">
-                    {tabs.map((t) => {
-                        const Icon = t.icon;
-                        const active = zone === t.id;
-                        return (
-                            <button
-                                key={t.id}
-                                type="button"
-                                onClick={() => setZone(t.id)}
-                                className={`flex items-center gap-2 rounded-2xl border px-4 py-3 text-left text-[13px] font-semibold transition-colors ${
-                                    active
-                                        ? 'border-white/[0.2] bg-white/[0.08] text-white'
-                                        : 'border-transparent bg-white/[0.02] text-white/50 hover:border-white/[0.08] hover:text-white/80'
-                                }`}
-                            >
-                                <Icon className="h-4 w-4 shrink-0 opacity-70" />
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                    <div className="mt-4 hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 md:block">
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">
-                            <Shield className="h-3.5 w-3.5" />
-                            Sécurité
+        <CommandPageShell header={header}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr] h-[calc(100vh-220px)] min-h-[600px]">
+                <div className="flex flex-col gap-2">
+                    <button 
+                        onClick={() => setZone('operator')}
+                        className={cn(
+                            "flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all text-left",
+                            zone === 'operator' 
+                                ? "bg-[#7c6aef]/10 border-[#7c6aef]/30 text-[#b8adff] shadow-lg shadow-[#7c6aef]/5" 
+                                : "bg-white/[0.02] border-white/5 text-white/40 hover:bg-white/[0.04] hover:text-white/60"
+                        )}
+                    >
+                        <User className="h-4 w-4" />
+                        <div className="min-w-0">
+                            <div className="text-[13px] font-bold">Profil Opérateur</div>
+                            <div className="text-[10px] uppercase tracking-widest opacity-40">Compte personnel</div>
                         </div>
-                        <p className="mt-2 text-[11px] leading-relaxed text-white/38">
-                            Authentification Clerk : mots de passe et 2FA hors de cet écran.
-                        </p>
-                    </div>
-                </nav>
+                    </button>
+                    <button 
+                        onClick={() => setZone('mandate')}
+                        className={cn(
+                            "flex items-center gap-3 px-5 py-4 rounded-2xl border transition-all text-left",
+                            zone === 'mandate' 
+                                ? "bg-[#7c6aef]/10 border-[#7c6aef]/30 text-[#b8adff] shadow-lg shadow-[#7c6aef]/5" 
+                                : "bg-white/[0.02] border-white/5 text-white/40 hover:bg-white/[0.04] hover:text-white/60"
+                        )}
+                    >
+                        <Building2 className="h-4 w-4" />
+                        <div className="min-w-0">
+                            <div className="text-[13px] font-bold">Identité Mandat</div>
+                            <div className="text-[10px] uppercase tracking-widest opacity-40">Configuration client</div>
+                        </div>
+                    </button>
 
-                <div className="min-w-0 space-y-6">
+                    <div className="mt-auto p-5 rounded-2xl bg-black/20 border border-white/5">
+                        <div className="flex items-center gap-2 mb-3 text-white/20">
+                            <ShieldCheckIcon className="h-4 w-4" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Sécurité</span>
+                        </div>
+                        <p className="text-[11px] text-white/20 leading-relaxed italic">"L'authentification est gérée par Clerk. Les sessions sont persistées localement."</p>
+                    </div>
+                </div>
+
+                <div className={cn(COMMAND_PANEL, "overflow-y-auto geo-scrollbar")}>
                     {zone === 'operator' ? (
-                        <div className={cn(COMMAND_PANEL, 'p-6')}>
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Plan opérateur</div>
-                            <p className="mt-2 text-[13px] text-white/48">
-                                Informations de votre compte Trouvable. Indépendant du mandat affiché.
-                            </p>
-                            <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                                <div className={cn(COMMAND_MUTED_PANEL, 'p-5')}>
-                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Compte administrateur</div>
-                                    <div className="mt-4 space-y-0">
-                                        <Row label="Nom affiché">{!isLoaded ? 'Chargement…' : adminDisplayName}</Row>
-                                        <Row label="Courriel de connexion">{!isLoaded ? 'Chargement…' : adminEmail}</Row>
-                                        <Row label="Sécurité">Mots de passe, 2FA et sessions via Clerk.</Row>
-                                    </div>
+                        <div className="p-8 space-y-10">
+                            <section>
+                                <div className="flex items-center gap-2 mb-6 text-[#7c6aef]">
+                                    <User className="h-4 w-4" />
+                                    <h3 className="text-[12px] font-bold uppercase tracking-[0.14em]">Identité Administrateur</h3>
                                 </div>
-                                <div className={cn(COMMAND_MUTED_PANEL, 'p-5')}>
-                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Support Trouvable</div>
-                                    <div className="mt-4 space-y-0">
-                                        <Row label="Courriel">
-                                            <a href={`mailto:${SITE_CONTACT_EMAIL}`} className="text-sky-300/90 hover:underline">
-                                                {SITE_CONTACT_EMAIL}
-                                            </a>
-                                        </Row>
-                                        <Row label="Téléphone">
-                                            <a href={`tel:${SITE_PHONE_TEL}`} className="text-sky-300/90 hover:underline tabular-nums">
-                                                {SITE_PHONE_DISPLAY}
-                                            </a>
-                                        </Row>
-                                    </div>
+                                <div className={cn(COMMAND_SURFACE, "p-6")}>
+                                    <SettingRow label="Nom de l'opérateur" value={adminDisplayName} hint="Nom utilisé dans les journaux d'activité" />
+                                    <SettingRow label="Email principal" value={adminEmail} hint="Adresse de notification système" />
+                                    <SettingRow label="Rôle système" value="GEO Analyst" hint="Niveau d'accès Enterprise" />
                                 </div>
-                            </div>
+                            </section>
+
+                            <section>
+                                <div className="flex items-center gap-2 mb-6 text-white/30">
+                                    <MailIcon className="h-4 w-4" />
+                                    <h3 className="text-[12px] font-bold uppercase tracking-[0.14em]">Assistance Trouvable</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <a href={`mailto:${SITE_CONTACT_EMAIL}`} className={cn(COMMAND_SURFACE, "p-5 hover:bg-white/[0.04] transition-all")}>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-1">Email Support</div>
+                                        <div className="text-[14px] font-bold text-[#b8adff]">{SITE_CONTACT_EMAIL}</div>
+                                    </a>
+                                    <a href={`tel:${SITE_PHONE_TEL}`} className={cn(COMMAND_SURFACE, "p-5 hover:bg-white/[0.04] transition-all")}>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-1">Assistance Directe</div>
+                                        <div className="text-[14px] font-bold text-[#b8adff] tabular-nums">{SITE_PHONE_DISPLAY}</div>
+                                    </a>
+                                </div>
+                            </section>
                         </div>
                     ) : (
-                        <div className={cn(COMMAND_PANEL, 'p-6')}>
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Plan mandat</div>
-                            <p className="mt-2 text-[13px] text-white/48">
-                                {client
-                                    ? `Configuration de ${client.client_name} : profil, portail, publication.`
-                                    : 'Aucun mandat actif. Sélectionnez un client pour voir ses paramètres.'}
-                            </p>
-                            {client ? (
-                                <div className="mt-6 rounded-2xl border border-emerald-400/15 bg-emerald-500/[0.06] p-5">
-                                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                                        <div>
-                                            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Nom</div>
-                                            <div className="mt-1 text-[15px] font-semibold text-white/92">{client.client_name}</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Type</div>
-                                            <div className="mt-1 text-[15px] font-semibold text-white/92">{client.business_type || 'LocalBusiness'}</div>
-                                        </div>
-                                        <div className="sm:col-span-2">
-                                            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Site web</div>
-                                            <a
-                                                href={client.website_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="mt-1 block text-[14px] font-semibold text-emerald-200/90 hover:underline break-all"
-                                            >
-                                                {client.website_url}
-                                            </a>
-                                        </div>
-                                        <div>
-                                            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Statut</div>
-                                            <span
-                                                className={cn(
-                                                    'mt-2 inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold',
-                                                    client.is_published
-                                                        ? 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100'
-                                                        : 'border-white/[0.1] bg-white/[0.04] text-white/70'
-                                                )}
-                                            >
-                                                {client.is_published ? 'Publié' : 'Brouillon'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 flex flex-wrap gap-2 border-t border-white/[0.06] pt-5">
-                                        <Link href={editHref} className={cn(COMMAND_BUTTONS.secondary, 'rounded-xl')}>Éditer le profil</Link>
-                                        <Link href={portalHref} className={cn(COMMAND_BUTTONS.subtle, 'rounded-xl')}>Portail client</Link>
-                                        <Link href={dossierBase} className={cn(COMMAND_BUTTONS.subtle, 'rounded-xl')}>Dossier complet</Link>
-                                    </div>
+                        <div className="p-8 space-y-12">
+                            <section>
+                                <div className="flex items-center gap-2 mb-6 text-[#7c6aef]">
+                                    <Building2 className="h-4 w-4" />
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40">Paramètres du Mandat</h3>
                                 </div>
-                            ) : null}
+                                <div className={cn(COMMAND_SURFACE, "p-8 bg-black/40")}>
+                                    {client ? (
+                                        <>
+                                            <SettingRow label="Raison Sociale" value={client.client_name} />
+                                            <SettingRow label="Type d'entité" value={client.business_type || 'LocalBusiness'} />
+                                            <SettingRow label="Domaine racine" value={client.website_url} />
+                                            <div className="py-5 border-b border-white/[0.04] flex items-center justify-between px-4 -mx-4 hover:bg-white/[0.01] transition-all rounded-xl">
+                                                <span className="text-[13px] font-bold text-white/40 uppercase tracking-widest">Statut de Publication</span>
+                                                <div className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border", client.is_published ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-white/5 text-white/30 border-white/10")}>
+                                                    {client.is_published ? 'Public' : 'Brouillon'}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <p className="text-[13px] text-white/30 italic">Aucun mandat chargé.</p>
+                                    )}
+                                </div>
+                            </section>
+
+                            <section>
+                                <div className="flex items-center gap-2 mb-6 text-white/20">
+                                    <GlobeIcon className="h-4 w-4" />
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40">Navigation Rapide</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Link href={editHref} className={cn(COMMAND_SURFACE, "p-6 hover:bg-[#7c6aef]/5 hover:border-[#7c6aef]/20 transition-all flex items-center justify-between group bg-black/40")}>
+                                        <span className="text-[13px] font-bold text-white/60 group-hover:text-white uppercase tracking-widest">Éditer le profil</span>
+                                        <ChevronRightIcon className="h-4 w-4 text-white/10 group-hover:text-[#7c6aef] group-hover:translate-x-1 transition-all" />
+                                    </Link>
+                                    <Link href={dossierBase} className={cn(COMMAND_SURFACE, "p-6 hover:bg-[#7c6aef]/5 hover:border-[#7c6aef]/20 transition-all flex items-center justify-between group bg-black/40")}>
+                                        <span className="text-[13px] font-bold text-white/60 group-hover:text-white uppercase tracking-widest">Dossier complet</span>
+                                        <ChevronRightIcon className="h-4 w-4 text-white/10 group-hover:text-[#7c6aef] group-hover:translate-x-1 transition-all" />
+                                    </Link>
+                                </div>
+                            </section>
                         </div>
                     )}
                 </div>

@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, MessageSquare, Folder, Code2, Settings, Download, MoreHorizontal, ChevronDown, AlignLeft } from 'lucide-react';
-import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
+import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
 
 function SoundWavesIcon({ className }) {
     return (
@@ -47,7 +47,9 @@ export default function ClaudePage({ page, trustBrief }) {
 
     return (
         <div className="min-h-screen bg-[#090706]">
-            <main className="pt-[100px] pb-24 px-6 sm:px-10">
+            <main className="pb-24">
+                <PlatformEditorialLead page={page} />
+                <div className="px-6 sm:px-10">
                 {/* Native App Window - Claude Style */}
                 <div className="mx-auto max-w-[1280px] h-[800px] rounded-2xl border border-white/10 bg-[#252422] shadow-2xl flex overflow-hidden relative font-sans text-[#e3e3e3]">
                     
@@ -262,6 +264,7 @@ export default function ClaudePage({ page, trustBrief }) {
                         </div>
 
                     </div>
+                </div>
                 </div>
                 
                 {/* Regular content appended below the "app" */}

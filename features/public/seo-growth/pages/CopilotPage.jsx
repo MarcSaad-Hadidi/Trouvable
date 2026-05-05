@@ -2,12 +2,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, Search, Mic, Paperclip, CheckCircle2, AlertTriangle, PackageOpen, PenSquare, Clock, MessageSquare, MoreHorizontal } from 'lucide-react';
-import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
+import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
 
 function buildChats(page) {
     return [
         { id: 'main', label: 'Visibilité Copilot', question: 'Comment être visible dans Copilot ?', aiText: page.definition, aiSummary: page.summary, showSections: true },
-        { id: 'entities', label: 'Optimisation des entités', question: 'Comment optimiser mes entités pour le Microsoft Graph ?', aiText: 'Copilot s\'appuie massivement sur le Microsoft Graph et l\'écosystème Bing. Pour être reconnu comme une entité fiable, il faut structurer vos données (JSON-LD) avec précision et aligner vos informations sur des sources B2B reconnues comme LinkedIn.', aiSummary: 'La stratégie : créer des pages "Profil d\'entreprise" robustes, utiliser le schéma LocalBusiness ou Organization complet, et s\'assurer que le nom de l\'entreprise est systématiquement associé à son cur d\'expertise dans les titres H1.', showSections: false },
+        { id: 'entities', label: 'Optimisation des entités', question: 'Comment optimiser mes entités pour le Microsoft Graph ?', aiText: 'Copilot s\'appuie massivement sur le Microsoft Graph et l\'écosystème Bing. Pour être reconnu comme une entité fiable, il faut structurer vos données (JSON-LD) avec précision et aligner vos informations sur des sources B2B reconnues comme LinkedIn.', aiSummary: 'La stratégie : créer des pages "Profil d\'entreprise" robustes, utiliser le schéma LocalBusiness ou Organization complet, et s\'assurer que le nom de l\'entreprise est systématiquement associé à son cœur d\'expertise dans les titres H1.', showSections: false },
         { id: 'audit', label: 'Audit de présence IA', question: 'Comment vérifier ma présence dans l\'écosystème Bing IA ?', aiText: 'Un audit de présence pour Copilot nécessite d\'analyser les Bing Webmaster Tools avec une optique IA. Il faut vérifier le taux d\'indexation, la présence de blocs "Chat" dans les SERP sur vos requêtes clés, et la manière dont Copilot résume vos pages.', aiSummary: 'Nous regardons 3 indicateurs : la fréquence d\'apparition dans les citations Copilot, la fidélité de l\'extraction d\'informations (Copilot comprend-il vos prix et services ?), et les requêtes conversationnelles qui déclenchent votre marque.', showSections: true },
         { id: 'content', label: 'Stratégie de contenu B2B', question: 'Quel type de contenu B2B est privilégié par Copilot ?', aiText: 'Copilot est souvent utilisé dans un contexte professionnel (Office 365, Edge Entreprise). Il favorise les contenus d\'autorité : rapports d\'industrie, comparaisons de logiciels, méthodologies chiffrées et définitions techniques claires.', aiSummary: 'Pour plaire à Copilot, abandonnez le contenu "inspirant" au profit du contenu "décisionnel". Créez des pages de type "Comment choisir un fournisseur de X" avec des critères objectifs. Copilot adore synthétiser ces listes.', showSections: false },
     ];
@@ -55,7 +55,9 @@ export default function CopilotPage({ page, trustBrief }) {
 
     return (
         <div className="min-h-screen bg-[#060709]">
-            <main className="pt-[100px] pb-24 px-6 sm:px-10">
+            <main className="pb-24">
+                <PlatformEditorialLead page={page} />
+                <div className="px-6 sm:px-10">
                 {/* Native App Window - Copilot Light Mode Web UI */}
                 <div className="mx-auto max-w-[1280px] h-[800px] rounded-2xl border border-white/10 bg-[#FFFFFF] shadow-2xl flex overflow-hidden relative font-sans text-[#242424]">
                     
@@ -118,14 +120,14 @@ export default function CopilotPage({ page, trustBrief }) {
                             {messages.length === 0 ? (
                                 <div className="flex-1 flex flex-col items-center justify-center p-8">
                                     <img src="/logos/copilot.png" alt="Copilot" className="w-16 h-16 mb-6 drop-shadow-md object-contain" />
-                                    <h1 className="text-[28px] font-semibold text-[#111111] mb-8 tracking-tight">
+                                    <p className="text-[28px] font-semibold text-[#111111] mb-8 tracking-tight">
                                         Hi there, Trouvable. What should we dive into today?
-                                    </h1>
+                                    </p>
                                     
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-[800px] w-full">
                                         <div className="bg-[#F7F7F8] border border-[#E5E5E5] hover:border-[#D1D1D1] hover:bg-[#F0F0F0] rounded-xl p-4 cursor-pointer transition-all">
                                             <div className="font-medium text-[14px] text-[#111111] mb-1">Auditer ma visibilité IA</div>
-                                            <div className="text-[13px] text-[#616161]">0valuer ma présence sur Copilot</div>
+                                            <div className="text-[13px] text-[#616161]">Évaluer ma présence sur Copilot</div>
                                         </div>
                                         <div className="bg-[#F7F7F8] border border-[#E5E5E5] hover:border-[#D1D1D1] hover:bg-[#F0F0F0] rounded-xl p-4 cursor-pointer transition-all">
                                             <div className="font-medium text-[14px] text-[#111111] mb-1">Rédiger un article</div>
@@ -264,6 +266,7 @@ export default function CopilotPage({ page, trustBrief }) {
                         </div>
 
                     </div>
+                </div>
                 </div>
                 
                 {/* Regular content appended below the "app" */}

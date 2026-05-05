@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryUpdateSchema } from '@/lib/admin-schemas';
 import * as db from '@/lib/db';
+import { inferDiscoveryMode, normalizeDiscoveryMode } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { buildPromptMetadata, shouldSoftBlockPromptActivation } from '@/lib/queries/prompt-intelligence';
 import { serializePromptContractForDb } from '@/lib/queries/prompt-contract-persistence';
 import { getAdminSupabase } from '@/lib/supabase-admin';
@@ -36,7 +37,7 @@ export async function POST(request) {
         const supabase = getAdminSupabase();
         const { data: trackedQuery, error: trackedQueryError } = await supabase
             .from('tracked_queries')
-            .select('id, client_id, query_text, locale, prompt_metadata')
+            .select('id, client_id, query_text, category, query_type, locale, discovery_mode, intent_family, prompt_metadata')
             .eq('id', id)
             .single();
 
@@ -65,15 +66,27 @@ export async function POST(request) {
             differentiationAngle: updates.differentiation_angle || updates.prompt_metadata?.differentiation_angle || '',
         });
 
+        const resolvedDiscoveryMode = updates.discovery_mode
+            ? normalizeDiscoveryMode(updates.discovery_mode)
+            : (trackedQuery.discovery_mode || trackedQuery.prompt_metadata?.discovery_mode || inferDiscoveryMode({
+                category: updates.category || trackedQuery.category || trackedQuery.query_type,
+                intentFamily: updates.intent_family || trackedQuery.intent_family,
+                queryText: resolvedQueryText,
+                clientName: client?.client_name || '',
+            }));
         const activationBlocked = shouldSoftBlockPromptActivation(promptMetadata) && updates.is_active === true;
         const serialized = serializePromptContractForDb({
             contract: promptMetadata,
             existingPromptMetadata: trackedQuery.prompt_metadata || {},
-            extraPromptMetadata: updates.prompt_metadata || {},
+            extraPromptMetadata: {
+                ...(updates.prompt_metadata || {}),
+                discovery_mode: resolvedDiscoveryMode,
+            },
         });
         const mergedUpdates = {
             ...updates,
             ...serialized.dbFields,
+            discovery_mode: resolvedDiscoveryMode,
             prompt_metadata: serialized.prompt_metadata,
             ...(activationBlocked ? { is_active: false } : {}),
         };
@@ -86,6 +99,7 @@ export async function POST(request) {
                 id,
                 fields: Object.keys(mergedUpdates),
                 quality_status: promptMetadata.quality_status,
+                discovery_mode: resolvedDiscoveryMode,
                 activation_blocked: activationBlocked,
             },
             performed_by: admin.email,

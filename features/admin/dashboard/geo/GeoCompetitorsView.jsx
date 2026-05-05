@@ -1,11 +1,13 @@
+// @ts-nocheck
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { GeoEmptyPanel, GeoPremiumCard, GeoSectionTitle } from '@/features/admin/dashboard/geo/components/GeoPremium';
+import React, { useMemo } from 'react';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
+import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
+import { AlertCircleIcon, ShieldAlertIcon, TargetIcon, UsersIcon, ShieldXIcon } from 'lucide-react';
 
-/* ─── Helpers ─── */
+/* ── Utilities ── */
 
 function threatLevel(count, topCount) {
     if (!topCount || !count) return 'low';
@@ -16,28 +18,27 @@ function threatLevel(count, topCount) {
 }
 
 const THREAT_COLORS = {
-    high: { dot: 'bg-red-400', text: 'text-red-300' },
-    medium: { dot: 'bg-amber-400', text: 'text-amber-300' },
-    low: { dot: 'bg-white/20', text: 'text-white/30' },
+    high: 'text-rose-400',
+    medium: 'text-amber-400',
+    low: 'text-white/20',
 };
 
-/* ─── Sub-Components ─── */
+/* ── Components ── */
 
 function SubstitutionAlert({ count, baseHref }) {
     if (!count || count <= 0) return null;
-
     return (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3 flex items-start gap-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/[0.04] p-4 flex items-start gap-4">
+            <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                <ShieldXIcon className="h-4 w-4 text-rose-500" />
+            </div>
             <div className="min-w-0">
-                <div className="text-[12px] font-semibold text-red-300">
-                    {count} run{count > 1 ? 's' : ''} avec substitution concurrentielle
-                </div>
-                <p className="text-[10px] text-red-200/50 mt-0.5 max-w-lg">
-                    Un concurrent est recommandé mais la cible est absente, avec un risque de substitution directe.
+                <div className="text-[13px] font-bold text-rose-400">Substitution Concurrentielle Détectée</div>
+                <p className="text-[11px] text-rose-200/40 mt-1 max-w-lg leading-relaxed italic">
+                    Un concurrent est recommandé mais la cible est absente dans {count} run(s). Risque critique de perte de conversion.
                 </p>
-                <Link href={`${baseHref}/opportunities`} className="inline-flex items-center gap-1 text-[10px] text-red-300/70 hover:text-red-200 mt-1.5 transition-colors">
-                    Voir les opportunités →
+                <Link href={`${baseHref}/opportunities`} className="inline-flex items-center gap-1.5 text-[10px] font-bold text-rose-400/80 hover:text-rose-300 mt-3 transition-colors uppercase tracking-widest">
+                    Voir les Correctifs GEO →
                 </Link>
             </div>
         </div>
@@ -46,140 +47,93 @@ function SubstitutionAlert({ count, baseHref }) {
 
 function ConfirmedCompetitorsList({ competitors, topCount }) {
     if (!competitors?.length) return null;
-
     return (
-        <GeoPremiumCard className="p-5">
-            <div className="mb-4">
-                <div className="text-sm font-semibold text-white/95">Concurrents confirmés</div>
-                <p className="text-[11px] text-white/35 mt-0.5">
-                    Entités identifiées comme concurrents dans les réponses IA : recommandation, comparaison ou alternative directe.
-                </p>
+        <div className={cn(COMMAND_SURFACE, "p-5")}>
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Concurrents Confirmés</div>
+                    <p className="text-[11px] text-white/20 mt-1 uppercase tracking-wider">Pression concurrentielle directe</p>
+                </div>
+                <UsersIcon className="h-4 w-4 text-[#7c6aef]/40" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
                 {competitors.map((item, i) => {
                     const level = threatLevel(item.count, topCount);
-                    const colors = THREAT_COLORS[level];
                     return (
-                        <div key={item.name} className="flex items-center gap-2.5 py-2 border-b border-white/[0.04] last:border-0">
-                            <span className="text-[10px] text-white/25 w-4 text-right tabular-nums font-mono shrink-0">{i + 1}</span>
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${colors.dot}`} />
-                            <span className="text-[12px] text-white/80 flex-1 truncate">{item.name}</span>
-                            <span className={`text-[11px] font-bold tabular-nums shrink-0 ${colors.text}`}>
+                        <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.03] transition-colors group">
+                            <div className={cn("h-1.5 w-1.5 rounded-full shrink-0", level === 'high' ? 'bg-rose-500' : (level === 'medium' ? 'bg-amber-500' : 'bg-white/10'))} />
+                            <span className="text-[13px] font-bold text-white/80 flex-1 truncate group-hover:text-white transition-colors">{item.name}</span>
+                            <span className={cn("text-[11px] font-bold tabular-nums shrink-0", THREAT_COLORS[level])}>
                                 {item.count} mention{item.count > 1 ? 's' : ''}
                             </span>
                         </div>
                     );
                 })}
             </div>
-        </GeoPremiumCard>
+        </div>
     );
 }
 
 function CompetitorPrompts({ promptsWithCompetitors }) {
     if (!promptsWithCompetitors?.length) return null;
-
     return (
-        <GeoPremiumCard className="p-5">
-            <div className="mb-4">
-                <div className="text-sm font-semibold text-white/95">Prompts exposant des concurrents</div>
-                <p className="text-[11px] text-white/35 mt-0.5">Prompts où des concurrents apparaissent le plus souvent.</p>
+        <div className={cn(COMMAND_SURFACE, "p-5")}>
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Prompts à Risque</div>
+                    <p className="text-[11px] text-white/20 mt-1 uppercase tracking-wider">Exposition concurrentielle</p>
+                </div>
+                <TargetIcon className="h-4 w-4 text-[#7c6aef]/40" />
             </div>
-            <div className="space-y-1.5">
-                {promptsWithCompetitors.map((item) => (
-                    <div key={item.id} className="flex items-start gap-2.5 py-2 border-b border-white/[0.04] last:border-0">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${item.recommended_competitors > 0 ? 'bg-red-400' : 'bg-amber-400'}`} />
+            <div className="space-y-3">
+                {promptsWithCompetitors.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.03] transition-colors group">
+                        <div className={cn("mt-1.5 h-1 w-1 rounded-full shrink-0", item.recommended_competitors > 0 ? 'bg-rose-500' : 'bg-amber-500')} />
                         <div className="flex-1 min-w-0">
-                            <div className="text-[12px] font-medium text-white/85 leading-snug">{item.query_text}</div>
-                            <div className="text-[10px] text-white/30 mt-0.5">
-                                {item.competitor_mentions} mention{item.competitor_mentions > 1 ? 's' : ''}
+                            <div className="text-[12px] font-bold text-white/70 leading-snug group-hover:text-white transition-colors line-clamp-2 italic">"{item.query_text}"</div>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-[8px] font-bold uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded text-white/20">{item.category}</span>
                                 {item.recommended_competitors > 0 && (
-                                    <span className="text-red-300/70"> · {item.recommended_competitors} recommandé{item.recommended_competitors > 1 ? 's' : ''}</span>
+                                    <span className="text-[8px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest">Substitution</span>
                                 )}
-                                {' · '}{item.category}
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-        </GeoPremiumCard>
+        </div>
     );
 }
-
-/* ─── Main Component ─── */
 
 export default function GeoCompetitorsView({ sharedData }) {
     const { client, clientId } = useGeoClient();
     const ownSlice = useGeoWorkspaceSlice('competitors', { enabled: !sharedData });
     const data = sharedData || ownSlice.data;
-    const loading = !sharedData && ownSlice.loading;
-    const error = !sharedData && ownSlice.error;
 
     const topCount = useMemo(() => {
         if (!data?.topCompetitors?.length) return 1;
         return Math.max(...data.topCompetitors.map((c) => c.count), 1);
     }, [data]);
 
-    if (loading) return <div className="py-8 text-center text-white/25 text-sm animate-pulse">Chargement des concurrents…</div>;
-    if (error) return <div className="py-8 text-center text-red-400 text-sm">{error}</div>;
     if (!data) return null;
 
-    const noRuns = data.summary.totalCompletedRuns === 0;
-    const noConfirmed = data.summary.competitorMentions === 0;
-    const hasGenericOnly = noConfirmed && data.summary.genericNonTargetMentions > 0;
-    const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const geoBase = clientId ? `/admin/clients/${clientId}/geo` : '/admin/clients';
 
     return (
-        <div className="space-y-4">
-            <GeoSectionTitle
-                title="Concurrents"
-                subtitle={`Paysage concurrentiel observé pour ${client?.client_name || 'ce client'}. Seuls les concurrents confirmés sont affichés.`}
-            />
-
-            {data.summary.sampleSizeWarning && (
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-3 py-2 text-[11px] text-amber-200/60">
-                    {data.summary.sampleSizeWarning}
+        <div className="space-y-6">
+            <div className="px-1">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#7c6aef]">
+                    <UsersIcon className="h-3 w-3" /> Pression Concurrentielle
                 </div>
-            )}
+                <p className="text-[11px] text-white/35 mt-1">Paysage concurrentiel observé pour {client?.client_name || 'ce mandat'}.</p>
+            </div>
 
             <SubstitutionAlert count={data.summary.runsWithoutTargetButCompetitor} baseHref={geoBase} />
 
-            {noRuns ? (
-                <GeoEmptyPanel title={data.emptyState.noRuns.title} description={data.emptyState.noRuns.description} />
-            ) : noConfirmed ? (
-                <div className="space-y-3">
-                    {hasGenericOnly && data.genericMentions?.length > 0 && (
-                        <GeoPremiumCard className="p-4">
-                            <div className="text-[11px] font-semibold text-amber-200/80 mb-2">Mentions non confirmées</div>
-                            <p className="text-[10px] text-white/40 leading-relaxed mb-3 max-w-lg">
-                                Des noms hors cible apparaissent dans les réponses, mais aucun n'atteint le seuil « concurrent confirmé » (recommandation, comparaison ou profil concurrent explicite).
-                            </p>
-                            <div className="space-y-1">
-                                {data.genericMentions.slice(0, 5).map((item) => (
-                                    <div key={item.name} className="flex items-center justify-between text-[11px] py-1">
-                                        <span className="text-white/45">{item.name}</span>
-                                        <span className="text-white/25 tabular-nums">{item.count}×</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </GeoPremiumCard>
-                    )}
-                    <GeoEmptyPanel
-                        title={data.emptyState.noCompetitors.title}
-                        description={data.emptyState.noCompetitors.description}
-                    >
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            <Link href={`${geoBase}/prompts`} className="geo-btn geo-btn-pri">Prompts & comparaisons</Link>
-                            <Link href={`${geoBase}/runs`} className="geo-btn geo-btn-ghost">Voir les runs</Link>
-                        </div>
-                    </GeoEmptyPanel>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                    <ConfirmedCompetitorsList competitors={data.topCompetitors} topCount={topCount} />
-                    <CompetitorPrompts promptsWithCompetitors={data.promptsWithCompetitors} />
-                </div>
-            )}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <ConfirmedCompetitorsList competitors={data.topCompetitors} topCount={topCount} />
+                <CompetitorPrompts promptsWithCompetitors={data.promptsWithCompetitors} />
+            </div>
         </div>
     );
 }

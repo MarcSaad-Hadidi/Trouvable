@@ -33,9 +33,22 @@ function inWindow(elapsed, startMs, endMs) {
   return elapsed >= startMs && elapsed < endMs;
 }
 
+function smoothstep(edge0, edge1, x) {
+  if (edge1 <= edge0) return x >= edge1 ? 1 : 0;
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function cycleEdgeOpacity(elapsed, cycleMs, fadeInMs, fadeOutMs) {
+  return smoothstep(0, fadeInMs, elapsed) * (1 - smoothstep(cycleMs - fadeOutMs, cycleMs, elapsed));
+}
+
 export default function GeoAnimationPanel() {
   const cycleMs = 12500;
   const elapsed = useCycleClock(cycleMs);
+  const fadeInMs = 420;
+  const fadeOutMs = 680;
+  const edge = cycleEdgeOpacity(elapsed, cycleMs, fadeInMs, fadeOutMs);
 
   const typedUserQuestion = getTypedSlice(
     "Meilleur expert en visibilité IA ?",
@@ -56,15 +69,15 @@ export default function GeoAnimationPanel() {
     2850
   );
 
-  const showUserBubble = inWindow(elapsed, 150, 11100);
+  const showUserBubble = inWindow(elapsed, 150, cycleMs);
   const showUserCaret = inWindow(elapsed, 250, 2900);
-  const showResponse = inWindow(elapsed, 3150, 11900);
+  const showResponse = inWindow(elapsed, 3150, cycleMs);
   const showThinking = inWindow(elapsed, 3150, 4300);
-  const showLine1 = inWindow(elapsed, 4450, 11600);
+  const showLine1 = inWindow(elapsed, 4450, cycleMs);
   const showLine1Caret = inWindow(elapsed, 4550, 7850);
-  const showLine2 = inWindow(elapsed, 7950, 11600);
+  const showLine2 = inWindow(elapsed, 7950, cycleMs);
   const showLine2Caret = inWindow(elapsed, 8050, 10950);
-  const showSource = inWindow(elapsed, 11150, 12050);
+  const showSource = inWindow(elapsed, 11150, cycleMs);
 
   return (
     <div className="relative mb-8 flex h-[320px] w-full flex-col overflow-hidden border border-white/[0.04] bg-[#212121] p-5 shadow-inner" style={{ borderRadius: "1.5rem", fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}>
@@ -76,7 +89,7 @@ export default function GeoAnimationPanel() {
         <div
           className="self-end max-w-[90%] rounded-[20px] bg-[#2f2f2f] px-4 py-3 text-[14px] leading-[1.5] text-[#ececec] flex items-center shadow-sm"
           style={{
-            opacity: showUserBubble ? 1 : 0,
+            opacity: showUserBubble ? edge : 0,
             transform: showUserBubble ? "translateY(0)" : "translateY(6px)",
             transition: SOFT_TRANSITION,
           }}
@@ -90,7 +103,7 @@ export default function GeoAnimationPanel() {
         <div
           className="flex flex-col w-full px-1"
           style={{
-            opacity: showResponse ? 1 : 0,
+            opacity: showResponse ? edge : 0,
             transform: showResponse ? "translateY(0)" : "translateY(6px)",
             transition: SOFT_TRANSITION,
           }}
