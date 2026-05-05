@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Plus, MessageSquare, Book, Sparkles, Settings, Share, MoreVertical, Mic, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
-import { FaqSection, LinksSection, CtaSection, AiThinking, TypewriterText } from './shared-primitives';
+import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
 
 function buildChats(page) {
     return [
@@ -41,7 +41,7 @@ function buildChats(page) {
     ];
 }
 
-export default function GeminiPage({ page }) {
+export default function GeminiPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
@@ -82,7 +82,9 @@ export default function GeminiPage({ page }) {
 
     return (
         <div className="min-h-screen bg-[#060609]">
-            <main className="pt-[100px] pb-24 px-6 sm:px-10">
+            <main className="pb-24">
+                <PlatformEditorialLead page={page} />
+                <div className="px-6 sm:px-10">
                 {/* Native App Window - Gemini Style */}
                 <div className="mx-auto max-w-[1280px] h-[800px] rounded-2xl border border-white/10 bg-[#131314] shadow-2xl flex overflow-hidden relative font-sans">
                     
@@ -306,8 +308,10 @@ export default function GeminiPage({ page }) {
                         </div>
                     </div>
                 </div>
+                </div>
                 
                 {/* Regular content */}
+                {trustBrief}
                 <div className="mt-20">
                     <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="indigo" heading="Questions fréquentes" /></section>
                     <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="indigo" heading="Univers connecté" /></section>

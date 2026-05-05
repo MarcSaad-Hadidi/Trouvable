@@ -1,10 +1,10 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { ArrowUpRight, CircleDot, Hexagon, Orbit, RadioTower } from 'lucide-react';
 
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
-import { CommandHeader, CommandPageShell, COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/features/admin/dashboard/shared/components/command';
+import { CommandHeader, CommandPageShell, COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/features/admin/dashboard/shared/components/command';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import {
     DossierEmptyState,
@@ -18,12 +18,12 @@ import {
 function Chip({ children, tone = 'neutral' }) {
     const tones = {
         neutral: 'border-white/[0.08] bg-white/[0.04] text-white/55',
-        ok: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100/90',
-        warn: 'border-amber-400/25 bg-amber-400/10 text-amber-100/90',
-        info: 'border-sky-400/25 bg-sky-400/10 text-sky-100/90',
+        ok: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400',
+        warn: 'border-amber-500/20 bg-amber-500/10 text-amber-400',
+        info: 'border-[#7c6aef]/20 bg-[#7c6aef]/10 text-[#b8adff]',
     };
     return (
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${tones[tone] || tones.neutral}`}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em]", tones[tone] || tones.neutral)}>
             {children}
         </span>
     );
@@ -32,15 +32,14 @@ function Chip({ children, tone = 'neutral' }) {
 function IdentityStrip({ items }) {
     if (!items?.length) return null;
     return (
-        <div className="grid gap-0 divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+        <div className="grid gap-0 divide-y divide-white/[0.04] overflow-hidden rounded-2xl border border-white/[0.06] bg-black/40">
             {items.map((item) => (
-                <div key={item.id} className="flex flex-col gap-1 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <div key={item.id} className="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between group hover:bg-white/[0.02] transition-colors">
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/30">{item.label}</span>
                     <div className="flex items-center gap-2 min-w-0 sm:justify-end">
-                        <span className="text-[13px] font-semibold text-white/88 truncate text-right">{item.value ?? '—'}</span>
+                        <span className="text-[13px] font-bold text-white/90 truncate text-right group-hover:text-white transition-colors">{item.value ?? '—'}</span>
                         <ReliabilityPill value={item?.reliability} />
                     </div>
-                    {item.detail ? <p className="text-[11px] text-white/38 sm:col-span-2 sm:mt-1">{item.detail}</p> : null}
                 </div>
             ))}
         </div>
@@ -51,7 +50,7 @@ function KpiOrbit({ cards }) {
     if (!cards?.length) return null;
     return (
         <div className="relative">
-            <div className="pointer-events-none absolute -inset-4 rounded-[32px] bg-[radial-gradient(ellipse_at_30%_0%,rgba(91,115,255,0.12),transparent_55%)]" />
+            <div className="pointer-events-none absolute -inset-4 rounded-[32px] bg-[radial-gradient(ellipse_at_30%_0%,rgba(255,255,255,0.03),transparent_55%)]" />
             <div className="relative grid gap-3 sm:grid-cols-3">
                 {cards.map((item, i) => {
                     const body = (
@@ -92,11 +91,11 @@ function FreshnessLanes({ items }) {
             {items.map((item) => (
                 <div
                     key={item.id}
-                    className="min-w-[240px] shrink-0 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-3"
+                    className={cn(COMMAND_SURFACE, "min-w-[240px] shrink-0 px-5 py-4")}
                 >
                     <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">{item.label}</div>
-                    <div className="mt-2 text-[15px] font-semibold text-white/90">{item.value ?? '—'}</div>
-                    {item.detail ? <p className="mt-1 text-[11px] text-white/38">{item.detail}</p> : null}
+                    <div className="mt-2 text-[15px] font-bold text-white/90">{item.value ?? '—'}</div>
+                    {item.detail ? <p className="mt-1 text-[11px] text-white/30 italic">"{item.detail}"</p> : null}
                 </div>
             ))}
         </div>
@@ -109,17 +108,17 @@ function ActionQueue({ actions, clientBase }) {
     const open = actions?.totalOpen || 0;
 
     return (
-        <div className={cn(COMMAND_PANEL, 'flex h-full min-h-[320px] flex-col p-4')}>
-            <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
+        <div className={cn(COMMAND_PANEL, 'flex h-full min-h-[320px] flex-col p-0 bg-[#060708]')}>
+            <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">
-                    <Orbit className="h-3.5 w-3.5 text-violet-300/80" />
+                    <Orbit className="h-4 w-4 text-[#7c6aef]" />
                     File tactique
                 </div>
-                <Link href={`${clientBase}/geo/opportunities`} className="text-[11px] font-semibold text-violet-300 hover:text-violet-200">
-                    Ouvrir
+                <Link href={`${clientBase}/geo/opportunities`} className="text-[11px] font-bold text-[#7c6aef] hover:text-[#b8adff] transition-colors">
+                    Ouvrir →
                 </Link>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="px-6 py-4 flex flex-wrap gap-2">
                 <Chip tone={open > 0 ? 'info' : 'ok'}>
                     <CircleDot className="h-3 w-3" />
                     {open} ouverte{open !== 1 ? 's' : ''}
@@ -130,7 +129,7 @@ function ActionQueue({ actions, clientBase }) {
                     </Chip>
                 ) : null}
             </div>
-            <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 geo-scrollbar">
+            <div className="flex-1 min-h-0 px-6 pb-6 space-y-2 overflow-y-auto pr-1 geo-scrollbar">
                 {items.length > 0 ? (
                     items.map((item) => <DossierTimelineItem key={item.id} item={item} />)
                 ) : (
@@ -143,41 +142,41 @@ function ActionQueue({ actions, clientBase }) {
 
 function ConnectorBus({ preview, emptyState, clientBase }) {
     return (
-        <div className={cn(COMMAND_PANEL, 'p-5')}>
-            <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className={cn(COMMAND_PANEL, 'p-0 overflow-hidden bg-[#060708]')}>
+            <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
                 <div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/28">Bus sources</div>
-                    <p className="mt-1 max-w-xl text-[12px] text-white/45">Lecture linéaire : chaque connecteur est un segment du bus, sans grille de cartes.</p>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Bus de Données</div>
+                    <p className="mt-1 text-[11px] text-white/20 uppercase tracking-widest">Connecteurs actifs et santé du flux</p>
                 </div>
                 <Link
                     href={`${clientBase}/dossier/connectors`}
-                    className="inline-flex items-center gap-1 rounded-full border border-white/[0.1] bg-white/[0.03] px-3 py-1.5 text-[11px] font-semibold text-white/70 hover:border-violet-400/30 hover:text-white"
+                    className={cn(COMMAND_BUTTONS.secondary, "py-1.5 px-3")}
                 >
-                    Baie complète
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    Baie complète →
                 </Link>
             </div>
-            <div className="mt-5 space-y-2">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {preview?.length > 0 ? (
                     preview.map((item) => (
                         <div
                             key={item.id}
-                            className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                            className={cn(COMMAND_SURFACE, "flex items-center justify-between px-4 py-3 group hover:bg-white/[0.04] transition-all")}
                         >
                             <div className="min-w-0">
-                                <div className="text-[13px] font-semibold text-white/90">{item.label}</div>
-                                {item.detail ? <p className="text-[11px] text-white/38 mt-0.5">{item.detail}</p> : null}
+                                <div className="text-[13px] font-bold text-white/90 group-hover:text-white transition-colors">{item.label}</div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 shrink-0">
-                                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/55">
+                            <div className="flex items-center gap-3">
+                                <Chip tone={item.status === 'healthy' ? 'ok' : (item.status === 'error' ? 'warn' : 'neutral')}>
                                     {connectorStatusLabel(item?.status)}
-                                </span>
+                                </Chip>
                                 <ReliabilityPill value={item?.reliability} />
                             </div>
                         </div>
                     ))
                 ) : (
-                    <DossierEmptyState {...emptyState} />
+                    <div className="col-span-full">
+                        <DossierEmptyState {...emptyState} />
+                    </div>
                 )}
             </div>
         </div>
@@ -186,48 +185,42 @@ function ConnectorBus({ preview, emptyState, clientBase }) {
 
 function QuickDock({ shared = [], seo = [], geo = [], clientBase }) {
     const groups = [
-        { label: 'Dossier', items: shared },
-        { label: 'SEO', items: seo },
-        { label: 'GEO', items: geo },
+        { label: 'Dossier', items: shared, accent: 'text-[#7c6aef]' },
+        { label: 'SEO Search', items: seo, accent: 'text-emerald-400' },
+        { label: 'IA / GEO', items: geo, accent: 'text-[#7c6aef]' },
     ].filter((g) => g.items?.length);
 
     if (!groups.length) return null;
 
     return (
-        <div className="rounded-[22px] border border-dashed border-white/[0.12] bg-white/[0.02] p-5">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white/28">
-                <RadioTower className="h-3.5 w-3.5" />
-                Accès direct
+        <div className={cn(COMMAND_PANEL, "p-8 bg-white/[0.01]")}>
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 mb-8">
+                <RadioTower className="h-4 w-4" />
+                Accès direct au Mandat
             </div>
-            <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                 {groups.map((g) => (
-                    <div key={g.label} className="min-w-0 flex-1">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/22 mb-2">{g.label}</div>
-                        <div className="flex flex-wrap gap-2">
+                    <div key={g.label} className="space-y-4">
+                        <div className={cn("text-[9px] font-bold uppercase tracking-[0.3em] opacity-40 mb-6", g.accent)}>{g.label}</div>
+                        <div className="flex flex-col gap-3">
                             {g.items.map((item) => (
                                 <Link
                                     key={`${g.label}-${item.id}`}
                                     href={item.href}
-                                    className="group rounded-2xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 transition-colors hover:border-[#5b73ff]/35"
+                                    className="group flex flex-col gap-1 transition-all"
                                 >
-                                    <div className="text-[12px] font-semibold text-white/85 group-hover:text-white">{item.label}</div>
-                                    {item.description ? (
-                                        <div className="text-[10px] text-white/35 mt-0.5 max-w-[200px] line-clamp-2">{item.description}</div>
-                                    ) : null}
+                                    <div className="text-[13px] font-bold text-white/60 group-hover:text-white transition-colors flex items-center gap-2">
+                                        {item.label}
+                                        <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-all -translate-y-0.5" />
+                                    </div>
+                                    {item.description && (
+                                        <div className="text-[10px] text-white/20 group-hover:text-white/30 transition-colors line-clamp-1">{item.description}</div>
+                                    )}
                                 </Link>
                             ))}
                         </div>
                     </div>
                 ))}
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
-                <Link href={`${clientBase}/dossier/activity`} className="text-[11px] font-semibold text-sky-300/90 hover:text-sky-200">
-                    Journal brut
-                </Link>
-                <span className="text-white/15">|</span>
-                <Link href={`${clientBase}/geo/opportunities`} className="text-[11px] font-semibold text-fuchsia-300/90 hover:text-fuchsia-200">
-                    File d&apos;actions
-                </Link>
             </div>
         </div>
     );

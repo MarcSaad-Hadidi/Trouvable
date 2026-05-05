@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, HelpCircle, Link2, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, HelpCircle, Link2 } from 'lucide-react';
 import ContactButton from '@/features/public/shared/ContactButton';
 
 /* ── Shared FAQ accordion (same interaction, but each page styles its wrapper differently) ── */
@@ -91,6 +91,31 @@ export function LinksSection({ links, accent = 'amber', heading = 'Pages connexe
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mb-8 flex items-center gap-3"><Link2 className={`h-5 w-5 ${c}`} /><h2 className="text-xl font-bold">{heading}</h2></motion.div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{links.map((l, i) => <motion.div key={l.href} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}><Link href={l.href} className={`group flex min-h-[140px] flex-col rounded-2xl border border-white/8 bg-[#0a0a0a] p-5 hover:-translate-y-1 ${h} transition`}><div className="mb-3 flex items-center justify-between gap-4"><h3 className="text-[15px] font-semibold text-white">{l.label}</h3><ArrowRight className={`h-4 w-4 shrink-0 opacity-20 group-hover:translate-x-1 ${c} group-hover:opacity-100 transition`} /></div><p className="text-[13px] leading-[1.65] text-[#9a9a9a]">{l.description}</p></Link></motion.div>)}</div>
         </div>
+    );
+}
+
+/** Static H1 + editorial block above platform UI mocks (SEO / GEO). */
+export function PlatformEditorialLead({ page }) {
+    return (
+        <section className="mx-auto max-w-[1280px] px-6 pb-10 pt-[100px] sm:px-10">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white/45">{page.eyebrow}</p>
+            <h1 className="max-w-[920px] text-[clamp(28px,4.2vw,46px)] font-bold leading-[1.08] tracking-[-0.035em] text-white">{page.h1}</h1>
+            <p className="mt-5 max-w-[780px] text-[17px] leading-[1.7] text-[#c8c8c8]">{page.summary}</p>
+            <p className="mt-4 max-w-[780px] text-[15px] leading-[1.75] text-[#a3a3a3]">{page.definition}</p>
+            <p className="mt-4 max-w-[780px] text-[14px] leading-[1.7] text-[#888]">{page.clientProblem}</p>
+            <ul className="mt-6 max-w-[780px] space-y-2 border-l border-white/12 pl-4">
+                {page.problems.map((problem) => (
+                    <li key={problem} className="text-[13px] leading-[1.65] text-[#9a9a9a]">{problem}</li>
+                ))}
+            </ul>
+            <p className="mt-8 max-w-[780px] text-[13px] leading-[1.65] text-white/50">
+                Pour un cadre Montréal et Québec :{' '}
+                <Link href="/agence-geo-montreal" className="font-medium text-[#aebaff] underline decoration-white/15 underline-offset-4 hover:text-white">
+                    agence GEO à Montréal
+                </Link>
+                .
+            </p>
+        </section>
     );
 }
 
@@ -198,7 +223,7 @@ export function CtaSection({ page, accent = 'amber', headline, icon: Icon }) {
                    <motion.div
                        initial={{ opacity: 0, y: -100, scale: 0.2, rotateZ: -45 }}
                        whileInView={{ opacity: 1, y: 0, scale: 1, rotateZ: 0 }}
-                       viewport={{ once: true, margin: "-100px" }}
+                       viewport={{ once: true, amount: 0.2 }}
                        transition={{ type: "spring", bounce: 0.7, duration: 2 }}
                        className="mb-16"
                    >
@@ -225,7 +250,7 @@ export function CtaSection({ page, accent = 'amber', headline, icon: Icon }) {
                <motion.div 
                    initial={{ opacity: 0, scale: 0.95 }}
                    whileInView={{ opacity: 1, scale: 1 }}
-                   viewport={{ once: true, margin: "-100px" }}
+                   viewport={{ once: true, amount: 0.2 }}
                    transition={{ duration: 0.5 }}
                    className="relative"
                >

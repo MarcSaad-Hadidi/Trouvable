@@ -1,6 +1,15 @@
 import React from 'react';
 import { SITE_PHONE_TEL } from '@/lib/site-contact';
-import { SITE_LAST_MODIFIED_ISO, SITE_PRIMARY_LANGUAGE, SITE_URL } from '@/lib/site-config';
+import {
+    SITE_ABOUT_URL,
+    SITE_AI_DESCRIPTION,
+    SITE_AUTHOR_NAME,
+    SITE_LAST_MODIFIED_ISO,
+    SITE_NAME,
+    SITE_PRIMARY_LANGUAGE,
+    SITE_SAME_AS,
+    SITE_URL,
+} from '@/lib/site-config';
 
 const SCHEMA_CONTEXT = 'https://schema.org';
 
@@ -139,13 +148,13 @@ function buildOrganizationSchema(baseUrl, address, dateModified) {
     return compactValue({
         '@type': 'Organization',
         '@id': `${baseUrl}#organization`,
-        name: 'Trouvable',
+        name: SITE_NAME,
         url: baseUrl,
         logo: `${baseUrl}/logos/trouvable_logo_blanc1.png`,
-        description: 'Firme d’exécution québécoise : visibilité organique Google et cohérence dans les réponses IA.',
+        description: SITE_AI_DESCRIPTION,
         inLanguage: SITE_PRIMARY_LANGUAGE,
         telephone: SITE_PHONE_TEL,
-        sameAs: ['https://www.linkedin.com/company/trouvable'],
+        sameAs: SITE_SAME_AS,
         about: [
             'visibilité organique locale',
             'optimisation pour moteurs génératifs',
@@ -181,7 +190,7 @@ function buildProfessionalServiceSchema(baseUrl, dateModified) {
     return compactValue({
         '@type': 'ProfessionalService',
         '@id': `${baseUrl}#professional-service`,
-        name: 'Trouvable',
+        name: SITE_NAME,
         url: baseUrl,
         description: 'Mandats de cartographie, implantation et pilotage continu pour la visibilité Google et IA.',
         inLanguage: SITE_PRIMARY_LANGUAGE,
@@ -194,7 +203,7 @@ function buildProfessionalServiceSchema(baseUrl, dateModified) {
             'Mandat d’implantation',
             'Pilotage continu',
         ],
-        sameAs: ['https://www.linkedin.com/company/trouvable'],
+        sameAs: SITE_SAME_AS,
         contactPoint: [{
             '@type': 'ContactPoint',
             contactType: 'customer support',
@@ -220,9 +229,9 @@ function buildWebsiteSchema(baseUrl, searchPath, dateModified) {
     return compactValue({
         '@type': 'WebSite',
         '@id': `${baseUrl}#website`,
-        name: 'Trouvable',
+        name: SITE_NAME,
         url: baseUrl,
-        description: 'Firme d’exécution en visibilité locale Google et IA pour entreprises au Québec.',
+        description: SITE_AI_DESCRIPTION,
         inLanguage: SITE_PRIMARY_LANGUAGE,
         publisher: { '@id': `${baseUrl}#organization` },
         about: [
@@ -357,13 +366,25 @@ function buildArticleSchema(article, baseUrl, dateModifiedFallback) {
         image: article.image,
         inLanguage: SITE_PRIMARY_LANGUAGE,
         author: {
+            '@type': 'Organization',
             '@id': `${baseUrl}#organization`,
+            name: SITE_AUTHOR_NAME,
+            url: SITE_ABOUT_URL,
         },
         publisher: {
+            '@type': 'Organization',
             '@id': `${baseUrl}#organization`,
+            name: SITE_NAME,
+            logo: {
+                '@type': 'ImageObject',
+                url: `${baseUrl}/logos/trouvable_logo_blanc1.png`,
+            },
         },
         about: article.about,
         mentions: article.mentions,
+        citation: Array.isArray(article.references)
+            ? article.references.map((reference) => reference.url || reference.href).filter(Boolean)
+            : undefined,
         datePublished: article.datePublished,
         dateModified: article.dateModified || dateModifiedFallback || SITE_LAST_MODIFIED_ISO,
     });

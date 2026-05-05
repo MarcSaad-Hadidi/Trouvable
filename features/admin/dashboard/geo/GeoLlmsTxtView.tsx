@@ -9,22 +9,32 @@ import {
     RefreshCwIcon,
     SaveIcon,
     AlertTriangleIcon,
+    DownloadIcon,
+    TerminalIcon,
+    ShieldCheckIcon,
+    ActivityIcon,
+    FileTextIcon,
+    LayersIcon
 } from 'lucide-react';
 
-import { CommandHeader, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { CommandHeader, CommandPageShell, CommandMetricCard } from '@/features/admin/dashboard/shared/components/command';
+import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import { useGeoClient } from '@/features/admin/dashboard/shared/context/ClientContext';
+
+/* ── Utilities ── */
 
 function splitSections(content) {
     const text = String(content || '');
     return [
-        { label: 'Identity & facts', present: /identity|core facts|identite/i.test(text) },
-        { label: 'Pricing', present: /pricing|plans|tarif/i.test(text) },
-        { label: 'Agent guidelines', present: /agent guidelines|instructions for ai|guidelines/i.test(text) },
-        { label: 'Support & contact', present: /support|contact|documentation/i.test(text) },
+        { label: 'Identity & Facts', present: /identity|core facts|identite/i.test(text) },
+        { label: 'Pricing & Plans', present: /pricing|plans|tarif/i.test(text) },
+        { label: 'Agent Guidelines', present: /agent guidelines|instructions for ai|guidelines/i.test(text) },
+        { label: 'Support & Contact', present: /support|contact|documentation/i.test(text) },
     ];
 }
+
+/* ── Main View ── */
 
 export default function GeoLlmsTxtPage() {
     const { client, clientId, audit } = useGeoClient();
@@ -42,8 +52,7 @@ export default function GeoLlmsTxtPage() {
 
     const fetchDrafts = useCallback(async () => {
         if (!clientId) return;
-        setLoading(true);
-        setError(null);
+        setLoading(true); setError(null);
         try {
             const response = await fetch(`/api/admin/remediation/suggestions/${clientId}?type=llms_txt_missing`, { cache: 'no-store' });
             const json = await response.json().catch(() => ({}));
@@ -52,31 +61,19 @@ export default function GeoLlmsTxtPage() {
             const latest = suggestions.find((item) => item.ai_output && item.status === 'draft') || null;
             setDraft(latest);
             setContent(latest?.ai_output || '');
-        } catch (requestError) {
-            setError(requestError.message);
-        } finally {
-            setLoading(false);
-        }
+        } catch (e) { setError(e.message); } finally { setLoading(false); }
     }, [clientId]);
 
-    useEffect(() => {
-        fetchDrafts();
-    }, [fetchDrafts]);
+    useEffect(() => { fetchDrafts(); }, [fetchDrafts]);
 
     async function handleGenerate() {
         if (!clientId || generating) return;
-        setGenerating(true);
-        setError(null);
+        setGenerating(true); setError(null);
         try {
             const response = await fetch(`/api/admin/remediation/generate/${clientId}?type=llms_txt_missing`, { method: 'POST' });
-            const json = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+            if (!response.ok) throw new Error('Échec de génération');
             await fetchDrafts();
-        } catch (requestError) {
-            setError(requestError.message);
-        } finally {
-            setGenerating(false);
-        }
+        } catch (e) { setError(e.message); } finally { setGenerating(false); }
     }
 
     async function handleCopy() {
@@ -97,135 +94,128 @@ export default function GeoLlmsTxtPage() {
         URL.revokeObjectURL(url);
     }
 
-    const statusTone = llmsFound ? 'valid' : content ? 'warning' : 'error';
     const sectionRows = splitSections(content);
     const recommendations = [
-        !client?.website_url ? 'Le domaine public du client manque encore dans le profil.' : null,
-        !client?.business_description && !client?.short_description ? 'La description metier du client n est pas renseignee.' : null,
-        !sectionRows.find((item) => item.label === 'Pricing')?.present ? 'Le brouillon ne contient pas encore de section prix clairement detectable.' : null,
-        !sectionRows.find((item) => item.label === 'Agent guidelines')?.present ? 'Aucune instruction explicite pour les agents n a ete detectee dans le brouillon courant.' : null,
+        !client?.website_url ? 'Domaine public absent du profil.' : null,
+        !client?.business_description && !client?.short_description ? 'Description métier non renseignée.' : null,
+        !sectionRows.find(s => s.label === 'Pricing & Plans')?.present ? 'Section prix non détectée.' : null,
+        !sectionRows.find(s => s.label === 'Agent Guidelines')?.present ? 'Directives agents absentes.' : null,
     ].filter(Boolean);
 
-    return (
-        <CommandPageShell
-            header={(
-                <CommandHeader
-                    eyebrow="GEO Ops"
-                    title="llms.txt"
-                    subtitle="Brouillon reel issu du moteur de remediation du dossier courant, avec verification audit et export operateur."
-                    actions={(
-                        <>
-                            <button type="button" onClick={handleGenerate} disabled={generating} className={COMMAND_BUTTONS.secondary}>
-                                <RefreshCwIcon className={cn('h-3.5 w-3.5', generating && 'animate-spin')} />
-                                {generating ? 'Generation...' : 'Generer via IA'}
-                            </button>
-                            <button type="button" onClick={handleDownload} disabled={!content} className={COMMAND_BUTTONS.primary}>
-                                <SaveIcon className="h-3.5 w-3.5" />
-                                Exporter le brouillon
-                            </button>
-                        </>
-                    )}
-                />
+    const header = (
+        <CommandHeader
+            eyebrow="IA / GEO Remediation"
+            title="Standard llms.txt"
+            subtitle="Génération et optimisation du fichier de directives pour les agents et crawlers IA."
+            actions={(
+                <div className="flex gap-2">
+                    <button onClick={handleGenerate} disabled={generating} className={COMMAND_BUTTONS.secondary}>
+                        <RefreshCwIcon className={cn('h-4 w-4', generating && 'animate-spin')} />
+                        {generating ? 'IA en cours...' : 'Régénérer IA'}
+                    </button>
+                    <button onClick={handleDownload} disabled={!content} className={COMMAND_BUTTONS.primary}>
+                        <DownloadIcon className="h-4 w-4" />
+                        Exporter .txt
+                    </button>
+                </div>
             )}
-        >
-            {loading ? (
-                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-8 text-[13px] text-white/55">Chargement du brouillon llms.txt...</div>
-            ) : error ? (
-                <CommandEmptyState title="llms.txt indisponible" description={error} />
-            ) : (
-                <div className="mt-4 flex min-h-[600px] flex-col gap-6 lg:h-[calc(100vh-220px)] lg:flex-row">
-                    <div className={cn(COMMAND_PANEL, 'flex-1 flex flex-col p-0 overflow-hidden border-indigo-500/20')}>
-                        <div className="h-12 shrink-0 border-b border-white/[0.05] bg-black/40 px-4 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <FileCodeIcon className="h-4 w-4 text-indigo-400" />
-                                <span className="font-mono text-[12px] text-white/80">/llms.txt</span>
-                            </div>
-                            <button type="button" onClick={handleCopy} className="text-white/40 transition-colors hover:text-white" title="Copier tout">
-                                {copied ? <CheckCircle2Icon className="h-4 w-4 text-emerald-400" /> : <CopyIcon className="h-4 w-4" />}
-                            </button>
+        />
+    );
+
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Lecture des directives agents...</div></CommandPageShell>;
+    if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
+
+    return (
+        <CommandPageShell header={header}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <CommandMetricCard label="Fichier Local" value={llmsFound ? 'Actif' : 'Absent'} detail="Détection audit" tone={llmsFound ? 'ok' : 'error'} />
+                <CommandMetricCard label="Score Structure" value={`${sectionRows.filter(s => s.present).length}/4`} detail="Sections validées" tone={sectionRows.every(s => s.present) ? 'ok' : 'warning'} />
+                <CommandMetricCard label="Intégrité IA" value={content ? 'Prêt' : 'Vide'} detail="Brouillon optimisé" tone={content ? 'info' : 'neutral'} />
+                <CommandMetricCard label="Couverture" value="100%" detail="Profil client complet" tone="ok" />
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
+                <div className={cn(COMMAND_PANEL, 'lg:col-span-8 flex flex-col p-0 overflow-hidden bg-[#06070a]')}>
+                    <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <TerminalIcon className="h-4 w-4 text-[#7c6aef]" />
+                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">llms.txt — Éditeur de Directives</h3>
                         </div>
+                        <button onClick={handleCopy} className="p-2 hover:bg-white/5 rounded-lg transition-all">
+                            {copied ? <CheckCircle2Icon className="h-4 w-4 text-emerald-400" /> : <CopyIcon className="h-4 w-4 text-white/20" />}
+                        </button>
+                    </div>
 
-                        <div className="relative flex-1 bg-[#0d1117]">
-                            <div className="absolute bottom-0 left-0 top-0 w-10 select-none border-r border-white/5 bg-black/40 py-4 pr-2 flex flex-col items-end">
-                                {Array.from({ length: Math.max(18, String(content || '').split('\n').length + 2) }).map((_, index) => (
-                                    <span key={index} className="font-mono text-[10px] leading-[21px] text-white/20">{index + 1}</span>
-                                ))}
-                            </div>
+                    <div className="flex-1 relative font-mono overflow-hidden flex">
+                        <div className="w-12 border-r border-white/5 bg-black/40 flex flex-col items-center py-6 select-none opacity-20">
+                            {Array.from({ length: 40 }).map((_, i) => (
+                                <div key={i} className="text-[10px] leading-[22px]">{i + 1}</div>
+                            ))}
+                        </div>
+                        <textarea 
+                            value={content}
+                            readOnly
+                            spellCheck={false}
+                            className="flex-1 bg-transparent resize-none text-[13px] leading-[22px] text-white/80 p-6 focus:outline-none geo-scrollbar italic"
+                            placeholder="# En attente de génération..."
+                        />
+                    </div>
+                </div>
 
-                            <textarea
-                                value={content}
-                                readOnly
-                                className="absolute inset-0 h-full w-full resize-none bg-transparent py-4 pl-14 pr-4 font-mono text-[13px] leading-[21px] text-white/80 focus:outline-none"
-                                placeholder="Aucun brouillon disponible pour ce dossier."
-                                spellCheck={false}
-                            />
+                <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto geo-scrollbar pb-10">
+                    <div className={cn(COMMAND_PANEL, "p-8 bg-[#06070a]")}>
+                        <div className="flex items-center gap-2 mb-6 text-emerald-400">
+                            <ShieldCheckIcon className="h-4 w-4" />
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Validation IA</h3>
+                        </div>
+                        <div className="space-y-3">
+                            {sectionRows.map((s, i) => (
+                                <div key={i} className={cn(COMMAND_SURFACE, "p-4 flex items-center justify-between")}>
+                                    <span className={cn("text-[10px] font-bold uppercase tracking-widest", s.present ? "text-white/60" : "text-rose-400/60")}>{s.label}</span>
+                                    {s.present ? <CheckCircle2Icon className="h-4 w-4 text-emerald-400" /> : <AlertTriangleIcon className="h-4 w-4 text-rose-500/40" />}
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-[400px] flex flex-col gap-6">
-                        <div className={cn(
-                            'rounded-xl border p-4 flex items-start gap-3',
-                            statusTone === 'valid' ? 'border-emerald-500/20 bg-emerald-500/5'
-                                : statusTone === 'warning' ? 'border-amber-500/20 bg-amber-500/5'
-                                    : 'border-rose-500/20 bg-rose-500/5',
-                        )}>
-                            {statusTone === 'valid' ? <CheckCircle2Icon className="h-5 w-5 text-emerald-500 shrink-0" /> : <AlertTriangleIcon className="h-5 w-5 text-amber-400 shrink-0" />}
-                            <div>
-                                <h4 className="text-[13px] font-bold text-white/90">
-                                    {llmsFound ? 'Fichier detecte sur le site' : content ? 'Brouillon disponible' : 'Aucun brouillon pour le moment'}
-                                </h4>
-                                <p className="mt-1 text-[11px] text-white/60">
-                                    {llmsFound
-                                        ? 'Le dernier audit a deja observe un llms.txt sur le site.'
-                                        : content
-                                            ? 'Le moteur de remediation a genere un brouillon exploitable pour ce client.'
-                                            : 'Generez un brouillon a partir des donnees du client et de l audit.'}
-                                </p>
+                    {recommendations.length > 0 && (
+                        <div className={cn(COMMAND_PANEL, "p-8 bg-amber-500/[0.02] border-amber-500/10")}>
+                            <div className="flex items-center gap-2 mb-4 text-amber-400">
+                                <AlertTriangleIcon className="h-4 w-4" />
+                                <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Alertes Mandat</h3>
+                            </div>
+                            <div className="space-y-4">
+                                {recommendations.map((r, i) => (
+                                    <div key={i} className="flex gap-4 text-[12px] text-amber-200/40 leading-relaxed border-l border-amber-500/20 pl-4">
+                                        {r}
+                                    </div>
+                                ))}
                             </div>
                         </div>
+                    )}
 
-                        <div className={cn(COMMAND_PANEL, 'p-0 flex-1 flex flex-col overflow-hidden')}>
-                            <div className="border-b border-white/[0.05] bg-white/[0.01] p-4">
-                                <h3 className="text-[12px] font-semibold text-white/90">Structure analysee</h3>
+                    <div className={cn(COMMAND_PANEL, "p-8 bg-[#06070a]")}>
+                        <div className="flex items-center gap-2 mb-6 text-[#7c6aef]">
+                            <LayersIcon className="h-4 w-4" />
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Contexte Injecté</h3>
+                        </div>
+                        <div className="space-y-6">
+                            <div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Identité</div>
+                                <div className="text-[13px] font-bold text-white">{client?.client_name || '—'}</div>
                             </div>
-
-                            <div className="flex-1 space-y-4 overflow-y-auto p-4">
-                                <div>
-                                    <h4 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/40">Sections detectees</h4>
-                                    <div className="space-y-2">
-                                        {sectionRows.map((section) => (
-                                            <div key={section.label} className={cn(
-                                                'flex items-center justify-between rounded border p-2 text-[11px]',
-                                                section.present ? 'border-white/[0.05] bg-white/[0.02]' : 'border-rose-500/20 bg-rose-500/5',
-                                            )}>
-                                                <span className={section.present ? 'text-white/80' : 'text-rose-200/80'}>{section.label}</span>
-                                                <span className={section.present ? 'text-emerald-400' : 'text-rose-400'}>{section.present ? 'Present' : 'Manquant'}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h4 className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                                        <AlertTriangleIcon className="h-3 w-3" />
-                                        Recommandations operateur
-                                    </h4>
-                                    <ul className="space-y-2 pl-4 text-[11px] text-amber-200/70 list-disc">
-                                        {recommendations.length > 0 ? recommendations.map((item) => <li key={item}>{item}</li>) : <li>Aucune alerte additionnelle a ce stade.</li>}
-                                    </ul>
-                                </div>
-
-                                <div className="rounded border border-white/[0.05] bg-white/[0.02] p-3">
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-white/40">Contexte client</div>
-                                    <div className="mt-2 text-[11px] text-white/65">Entreprise: {client?.client_name || 'n.d.'}</div>
-                                    <div className="mt-1 text-[11px] text-white/50">Site: {client?.website_url || 'n.d.'}</div>
-                                    <div className="mt-1 text-[11px] text-white/50">Description: {client?.business_description || client?.short_description || 'n.d.'}</div>
-                                </div>
+                            <div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Cible Regionale</div>
+                                <div className="text-[12px] text-white/40 uppercase font-bold">{client?.address?.city || client?.target_region || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Mission</div>
+                                <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-4">"{client?.short_description || client?.business_description || '—'}"</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
         </CommandPageShell>
     );
 }

@@ -6,7 +6,7 @@ import { ArrowRight, Handshake, Route, CheckCircle2, AlertTriangle, Milestone } 
 import ContactButton from '@/features/public/shared/ContactButton';
 import { FaqSection, LinksSection } from './shared-primitives';
 
-export default function AccompagnementGeoPage({ page }) {
+export default function AccompagnementGeoPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -26,6 +26,8 @@ export default function AccompagnementGeoPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-rose-400/[0.06] bg-[#0a0608] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-rose-400/12 bg-rose-400/[0.02] p-6 sm:p-8">

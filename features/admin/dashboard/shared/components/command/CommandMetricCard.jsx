@@ -5,10 +5,10 @@ import { COMMAND_PANEL, cn, getToneMeta } from './tokens';
 export default function CommandMetricCard({ label, value, detail = null, tone = 'neutral', href = null }) {
     const toneMeta = getToneMeta(tone);
     const content = (
-        <div className={cn(COMMAND_PANEL, toneMeta.panel, 'flex h-full min-h-[112px] flex-col justify-between p-4')}>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/[0.38]">{label}</div>
-            <div className={cn('mt-4 text-[28px] font-semibold tracking-[-0.05em]', toneMeta.text)}>{value}</div>
-            {detail ? <div className="mt-3 text-[11px] leading-relaxed text-white/[0.6]">{detail}</div> : null}
+        <div className={cn(COMMAND_PANEL, toneMeta.panel, 'flex h-full min-h-[112px] flex-col justify-between p-5 transition-all hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.02)]')}>
+            <div className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">{label}</div>
+            <div className={cn('mt-4 text-[32px] font-black tracking-[-0.05em]', toneMeta.text)}>{value}</div>
+            {detail ? <div className="mt-3 text-[12px] font-medium leading-relaxed text-white/70">{detail}</div> : null}
         </div>
     );
 

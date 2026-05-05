@@ -94,7 +94,7 @@ export async function POST(request) {
             fallbackProvider: 'gemini',
         });
 
-        const suggestion = (result.text || '').trim().replace(/^["«»"]+|["«»"]+$/g, '');
+        const suggestion = (result.text || '').trim().replace(/^["«»]+|["«»]+$/g, '');
 
         if (!suggestion) {
             return NextResponse.json({ error: 'Aucune suggestion generee' }, { status: 502 });

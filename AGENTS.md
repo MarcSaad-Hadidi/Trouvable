@@ -93,6 +93,25 @@ If data is missing, say it is missing.
 - Stripe: `STRIPE_SECRET_KEY` (server), `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (client)
 - AI: `MISTRAL_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY` (all server-only)
 
+## Admin shell scroll model (do not break)
+
+The admin workspace uses a fixed three-tier scroll model. Operator pages
+must respect it or scroll will break in production:
+
+1. **`.geo-shell`** — `height: 100vh; overflow: hidden`. Always full viewport, never scrolls.
+2. **`.geo-main`** — flex column, `overflow: hidden`. Hosts the chrome (MissionBar / MandateRibbon) and the content viewport.
+3. **`.geo-content`** — the **single** `overflow-y: auto` viewport. Every operator page is rendered inside it.
+
+Rules for pages and feature components rendered inside `.geo-content`:
+
+- Do **not** set `h-screen`, `max-h-screen`, or `overflow-y-auto` on a top-level page wrapper. The shell already owns the scroll.
+- Use `min-h-0` on flex children that must shrink (e.g. nested column layouts inside drawers or two-pane shells).
+- Inner `overflow-hidden` is fine on cards, charts, and decorative containers — but never on the page-root element.
+- Drawers (e.g. `EvidenceDrawer`) own their own scroll via a portal and `overscroll-behavior: contain`. Do not duplicate that pattern at page level.
+- The unified `OperatorPageShell` wraps `.operator-shell`, which intentionally has no `overflow` — it is layout-only.
+
+When in doubt: render plain content inside `<OperatorPageShell>` and let `.geo-content` scroll the viewport.
+
 ## Validation
 
 After meaningful changes, recommend the smallest relevant validation: `npm run lint`, targeted test, single route check, focused browser verification. Do not recommend heavy suites unless scope justifies it.

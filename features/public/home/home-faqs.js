@@ -1,7 +1,7 @@
 const HOME_CANONICAL_QA = [
     {
         question: 'Quelle différence entre SEO local et GEO pour une entreprise de services ?',
-        answer: 'Le SEO local améliore votre visibilité dans Google Maps et les résultats organiques. Le GEO renforce la compréhension de votre entreprise par les assistants conversationnels. Les deux se complètent pour augmenter votre présence sur des intentions locales qualifiées.',
+        answer: 'Le SEO local améliore votre visibilité dans Google Maps et les résultats organiques. Le GEO renforce la compréhension de votre entreprise par les assistants conversationnels. Les deux se complètent pour augmenter votre présence sur des intentions locales qualifiées, sans confondre classement, citation et prise de contact.',
     },
     {
         question: 'Pourquoi les entreprises locales perdent-elles des opportunités dans les réponses IA ?',
@@ -13,11 +13,11 @@ const HOME_CANONICAL_QA = [
     },
     {
         question: 'Combien de temps faut-il pour voir des progrès concrets ?',
-        answer: 'Les premiers effets apparaissent après la mise en conformité des signaux critiques, puis progressent selon les cycles d’indexation. En pratique, on observe une amélioration sur plusieurs semaines, puis une consolidation sur quelques mois avec un pilotage régulier.',
+        answer: 'Les premiers effets apparaissent après la mise en conformité des signaux critiques, puis progressent selon les cycles d’indexation. En pratique, on observe une amélioration sur plusieurs semaines, puis une consolidation sur quelques mois avec un pilotage régulier et des contrôles documentés.',
     },
     {
         question: 'Faut-il refaire complètement le site pour travailler la visibilité IA ?',
-        answer: 'Non. Dans la plupart des cas, il faut surtout structurer correctement l’existant: clarifier les contenus clés, corriger les incohérences et renforcer les pages à intention. L’objectif est d’améliorer la lisibilité pour les moteurs sans casser l’expérience utilisateur.',
+        answer: 'Non. Dans la plupart des cas, il faut surtout structurer correctement l’existant: clarifier les contenus clés, corriger les incohérences et renforcer les pages à intention. L’objectif est d’améliorer la lisibilité pour les moteurs sans casser l’expérience utilisateur ni déplacer inutilement vos parcours commerciaux.',
     },
 ];
 

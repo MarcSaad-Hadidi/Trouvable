@@ -4,7 +4,32 @@ import { redirect } from 'next/navigation';
 
 import { resolvePortalMembership } from '@/features/portal/server/access';
 import { SITE_CONTACT_EMAIL } from '@/lib/site-contact';
+
 export const dynamic = 'force-dynamic';
+
+function formatDateLong(iso) {
+    if (!iso) return null;
+    try {
+        return new Date(iso).toLocaleDateString('fr-CA', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    } catch {
+        return null;
+    }
+}
+
+const ISSUE_LABEL = (() => {
+    try {
+        const date = new Date();
+        const month = date.toLocaleDateString('fr-CA', { month: 'long' });
+        const year = date.getFullYear();
+        return `Édition · ${month.charAt(0).toUpperCase()}${month.slice(1)} ${year}`;
+    } catch {
+        return 'Édition courante';
+    }
+})();
 
 export default async function PortalIndexPage() {
     const membershipState = await resolvePortalMembership();
@@ -16,78 +41,110 @@ export default async function PortalIndexPage() {
 
     if (memberships.length === 0) {
         return (
-            <section className="mx-auto max-w-3xl rounded-[28px] border border-white/10 bg-[#0e0e10] p-8 shadow-[0_20px_70px_rgba(0,0,0,0.48)]">
-                <div className="inline-flex rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-300">
-                    Acces en attente
-                </div>
-                <h1 className="mt-5 text-3xl font-black tracking-[-0.05em] text-white">
-                    Aucun dossier client n est encore lie a ce compte
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/55">
-                    Le portail se debloque uniquement lorsqu un acces actif existe pour votre compte via votre identifiant Clerk
-                    ou une adresse Clerk verifiee. Si vous venez d etre invite, demandez a notre equipe de confirmer
-                    l adresse suivante:
-                </p>
-                <div className="mt-5 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white/75">
-                    {membershipState.primaryVerifiedEmail || 'Aucune adresse verifiee disponible dans ce compte'}
-                </div>
-                <div className="mt-8 flex flex-wrap gap-3">
+            <article className="mx-auto max-w-3xl">
+                <header className="border-b border-white/[0.07] pb-6">
+                    <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                        <span>Trouvable · Restitution</span>
+                        <span>{ISSUE_LABEL}</span>
+                    </div>
+                    <h1 className="mt-6 font-display text-[44px] font-semibold leading-[1.05] tracking-[-0.045em] text-white">
+                        Votre dossier n'est pas encore relié à ce compte.
+                    </h1>
+                    <p className="mt-5 max-w-2xl text-[15px] leading-[1.78] text-white/55">
+                        L'espace de restitution se débloque dès qu'un accès actif existe pour votre identifiant Clerk
+                        ou pour une adresse vérifiée présente dans votre compte. Notre équipe peut établir le lien
+                        sur demande, en quelques minutes.
+                    </p>
+                </header>
+
+                <section className="mt-8 rounded-[20px] border border-white/[0.08] bg-white/[0.02] p-6">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                        Adresse vérifiée détectée
+                    </div>
+                    <div className="mt-3 font-mono text-[14px] text-white/85">
+                        {membershipState.primaryVerifiedEmail || 'Aucune adresse vérifiée disponible dans ce compte.'}
+                    </div>
+                </section>
+
+                <footer className="mt-10 flex flex-wrap gap-3">
                     <a
                         href={`mailto:${SITE_CONTACT_EMAIL}`}
-                        className="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-black transition hover:bg-[#d6d6d6]"
+                        className="inline-flex items-center rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-black transition hover:bg-[#dadada]"
                     >
                         Contacter Trouvable
                     </a>
                     <SignOutButton redirectUrl="/portal/sign-in">
                         <button
                             type="button"
-                            className="inline-flex items-center rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+                            className="inline-flex items-center rounded-full border border-white/[0.10] bg-white/[0.03] px-5 py-2.5 text-[13px] font-semibold text-white/65 transition hover:border-white/[0.18] hover:bg-white/[0.06] hover:text-white"
                         >
                             Changer de compte
                         </button>
                     </SignOutButton>
-                </div>
-            </section>
+                </footer>
+            </article>
         );
     }
 
     return (
-        <section className="space-y-6">
-            <div className="rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(91,115,255,0.16),transparent_34%),linear-gradient(180deg,#121316_0%,#0a0a0b_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.48)]">
-                <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
-                    Selection du dossier
+        <article className="space-y-10">
+            <header className="border-b border-white/[0.07] pb-8">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                    <span>Trouvable · Restitution</span>
+                    <span>{ISSUE_LABEL}</span>
                 </div>
-                <h1 className="mt-5 text-3xl font-black tracking-[-0.05em] text-white">
-                    Choisissez le dossier client a consulter
+                <h1 className="mt-6 font-display text-[clamp(36px,5vw,56px)] font-semibold leading-[1.04] tracking-[-0.045em] text-white">
+                    Sommaire des dossiers à votre nom.
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">
-                    Chaque vue reste en lecture seule et se limite au dossier auquel votre compte est autorise.
+                <p className="mt-5 max-w-2xl text-[15px] leading-[1.78] text-white/55">
+                    Chaque entrée ouvre une lecture en restitution stricte du mandat correspondant.
+                    Aucune action opérationnelle n'est exécutée depuis cet espace : tout y est observé,
+                    pour comprendre où en est votre visibilité.
                 </p>
-            </div>
+            </header>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {memberships.map((membership) => (
-                    <Link
-                        key={membership.id}
-                        href={`/portal/${membership.client_slug}`}
-                        className="group rounded-[24px] border border-white/10 bg-[#0e0f11] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.38)] transition hover:border-white/20 hover:bg-white/[0.04]"
-                    >
-                        <div className="flex items-start justify-between gap-4">
-                            <div>
-                                <div className="text-xl font-bold tracking-[-0.03em] text-white">{membership.client_name}</div>
-                                <div className="mt-2 text-sm text-white/45">{membership.business_type || 'Entreprise locale'}</div>
+            <section className="space-y-3">
+                {memberships.map((membership, index) => {
+                    const order = String(index + 1).padStart(2, '0');
+                    return (
+                        <Link
+                            key={membership.id}
+                            href={`/portal/${membership.client_slug}`}
+                            className="group block rounded-[20px] border border-white/[0.07] bg-white/[0.015] p-6 transition-all duration-300 hover:border-white/[0.18] hover:bg-white/[0.04]"
+                        >
+                            <div className="grid grid-cols-[auto_1fr_auto] items-start gap-6">
+                                <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/30">
+                                    {order}
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="font-display text-[22px] font-semibold leading-tight tracking-[-0.03em] text-white transition group-hover:text-white">
+                                        {membership.client_name}
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-white/45">
+                                        <span>{membership.business_type || 'Entreprise locale'}</span>
+                                        {membership.website_url ? (
+                                            <>
+                                                <span className="text-white/15">·</span>
+                                                <span className="font-mono text-[11.5px]">
+                                                    {membership.website_url.replace(/^https?:\/\//, '')}
+                                                </span>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2 text-right">
+                                    <span className="rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                                        {membership.portal_role}
+                                    </span>
+                                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/35 transition group-hover:text-white/80">
+                                        Ouvrir →
+                                    </span>
+                                </div>
                             </div>
-                            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
-                                {membership.portal_role}
-                            </div>
-                        </div>
-                        <div className="mt-6 flex items-center justify-between text-sm">
-                            <span className="text-white/45">{membership.website_url || membership.client_slug}</span>
-                            <span className="text-[#a9b6ff] transition group-hover:text-white">Ouvrir</span>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-        </section>
+                        </Link>
+                    );
+                })}
+            </section>
+        </article>
     );
 }

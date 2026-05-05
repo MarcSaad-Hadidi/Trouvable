@@ -11,8 +11,7 @@ import {
   Target,
   ShieldCheck,
   TrendingUp,
-  X,
-  Crosshair
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactButton from "@/features/public/shared/ContactButton";
@@ -68,6 +67,22 @@ const MARKET_STATS = [
   },
 ];
 
+const MOTION_EASE = [0.16, 1, 0.3, 1];
+
+const compareSectionMotion = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: MOTION_EASE, staggerChildren: 0.14, delayChildren: 0.04 },
+  },
+};
+
+const compareCardMotion = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.82, ease: MOTION_EASE } },
+};
+
 function RadarScanner() {
   return (
     <div className="pointer-events-none absolute right-[-100px] top-[-60px] h-[500px] w-[500px] opacity-[0.08] lg:opacity-[0.12]">
@@ -99,7 +114,6 @@ function RadarScanner() {
 /* ================= MAIN COMPONENT ================= */
 
 export default function TrouvableLandingPage() {
-
   return (
     <main id="main-content" className="min-h-screen overflow-x-hidden bg-[#080808] font-[Inter] text-[#f0f0f0] antialiased">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(91,115,255,0.08),transparent_55%),linear-gradient(to_bottom,#080808,#080808)]" />
@@ -155,6 +169,28 @@ export default function TrouvableLandingPage() {
 
         <div>
           <PipelinePreview />
+        </div>
+      </section>
+
+      <section className="border-y border-white/[0.06] bg-[#0c0c0f] px-6 py-10 sm:px-10" aria-labelledby="geo-mtl-band-title">
+        <div className="mx-auto flex max-w-[1120px] flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="max-w-2xl">
+            <p id="geo-mtl-band-title" className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7b8fff]">
+              Ancrage local
+            </p>
+            <p className="mt-2 text-[15px] leading-[1.65] text-white/78">
+              <Link href="/agence-geo-montreal" className="font-semibold text-white underline decoration-[#5b73ff]/40 underline-offset-4 transition hover:decoration-[#7b8fff]">
+                Agence GEO à Montréal
+              </Link>
+              {' '}pour les mandats Google, ChatGPT, Perplexity et réponses IA : même méthode et mêmes livrables que sur la page pilier, avec une lecture explicite du marché local et bilingue.
+            </p>
+          </div>
+          <Link
+            href="/agence-geo-montreal"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#5b73ff]/35 bg-[#5b73ff]/10 px-5 py-3 text-sm font-medium text-[#d6dcff] transition hover:-translate-y-px hover:border-[#7b8fff]/50 hover:text-white"
+          >
+            Voir le pilier Montréal <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
@@ -237,7 +273,13 @@ export default function TrouvableLandingPage() {
         <div className="pointer-events-none absolute right-0 bottom-0 h-[600px] w-[600px] translate-x-1/3 translate-y-1/3 rounded-full bg-[#5b73ff]/[0.04] blur-[120px]" />
 
         <div className="relative z-10 mx-auto max-w-[1120px]">
-          <div className="mb-16 text-center">
+          <motion.div
+            className="mb-16 text-center"
+            variants={compareSectionMotion}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.35 }}
+          >
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-[#7b8fff]">
               Double contrainte
             </div>
@@ -248,11 +290,17 @@ export default function TrouvableLandingPage() {
             <p className="mx-auto max-w-2xl text-[16px] leading-[1.65] text-[#a0a0a0]">
               Une entreprise peut avoir un excellent positionnement organique &ldquo;classique&rdquo;, mais être ignorée par les moteurs d&apos;intelligence artificielle car elle manque de clarté sémantique.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid gap-6 lg:grid-cols-12">
+          <motion.div
+            className="grid gap-6 lg:grid-cols-12"
+            variants={compareSectionMotion}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.22 }}
+          >
             {/* Colonne 1 : SEO Classique (Bento 5 cols) */}
-            <div className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-8 lg:col-span-5 hover:border-white/20 transition-colors shadow-none">
+            <motion.div className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-8 lg:col-span-5 hover:border-white/20 transition-colors shadow-none" variants={compareCardMotion}>
               <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
                 <Search className="h-32 w-32 text-white" />
               </div>
@@ -279,10 +327,10 @@ export default function TrouvableLandingPage() {
                   </li>
                 </ul>
               </div>
-            </div>
+            </motion.div>
 
             {/* Colonne 2 : Visibilité IA (Bento 7 cols) */}
-            <div className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-[#5b73ff]/30 bg-gradient-to-br from-[#5b73ff]/[0.08] to-[#0f0f0f] p-8 lg:col-span-7 shadow-[0_0_80px_rgba(91,115,255,0.06)_inset]">
+            <motion.div className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-[#5b73ff]/30 bg-gradient-to-br from-[#5b73ff]/[0.08] to-[#0f0f0f] p-8 lg:col-span-7 shadow-[0_0_80px_rgba(91,115,255,0.06)_inset]" variants={compareCardMotion}>
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#5b73ff]/60 to-transparent opacity-50" />
               <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#5b73ff]/10 blur-[80px]" />
               
@@ -320,8 +368,8 @@ export default function TrouvableLandingPage() {
                   </ul>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Mini exemple anonymisé (Bento Full Width) */}
           <div className="mt-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#0a0a0a] p-8 lg:p-12 relative shadow-none">
@@ -584,6 +632,24 @@ export default function TrouvableLandingPage() {
               </p>
             </aside>
           </div>
+        </div>
+      </section>
+
+      <section className="border-y border-white/[0.06] bg-[#080808] px-6 py-10 sm:px-10">
+        <div className="mx-auto max-w-[1120px]">
+          <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+          <ul className="grid gap-3 md:grid-cols-3">
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Trouvable exécute les mandats de visibilité Google, SEO local et réponses IA pour des entreprises québécoises.
+            </li>
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Le travail part de signaux vérifiables : pages publiques, données structurées, FAQ, preuves et cohérence locale.
+            </li>
+            <li className="border-l border-white/10 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+              Les résultats ne sont pas garantis ; chaque mandat documente ce qui est corrigé, mesuré et encore à vérifier.
+            </li>
+          </ul>
+          <div className="mt-5 text-[12px] uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
         </div>
       </section>
 

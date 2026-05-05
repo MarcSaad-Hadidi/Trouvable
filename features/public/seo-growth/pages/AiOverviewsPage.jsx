@@ -1,11 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
-import { TypewriterText, AiThinking, FaqSection, LinksSection } from './shared-primitives';
+import { TypewriterText, AiThinking, FaqSection, LinksSection, PlatformEditorialLead } from './shared-primitives';
 
-export default function AiOverviewsPage({ page }) {
+export default function AiOverviewsPage({ page, trustBrief }) {
     const [isGenerating, setIsGenerating] = useState(true);
 
     useEffect(() => {
@@ -16,8 +16,9 @@ export default function AiOverviewsPage({ page }) {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#060609] text-[#e8eaed] font-sans pb-24">
-            <main className="pt-[100px] px-4 sm:px-8">
+        <div className="min-h-screen bg-[#060609] text-[#e8eaed] font-sans">
+            <main className="px-4 pb-24 sm:px-8">
+                <PlatformEditorialLead page={page} />
                 {/* Google Native App Window */}
                 <div className="max-w-[1400px] mx-auto rounded-2xl border border-white/10 bg-[#202124] shadow-2xl overflow-hidden relative flex flex-col min-h-[800px]">
 
@@ -32,10 +33,15 @@ export default function AiOverviewsPage({ page }) {
                             <span className="text-[#ea4335]">e</span>
                         </div>
                         <div className="flex-1 max-w-[700px] relative">
+                            <label htmlFor="ai-overviews-demo-query" className="sr-only">
+                                Requête illustrée dans la simulation AI Overviews
+                            </label>
                             <input
+                                id="ai-overviews-demo-query"
                                 type="text"
                                 className="w-full bg-[#303134] hover:bg-[#3c4043] focus:bg-[#303134] rounded-full h-[46px] pl-6 pr-28 text-[15px] text-white outline-none border border-transparent shadow-sm transition-colors"
                                 value={page.h1}
+                                aria-label="Requête illustrée dans la simulation AI Overviews"
                                 readOnly
                             />
                             <div className="absolute right-4 top-0 h-full flex items-center gap-3.5 text-[#9aa0a6]">
@@ -216,8 +222,8 @@ export default function AiOverviewsPage({ page }) {
                                     },
                                     {
                                         title: "Audit de Visibilité IA - Mesurez votre impact",
-                                        url: "https://trouvable.ca/offres/audit-visibilite-ia",
-                                        breadcrumb: "trouvable.ca › offres › audit-visibilite-ia",
+                                        url: "https://trouvable.ca/services/audit-visibilite-ia",
+                                        breadcrumb: "trouvable.ca › services › audit-visibilite-ia",
                                         description: "Testez comment votre marque apparaît dans ChatGPT, Gemini et Claude. Obtenez un rapport personnalisé sur votre présence dans les moteurs génératifs."
                                     },
                                     {
@@ -313,6 +319,8 @@ export default function AiOverviewsPage({ page }) {
 
                     </div>
                 </div>
+
+                {trustBrief}
 
                 {/* Regular bottom content */}
                 <div className="mt-20 max-w-[1400px] mx-auto">

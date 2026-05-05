@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryCreateSchema } from '@/lib/admin-schemas';
 import * as db from '@/lib/db';
+import { inferDiscoveryMode, normalizeDiscoveryMode } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { buildPromptMetadata, shouldSoftBlockPromptActivation } from '@/lib/queries/prompt-intelligence';
 import { serializePromptContractForDb } from '@/lib/queries/prompt-contract-persistence';
 
@@ -46,12 +47,21 @@ export async function POST(request) {
             primaryUseCase: input.primary_use_case || input.prompt_metadata?.primary_use_case || '',
             differentiationAngle: input.differentiation_angle || input.prompt_metadata?.differentiation_angle || '',
         });
+        const resolvedDiscoveryMode = input.discovery_mode
+            ? normalizeDiscoveryMode(input.discovery_mode)
+            : inferDiscoveryMode({
+                category: input.category || input.query_type,
+                intentFamily: input.intent_family,
+                queryText: input.query_text,
+                clientName: client?.client_name || '',
+            });
         const activationBlocked = shouldSoftBlockPromptActivation(promptMetadata) && input.is_active !== false;
         const serialized = serializePromptContractForDb({
             contract: promptMetadata,
             existingPromptMetadata: input.prompt_metadata || {},
             extraPromptMetadata: {
                 generated_at: new Date().toISOString(),
+                discovery_mode: resolvedDiscoveryMode,
             },
         });
 
@@ -59,6 +69,7 @@ export async function POST(request) {
             client_id: input.clientId,
             query_text: input.query_text,
             category: input.category,
+            discovery_mode: resolvedDiscoveryMode,
             locale: input.locale,
             query_type: input.query_type,
             is_active: activationBlocked ? false : input.is_active,
@@ -72,6 +83,7 @@ export async function POST(request) {
             details: {
                 id: row.id,
                 quality_status: promptMetadata.quality_status,
+                discovery_mode: resolvedDiscoveryMode,
                 activation_blocked: activationBlocked,
             },
             performed_by: admin.email,

@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -95,12 +94,6 @@ const CASE_STUDY_ARTICLE_SCHEMA = {
 };
 
 export default function DossierTypePage() {
-  const [heroOverview, setHeroOverview] = useState("");
-
-  useEffect(() => {
-    setHeroOverview(HERO_OVERVIEW_TEXT);
-  }, []);
-
   return (
     <div className="min-h-screen bg-[#080808] font-[Inter] text-[#f0f0f0] antialiased">
       <Navbar />
@@ -151,7 +144,7 @@ export default function DossierTypePage() {
               translate="no"
               className="mt-5 max-w-3xl text-[16px] leading-[1.7] text-[#a0a0a0] notranslate"
             >
-              <span>{heroOverview}</span>
+              <span>{HERO_OVERVIEW_TEXT}</span>
             </motion.p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] uppercase tracking-[0.08em] text-white/35">
               <span>Par Trouvable</span>

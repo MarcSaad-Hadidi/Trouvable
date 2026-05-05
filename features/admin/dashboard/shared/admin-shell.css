@@ -1,52 +1,124 @@
-/* ═══════════════════════════════════════════════════════════
-   TROUVABLE — COMMAND CENTER DESIGN SYSTEM
-   Mission Control Premium · Dark Operator Environment
-   ═══════════════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TROUVABLE â€” OPERATOR DESIGN SYSTEM v2
+   Premium Dark Workspace Â· Obsidian Foundation
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 :root {
-    --cmd-bg: #060607;
-    --cmd-s0: #090a0b;
-    --cmd-s1: #0d0e10;
-    --cmd-s2: #131416;
-    --cmd-s3: #1a1b1e;
-    --cmd-s4: #222326;
-    --cmd-s5: #2c2d31;
-    --cmd-bd: rgba(255, 255, 255, 0.06);
-    --cmd-bd2: rgba(255, 255, 255, 0.10);
-    --cmd-bd3: rgba(255, 255, 255, 0.15);
-    --cmd-bd-accent: rgba(91, 115, 255, 0.15);
-    --cmd-t1: #f0f0f0;
-    --cmd-t2: #9a9ba0;
-    --cmd-t3: #5a5b60;
-    --cmd-t4: #3a3b3f;
-    --cmd-blue: #5b73ff;
-    --cmd-blue-soft: #7b8fff;
-    --cmd-violet: #8b5cf6;
-    --cmd-violet-soft: #a78bfa;
-    --cmd-green: #22c55e;
-    --cmd-green-soft: #4ade80;
-    --cmd-amber: #f59e0b;
-    --cmd-amber-soft: #fbbf24;
-    --cmd-red: #ef4444;
-    --cmd-red-soft: #f87171;
-    --cmd-cyan: #06b6d4;
-    --cmd-blue-bg: rgba(91, 115, 255, 0.06);
-    --cmd-blue-bd: rgba(91, 115, 255, 0.15);
-    --cmd-violet-bg: rgba(139, 92, 246, 0.06);
-    --cmd-violet-bd: rgba(139, 92, 246, 0.15);
-    --cmd-green-bg: rgba(34, 197, 94, 0.06);
-    --cmd-green-bd: rgba(34, 197, 94, 0.15);
-    --cmd-amber-bg: rgba(245, 158, 11, 0.06);
-    --cmd-amber-bd: rgba(245, 158, 11, 0.15);
-    --cmd-red-bg: rgba(239, 68, 68, 0.05);
-    --cmd-red-bd: rgba(239, 68, 68, 0.15);
-    --cmd-r: 8px;
-    --cmd-r2: 12px;
-    --cmd-r3: 16px;
-    --cmd-r4: 20px;
-    --sb-w: 240px;
+    /* â”€â”€ Foundation: Obsidian Palette â”€â”€ */
+    --t-black: #000000;
+    --t-obsidian: #080808;
+    --t-graphite: #111111;
+    --t-slate: #1a1a1a;
+    --t-ash: #222222;
+    --t-mist: rgba(255, 255, 255, 0.06);
 
-    /* Legacy aliases */
+    /* â”€â”€ Text â”€â”€ */
+    --t-text-1: #ededef;
+    --t-text-2: #8e8f96;
+    --t-text-3: #4e4f55;
+
+    /* â”€â”€ Borders â”€â”€ */
+    --t-border: rgba(255, 255, 255, 0.07);
+    --t-border-h: rgba(255, 255, 255, 0.12);
+    --t-border-active: rgba(255, 255, 255, 0.18);
+
+    /* â”€â”€ Brand Accents â”€â”€ */
+    --t-violet: #7c6aef;
+    --t-violet-soft: #a79aff;
+    --t-indigo: #6366f1;
+
+    /* â”€â”€ Service World Accents â”€â”€ */
+    --t-steel: #6b9cc5;
+    --t-orange: #d4874a;
+    --t-agent-indigo: #818cf8;
+
+    /* â”€â”€ Semantic Colors â”€â”€ */
+    --t-green: #4ade80;
+    --t-amber: #d4a34a;
+    --t-coral: #e06060;
+    --t-cyan: #06b6d4;
+
+    /* â”€â”€ Semantic Surfaces â”€â”€ */
+    --t-green-bg: rgba(74, 222, 128, 0.06);
+    --t-green-bd: rgba(74, 222, 128, 0.15);
+    --t-amber-bg: rgba(212, 163, 74, 0.06);
+    --t-amber-bd: rgba(212, 163, 74, 0.15);
+    --t-coral-bg: rgba(224, 96, 96, 0.05);
+    --t-coral-bd: rgba(224, 96, 96, 0.15);
+    --t-violet-bg: rgba(124, 106, 239, 0.06);
+    --t-violet-bd: rgba(124, 106, 239, 0.15);
+    --t-steel-bg: rgba(107, 156, 197, 0.06);
+    --t-steel-bd: rgba(107, 156, 197, 0.15);
+    --t-orange-bg: rgba(212, 135, 74, 0.06);
+    --t-orange-bd: rgba(212, 135, 74, 0.15);
+
+    /* â”€â”€ Service Accent (overridden per world context) â”€â”€ */
+    --service-accent: var(--t-violet);
+    --service-accent-bg: var(--t-violet-bg);
+    --service-accent-bd: var(--t-violet-bd);
+
+    /* â”€â”€ Radius â”€â”€ */
+    --t-r-panel: 14px;
+    --t-r-elevated: 16px;
+    --t-r-pill: 6px;
+    --t-r-button: 8px;
+    --t-r-inner: 10px;
+
+    /* â”€â”€ Spacing â”€â”€ */
+    --t-page-px: 20px;
+    --t-page-px-lg: 32px;
+    --t-section-gap: 24px;
+    --t-card-pad: 16px;
+
+    /* â”€â”€ Shell Dimensions â”€â”€ */
+    --rail-w: 56px;
+    --tray-w: 220px;
+    --strip-h: 44px;
+    --sb-w: calc(var(--rail-w) + var(--tray-w));
+
+    /* â”€â”€ Legacy Aliases: --cmd-* â†’ --t-* â”€â”€ */
+    --cmd-bg: var(--t-black);
+    --cmd-s0: var(--t-obsidian);
+    --cmd-s1: var(--t-graphite);
+    --cmd-s2: var(--t-slate);
+    --cmd-s3: var(--t-ash);
+    --cmd-s4: #2c2d36;
+    --cmd-s5: #35363f;
+    --cmd-bd: var(--t-border);
+    --cmd-bd2: var(--t-border-h);
+    --cmd-bd3: var(--t-border-active);
+    --cmd-bd-accent: var(--t-violet-bd);
+    --cmd-t1: var(--t-text-1);
+    --cmd-t2: var(--t-text-2);
+    --cmd-t3: var(--t-text-3);
+    --cmd-t4: #3a3b42;
+    --cmd-blue: var(--t-steel);
+    --cmd-blue-soft: #8bb6d6;
+    --cmd-violet: var(--t-violet);
+    --cmd-violet-soft: var(--t-violet-soft);
+    --cmd-green: var(--t-green);
+    --cmd-green-soft: #6ee7a0;
+    --cmd-amber: var(--t-amber);
+    --cmd-amber-soft: #e2bc6e;
+    --cmd-red: var(--t-coral);
+    --cmd-red-soft: #e88080;
+    --cmd-cyan: var(--t-cyan);
+    --cmd-blue-bg: var(--t-steel-bg);
+    --cmd-blue-bd: var(--t-steel-bd);
+    --cmd-violet-bg: var(--t-violet-bg);
+    --cmd-violet-bd: var(--t-violet-bd);
+    --cmd-green-bg: var(--t-green-bg);
+    --cmd-green-bd: var(--t-green-bd);
+    --cmd-amber-bg: var(--t-amber-bg);
+    --cmd-amber-bd: var(--t-amber-bd);
+    --cmd-red-bg: var(--t-coral-bg);
+    --cmd-red-bd: var(--t-coral-bd);
+    --cmd-r: var(--t-r-button);
+    --cmd-r2: var(--t-r-inner);
+    --cmd-r3: var(--t-r-panel);
+    --cmd-r4: var(--t-r-elevated);
+
+    /* â”€â”€ Legacy Aliases: --geo-* â†’ --cmd-* â”€â”€ */
     --geo-bg: var(--cmd-bg);
     --geo-s0: var(--cmd-s0);
     --geo-s1: var(--cmd-s1);
@@ -84,9 +156,9 @@
     --geo-r3: var(--cmd-r3);
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SHELL LAYOUT
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .geo-shell {
     display: flex;
@@ -105,9 +177,6 @@
     content: '';
     position: fixed;
     inset: 0;
-    background:
-        radial-gradient(ellipse 80% 50% at 15% 0%, rgba(91, 115, 255, 0.035), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 85% 100%, rgba(139, 92, 246, 0.025), transparent 50%);
     pointer-events: none;
     z-index: 0;
 }
@@ -115,7 +184,7 @@
 .geo-sb {
     width: var(--sb-w);
     min-width: var(--sb-w);
-    background: linear-gradient(180deg, rgba(9, 10, 11, 0.98) 0%, rgba(9, 10, 11, 0.94) 100%);
+    background: linear-gradient(180deg, rgba(8, 8, 8, 0.98) 0%, rgba(8, 8, 8, 0.94) 100%);
     border-right: 1px solid var(--cmd-bd);
     display: flex;
     flex-direction: column;
@@ -188,7 +257,7 @@
     right: 0;
     bottom: 0;
     width: 18px;
-    background: linear-gradient(90deg, rgba(9, 10, 11, 0) 0%, rgba(9, 10, 11, 0.92) 42%, rgba(9, 10, 11, 1) 100%);
+    background: linear-gradient(90deg, rgba(8, 8, 8, 0) 0%, rgba(8, 8, 8, 0.92) 42%, rgba(8, 8, 8, 1) 100%);
     pointer-events: none;
     z-index: 1;
 }
@@ -211,7 +280,7 @@
     overflow-x: hidden;
     overflow-y: auto !important;
     scrollbar-width: thin !important;
-    scrollbar-color: rgba(123, 143, 255, 0.18) transparent !important;
+    scrollbar-color: rgba(255,255,255,0.05) transparent !important;
     scrollbar-gutter: stable;
     padding-bottom: 28px;
 }
@@ -286,18 +355,18 @@
 .geo-scrollbar::-webkit-scrollbar-thumb {
     background-color: rgba(123, 143, 255, 0.48);
     min-height: 48px;
-    border: 2px solid rgba(9, 10, 11, 0.92);
+    border: 2px solid rgba(8, 8, 8, 0.92);
     border-radius: 999px;
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 0 10px rgba(91, 115, 255, 0.14);
+        0 0 10px rgba(255,255,255,0.03);
 }
 
 .geo-scrollbar:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(167, 139, 250, 0.62);
+    background-color: rgba(255,255,255,0.3);
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.12),
-        0 0 14px rgba(123, 143, 255, 0.18);
+        0 0 14px rgba(255,255,255,0.05);
 }
 
 .geo-scrollbar::-webkit-scrollbar-corner {
@@ -319,9 +388,9 @@
     .geo-sb { position: relative; transform: translateX(0); }
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PREMIUM SURFACES
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .geo-card {
     background: var(--cmd-s1);
@@ -338,7 +407,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--cmd-r3);
     box-shadow:
-        0 0 0 1px rgba(139, 92, 246, 0.05) inset,
+        0 0 0 1px rgba(255,255,255,0.05) inset,
         0 24px 64px rgba(0, 0, 0, 0.5);
 }
 
@@ -383,13 +452,13 @@
     color: var(--cmd-t3);
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    TOP COMMAND BAR
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .cmd-topbar {
     height: 48px;
-    background: rgba(9, 10, 11, 0.94);
+    background: rgba(8, 8, 8, 0.94);
     border-bottom: 1px solid var(--cmd-bd);
     display: flex;
     align-items: center;
@@ -401,7 +470,7 @@
 
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     .cmd-topbar {
-        background: rgba(9, 10, 11, 0.82);
+        background: rgba(8, 8, 8, 0.82);
         -webkit-backdrop-filter: blur(20px) saturate(1.4);
         backdrop-filter: blur(20px) saturate(1.4);
     }
@@ -413,20 +482,20 @@
     }
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PRESERVED + ENHANCED CLASSES
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .geo-premium-glow-violet {
     box-shadow:
-        0 0 48px rgba(139, 92, 246, 0.12),
-        0 0 0 1px rgba(139, 92, 246, 0.18) inset;
+        0 0 48px rgba(255,255,255,0.05),
+        0 0 0 1px rgba(255,255,255,0.1) inset;
 }
 
 .geo-premium-hero-num {
     font-family: var(--font-plus-jakarta-sans), sans-serif;
     letter-spacing: -0.04em;
-    text-shadow: 0 0 32px rgba(167, 139, 250, 0.3);
+    text-shadow: 0 0 32px rgba(255,255,255,0.15);
 }
 
 .geo-ch { padding: 14px 18px; border-bottom: 1px solid var(--cmd-bd); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
@@ -464,7 +533,7 @@
 .geo-btn-pri { background: white; color: #080808; font-weight: 600; }
 .geo-btn-pri:hover { background: #e8e8e8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255, 255, 255, 0.06); }
 .geo-btn-vio { background: var(--cmd-violet-bg); border: 1px solid var(--cmd-violet-bd); color: var(--cmd-violet-soft); }
-.geo-btn-vio:hover { background: rgba(139, 92, 246, 0.12); }
+.geo-btn-vio:hover { background: rgba(255,255,255,0.05); }
 
 /* Tabs */
 .geo-tabs { display: flex; gap: 0; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--cmd-bd); border-radius: var(--cmd-r); padding: 3px; }
@@ -482,9 +551,9 @@
 .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ANIMATIONS
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 @keyframes geo-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
 .geo-pulse { animation: geo-pulse 1.5s ease-in-out infinite; }

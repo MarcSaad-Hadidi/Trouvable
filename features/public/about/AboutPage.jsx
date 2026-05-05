@@ -6,7 +6,7 @@ import Navbar from "@/features/public/shared/Navbar";
 import SiteFooter from "@/features/public/shared/SiteFooter";
 import ContactButton from "@/features/public/shared/ContactButton";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, XCircle, Users, Target, MapPin, Shield } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle, Users, MapPin } from "lucide-react";
 
 const OFFERINGS = [
   { num: "01", title: "Cartographie stratégique", desc: "Diagnostic croisé de votre visibilité Google et de votre crédibilité dans les réponses IA. Plan d'action priorisé, livré sur un rythme de mandat convenu." },

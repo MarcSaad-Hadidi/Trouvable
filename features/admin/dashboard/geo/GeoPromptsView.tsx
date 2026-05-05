@@ -1,24 +1,41 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { History, Play, Radar } from 'lucide-react';
+import {
+    History,
+    Play,
+    Radar,
+    PlusCircleIcon,
+    SparklesIcon,
+    ActivityIcon,
+    Trash2Icon,
+    PauseIcon,
+    Edit3Icon,
+    ZapIcon,
+    ChevronRightIcon,
+    CheckCircle2Icon,
+    AlertCircleIcon,
+    ClockIcon,
+    SearchIcon,
+    ListIcon,
+    ArrowUpRightIcon,
+    PlayIcon
+} from 'lucide-react';
 
-import { GeoPremiumCard } from '@/features/admin/dashboard/geo/components/GeoPremium';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import {
-    COMMAND_BUTTONS,
-    CommandEmptyState,
     CommandHeader,
     CommandMetricCard,
     CommandPageShell,
-    CommandSkeleton,
+    COMMAND_BUTTONS,
+    COMMAND_PANEL,
+    COMMAND_SURFACE,
     cn,
 } from '@/features/admin/dashboard/shared/components/command';
-import { ADMIN_GEO_LABELS } from '@/lib/i18n/admin-fr';
-import { translateRunSignalTier } from '@/lib/i18n/run-diagnostics-fr';
-import { translateRunErrorMessage } from '@/lib/i18n/run-diagnostics-fr';
+import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import QualityPill from '@/components/shared/metrics/QualityPill';
 
 /* --- Constants --- */
@@ -26,6 +43,7 @@ import QualityPill from '@/components/shared/metrics/QualityPill';
 const DEFAULT_FORM = {
     query_text: '',
     category: 'discovery',
+    discovery_mode: 'blind_discovery',
     locale: 'fr-CA',
     prompt_mode: 'user_like',
     is_active: true,
@@ -36,41 +54,47 @@ const PROMPT_MODE_LABELS = {
     operator_probe: 'Sonde opérateur',
 };
 
+const EASE = [0.16, 1, 0.3, 1];
+
 /* --- Helpers --- */
 
 function resolvePromptMode(prompt) {
     return prompt.prompt_mode || prompt.prompt_metadata?.prompt_mode || 'user_like';
 }
 
+function discoveryModeLabel(prompt) {
+    return prompt.discovery_mode_label || prompt.discovery_mode || 'Mode inconnu';
+}
+
+function discoveryModeTone(prompt) {
+    if (prompt.context_injected || prompt.bias_risk === 'context_injected') return 'text-amber-400/70';
+    if (prompt.source_grounded || prompt.bias_risk === 'source_grounded') return 'text-emerald-400/70';
+    if (prompt.bias_risk === 'brand_name_only') return 'text-sky-400/70';
+    return 'text-white/25';
+}
+
 function promptStatusDotClass(prompt) {
-    if (!prompt.is_active) return 'bg-white/15';
-    if (prompt.quality_status === 'strong') return 'bg-emerald-400';
-    if (prompt.quality_status === 'weak') return 'bg-red-400';
-    return 'bg-amber-400';
+    if (!prompt.is_active) return 'bg-white/10';
+    if (prompt.quality_status === 'strong') return 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]';
+    if (prompt.quality_status === 'weak') return 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]';
+    return 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]';
 }
 
 function executionStatusMeta(status) {
-    if (status === 'completed') return { label: 'Terminée', cls: 'text-emerald-400', dot: 'bg-emerald-400' };
-    if (status === 'partial') return { label: 'Partielle', cls: 'text-amber-300', dot: 'bg-amber-400' };
-    if (status === 'running') return { label: 'En cours', cls: 'text-violet-400', dot: 'bg-violet-400' };
-    if (status === 'pending') return { label: 'En attente', cls: 'text-amber-400', dot: 'bg-amber-400' };
-    if (status === 'partial_error') return { label: 'Erreur partielle', cls: 'text-red-300', dot: 'bg-red-400' };
-    if (status === 'failed') return { label: 'Échouée', cls: 'text-red-400', dot: 'bg-red-400' };
-    return { label: 'Aucune', cls: 'text-white/40', dot: 'bg-white/20' };
+    if (status === 'completed') return { label: 'Terminée', cls: 'text-emerald-400', dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]' };
+    if (status === 'partial') return { label: 'Partielle', cls: 'text-amber-400', dot: 'bg-amber-400' };
+    if (status === 'running') return { label: 'En cours', cls: 'text-[#7c6aef]', dot: 'bg-[#7c6aef] animate-pulse shadow-[0_0_8px_rgba(124,106,239,0.4)]' };
+    if (status === 'failed') return { label: 'Échouée', cls: 'text-rose-400', dot: 'bg-rose-400' };
+    return { label: '—', cls: 'text-white/20', dot: 'bg-white/10' };
 }
 
 function promptLifecycleLabel(prompt) {
-    if (!prompt.is_active) return { text: 'Inactif', cls: 'text-white/35' };
-    if (prompt.quality_status === 'weak') return { text: 'À renforcer', cls: 'text-red-300' };
-    if (prompt.quality_status === 'review') return { text: 'À revoir', cls: 'text-amber-300' };
-    if (!prompt.last_run) return { text: 'Prêt', cls: 'text-blue-300' };
-    if (prompt.last_run.target_found) return { text: 'Performant', cls: 'text-emerald-300' };
-    return { text: 'Actif', cls: 'text-white/60' };
-}
-
-function prioritySortSuggestions(suggestions) {
-    const order = { strong: 0, review: 1, weak: 2 };
-    return [...suggestions].sort((a, b) => (order[a.quality_status] ?? 1) - (order[b.quality_status] ?? 1));
+    if (!prompt.is_active) return { text: 'INACTIF', cls: 'text-white/20' };
+    if (prompt.quality_status === 'weak') return { text: 'À RENFORCER', cls: 'text-rose-400' };
+    if (prompt.quality_status === 'review') return { text: 'À REVOIR', cls: 'text-amber-400' };
+    if (!prompt.last_run) return { text: 'PRÊT', cls: 'text-[#7c6aef]' };
+    if (prompt.last_run.target_found) return { text: 'PERFORMANT', cls: 'text-emerald-400' };
+    return { text: 'ACTIF', cls: 'text-white/40' };
 }
 
 async function parseJsonResponse(response) {
@@ -79,223 +103,108 @@ async function parseJsonResponse(response) {
     return json;
 }
 
-function buildOperatorRunErrorMessage(prefix, runRows = []) {
-    const failedRun = runRows.find((item) => item?.error);
-    if (!failedRun?.error) return prefix;
-    return `${prefix} ${translateRunErrorMessage(failedRun.error)}`;
-}
+/* --- Components --- */
 
-/* --- AI Refine Helper --- */
-
-async function fetchAiRefinement({ queryText, client, category, promptMode }) {
-    const response = await fetch('/api/admin/clients/onboarding/suggest-prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            current_query: queryText,
-            business_name: client?.client_name || '',
-            business_type: client?.business_type || '',
-            target_region: client?.address?.city || client?.target_region || '',
-            seo_description: client?.seo_description || '',
-            services: Array.isArray(client?.business_details?.services) ? client.business_details.services.join(', ') : '',
-            intent_family: category || '',
-            prompt_mode: promptMode || 'user_like',
-        }),
-    });
-    const json = await parseJsonResponse(response);
-    if (!json.suggestion) throw new Error('Aucune suggestion générée.');
-    return json.suggestion;
-}
-
-/* --- Sub-Components --- */
-
-function PromptsHeader({ client, summary, hasActivePrompt, runningBatch, submitting, onRunAll, clientId }) {
-    const mentionRate = summary?.mentionRatePercent;
-    const healthTone = mentionRate == null ? 'neutral' : mentionRate >= 60 ? 'ok' : mentionRate >= 30 ? 'warning' : 'critical';
-    const healthLabels = { ok: 'Bonne couverture', warning: 'Couverture partielle', critical: 'Couverture faible', neutral: 'Pas de données' };
-    const healthDotClass = { ok: 'bg-emerald-300', warning: 'bg-amber-300', critical: 'bg-rose-300', neutral: 'bg-white/35' }[healthTone];
-    const healthTextClass = { ok: 'text-emerald-200/85', warning: 'text-amber-200/85', critical: 'text-rose-200/85', neutral: 'text-white/55' }[healthTone];
-
-    const meta = (
-        <>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[11px] text-white/70">
-                <span className={cn('h-1.5 w-1.5 rounded-full', healthDotClass)} />
-                <span className={healthTextClass}>
-                    {healthLabels[healthTone]}
-                    {mentionRate != null ? ` · ${mentionRate}% cible` : ''}
-                </span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[11px] text-white/70">
-                {(summary?.total || 0)} prompts · {(summary?.active || 0)} actifs
-            </span>
-            {(summary?.weakPromptCount || 0) > 0 ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1 text-[11px] text-amber-100">
-                    {summary.weakPromptCount} à renforcer
-                </span>
-            ) : null}
-        </>
-    );
-
-    const actions = (
-        <>
-            <button
-                type="button"
-                className={cn(COMMAND_BUTTONS.primary, 'disabled:opacity-50 disabled:cursor-not-allowed')}
-                disabled={!hasActivePrompt || runningBatch || submitting}
-                onClick={onRunAll}
-            >
-                <Play className="h-4 w-4" />
-                {runningBatch ? 'Exécution…' : ADMIN_GEO_LABELS.actions.runActivePrompts}
-            </button>
-            <Link href={`/admin/clients/${clientId}/geo/runs`} className={COMMAND_BUTTONS.secondary}>
-                <History className="h-4 w-4" />
-                {ADMIN_GEO_LABELS.nav.runHistory}
-            </Link>
-            <Link href={`/admin/clients/${clientId}/geo/signals`} className={COMMAND_BUTTONS.subtle}>
-                <Radar className="h-4 w-4" />
-                Signaux
-            </Link>
-        </>
-    );
-
-    return (
-        <CommandHeader
-            eyebrow="GEO Ops · Requêtes"
-            title="Stratégie prompts"
-            subtitle={`Centre de contrôle des requêtes suivies pour ${client?.client_name || 'ce mandat'}.`}
-            meta={meta}
-            actions={actions}
-        />
-    );
-}
-
-function PromptsMetricsGrid({ summary }) {
-    const mentionRate = summary?.mentionRatePercent;
-    const mentionTone = mentionRate == null ? 'neutral' : mentionRate >= 60 ? 'ok' : mentionRate >= 30 ? 'warning' : 'critical';
-    const failedCount = summary?.latestStatusCounts?.failed || 0;
-
-    return (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <CommandMetricCard
-                label="Prompts actifs"
-                value={summary?.active ?? 0}
-                detail="Prêts à exécuter"
-                tone={summary?.active > 0 ? 'ok' : 'neutral'}
-            />
-            <CommandMetricCard
-                label="Taux cible"
-                value={mentionRate != null ? `${mentionRate}%` : 'n.d.'}
-                detail="Détection dans les réponses IA"
-                tone={mentionTone}
-            />
-            <CommandMetricCard
-                label="Sans exécution"
-                value={summary?.noRunYet ?? 0}
-                detail="En attente de lancement"
-                tone={summary?.noRunYet > 0 ? 'warning' : 'neutral'}
-            />
-            <CommandMetricCard
-                label="Échecs récents"
-                value={failedCount}
-                detail="Dernière exécution échouée"
-                tone={failedCount > 0 ? 'critical' : 'neutral'}
-            />
-        </div>
-    );
-}
-
-function PromptCreationSurface({ form, setForm, categoryOptions, submitting, onSubmit, clientId, client, actionNotice, actionError }) {
+function PromptCreationSurface({ form, setForm, categoryOptions, discoveryModeOptions = [], submitting, onSubmit, client, actionNotice, actionError }) {
     const [aiRefining, setAiRefining] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState(null);
-    const [aiError, setAiError] = useState(null);
 
     const handleAiRefine = useCallback(async () => {
         const rawText = form.query_text.trim();
         if (!rawText || rawText.length < 5) return;
         setAiRefining(true);
         setAiSuggestion(null);
-        setAiError(null);
         try {
-            const suggestion = await fetchAiRefinement({ queryText: rawText, client, category: form.category, promptMode: form.prompt_mode });
-            setAiSuggestion(suggestion);
-        } catch {
-            setAiError('Impossible de générer une suggestion pour le moment.');
-        } finally {
+            const response = await fetch('/api/admin/clients/onboarding/suggest-prompt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    current_query: rawText,
+                    business_name: client?.client_name || '',
+                    business_type: client?.business_type || '',
+                    intent_family: form.category || '',
+                    prompt_mode: form.prompt_mode || 'user_like',
+                }),
+            });
+            const json = await parseJsonResponse(response);
+            setAiSuggestion(json.suggestion);
+        } catch { /* Silent fail */ } finally {
             setAiRefining(false);
         }
     }, [form, client]);
 
     return (
-        <GeoPremiumCard className="p-5">
-            <div className="flex items-center justify-between gap-3 mb-4">
-                <div>
-                    <div className="text-sm font-semibold text-white/95">Créer un prompt</div>
-                    <p className="text-[11px] text-white/40 mt-0.5">Décrivez une intention de recherche, l&apos;IA peut affiner le texte.</p>
-                </div>
+        <div className={cn(COMMAND_PANEL, "p-6 bg-[#06070a]")}>
+            <div className="flex items-center gap-2 mb-6 text-[#7c6aef]">
+                <PlusCircleIcon className="h-4 w-4" />
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Nouveau Prompt</h3>
             </div>
 
-            <form onSubmit={onSubmit} className="space-y-3">
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                        className="flex-1 bg-white/[0.04] border border-white/[0.10] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none transition-colors"
+            <form onSubmit={onSubmit} className="space-y-5">
+                <div className="relative group">
+                    <textarea
+                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-[13px] text-white placeholder:text-white/5 focus:border-[#7c6aef]/40 focus:ring-0 transition-all min-h-[100px] resize-none italic"
                         value={form.query_text}
-                        onChange={(event) => setForm((current) => ({ ...current, query_text: event.target.value }))}
-                        placeholder="Ex. Quel plombier recommander à Québec pour une urgence ?"
+                        onChange={(e) => setForm((c) => ({ ...c, query_text: e.target.value }))}
+                        placeholder="Quelle est la meilleure solution pour..."
                         disabled={submitting}
                     />
-                    {form.query_text.trim().length >= 5 && (
-                        <button
-                            type="button"
-                            onClick={handleAiRefine}
-                            disabled={aiRefining || submitting}
-                            className="geo-btn geo-btn-vio text-[11px] px-3 py-2.5 shrink-0"
-                        >
-                            {aiRefining ? 'Réflexion…' : 'Affiner avec IA'}
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={handleAiRefine}
+                        disabled={aiRefining || submitting || form.query_text.length < 5}
+                        className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#7c6aef]/10 border border-[#7c6aef]/20 text-[10px] font-bold uppercase tracking-widest text-[#7c6aef] hover:bg-[#7c6aef]/20 transition-all disabled:opacity-0"
+                    >
+                        <SparklesIcon className={cn("h-3 w-3", aiRefining && "animate-pulse")} />
+                        {aiRefining ? 'IA...' : 'Affiner'}
+                    </button>
                 </div>
 
                 {aiSuggestion && (
-                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/[0.04] p-3">
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                                <p className="text-[10px] font-semibold text-violet-300/80 uppercase tracking-[0.06em] mb-1">Suggestion IA</p>
-                                <p className="text-[13px] text-white/85 leading-relaxed">{aiSuggestion}</p>
-                            </div>
-                            <div className="flex gap-1.5 shrink-0">
-                                <button type="button" onClick={() => { setForm((c) => ({ ...c, query_text: aiSuggestion })); setAiSuggestion(null); setAiError(null); }} className="geo-btn geo-btn-vio text-[10px] px-2 py-1">Utiliser</button>
-                                <button type="button" onClick={() => setAiSuggestion(null)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Ignorer</button>
-                            </div>
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-[#7c6aef]/20 bg-[#7c6aef]/5 p-4">
+                        <p className="text-[12px] text-white/80 leading-relaxed italic mb-4">"{aiSuggestion}"</p>
+                        <div className="flex gap-3">
+                            <button type="button" onClick={() => { setForm((c) => ({ ...c, query_text: aiSuggestion })); setAiSuggestion(null); }} className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 bg-[#7c6aef] text-white rounded-lg">Utiliser</button>
+                            <button type="button" onClick={() => setAiSuggestion(null)} className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 text-white/40 hover:text-white transition-colors">Ignorer</button>
                         </div>
+                    </motion.div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-white/20 ml-1">Catégorie</label>
+                        <select className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30" value={form.category} onChange={(e) => setForm((c) => ({ ...c, category: e.target.value }))} disabled={submitting}>
+                            {categoryOptions.map((o) => <option key={o.key} value={o.key} className="bg-[#0a0a0c]">{o.label}</option>)}
+                        </select>
                     </div>
-                )}
-
-                {aiError && (
-                    <p className="text-[11px] text-amber-400/80 px-1">{aiError}</p>
-                )}
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <select className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none" value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))} disabled={submitting}>
-                        {categoryOptions.map((option) => <option key={option.key} value={option.key} className="bg-[#101010]">{option.label}</option>)}
-                    </select>
-                    <select className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none" value={form.prompt_mode} onChange={(event) => setForm((current) => ({ ...current, prompt_mode: event.target.value }))} disabled={submitting}>
-                        <option value="user_like" className="bg-[#101010]">Question naturelle</option>
-                        <option value="operator_probe" className="bg-[#101010]">Sonde opérateur</option>
-                    </select>
-                    <input className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none" value={form.locale} onChange={(event) => setForm((current) => ({ ...current, locale: event.target.value }))} disabled={submitting} />
-                    <button type="submit" disabled={submitting || !form.query_text.trim()} className="geo-btn geo-btn-pri justify-center py-2">Ajouter le prompt</button>
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-white/20 ml-1">Mode</label>
+                        <select className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30" value={form.prompt_mode} onChange={(e) => setForm((c) => ({ ...c, prompt_mode: e.target.value }))} disabled={submitting}>
+                            <option value="user_like" className="bg-[#0a0a0c]">Naturel</option>
+                            <option value="operator_probe" className="bg-[#0a0a0c]">Sonde</option>
+                        </select>
+                    </div>
                 </div>
-            </form>
 
-            {actionNotice && <div className="text-[12px] text-emerald-300 mt-3 px-1">{actionNotice}</div>}
-            {actionError && <div className="text-[12px] text-red-400 mt-3 px-1">{actionError}</div>}
-        </GeoPremiumCard>
+                <div className="space-y-2">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/20 ml-1">Mesure</label>
+                    <select className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30" value={form.discovery_mode} onChange={(e) => setForm((c) => ({ ...c, discovery_mode: e.target.value }))} disabled={submitting}>
+                        {(discoveryModeOptions.length ? discoveryModeOptions.filter((o) => o.key !== 'operator_extraction') : [{ key: 'blind_discovery', label: 'Decouverte spontanee' }]).map((o) => (
+                            <option key={o.key} value={o.key} className="bg-[#0a0a0c]">{o.label}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <button type="submit" disabled={submitting || !form.query_text.trim()} className={cn(COMMAND_BUTTONS.primary, "w-full justify-center py-3 rounded-xl")}>
+                    <PlusCircleIcon className="h-4 w-4" />
+                    Enregistrer Prompt
+                </button>
+            </form>
+        </div>
     );
 }
 
-/* --- AI Prompt List Generation --- */
-
-async function createPromptDirectly({ clientId, queryText, category, promptMode, locale }) {
+async function createPromptDirectly({ clientId, queryText, category, promptMode, discoveryMode, locale }) {
     const response = await fetch('/api/admin/queries/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -303,11 +212,11 @@ async function createPromptDirectly({ clientId, queryText, category, promptMode,
             clientId,
             query_text: queryText,
             category: category || 'discovery',
-            query_type: category || 'discovery',
+            discovery_mode: discoveryMode,
             locale: locale || 'fr-CA',
             prompt_mode: promptMode || 'user_like',
             is_active: true,
-            prompt_origin: 'ai_generated_list',
+            prompt_origin: 'ai_generated_batch',
         }),
     });
     return parseJsonResponse(response);
@@ -322,35 +231,16 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
     const [generating, setGenerating] = useState(false);
     const [results, setResults] = useState(null);
     const [error, setError] = useState(null);
-    const [selected, setSelected] = useState(new Set());
-    const [showGuidance, setShowGuidance] = useState(false);
-
-    /* - AI refine per-item - */
-    const [refiningId, setRefiningId] = useState(null);
-    const [refinements, setRefinements] = useState({});
-    const [refineError, setRefineError] = useState(null);
-
-    /* - Direct-add tracking - */
     const [addingIds, setAddingIds] = useState(new Set());
     const [addedIds, setAddedIds] = useState(new Set());
-    const [addNotice, setAddNotice] = useState(null);
-    const [addError, setAddError] = useState(null);
 
     const mandateContext = [client?.client_name, client?.business_type, client?.address?.city || client?.target_region].filter(Boolean);
     const hasMandateContext = mandateContext.length > 0;
 
     const handleGenerate = useCallback(async () => {
-        if (!hasMandateContext && (!guidance.trim() || guidance.trim().length < 5)) return;
         setGenerating(true);
         setResults(null);
         setError(null);
-        setSelected(new Set());
-        setRefinements({});
-        setRefineError(null);
-        setAddedIds(new Set());
-        setAddingIds(new Set());
-        setAddNotice(null);
-        setAddError(null);
         try {
             const response = await fetch('/api/admin/clients/onboarding/generate-prompt-list', {
                 method: 'POST',
@@ -368,696 +258,271 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                 }),
             });
             const json = await parseJsonResponse(response);
-            if (!json.prompts || json.prompts.length === 0) throw new Error('Aucun prompt généré.');
-            setResults(json.prompts);
+            setResults(json.prompts || []);
         } catch (err) {
-            setError(err.message || 'Échec de la génération.');
+            setError(err.message || 'Échec de la génération');
         } finally {
             setGenerating(false);
         }
-    }, [guidance, category, promptMode, count, client, hasMandateContext]);
+    }, [guidance, category, promptMode, count, client]);
 
-    const handleRefineItem = useCallback(async (item) => {
-        setRefiningId(item.id);
-        setRefineError(null);
-        try {
-            const suggestion = await fetchAiRefinement({
-                queryText: item.query_text,
-                client,
-                category: item.intent_family || category,
-                promptMode: item.prompt_mode || 'user_like',
-            });
-            setRefinements((prev) => ({ ...prev, [item.id]: suggestion }));
-        } catch {
-            setRefineError('Impossible d\u2019améliorer ce prompt pour le moment.');
-        } finally {
-            setRefiningId(null);
-        }
-    }, [client, category]);
-
-    const toggleSelect = useCallback((id) => {
-        setSelected((prev) => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id); else next.add(id);
-            return next;
-        });
-    }, []);
-
-    /* - Direct single-item add via API - */
     const handleAddItem = useCallback(async (item) => {
-        if (!clientId) return;
-        const text = refinements[item.id] || item.query_text;
-        setAddingIds((prev) => new Set(prev).add(item.id));
-        setAddError(null);
+        setAddingIds(prev => new Set(prev).add(item.id));
         try {
             await createPromptDirectly({
                 clientId,
-                queryText: text,
-                category: item.intent_family || 'discovery',
-                promptMode: item.prompt_mode || 'user_like',
+                queryText: item.query_text,
+                category: item.intent_family,
+                promptMode: item.prompt_mode,
+                discoveryMode: item.discovery_mode,
             });
-            setAddedIds((prev) => new Set(prev).add(item.id));
-            setSelected((prev) => { const next = new Set(prev); next.delete(item.id); return next; });
+            setAddedIds(prev => new Set(prev).add(item.id));
             invalidateWorkspace();
-        } catch (err) {
-            setAddError(err.message || 'Échec de l\u2019ajout.');
-        } finally {
-            setAddingIds((prev) => { const next = new Set(prev); next.delete(item.id); return next; });
+        } catch {} finally {
+            setAddingIds(prev => { const next = new Set(prev); next.delete(item.id); return next; });
         }
-    }, [clientId, refinements, invalidateWorkspace]);
-
-    /* - True batch add — sequential API calls with per-item tracking - */
-    const handleAddSelected = useCallback(async () => {
-        if (!results || !clientId) return;
-        const items = results.filter((r) => selected.has(r.id) && !addedIds.has(r.id));
-        if (items.length === 0) return;
-        setAddError(null);
-        setAddNotice(null);
-        let successCount = 0;
-        let failCount = 0;
-        for (const item of items) {
-            const text = refinements[item.id] || item.query_text;
-            setAddingIds((prev) => new Set(prev).add(item.id));
-            try {
-                await createPromptDirectly({
-                    clientId,
-                    queryText: text,
-                    category: item.intent_family || 'discovery',
-                    promptMode: item.prompt_mode || 'user_like',
-                });
-                setAddedIds((prev) => new Set(prev).add(item.id));
-                successCount++;
-            } catch {
-                failCount++;
-            } finally {
-                setAddingIds((prev) => { const next = new Set(prev); next.delete(item.id); return next; });
-            }
-        }
-        setSelected(new Set());
-        if (failCount === 0) {
-            setAddNotice(`${successCount} prompt${successCount > 1 ? 's' : ''} ajouté${successCount > 1 ? 's' : ''} avec succès.`);
-        } else {
-            setAddError(`${successCount} ajouté${successCount > 1 ? 's' : ''}, ${failCount} échec${failCount > 1 ? 's' : ''}.`);
-        }
-        invalidateWorkspace();
-    }, [results, selected, addedIds, clientId, refinements, invalidateWorkspace]);
-
-    const handleClearRefinement = useCallback((id) => {
-        setRefinements((prev) => { const next = { ...prev }; delete next[id]; return next; });
-    }, []);
-
-    const selectableCount = results ? results.filter((r) => !addedIds.has(r.id)).length : 0;
+    }, [clientId, invalidateWorkspace]);
 
     if (!open) {
         return (
-            <GeoPremiumCard className="p-5">
-                <div className="flex items-center justify-between gap-3">
-                    <div>
-                        <div className="text-sm font-semibold text-white/95">Générer des prompts à partir du mandat</div>
-                        <p className="text-[11px] text-white/40 mt-0.5">
-                            {hasMandateContext
-                                ? `L'IA génère des prompts adaptés pour ${mandateContext.join(' · ')}`
-                                : 'Génération IA basée sur le contexte client'}
-                        </p>
+            <div className={cn(COMMAND_PANEL, "p-6 bg-[#06070a] border-dashed border-[#7c6aef]/20 hover:border-[#7c6aef]/40 transition-all cursor-pointer group")} onClick={() => setOpen(true)}>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-[#7c6aef]/10 flex items-center justify-center text-[#7c6aef]">
+                            <SparklesIcon className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7c6aef]">Génération Assistée</div>
+                            <div className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">IA génère des prompts selon le mandat</div>
+                        </div>
                     </div>
-                    <button type="button" onClick={() => setOpen(true)} className="geo-btn geo-btn-vio shrink-0">
-                        Générer des prompts
-                    </button>
+                    <ChevronRightIcon className="h-4 w-4 text-white/10 group-hover:text-[#7c6aef] transition-colors" />
                 </div>
-            </GeoPremiumCard>
+            </div>
         );
     }
 
     return (
-        <GeoPremiumCard className="p-5">
-            <div className="flex items-center justify-between gap-3 mb-4">
+        <div className={cn(COMMAND_PANEL, "p-6 bg-[#06070a] space-y-6")}>
+            <div className="flex items-center justify-between">
                 <div>
-                    <div className="text-sm font-semibold text-white/95">Générer des prompts pour ce mandat</div>
+                    <h3 className="text-sm font-semibold text-white/95">Générer des prompts pour ce mandat</h3>
                     <p className="text-[11px] text-white/40 mt-0.5">
-                        {hasMandateContext
-                            ? `Contexte : ${mandateContext.join(' · ')}`
-                            : 'Aucun contexte mandat détecté. Ajoutez une consigne ci-dessous.'}
+                        Contexte : {mandateContext.join(' · ') || 'Inconnu'}
                     </p>
                 </div>
-                <button type="button" onClick={() => { setOpen(false); setResults(null); setError(null); setAddNotice(null); setAddError(null); }} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Fermer</button>
+                <button onClick={() => setOpen(false)} className="px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold text-white/60 hover:text-white transition-all uppercase tracking-widest">Fermer</button>
             </div>
 
-            {/* - Mandate context summary - */}
             {hasMandateContext && (
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 mb-3">
-                    <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-white/50">
-                        {client?.client_name && <span><span className="text-white/25">Client :</span> {client.client_name}</span>}
-                        {client?.business_type && <span><span className="text-white/25">Type :</span> {client.business_type}</span>}
-                        {(client?.address?.city || client?.target_region) && <span><span className="text-white/25">Région :</span> {client.address?.city || client.target_region}</span>}
-                        {client?.seo_description && <span className="basis-full"><span className="text-white/25">Description :</span> {client.seo_description.length > 80 ? client.seo_description.slice(0, 80) + '…' : client.seo_description}</span>}
+                <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-4">
+                    <div className="grid grid-cols-3 gap-4 mb-2">
+                        <div className="space-y-0.5">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">Client</p>
+                            <p className="text-[11px] text-white/60 truncate">{client?.client_name}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">Type</p>
+                            <p className="text-[11px] text-white/60 truncate">{client?.business_type}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">Région</p>
+                            <p className="text-[11px] text-white/60 truncate">{client?.address?.city || client?.target_region}</p>
+                        </div>
                     </div>
+                    {client?.seo_description && (
+                        <div className="pt-2 border-t border-white/[0.04]">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Description</p>
+                            <p className="text-[11px] text-white/40 line-clamp-2 leading-relaxed">{client.seo_description}</p>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* - Controls + Generate - */}
-            <div className="space-y-3">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
                     <select
-                        className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none"
+                        className="bg-black/40 border border-[#7c6aef]/20 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/50"
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        disabled={generating}
+                        onChange={e => setCategory(e.target.value)}
                     >
-                        <option value="" className="bg-[#101010]">Catégorie (auto)</option>
-                        {categoryOptions.map((opt) => <option key={opt.key} value={opt.key} className="bg-[#101010]">{opt.label}</option>)}
+                        <option value="" className="bg-[#0a0a0c]">Catégorie (auto)</option>
+                        {categoryOptions.map(o => <option key={o.key} value={o.key} className="bg-[#0a0a0c]">{o.label}</option>)}
                     </select>
                     <select
-                        className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none"
+                        className="bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30"
                         value={promptMode}
-                        onChange={(e) => setPromptMode(e.target.value)}
-                        disabled={generating}
+                        onChange={e => setPromptMode(e.target.value)}
                     >
-                        <option value="" className="bg-[#101010]">Mode (varié)</option>
-                        <option value="user_like" className="bg-[#101010]">Question naturelle</option>
-                        <option value="operator_probe" className="bg-[#101010]">Sonde opérateur</option>
+                        <option value="" className="bg-[#0a0a0c]">Mode (varié)</option>
+                        <option value="user_like" className="bg-[#0a0a0c]">Question naturelle</option>
+                        <option value="operator_probe" className="bg-[#0a0a0c]">Sonde opérateur</option>
                     </select>
                     <select
-                        className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:border-violet-500/40 focus:outline-none"
+                        className="bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30"
                         value={count}
-                        onChange={(e) => setCount(Number(e.target.value))}
-                        disabled={generating}
+                        onChange={e => setCount(Number(e.target.value))}
                     >
-                        <option value={3} className="bg-[#101010]">3 prompts</option>
-                        <option value={4} className="bg-[#101010]">4 prompts</option>
-                        <option value={5} className="bg-[#101010]">5 prompts</option>
-                        <option value={6} className="bg-[#101010]">6 prompts</option>
+                        <option value={3} className="bg-[#0a0a0c]">3 prompts</option>
+                        <option value={4} className="bg-[#0a0a0c]">4 prompts</option>
+                        <option value={5} className="bg-[#0a0a0c]">5 prompts</option>
+                        <option value={6} className="bg-[#0a0a0c]">6 prompts</option>
                     </select>
-                    <button
-                        type="button"
-                        onClick={handleGenerate}
-                        disabled={generating || (!hasMandateContext && (!guidance.trim() || guidance.trim().length < 5)) || parentSubmitting}
-                        className="geo-btn geo-btn-pri justify-center py-2"
-                    >
-                        {generating ? 'Génération…' : 'Générer'}
-                    </button>
                 </div>
 
-                {/* - Optional guidance (collapsed by default) - */}
-                {!showGuidance ? (
-                    <button
-                        type="button"
-                        onClick={() => setShowGuidance(true)}
-                        className="text-[11px] text-violet-300/60 hover:text-violet-300/90 transition-colors"
-                    >
-                        + Ajouter une consigne additionnelle
-                    </button>
-                ) : (
-                    <div>
-                        <label className="text-[11px] text-white/35 mb-1 block">Angle supplémentaire (optionnel)</label>
+                <div className="space-y-2">
+                    <label className="text-[11px] text-white/30 ml-1 block">Angle supplémentaire (optionnel)</label>
+                    <div className="flex gap-3">
                         <input
                             type="text"
-                            className="w-full bg-white/[0.04] border border-white/[0.10] rounded-lg px-4 py-2 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none transition-colors"
-                            value={guidance}
-                            onChange={(e) => setGuidance(e.target.value)}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-white/5 focus:outline-none focus:border-[#7c6aef]/30"
                             placeholder="Ex. Focus sur les services d'urgence, ou cibler les jeunes familles"
-                            disabled={generating}
+                            value={guidance}
+                            onChange={e => setGuidance(e.target.value)}
                         />
+                        <button
+                            onClick={handleGenerate}
+                            disabled={generating}
+                            className="px-8 py-3 rounded-xl bg-white text-black font-bold text-[12px] hover:bg-white/90 transition-all disabled:opacity-50 shrink-0"
+                        >
+                            {generating ? 'IA...' : 'Générer'}
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
 
-            {error && <p className="text-[11px] text-amber-400/80 mt-3 px-1">{error}</p>}
-
-            {/* - Results list - */}
-            {results && results.length > 0 && (
-                <div className="mt-4 space-y-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="text-[10px] font-semibold text-violet-300/80 uppercase tracking-[0.06em]">
-                            {results.length} prompt{results.length > 1 ? 's' : ''} généré{results.length > 1 ? 's' : ''}
-                            {addedIds.size > 0 && <span className="text-emerald-400/80 ml-2">· {addedIds.size} ajouté{addedIds.size > 1 ? 's' : ''}</span>}
-                        </p>
-                        {selected.size > 0 && (
-                            <button type="button" onClick={handleAddSelected} className="geo-btn geo-btn-vio text-[10px] px-2.5 py-1" disabled={parentSubmitting || addingIds.size > 0}>
-                                {addingIds.size > 0 ? 'Ajout…' : `Ajouter ${selected.size} sélectionné${selected.size > 1 ? 's' : ''}`}
+            {results && (
+                <div className="space-y-2 pt-4 border-t border-white/5">
+                    {results.map((item, i) => (
+                        <div key={i} className={cn(COMMAND_SURFACE, "p-4 flex items-start gap-4 group relative")}>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[12px] text-white/80 italic leading-relaxed">"{item.query_text}"</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-[#7c6aef]/60">{item.intent_family}</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-white/10">·</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-white/20">{PROMPT_MODE_LABELS[item.prompt_mode] || item.prompt_mode}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleAddItem(item)}
+                                disabled={addedIds.has(item.id) || addingIds.has(item.id)}
+                                className={cn(
+                                    "p-2 rounded-xl transition-all",
+                                    addedIds.has(item.id) ? "text-emerald-400 bg-emerald-400/10" : "text-white/10 hover:text-white hover:bg-white/5"
+                                )}
+                            >
+                                {addedIds.has(item.id) ? <CheckCircle2Icon className="h-4 w-4" /> : <PlusCircleIcon className="h-4 w-4" />}
                             </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+
+function TrackedPromptRow({
+    prompt, categoryOptions, isEditing, editingForm, setEditingForm, setEditingId,
+    submitting, isRunning, onSave, onToggle, onDelete, onRun, onImprove,
+    isImproving, improvedText, onUseImproved, onClearImprovement
+}) {
+    const lifecycle = promptLifecycleLabel(prompt);
+    const mode = resolvePromptMode(prompt);
+    const execStatus = executionStatusMeta(prompt.last_run?.status);
+
+    if (isEditing) {
+        return (
+            <div className="p-8 space-y-5 bg-[#7c6aef]/5 border-y border-[#7c6aef]/10">
+                <textarea
+                    className="w-full bg-black/40 border border-[#7c6aef]/30 rounded-2xl px-5 py-4 text-[13px] text-white focus:ring-0 min-h-[100px] italic"
+                    value={editingForm.query_text}
+                    onChange={(e) => setEditingForm((c) => ({ ...c, query_text: e.target.value }))}
+                />
+                <div className="flex gap-4">
+                    <button onClick={() => onSave(prompt.id)} className={cn(COMMAND_BUTTONS.primary, "px-6")}>Appliquer</button>
+                    <button onClick={() => setEditingId(null)} className={cn(COMMAND_BUTTONS.secondary, "px-6")}>Annuler</button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={cn(
+            "group relative px-8 py-7 transition-all border border-transparent hover:border-white/10 hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)] rounded-2xl mb-2",
+            !prompt.is_active && "opacity-30 grayscale"
+        )}>
+            <div className="flex items-start gap-6">
+                <div className={cn("mt-2.5 h-1.5 w-1.5 rounded-full shrink-0", promptStatusDotClass(prompt))} />
+
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", lifecycle.cls)}>{lifecycle.text}</span>
+                        {prompt.last_run?.target_found && <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Target Found</span>}
+                    </div>
+                    <p className="text-[15px] font-bold text-white/90 leading-relaxed group-hover:text-white transition-colors italic">"{prompt.query_text}"</p>
+                    {(prompt.context_injected || prompt.last_run?.context_injected) && (
+                        <div className="mt-3 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/80">
+                            Contexte injecte - hors visibilite naturelle
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-6 mt-4">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                            <ListIcon className="h-3.5 w-3.5" /> {prompt.category_label}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                            <ZapIcon className="h-3.5 w-3.5" /> {PROMPT_MODE_LABELS[mode]}
+                        </div>
+                        <div className={cn("flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest", discoveryModeTone(prompt))}>
+                            <Radar className="h-3.5 w-3.5" /> {discoveryModeLabel(prompt)}
+                        </div>
+                        {prompt.last_run && (
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                                <ActivityIcon className="h-3.5 w-3.5 text-white/10" />
+                                <span className={execStatus.cls}>{execStatus.label}</span>
+                                <span className="text-white/10">· {new Date(prompt.last_run.created_at).toLocaleDateString()}</span>
+                            </div>
                         )}
                     </div>
-
-                    {addNotice && <p className="text-[11px] text-emerald-300/80 px-1 mb-1">{addNotice}</p>}
-                    {addError && <p className="text-[11px] text-amber-400/80 px-1 mb-1">{addError}</p>}
-                    {refineError && <p className="text-[11px] text-amber-400/80 px-1 mb-1">{refineError}</p>}
-
-                    {results.map((item) => {
-                        const isAdded = addedIds.has(item.id);
-                        const isAdding = addingIds.has(item.id);
-                        return (
-                            <div key={item.id} className={`group rounded-xl border px-4 py-3 transition-colors ${isAdded ? 'border-emerald-500/20 bg-emerald-500/[0.03]' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]'}`}>
-                                <div className="flex items-start gap-3">
-                                    {/* Checkbox or added indicator */}
-                                    {isAdded ? (
-                                        <div className="mt-0.5 w-4 h-4 rounded bg-emerald-500/80 flex items-center justify-center shrink-0">
-                                            <span className="text-[10px] text-white leading-none">✓</span>
-                                        </div>
-                                    ) : (
-                                        <label className="mt-0.5 shrink-0 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selected.has(item.id)}
-                                                onChange={() => toggleSelect(item.id)}
-                                                className="sr-only peer"
-                                                disabled={isAdding}
-                                            />
-                                            <div className="w-4 h-4 rounded border border-white/20 peer-checked:bg-violet-500/80 peer-checked:border-violet-500/80 flex items-center justify-center transition-colors">
-                                                {selected.has(item.id) && <span className="text-[10px] text-white leading-none">✓</span>}
-                                            </div>
-                                        </label>
-                                    )}
-
-                                    {/* Content */}
-                                    <div className={`min-w-0 flex-1 ${isAdded ? 'opacity-60' : ''}`}>
-                                        <p className="text-[13px] text-white/85 leading-relaxed">{refinements[item.id] || item.query_text}</p>
-                                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                            <span className="text-[10px] text-violet-300/60">{item.intent_family}</span>
-                                            <span className="text-[10px] text-white/30">{PROMPT_MODE_LABELS[item.prompt_mode] || item.prompt_mode}</span>
-                                            {isAdded && <span className="text-[10px] text-emerald-400/70">Ajouté</span>}
-                                            {item.rationale && !isAdded && <span className="text-[10px] text-white/25 hidden md:inline">· {item.rationale}</span>}
-                                        </div>
-                                    </div>
-
-                                    {/* Actions */}
-                                    {!isAdded && (
-                                        <div className="flex gap-1.5 shrink-0">
-                                            {!refinements[item.id] && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRefineItem(item)}
-                                                    disabled={refiningId === item.id || isAdding}
-                                                    className="geo-btn geo-btn-vio text-[10px] px-2.5 py-1 opacity-60 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    {refiningId === item.id ? '…' : 'Améliorer'}
-                                                </button>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleAddItem(item)}
-                                                disabled={parentSubmitting || isAdding}
-                                                className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1 opacity-60 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                {isAdding ? '…' : 'Ajouter'}
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Refined version */}
-                                {refinements[item.id] && !isAdded && (
-                                    <div className="mt-2.5 rounded-xl border border-violet-500/20 bg-violet-500/[0.04] p-3">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="text-[10px] font-semibold text-violet-300/80 uppercase tracking-[0.06em] mb-1">Version améliorée</p>
-                                                <p className="text-[13px] text-white/85 leading-relaxed">{refinements[item.id]}</p>
-                                            </div>
-                                            <div className="flex gap-1.5 shrink-0">
-                                                <button type="button" onClick={() => handleClearRefinement(item.id)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Original</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
                 </div>
-            )}
-        </GeoPremiumCard>
-    );
-}
 
-function SuggestedPromptPack({ suggestions, onUse, client }) {
-    if (!suggestions || suggestions.length === 0) return null;
-    const sorted = prioritySortSuggestions(suggestions);
-    const strong = sorted.filter((p) => p.quality_status === 'strong');
-    const rest = sorted.filter((p) => p.quality_status !== 'strong');
-
-    const [improvingId, setImprovingId] = useState(null);
-    const [improvements, setImprovements] = useState({});
-    const [improveError, setImproveError] = useState(null);
-
-    const handleImprove = useCallback(async (prompt) => {
-        setImprovingId(prompt.id);
-        setImproveError(null);
-        try {
-            const suggestion = await fetchAiRefinement({
-                queryText: prompt.query_text,
-                client,
-                category: prompt.category,
-                promptMode: prompt.prompt_mode || prompt.prompt_metadata?.prompt_mode || 'user_like',
-            });
-            setImprovements((prev) => ({ ...prev, [prompt.id]: suggestion }));
-        } catch {
-            setImproveError('Impossible d\u2019améliorer cette suggestion.');
-        } finally {
-            setImprovingId(null);
-        }
-    }, [client]);
-
-    const handleClearImprovement = useCallback((id) => {
-        setImprovements((prev) => { const next = { ...prev }; delete next[id]; return next; });
-    }, []);
-
-    return (
-        <GeoPremiumCard className="p-5">
-            <div className="flex items-center justify-between gap-3 mb-4">
-                <div>
-                    <div className="text-sm font-semibold text-white/95">Prompts suggérés</div>
-                    <p className="text-[11px] text-white/40 mt-0.5">Suggestions basées sur le profil métier, les plus pertinentes en premier.</p>
-                </div>
-                <span className="text-[10px] text-white/30 tabular-nums">{suggestions.length} disponible{suggestions.length > 1 ? 's' : ''}</span>
-            </div>
-
-            {improveError && <p className="text-[11px] text-amber-400/80 mb-3 px-1">{improveError}</p>}
-
-            {strong.length > 0 && (
-                <div className="space-y-2 mb-3">
-                    <p className="text-[10px] font-semibold text-emerald-400/70 uppercase tracking-[0.06em]">Recommandés</p>
-                    {strong.map((prompt) => (
-                        <SuggestedPromptRow key={prompt.id} prompt={prompt} onUse={onUse} onImprove={handleImprove} isImproving={improvingId === prompt.id} improvedText={improvements[prompt.id] || null} onClearImprovement={handleClearImprovement} />
-                    ))}
-                </div>
-            )}
-
-            {rest.length > 0 && (
-                <div className="space-y-2">
-                    {strong.length > 0 && <p className="text-[10px] font-semibold text-white/30 uppercase tracking-[0.06em] mt-2">Autres suggestions</p>}
-                    {rest.map((prompt) => (
-                        <SuggestedPromptRow key={prompt.id} prompt={prompt} onUse={onUse} onImprove={handleImprove} isImproving={improvingId === prompt.id} improvedText={improvements[prompt.id] || null} onClearImprovement={handleClearImprovement} />
-                    ))}
-                </div>
-            )}
-        </GeoPremiumCard>
-    );
-}
-
-function SuggestedPromptRow({ prompt, onUse, onImprove, isImproving, improvedText, onClearImprovement }) {
-    const mode = prompt.prompt_mode || prompt.prompt_metadata?.prompt_mode || 'user_like';
-    const canImprove = prompt.quality_status !== 'strong';
-
-    return (
-        <div className="group rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] px-4 py-3 transition-colors">
-            <div className="flex items-start gap-3">
-                <div className="min-w-0 flex-1">
-                    <p className="text-[13px] text-white/85 leading-relaxed">{prompt.query_text}</p>
-                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                        <QualityPill status={prompt.quality_status} />
-                        <span className="text-[10px] text-white/30">{prompt.category}</span>
-                        <span className="text-[10px] text-white/30">{PROMPT_MODE_LABELS[mode] || mode}</span>
-                        {prompt.rationale && <span className="text-[10px] text-white/25 hidden md:inline">· {prompt.rationale}</span>}
-                    </div>
-                    {prompt.activation_blocked && (
-                        <p className="text-[10px] text-amber-300/80 mt-1">Reformulez avant activation.</p>
-                    )}
-                </div>
-                <div className="flex gap-1.5 shrink-0">
-                    {canImprove && !improvedText && (
-                        <button
-                            type="button"
-                            onClick={() => onImprove(prompt)}
-                            disabled={isImproving}
-                            className="geo-btn geo-btn-vio text-[10px] px-2.5 py-1 opacity-60 group-hover:opacity-100 transition-opacity"
-                        >
-                            {isImproving ? '…' : 'Améliorer'}
-                        </button>
-                    )}
-                    <button
-                        type="button"
-                        onClick={() => onUse(prompt)}
-                        className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1 opacity-60 group-hover:opacity-100 shrink-0 transition-opacity"
-                    >
-                        Utiliser
-                    </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                    <button onClick={() => onRun(prompt)} disabled={isRunning} className="p-2.5 text-[#7c6aef] hover:bg-[#7c6aef]/10 rounded-xl transition-colors" title="Lancer audit"><PlayIcon className="h-4 w-4" /></button>
+                    <button onClick={() => onImprove(prompt)} disabled={isImproving} className={cn("p-2.5 rounded-xl transition-colors", isImproving ? "text-[#7c6aef] animate-pulse bg-[#7c6aef]/10" : "text-emerald-400/50 hover:text-emerald-400 hover:bg-emerald-400/10")} title="Améliorer avec IA"><SparklesIcon className="h-4 w-4" /></button>
+                    <button onClick={() => { setEditingId(prompt.id); setEditingForm({ ...prompt, prompt_mode: mode }); }} className="p-2.5 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-colors"><Edit3Icon className="h-4 w-4" /></button>
+                    <button onClick={() => onToggle(prompt.id, !prompt.is_active)} className="p-2.5 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-colors"><PauseIcon className="h-4 w-4" /></button>
+                    <button onClick={() => onDelete(prompt.id)} className="p-2.5 text-rose-400/30 hover:text-rose-400 hover:bg-rose-400/10 rounded-xl transition-colors"><Trash2Icon className="h-4 w-4" /></button>
                 </div>
             </div>
 
             {improvedText && (
-                <div className="mt-2.5 rounded-xl border border-violet-500/20 bg-violet-500/[0.04] p-3">
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                            <p className="text-[10px] font-semibold text-violet-300/80 uppercase tracking-[0.06em] mb-1">Version améliorée</p>
-                            <p className="text-[13px] text-white/85 leading-relaxed">{improvedText}</p>
-                        </div>
-                        <div className="flex gap-1.5 shrink-0">
-                            <button type="button" onClick={() => onUse({ ...prompt, query_text: improvedText })} className="geo-btn geo-btn-vio text-[10px] px-2 py-1">Utiliser</button>
-                            <button type="button" onClick={() => onClearImprovement(prompt.id)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Ignorer</button>
-                        </div>
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 ml-8 p-4 rounded-xl border border-[#7c6aef]/20 bg-[#7c6aef]/5 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#7c6aef]">
+                        <SparklesIcon className="h-3 w-3" />
+                        Suggestion IA
                     </div>
-                </div>
+                    <p className="text-[13px] text-white/90 italic leading-relaxed">"{improvedText}"</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onUseImproved(prompt.id, improvedText)}
+                            className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 bg-[#7c6aef] text-white rounded-lg hover:bg-[#7c6aef]/80 transition-all"
+                        >
+                            Utiliser
+                        </button>
+                        <button
+                            onClick={() => onClearImprovement(prompt.id)}
+                            className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 text-white/40 hover:text-white transition-all"
+                        >
+                            Ignorer
+                        </button>
+                    </div>
+                </motion.div>
             )}
         </div>
     );
 }
-
-function TrackedPromptsList({
-    prompts,
-    categoryOptions,
-    editingId,
-    setEditingId,
-    editingForm,
-    setEditingForm,
-    submitting,
-    runningPromptId,
-    onSave,
-    onToggle,
-    onDelete,
-    onRun,
-    onImprove,
-    pendingRefineId,
-    onClearPendingRefine,
-    clientId,
-    client,
-}) {
-    if (prompts.length === 0) return null;
-
-    const active = prompts.filter((p) => p.is_active);
-    const inactive = prompts.filter((p) => !p.is_active);
-
-    return (
-        <GeoPremiumCard className="p-0 overflow-hidden">
-            <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
-                <div>
-                    <div className="text-sm font-semibold text-white/95">Prompts suivis</div>
-                    <p className="text-[11px] text-white/35 mt-0.5">{active.length} actif{active.length > 1 ? 's' : ''}{inactive.length > 0 ? ` · ${inactive.length} inactif${inactive.length > 1 ? 's' : ''}` : ''}</p>
-                </div>
-            </div>
-
-            <div className="divide-y divide-white/[0.05]">
-                {active.map((prompt) => (
-                    <TrackedPromptRow
-                        key={prompt.id}
-                        prompt={prompt}
-                        categoryOptions={categoryOptions}
-                        isEditing={editingId === prompt.id}
-                        editingForm={editingForm}
-                        setEditingForm={setEditingForm}
-                        setEditingId={setEditingId}
-                        submitting={submitting}
-                        isRunning={runningPromptId === prompt.id}
-                        onSave={onSave}
-                        onToggle={onToggle}
-                        onDelete={onDelete}
-                        onRun={onRun}
-                        onImprove={onImprove}
-                        pendingRefineId={pendingRefineId}
-                        onClearPendingRefine={onClearPendingRefine}
-                        clientId={clientId}
-                        client={client}
-                    />
-                ))}
-                {inactive.length > 0 && active.length > 0 && (
-                    <div className="px-5 py-2 bg-white/[0.015]">
-                        <p className="text-[10px] font-semibold text-white/25 uppercase tracking-[0.06em]">Inactifs</p>
-                    </div>
-                )}
-                {inactive.map((prompt) => (
-                    <TrackedPromptRow
-                        key={prompt.id}
-                        prompt={prompt}
-                        categoryOptions={categoryOptions}
-                        isEditing={editingId === prompt.id}
-                        editingForm={editingForm}
-                        setEditingForm={setEditingForm}
-                        setEditingId={setEditingId}
-                        submitting={submitting}
-                        isRunning={runningPromptId === prompt.id}
-                        onSave={onSave}
-                        onToggle={onToggle}
-                        onDelete={onDelete}
-                        onRun={onRun}
-                        onImprove={onImprove}
-                        pendingRefineId={pendingRefineId}
-                        onClearPendingRefine={onClearPendingRefine}
-                        clientId={clientId}
-                        client={client}
-                    />
-                ))}
-            </div>
-        </GeoPremiumCard>
-    );
-}
-
-function TrackedPromptRow({ prompt, categoryOptions, isEditing, editingForm, setEditingForm, setEditingId, submitting, isRunning, onSave, onToggle, onDelete, onRun, onImprove, pendingRefineId, onClearPendingRefine, clientId, client }) {
-    const lifecycle = promptLifecycleLabel(prompt);
-    const mode = resolvePromptMode(prompt);
-    const execStatus = executionStatusMeta(prompt.last_run?.status);
-    const isWeak = prompt.is_active && (prompt.quality_status === 'weak' || prompt.quality_status === 'review');
-
-    /* - AI refine state for edit mode - */
-    const [aiRefining, setAiRefining] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState(null);
-    const [aiError, setAiError] = useState(null);
-    const didAutoRefine = useRef(false);
-    const hasMinimumQuery = editingForm?.query_text?.trim().length >= 5;
-
-    const handleEditAiRefine = useCallback(async () => {
-        const rawText = editingForm?.query_text?.trim();
-        if (!rawText || rawText.length < 5) return;
-        setAiRefining(true);
-        setAiSuggestion(null);
-        setAiError(null);
-        try {
-            const suggestion = await fetchAiRefinement({ queryText: rawText, client, category: editingForm.category, promptMode: editingForm.prompt_mode });
-            setAiSuggestion(suggestion);
-        } catch {
-            setAiError('Impossible de générer une suggestion.');
-        } finally {
-            setAiRefining(false);
-        }
-    }, [editingForm, client]);
-
-    /* Auto-refine when entering edit mode via "Améliorer".
-       Deps intentionally limited: we only want to trigger on edit mode entry or pendingRefine change,
-       not on every keystroke in editingForm. handleEditAiRefine captures current editingForm via closure. */
-    useEffect(() => {
-        if (isEditing && pendingRefineId === prompt.id && !didAutoRefine.current && hasMinimumQuery) {
-            didAutoRefine.current = true;
-            onClearPendingRefine();
-            handleEditAiRefine();
-        }
-        if (!isEditing) {
-            didAutoRefine.current = false;
-            setAiSuggestion(null);
-            setAiError(null);
-        }
-    }, [isEditing, pendingRefineId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    if (isEditing) {
-        return (
-            <div className="px-5 py-4 space-y-3 bg-white/[0.02]">
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <input className="flex-1 bg-white/[0.04] border border-violet-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none" value={editingForm.query_text} onChange={(event) => setEditingForm((current) => ({ ...current, query_text: event.target.value }))} disabled={submitting} />
-                    {hasMinimumQuery && (
-                        <button
-                            type="button"
-                            onClick={handleEditAiRefine}
-                            disabled={aiRefining || submitting}
-                            className="geo-btn geo-btn-vio text-[11px] px-3 py-2.5 shrink-0"
-                        >
-                            {aiRefining ? 'Réflexion…' : 'Affiner avec IA'}
-                        </button>
-                    )}
-                </div>
-
-                {aiSuggestion && (
-                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/[0.04] p-3">
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                                <p className="text-[10px] font-semibold text-violet-300/80 uppercase tracking-[0.06em] mb-1">Suggestion IA</p>
-                                <p className="text-[13px] text-white/85 leading-relaxed">{aiSuggestion}</p>
-                            </div>
-                            <div className="flex gap-1.5 shrink-0">
-                                <button type="button" onClick={() => { setEditingForm((c) => ({ ...c, query_text: aiSuggestion })); setAiSuggestion(null); }} className="geo-btn geo-btn-vio text-[10px] px-2 py-1">Utiliser</button>
-                                <button type="button" onClick={() => setAiSuggestion(null)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Ignorer</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {aiError && <p className="text-[11px] text-amber-400/80 px-1">{aiError}</p>}
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <select className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none" value={editingForm.category} onChange={(event) => setEditingForm((current) => ({ ...current, category: event.target.value }))} disabled={submitting}>
-                        {categoryOptions.map((option) => <option key={option.key} value={option.key} className="bg-[#101010]">{option.label}</option>)}
-                    </select>
-                    <input className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none" value={editingForm.locale} onChange={(event) => setEditingForm((current) => ({ ...current, locale: event.target.value }))} disabled={submitting} />
-                    <select className="bg-white/[0.04] border border-white/[0.10] rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none" value={editingForm.prompt_mode || 'user_like'} onChange={(event) => setEditingForm((current) => ({ ...current, prompt_mode: event.target.value }))} disabled={submitting}>
-                        <option value="user_like" className="bg-[#101010]">Question naturelle</option>
-                        <option value="operator_probe" className="bg-[#101010]">Sonde opérateur</option>
-                    </select>
-                </div>
-                <div className="flex gap-2">
-                    <button type="button" onClick={() => onSave(prompt.id)} className="geo-btn geo-btn-pri" disabled={submitting || !editingForm.query_text.trim()}>Enregistrer</button>
-                    <button type="button" onClick={() => setEditingId(null)} className="geo-btn geo-btn-ghost" disabled={submitting}>Annuler</button>
-                </div>
-            </div>
-        );
-    }
-
-    const enterEditMode = () => {
-        setEditingId(prompt.id);
-        setEditingForm({ query_text: prompt.query_text, category: prompt.category, locale: prompt.locale, prompt_mode: mode, is_active: prompt.is_active });
-    };
-
-    return (
-        <div className={`group px-4 md:px-5 py-3.5 hover:bg-white/[0.02] transition-colors ${!prompt.is_active ? 'opacity-50' : ''}`}>
-            {/* Row 1 — status dot + prompt text + desktop-inline actions */}
-            <div className="flex items-start gap-3">
-                {/* Status dot */}
-                <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${promptStatusDotClass(prompt)}`} />
-
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-white/90 leading-relaxed">{prompt.query_text}</p>
-
-                    {/* Metadata: lifecycle (primary) · category · mode · execution (secondary) */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10px]">
-                        <span className={`font-semibold ${lifecycle.cls}`}>{lifecycle.text}</span>
-                        <span className="text-white/30">{prompt.category_label}</span>
-                        <span className="text-white/25">{PROMPT_MODE_LABELS[mode] || mode}</span>
-                        {prompt.last_run && (
-                            <>
-                                <span className="text-white/30">
-                                    Exécution : <span className="text-white/45">{execStatus.label.toLowerCase()}</span>
-                                </span>
-                                {prompt.last_run.target_found && <span className="text-emerald-400/80">Cible détectée</span>}
-                                {prompt.last_run.run_signal_tier && <span className="text-white/30">{translateRunSignalTier(prompt.last_run.run_signal_tier)}</span>}
-                            </>
-                        )}
-                        {!prompt.last_run && <span className="text-white/20">Jamais exécuté</span>}
-                    </div>
-                </div>
-
-                {/* Actions — desktop only: inline, hover-reveal */}
-                <div className="hidden md:flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {isWeak && (
-                        <button type="button" onClick={() => onImprove(prompt)} className="geo-btn geo-btn-vio text-[10px] px-2 py-1" disabled={submitting}>Améliorer</button>
-                    )}
-                    <button type="button" onClick={() => onRun(prompt)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1" disabled={isRunning || submitting}>{isRunning ? '…' : 'Exécuter'}</button>
-                    <button type="button" onClick={enterEditMode} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1" disabled={submitting}>Modifier</button>
-                    <button type="button" onClick={() => onToggle(prompt.id, !prompt.is_active)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1" disabled={submitting}>{prompt.is_active ? 'Pause' : 'Activer'}</button>
-                    <button type="button" onClick={() => onDelete(prompt.id)} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1 text-red-300/60 hover:text-red-300" disabled={submitting} aria-label="Supprimer">×</button>
-                    <Link href={`/admin/clients/${clientId}/geo/runs?prompt=${prompt.id}`} className="geo-btn geo-btn-ghost text-[10px] px-2 py-1">Runs</Link>
-                </div>
-            </div>
-
-            {/* Row 2 — mobile actions: visible below content, wrapping gracefully */}
-            <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2.5 pl-5">
-                {isWeak && (
-                    <button type="button" onClick={() => onImprove(prompt)} className="geo-btn geo-btn-vio text-[10px] px-2.5 py-1.5" disabled={submitting}>Améliorer</button>
-                )}
-                <button type="button" onClick={() => onRun(prompt)} className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1.5" disabled={isRunning || submitting}>{isRunning ? '…' : 'Exécuter'}</button>
-                <button type="button" onClick={enterEditMode} className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1.5" disabled={submitting}>Modifier</button>
-                <button type="button" onClick={() => onToggle(prompt.id, !prompt.is_active)} className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1.5" disabled={submitting}>{prompt.is_active ? 'Pause' : 'Activer'}</button>
-                <button type="button" onClick={() => onDelete(prompt.id)} className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1.5 text-red-300/60 hover:text-red-300" disabled={submitting} aria-label="Supprimer">×</button>
-                <Link href={`/admin/clients/${clientId}/geo/runs?prompt=${prompt.id}`} className="geo-btn geo-btn-ghost text-[10px] px-2.5 py-1.5">Runs</Link>
-            </div>
-        </div>
-    );
-}
-
-/* --- Main View --- */
 
 export default function GeoPromptsView() {
     const { clientId, invalidateWorkspace, client } = useGeoClient();
@@ -1068,295 +533,197 @@ export default function GeoPromptsView() {
     const [submitting, setSubmitting] = useState(false);
     const [runningPromptId, setRunningPromptId] = useState(null);
     const [runningBatch, setRunningBatch] = useState(false);
-    const [actionError, setActionError] = useState(null);
-    const [actionNotice, setActionNotice] = useState(null);
-    const [pendingRefineId, setPendingRefineId] = useState(null);
+    const [improvingId, setImprovingId] = useState(null);
+    const [improvements, setImprovements] = useState({});
 
-    const categoryOptions = data?.categoryOptions || [];
     const prompts = data?.prompts || [];
-    const starterPrompts = data?.starterPack?.prompts || [];
-    const hasActivePrompt = prompts.some((prompt) => prompt.is_active);
+    const hasActivePrompt = prompts.some(p => p.is_active);
 
-    function clearMessages() {
-        setActionError(null);
-        setActionNotice(null);
-    }
+    const header = (
+        <CommandHeader
+            eyebrow="IA / GEO"
+            title="Registre de Prompts"
+            subtitle="Pilotage de la sémantique d'audit et centre de contrôle des requêtes suivies."
+            actions={(
+                <div className="flex gap-2">
+                    <Link href={`/admin/clients/${clientId}/geo/runs`} className={COMMAND_BUTTONS.secondary}><History className="h-4 w-4" /> Historique</Link>
+                    <button
+                        onClick={async () => {
+                            setRunningBatch(true);
+                            try {
+                                await fetch('/api/admin/queries/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId }) });
+                                invalidateWorkspace();
+                            } catch {} finally { setRunningBatch(false); }
+                        }}
+                        disabled={!hasActivePrompt || runningBatch}
+                        className={COMMAND_BUTTONS.primary}
+                    >
+                        <Play className={cn("h-4 w-4", runningBatch && "animate-pulse")} />
+                        {runningBatch ? 'Batch...' : 'Exécuter les actifs'}
+                    </button>
+                </div>
+            )}
+        />
+    );
 
-    async function handleCreate(event) {
-        event.preventDefault();
-        if (!clientId || !form.query_text.trim()) return;
-        setSubmitting(true);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    clientId,
-                    query_text: form.query_text.trim(),
-                    category: form.category,
-                    query_type: form.category,
-                    locale: form.locale,
-                    prompt_mode: form.prompt_mode,
-                    is_active: form.is_active,
-                }),
-            });
-            const json = await parseJsonResponse(response);
-            setForm(DEFAULT_FORM);
-            setActionNotice(json.warning || 'Prompt suivi créé avec succès.');
-            invalidateWorkspace();
-        } catch (submitError) {
-            setActionError(submitError.message);
-        } finally {
-            setSubmitting(false);
-        }
-    }
-
-    async function handleSave(promptId) {
-        setSubmitting(true);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: promptId,
-                    query_text: editingForm.query_text.trim(),
-                    category: editingForm.category,
-                    query_type: editingForm.category,
-                    locale: editingForm.locale,
-                    prompt_mode: editingForm.prompt_mode || 'user_like',
-                }),
-            });
-            const json = await parseJsonResponse(response);
-            setEditingId(null);
-            setActionNotice(json.warning || 'Prompt suivi mis à jour.');
-            invalidateWorkspace();
-        } catch (submitError) {
-            setActionError(submitError.message);
-        } finally {
-            setSubmitting(false);
-        }
-    }
-
-    async function handleToggle(promptId, nextState) {
-        setSubmitting(true);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/toggle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: promptId, is_active: nextState }),
-            });
-            await parseJsonResponse(response);
-            setActionNotice(nextState ? 'Prompt activé.' : 'Prompt désactivé.');
-            invalidateWorkspace();
-        } catch (submitError) {
-            setActionError(submitError.message);
-        } finally {
-            setSubmitting(false);
-        }
-    }
-
-    async function handleDelete(promptId) {
-        if (!window.confirm('Supprimer ce prompt suivi ?')) return;
-        setSubmitting(true);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: promptId }),
-            });
-            await parseJsonResponse(response);
-            if (editingId === promptId) setEditingId(null);
-            setActionNotice('Prompt suivi supprimé.');
-            invalidateWorkspace();
-        } catch (submitError) {
-            setActionError(submitError.message);
-        } finally {
-            setSubmitting(false);
-        }
-    }
-
-    async function handleRun(prompt) {
-        setRunningPromptId(prompt.id);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/run', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clientId, trackedQueryId: prompt.id }),
-            });
-            const json = await parseJsonResponse(response);
-            const runRows = Array.isArray(json.runs) ? json.runs : [];
-            const failedCount = runRows.filter((item) => item.error).length;
-            if (failedCount === 0) setActionNotice(`Exécution terminée pour « ${prompt.query_text} ».`);
-            else setActionError(buildOperatorRunErrorMessage(`Exécution terminée avec erreurs pour « ${prompt.query_text} ».`, runRows));
-            invalidateWorkspace();
-        } catch (runError) {
-            setActionError(runError.message);
-        } finally {
-            setRunningPromptId(null);
-        }
-    }
-
-    async function handleRunAll() {
-        setRunningBatch(true);
-        clearMessages();
-        try {
-            const response = await fetch('/api/admin/queries/run', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clientId }),
-            });
-            const json = await parseJsonResponse(response);
-            const runRows = Array.isArray(json.runs) ? json.runs : [];
-            const successCount = runRows.filter((item) => !item.error).length;
-            const failedCount = runRows.filter((item) => item.error).length;
-            if (failedCount === 0) setActionNotice(`Exécution terminée : ${successCount} succès.`);
-            else setActionError(buildOperatorRunErrorMessage(`Exécution terminée : ${successCount} succès, ${failedCount} échec(s).`, runRows));
-            invalidateWorkspace();
-        } catch (runError) {
-            setActionError(runError.message);
-        } finally {
-            setRunningBatch(false);
-        }
-    }
-
-    function handleUseSuggestion(prompt) {
-        setForm((current) => ({
-            ...current,
-            query_text: prompt.query_text,
-            category: prompt.category || current.category,
-            locale: prompt.locale || current.locale,
-            prompt_mode: prompt.prompt_mode || current.prompt_mode,
-        }));
-    }
-
-    function handleImprove(prompt) {
-        const mode = resolvePromptMode(prompt);
-        setEditingId(prompt.id);
-        setEditingForm({ query_text: prompt.query_text, category: prompt.category, locale: prompt.locale, prompt_mode: mode, is_active: prompt.is_active });
-        setPendingRefineId(prompt.id);
-    }
-
-    if (loading) return <CommandSkeleton />;
-    if (error) {
-        return (
-            <CommandPageShell>
-                <CommandEmptyState
-                    tone="critical"
-                    title="Chargement impossible"
-                    description={error}
-                />
-            </CommandPageShell>
-        );
-    }
-    if (!data) {
-        return (
-            <CommandPageShell>
-                <CommandEmptyState
-                    title="Prompts indisponibles"
-                    description="L'espace prompts suivis n'a pas pu être chargé."
-                />
-            </CommandPageShell>
-        );
-    }
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Lecture du registre sémantique...</div></CommandPageShell>;
+    if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
 
     return (
-        <div className="min-h-[calc(100vh-6rem)] bg-[#060708]">
-            <div className="border-b border-white/[0.06] bg-gradient-to-br from-[#10121a] via-[#0a0b0e] to-[#060708]">
-                <div className="mx-auto max-w-[1800px] px-4 py-6 md:px-6 md:py-8">
-                    <PromptsHeader
-                        client={client}
-                        summary={data.summary}
-                        hasActivePrompt={hasActivePrompt}
-                        runningBatch={runningBatch}
+        <CommandPageShell header={header}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <CommandMetricCard label="Inventaire" value={data.summary?.total || 0} detail="Total prompts" tone="info" />
+                <CommandMetricCard label="Performance" value={`${data.summary?.mentionRatePercent || 0}%`} detail="Taux cible" tone="ok" />
+                <CommandMetricCard label="Critique" value={data.summary?.weakPromptCount || 0} detail="À renforcer" tone="critical" />
+                <CommandMetricCard label="Inactifs" value={prompts.filter(p => !p.is_active).length} detail="En pause" tone="neutral" />
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12">
+                <div className="lg:col-span-4 flex flex-col gap-4 pb-10">
+                    <PromptCreationSurface
+                        form={form} setForm={setForm}
+                        categoryOptions={data.categoryOptions}
+                        discoveryModeOptions={data.discoveryModeOptions}
                         submitting={submitting}
-                        onRunAll={handleRunAll}
-                        clientId={clientId}
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            setSubmitting(true);
+                            try {
+                                await fetch('/api/admin/queries/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId, ...form }) });
+                                setForm(DEFAULT_FORM);
+                                invalidateWorkspace();
+                            } catch {} finally { setSubmitting(false); }
+                        }}
+                        client={client}
                     />
-                </div>
-            </div>
 
-            <div className="mx-auto max-w-[1800px] px-4 py-6 md:px-6">
-                <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:gap-10">
-                    <div className="space-y-6 xl:col-span-4 xl:sticky xl:top-4 xl:self-start">
-                        <div className="rounded-[22px] border border-white/[0.07] bg-[#090a0c] p-5">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35 mb-4">Composer &amp; enrichir</div>
-                            <PromptCreationSurface
-                                form={form}
-                                setForm={setForm}
-                                categoryOptions={categoryOptions}
+                    <AiPromptListSurface
+                        client={client}
+                        clientId={clientId}
+                        invalidateWorkspace={invalidateWorkspace}
+                        categoryOptions={data.categoryOptions}
+                        submitting={submitting}
+                    />
+
+                    {data.starterPack?.prompts?.length > 0 && (
+                        <div className={cn(COMMAND_PANEL, "p-6 bg-[#06070a]")}>
+                            <div className="flex items-center gap-2 mb-6 text-emerald-400">
+                                <SparklesIcon className="h-4 w-4" />
+                                <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Starter Pack</h3>
+                            </div>
+                            <div className="space-y-3">
+                                {data.starterPack.prompts.map((p, i) => (
+                                    <div key={i} className={cn(COMMAND_SURFACE, "p-4 group hover:bg-white/[0.04] transition-all cursor-pointer")} onClick={() => setForm(c => ({ ...c, query_text: p.query_text, category: p.category || c.category, discovery_mode: p.discovery_mode || c.discovery_mode }))}>
+                                        <p className="text-[11px] text-white/50 group-hover:text-white transition-colors italic">"{p.query_text}"</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className={cn(COMMAND_PANEL, "lg:col-span-8 p-0 bg-[#06070a]")}>
+                    <div className="px-8 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <ListIcon className="h-4 w-4 text-[#7c6aef]" />
+                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Registre Sémantique</h3>
+                        </div>
+                        <div className="text-[10px] font-bold text-white/10 uppercase tracking-widest">{prompts.length} PROMPTS ACTIFS</div>
+                    </div>
+
+                    <div className="divide-y divide-white/[0.03]">
+                        {prompts.length === 0 ? (
+                            <CommandEmptyState title="Registre vide" description="Ajoutez votre premier prompt d'audit pour démarrer le suivi." />
+                        ) : prompts.map((p) => (
+                             <TrackedPromptRow
+                                key={p.id} prompt={p}
+                                categoryOptions={data.categoryOptions}
+                                isEditing={editingId === p.id}
+                                editingForm={editingForm}
+                                setEditingForm={setEditingForm}
+                                setEditingId={setEditingId}
                                 submitting={submitting}
-                                onSubmit={handleCreate}
-                                clientId={clientId}
-                                client={client}
-                                actionNotice={actionNotice}
-                                actionError={actionError}
+                                isRunning={runningPromptId === p.id}
+                                onSave={async (id) => {
+                                    setSubmitting(true);
+                                    try {
+                                        await fetch('/api/admin/queries/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...editingForm }) });
+                                        setEditingId(null);
+                                        invalidateWorkspace();
+                                    } catch {} finally { setSubmitting(false); }
+                                }}
+                                onToggle={async (id, s) => {
+                                    setSubmitting(true);
+                                    try {
+                                        await fetch('/api/admin/queries/toggle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, is_active: s }) });
+                                        invalidateWorkspace();
+                                    } catch {} finally { setSubmitting(false); }
+                                }}
+                                onDelete={async (id) => {
+                                    if (!confirm('Supprimer ce prompt ?')) return;
+                                    setSubmitting(true);
+                                    try {
+                                        await fetch('/api/admin/queries/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                                        invalidateWorkspace();
+                                    } catch {} finally { setSubmitting(false); }
+                                }}
+                                onRun={async (p) => {
+                                    setRunningPromptId(p.id);
+                                    try {
+                                        await fetch('/api/admin/queries/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId, trackedQueryId: p.id }) });
+                                        invalidateWorkspace();
+                                    } catch {} finally { setRunningPromptId(null); }
+                                }}
+                                onImprove={async (p) => {
+                                    setImprovingId(p.id);
+                                    try {
+                                        const response = await fetch('/api/admin/clients/onboarding/suggest-prompt', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                current_query: p.query_text,
+                                                business_name: client?.client_name || '',
+                                                business_type: client?.business_type || '',
+                                                intent_family: p.category || '',
+                                                prompt_mode: p.prompt_mode || 'user_like',
+                                            }),
+                                        });
+                                        const json = await parseJsonResponse(response);
+                                        if (json.suggestion) {
+                                            setImprovements(prev => ({ ...prev, [p.id]: json.suggestion }));
+                                        }
+                                    } catch {} finally { setImprovingId(null); }
+                                }}
+                                isImproving={improvingId === p.id}
+                                improvedText={improvements[p.id]}
+                                onUseImproved={async (id, text) => {
+                                    setSubmitting(true);
+                                    try {
+                                        await fetch('/api/admin/queries/update', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ id, query_text: text })
+                                        });
+                                        setImprovements(prev => {
+                                            const next = { ...prev };
+                                            delete next[id];
+                                            return next;
+                                        });
+                                        invalidateWorkspace();
+                                    } catch {} finally { setSubmitting(false); }
+                                }}
+                                onClearImprovement={(id) => {
+                                    setImprovements(prev => {
+                                        const next = { ...prev };
+                                        delete next[id];
+                                        return next;
+                                    });
+                                }}
                             />
-                        </div>
-                        <SuggestedPromptPack
-                            suggestions={starterPrompts}
-                            onUse={handleUseSuggestion}
-                            client={client}
-                        />
-                        <AiPromptListSurface
-                            client={client}
-                            clientId={clientId}
-                            invalidateWorkspace={invalidateWorkspace}
-                            categoryOptions={categoryOptions}
-                            submitting={submitting}
-                        />
-                    </div>
-
-                    <div className="space-y-6 xl:col-span-8">
-                        <div className="rounded-[22px] border border-white/[0.07] bg-[#090a0c]/90 p-5">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35 mb-4">Lecture synthétique</div>
-                            <PromptsMetricsGrid summary={data.summary} />
-                        </div>
-
-                        <div className="rounded-[22px] border border-white/[0.07] bg-[#08090b] p-1">
-                            <div className="border-b border-white/[0.06] px-5 py-4">
-                                <div className="text-[15px] font-semibold text-white/92">Catalogue des requêtes suivies</div>
-                                <div className="text-[12px] text-white/45 mt-1">Liste principale : exécution, pause et affinage IA restent sur chaque ligne.</div>
-                            </div>
-                            <div className="p-3 sm:p-4">
-                                {prompts.length === 0 ? (
-                                    <CommandEmptyState
-                                        title={data.emptyState.title}
-                                        description={data.emptyState.description}
-                                    />
-                                ) : (
-                                    <TrackedPromptsList
-                                        prompts={prompts}
-                                        categoryOptions={categoryOptions}
-                                        editingId={editingId}
-                                        setEditingId={setEditingId}
-                                        editingForm={editingForm}
-                                        setEditingForm={setEditingForm}
-                                        submitting={submitting}
-                                        runningPromptId={runningPromptId}
-                                        onSave={handleSave}
-                                        onToggle={handleToggle}
-                                        onDelete={handleDelete}
-                                        onRun={handleRun}
-                                        onImprove={handleImprove}
-                                        pendingRefineId={pendingRefineId}
-                                        onClearPendingRefine={() => setPendingRefineId(null)}
-                                        clientId={clientId}
-                                        client={client}
-                                    />
-                                )}
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
-        </div>
+        </CommandPageShell>
     );
 }
-
-
-

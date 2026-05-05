@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -65,7 +65,7 @@ function SeriesLegend({ seriesList, hiddenKeys, onToggle, primaryId }) {
                         key={s.id}
                         type="button"
                         onClick={() => onToggle(s.id)}
-                        title={hidden ? 'Afficher la série' : 'Masquer la série'}
+                        title={hidden ? 'Afficher la serie' : 'Masquer la serie'}
                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all ${
                             hidden
                                 ? 'border-white/[0.06] bg-white/[0.03] text-white/35 line-through'
@@ -87,15 +87,15 @@ function SeriesLegend({ seriesList, hiddenKeys, onToggle, primaryId }) {
 }
 
 /**
- * Graphique d’évolution interactif (Recharts) : tooltip au survol, légende cliquable pour masquer/afficher une série,
- * brush de plage lorsqu’il y a assez de points, grille et axes lisibles.
+ * Graphique d'evolution interactif (Recharts): tooltip au survol, legende cliquable pour masquer/afficher une serie,
+ * brush de plage lorsqu'il y a assez de points, grille et axes lisibles.
  */
 export default function CommandLineChart({
     labels = [],
     series = [],
     min = 0,
     max = 100,
-    /** Renseigné seulement si le parent ne fixe pas la hauteur (ex. `className="h-[300px]"`). */
+    /** Renseigne seulement si le parent ne fixe pas la hauteur (ex. `className="h-[300px]"`). */
     height = null,
     className = '',
     valueFormatter = (value) => `${Math.round(value)}%`,
@@ -157,7 +157,7 @@ export default function CommandLineChart({
 
     return (
         <div
-            className={`relative flex h-full min-h-[200px] w-full flex-col overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.1),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.08),transparent_40%)] p-1 sm:p-2 ${className}`.trim()}
+            className={`relative flex h-full min-h-[200px] w-full flex-col overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.02),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.02),transparent_40%)] p-1 sm:p-2 ${className}`.trim()}
             style={rootStyle}
         >
             <SeriesLegend

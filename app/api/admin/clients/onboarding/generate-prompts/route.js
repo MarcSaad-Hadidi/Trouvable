@@ -188,7 +188,7 @@ function validatePromptArray(data) {
     const valid = data
         .filter((item) => item && typeof item.query_text === 'string' && item.query_text.trim().length >= 8)
         .map((item) => ({
-            query_text: item.query_text.trim().replace(/^["«»"]+|["«»"]+$/g, ''),
+            query_text: item.query_text.trim().replace(/^["«»]+|["«»]+$/g, ''),
             intent_family: VALID_INTENT_FAMILIES.has(item.intent_family) ? item.intent_family : 'discovery',
             prompt_mode: VALID_MODES.has(item.prompt_mode) ? item.prompt_mode : 'user_like',
             rationale: String(item.rationale || '').trim(),

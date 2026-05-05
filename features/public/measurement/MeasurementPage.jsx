@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/features/public/shared/Navbar";
 import SiteFooter from "@/features/public/shared/SiteFooter";
 import ContactButton from "@/features/public/shared/ContactButton";
+import GeoSeoInjector from "@/features/public/shared/GeoSeoInjector";
 import Link from "next/link";
 import { ArrowRight, BarChart3, Target, Bot, Search, Layers, Eye, TrendingUp } from "lucide-react";
+import { SITE_LAST_MODIFIED, SITE_LAST_MODIFIED_ISO, SITE_URL } from "@/lib/site-config";
 
 const LAYERS = [
   { id: "signals", label: "Les signaux", accent: "#5b73ff", icon: Layers, sublabel: "Fondation", desc: "Ce sont les balises Schema.org, les profils créés, le code injecté. Nous mesurons si l'implémentation technique est à 100\u00A0% propre pour que la donnée soit ingestible.", metrics: ["Score Schema.org", "Conformité llms.txt", "Cohérence NAP annuaires"] },
@@ -59,9 +61,29 @@ function LayerExplorer() {
 }
 
 export default function NotreMesurePage() {
+  const pageUrl = `${SITE_URL}/notre-mesure`;
+
   return (
     <div className="min-h-screen bg-[#080808] font-[Inter] text-[#f0f0f0] antialiased">
       <Navbar />
+      <GeoSeoInjector
+        baseUrl={SITE_URL}
+        article={{
+          url: pageUrl,
+          headline: "Cadre de mesure Trouvable",
+          description: "Cadre pour distinguer les signaux techniques, la présence Google et IA, puis les indicateurs d'affaires.",
+          datePublished: SITE_LAST_MODIFIED_ISO,
+          dateModified: SITE_LAST_MODIFIED_ISO,
+          about: ["mesure SEO", "mesure GEO", "visibilité IA"],
+          mentions: [`${SITE_URL}/methodologie`, `${SITE_URL}/offres`],
+        }}
+        itemList={{
+          id: `${pageUrl}#measurement-layers`,
+          name: "Couches de mesure Trouvable",
+          pageUrl,
+          items: LAYERS.map((layer) => layer.label),
+        }}
+      />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(52,211,153,0.04)_0%,rgba(91,115,255,0.04)_50%,transparent_70%),linear-gradient(to_bottom,#080808,#080808)]" />
 
       <main>
@@ -77,6 +99,11 @@ export default function NotreMesurePage() {
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.14 }} className="mx-auto max-w-[600px] text-[17px] leading-[1.65] text-[#a0a0a0]">
               Signaux publics, présence sur votre marché, indicateurs business : nous les dissocions pour éviter les confusions et les métriques de façade.
             </motion.p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[12px] uppercase tracking-[0.08em] text-white/35">
+              <span>Par Trouvable</span>
+              <span aria-hidden>•</span>
+              <span>Dernière mise à jour: {SITE_LAST_MODIFIED}</span>
+            </div>
           </div>
         </section>
 
@@ -144,6 +171,19 @@ export default function NotreMesurePage() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.05] px-6 py-10 sm:px-10">
+          <div className="mx-auto max-w-[960px]">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">À retenir</div>
+            <ul className="grid gap-3 md:grid-cols-3">
+              {LAYERS.map((layer) => (
+                <li key={layer.id} className="border-l border-emerald-400/20 pl-4 text-[13.5px] leading-[1.65] text-white/62">
+                  <span className="font-semibold text-white/82">{layer.label}.</span> {layer.desc}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

@@ -2,6 +2,7 @@
 import { EXPERTISES, VILLES } from "@/lib/data/geo-architecture";
 import { resolveExpertiseComposition } from "@/lib/data/composition";
 import { SITE_URL } from "@/lib/site-config";
+import { fitMetaDescription, withPublicAuthor } from "@/lib/seo/metadata";
 import ExpertisePageClient from "@/features/public/expertise/ExpertisePageClient";
 
 export function generateStaticParams() {
@@ -14,9 +15,9 @@ export async function generateMetadata({ params }) {
     if (!expertise) return {};
 
     const title = `${expertise.name} | Visibilité IA | Trouvable`;
-    const description = expertise.description;
+    const description = fitMetaDescription(expertise.description);
 
-    return {
+    return withPublicAuthor({
         title,
         description,
         alternates: { canonical: `${SITE_URL}/expertises/${expertise.slug}` },
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }) {
             images: [`${SITE_URL}/twitter-image`],
         },
         robots: { index: true, follow: true },
-    };
+    });
 }
 
 export default async function ExpertisePage({ params }) {

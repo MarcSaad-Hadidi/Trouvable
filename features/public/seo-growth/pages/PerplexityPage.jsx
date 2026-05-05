@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp, Search, Globe, Plus, PlusCircle, Monitor, Grid, SlidersHorizontal, Clock, Share, MoreHorizontal, ImageIcon, Mic, ChevronDown, Pin } from 'lucide-react';
-import { FaqSection, LinksSection, AiThinking, TypewriterText } from './shared-primitives';
+import { ArrowUp, Search, Globe, Plus, Monitor, Grid, SlidersHorizontal, Clock, Share, MoreHorizontal, ImageIcon, Mic, ChevronDown, Pin } from 'lucide-react';
+import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
 
 function buildChats(page) {
     return [
@@ -13,7 +13,7 @@ function buildChats(page) {
     ];
 }
 
-export default function PerplexityPage({ page }) {
+export default function PerplexityPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
     const [isSearching, setIsSearching] = useState(false);
@@ -43,7 +43,9 @@ export default function PerplexityPage({ page }) {
 
     return (
         <div className="min-h-screen bg-[#050709]">
-            <main className="pt-[100px] pb-24 px-6 sm:px-10">
+            <main className="pb-24">
+                <PlatformEditorialLead page={page} />
+                <div className="px-6 sm:px-10">
                 {/* Native App Window - Perplexity Style */}
                 <div className="mx-auto max-w-[1280px] h-[800px] rounded-2xl border border-white/10 bg-[#191a1a] shadow-2xl flex overflow-hidden relative font-sans text-[#e3e3e3]">
 
@@ -227,8 +229,10 @@ export default function PerplexityPage({ page }) {
 
                     </div>
                 </div>
+                </div>
 
                 {/* Regular content appended below the "app" */}
+                {trustBrief}
                 <div className="mt-20">
                     <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="cyan" heading="Questions fréquentes" /></section>
                     <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="cyan" heading="Plateformes connexes" /></section>

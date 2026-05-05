@@ -23,13 +23,6 @@ const nextConfig = {
         }
 
         return [
-            // Long-lived cache for all Next.js static chunks (hashed filenames — safe forever)
-            {
-                source: '/_next/static/:path*',
-                headers: [
-                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-                ],
-            },
             {
                 source: '/logos/:path*',
                 headers: [

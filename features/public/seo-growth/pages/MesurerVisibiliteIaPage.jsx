@@ -2,7 +2,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, Gauge, BarChart3, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react';
+import { ArrowRight, Gauge, BarChart3, CheckCircle2, AlertTriangle, TrendingUp, Table2, ListChecks, Scale } from 'lucide-react';
 import ContactButton from '@/features/public/shared/ContactButton';
 import { FaqSection, LinksSection } from './shared-primitives';
 
@@ -17,7 +17,7 @@ function AnimatedGauge({ value, label, delay }) {
     </motion.div>);
 }
 
-export default function MesurerVisibiliteIaPage({ page }) {
+export default function MesurerVisibiliteIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -29,7 +29,7 @@ export default function MesurerVisibiliteIaPage({ page }) {
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.02)_1px,transparent_1px)] [background-size:80px_80px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,black_20%,transparent_100%)]" />
                 <div className="relative z-[1] mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-400/[0.06] px-5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-orange-300"><Gauge className="h-3.5 w-3.5" /> {page.eyebrow}</motion.div>
-                    <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em]"><span className="bg-gradient-to-r from-orange-200 via-white to-orange-200/60 bg-clip-text text-transparent">{page.h1}</span></motion.h1>
+                    <h1 className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em] text-orange-50">{page.h1}</h1>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-7 max-w-[680px] text-[17px] leading-[1.7] text-[#a8a8a8]">{page.summary}</motion.p>
                     {/* Dashboard gauges */}
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-10 flex flex-wrap gap-6 justify-start">
@@ -41,6 +41,8 @@ export default function MesurerVisibiliteIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-orange-400/[0.06] bg-[#0a0608] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-orange-400/12 bg-orange-400/[0.02] p-6 sm:p-8">
@@ -50,6 +52,67 @@ export default function MesurerVisibiliteIaPage({ page }) {
                     </motion.div>
                 </div>
             </section>
+
+            <section className="border-t border-orange-400/[0.06] bg-[#0a0608] px-6 py-16 sm:px-10">
+                <div className="mx-auto max-w-[1120px] grid gap-8 lg:grid-cols-2">
+                    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-orange-400/12 bg-orange-400/[0.03] p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2"><ListChecks className="h-5 w-5 text-orange-400" /><span className="text-[11px] font-bold uppercase tracking-[0.12em] text-orange-400/75">{page.measurementIndicatorsHeading}</span></div>
+                        <ul className="space-y-3">{page.measurementIndicators.map((line) => (
+                            <li key={line} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />{line}</li>
+                        ))}</ul>
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.06 }} className="rounded-2xl border border-white/8 bg-[#0a0a0a] p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-orange-400" /><span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/45">{page.measurementPromptExamplesHeading}</span></div>
+                        <ul className="space-y-3">{page.measurementPromptExamples.map((p) => (
+                            <li key={p} className="rounded-lg border border-white/6 bg-white/[0.02] px-4 py-3 font-mono text-[12px] leading-[1.55] text-orange-100/90">{p}</li>
+                        ))}</ul>
+                    </motion.div>
+                </div>
+            </section>
+
+            <section className="border-t border-orange-400/[0.06] px-6 py-16 sm:px-10">
+                <div className="mx-auto max-w-[1120px]">
+                    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-6 flex items-center gap-2"><Table2 className="h-5 w-5 text-orange-400" /><h2 className="text-[clamp(20px,2.4vw,26px)] font-bold tracking-[-0.03em] text-orange-50">{page.measurementTableHeading}</h2></motion.div>
+                    <div className="overflow-x-auto rounded-2xl border border-white/8 bg-[#0a0a0a]">
+                        <table className="w-full min-w-[720px] border-collapse text-left text-[12px] sm:text-[13px]">
+                            <thead>
+                                <tr className="border-b border-white/10 bg-white/[0.03]">
+                                    {page.measurementTableColumns.map((col) => (
+                                        <th key={col} className="px-4 py-3 font-semibold text-white/85">{col}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {page.measurementTableRows.map((row, ri) => (
+                                    <tr key={ri} className="border-b border-white/6 last:border-0">
+                                        {row.map((cell, ci) => (
+                                            <td key={ci} className="px-4 py-3 leading-[1.55] text-[#a8a8a8]">{cell}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section className="border-t border-orange-400/[0.06] bg-[#0a0608] px-6 py-16 sm:px-10">
+                <div className="mx-auto max-w-[1120px] grid gap-8 lg:grid-cols-2">
+                    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-white/8 bg-[#0a0a0a] p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2"><Scale className="h-5 w-5 text-orange-400" /><h2 className="text-[clamp(18px,2.2vw,22px)] font-bold tracking-[-0.02em] text-white">{page.competitorComparisonHeading}</h2></div>
+                        <ul className="space-y-3">{page.competitorComparisonBullets.map((b) => (
+                            <li key={b} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400/70" />{b}</li>
+                        ))}</ul>
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.06 }} className="rounded-2xl border border-orange-400/15 bg-orange-400/[0.04] p-6 sm:p-8">
+                        <div className="mb-4 flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-orange-400" /><h2 className="text-[clamp(18px,2.2vw,22px)] font-bold tracking-[-0.02em] text-orange-50">{page.trouvableMethodHeading}</h2></div>
+                        <ul className="space-y-3">{page.trouvableMethodBullets.map((b) => (
+                            <li key={b} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#c8c8c8]"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-orange-400/60" />{b}</li>
+                        ))}</ul>
+                    </motion.div>
+                </div>
+            </section>
+
             {/* Dashboard widget layout */}
             <section className="border-t border-orange-400/[0.06] px-6 py-20 sm:px-10">
                 <div className="mx-auto max-w-[1120px] grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">

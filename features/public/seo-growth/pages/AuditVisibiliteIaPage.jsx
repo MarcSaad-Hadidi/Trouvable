@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, Crosshair, ScanLine, Shield, Radio, CheckCircle2 } from 'lucide-react';
@@ -21,13 +21,6 @@ function RadarScanner() {
     );
 }
 
-function TypewriterTitle({ text }) {
-    const [displayed, setDisplayed] = useState('');
-    const [done, setDone] = useState(false);
-    useEffect(() => { let i = 0; const id = setInterval(() => { i++; setDisplayed(text.slice(0, i)); if (i >= text.length) { clearInterval(id); setDone(true); } }, 30); return () => clearInterval(id); }, [text]);
-    return <span>{displayed}{!done && <span className="animate-pulse text-cyan-400">|</span>}</span>;
-}
-
 function HudCard({ children, delay = 0 }) {
     return (
         <motion.div initial={{ opacity: 0, y: 20, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay }} className="group relative overflow-hidden rounded-xl border border-cyan-400/10 bg-[#0a0a0a] transition-all hover:border-cyan-400/25">
@@ -39,7 +32,7 @@ function HudCard({ children, delay = 0 }) {
     );
 }
 
-export default function AuditVisibiliteIaPage({ page }) {
+export default function AuditVisibiliteIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -54,7 +47,7 @@ export default function AuditVisibiliteIaPage({ page }) {
                 <RadarScanner />
                 <div className="relative z-[1] mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-300"><Crosshair className="h-3.5 w-3.5" /> {page.eyebrow}</motion.div>
-                    <h1 className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em] text-white"><TypewriterTitle text={page.h1} /></h1>
+                    <h1 className="max-w-[860px] text-[clamp(36px,6vw,72px)] font-bold leading-[1.04] tracking-[-0.045em] text-white">{page.h1}</h1>
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} className="mt-7 max-w-[680px] text-[17px] leading-[1.7] text-[#a8a8a8]">{page.summary}</motion.p>
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2 }} className="mt-8 flex flex-col gap-3 sm:flex-row">
                         <ContactButton className="inline-flex items-center gap-2 rounded-lg bg-cyan-400 px-6 py-3.5 text-sm font-semibold text-black hover:-translate-y-px hover:bg-cyan-300 hover:shadow-[0_0_30px_rgba(34,211,238,0.2)] transition">{page.ctaLabel} <ArrowRight className="h-4 w-4" /></ContactButton>
@@ -62,6 +55,8 @@ export default function AuditVisibiliteIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-cyan-400/[0.08] bg-[#060608] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]"><HudCard><div className="p-6 sm:p-8">
                     <div className="mb-4 flex items-center gap-3"><ScanLine className="h-5 w-5 text-cyan-400" /><div className="text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-400/70">Briefing</div></div>

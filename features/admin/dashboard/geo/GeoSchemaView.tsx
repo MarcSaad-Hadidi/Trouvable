@@ -8,15 +8,22 @@ import {
     AlertTriangleIcon,
     CheckCircle2Icon,
     ChevronRightIcon,
+    FingerprintIcon,
     HashIcon,
     NetworkIcon,
     ShieldAlertIcon,
+    TerminalIcon,
+    SearchIcon,
+    DatabaseIcon,
+    ActivityIcon
 } from 'lucide-react';
 
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
+
+/* ── Utilities ── */
 
 function toneFromStatus(status) {
     const normalized = String(status || '').toLowerCase();
@@ -25,209 +32,187 @@ function toneFromStatus(status) {
     return 'error';
 }
 
-function statusIcon(status) {
-    const tone = toneFromStatus(status);
-    if (tone === 'valid') return <CheckCircle2Icon className="h-4 w-4 text-emerald-400" />;
-    if (tone === 'warning') return <ShieldAlertIcon className="h-4 w-4 text-amber-400" />;
-    return <AlertTriangleIcon className="h-4 w-4 text-rose-400" />;
-}
+const EASE = [0.16, 1, 0.3, 1];
 
-function statusChip(status) {
-    const tone = toneFromStatus(status);
-    if (tone === 'valid') return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-    if (tone === 'warning') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-    return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
-}
+/* ── Main View ── */
 
 export default function GeoSchemaPage() {
     const { clientId } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('schema');
     const [expandedRow, setExpandedRow] = useState(null);
     const geoBase = clientId ? `/admin/clients/${clientId}/geo` : '/admin/clients';
-    const seoBase = clientId ? `/admin/clients/${clientId}/seo` : '/admin/clients';
 
     const orbitNodes = useMemo(() => {
         return (data?.coverageItems || []).slice(0, 5).map((item, index) => ({
             id: item.key,
             label: item.label,
             status: item.operatorStatus,
-            top: ['10%', '35%', '35%', '78%', '78%'][index],
-            left: ['50%', '12%', '86%', '24%', '76%'][index],
-            center: index === 0,
+            top: ['15%', '40%', '40%', '75%', '75%'][index],
+            left: ['50%', '15%', '85%', '25%', '75%'][index],
         }));
     }, [data]);
 
+    const header = (
+        <CommandHeader
+            eyebrow="IA / GEO"
+            title="Schéma & Entités"
+            subtitle="Validation du balisage structuré et des entités détectées pour les moteurs IA."
+            actions={(
+                <Link href={`${geoBase}/consistency`} className={COMMAND_BUTTONS.primary}>
+                    <ActivityIcon className="h-4 w-4" /> Analyse Cohérence
+                </Link>
+            )}
+        />
+    );
+
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Cartographie du graphe d'entités...</div></CommandPageShell>;
+    if (error || !data) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error || "Impossible d'accéder aux données structurées."} /></CommandPageShell>;
+
     return (
-        <CommandPageShell
-            header={(
-                <CommandHeader
-                    eyebrow="GEO Ops"
-                    title="Schema & entites"
-                    subtitle="Validation reelle du balisage structure, des entites et des manques detectes sur le dernier audit exploitable."
-                    actions={(
-                        <>
-                            <Link href={`${seoBase}/health`} className={COMMAND_BUTTONS.secondary}>Voir audit</Link>
-                            <Link href={`${geoBase}/consistency`} className={COMMAND_BUTTONS.primary}>Voir fiabilite IA</Link>
-                        </>
-                    )}
-                />
-            )}
-        >
-            {loading ? (
-                <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-8 text-[13px] text-white/55">Chargement du schema...</div>
-            ) : error ? (
-                <CommandEmptyState title="Lecture schema indisponible" description={error} />
-            ) : data?.emptyState ? (
-                <CommandEmptyState title={data.emptyState.title} description={data.emptyState.description} />
-            ) : (
-                <>
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <CommandMetricCard label="Couverture schema" value={`${data?.summary?.coveragePercent ?? 0}%`} detail={`${data?.summary?.observedTypeCount ?? 0} types observes`} tone={(data?.summary?.coveragePercent ?? 0) >= 70 ? 'ok' : 'warning'} />
-                        <CommandMetricCard label="Entites detectees" value={data?.summary?.observedTypeCount ?? 0} detail="Types structures distincts" tone="info" />
-                        <CommandMetricCard label="Ecarts critiques" value={data?.summary?.criticalGapCount ?? 0} detail="Manques qui bloquent l'ancrage" tone={(data?.summary?.criticalGapCount ?? 0) > 0 ? 'critical' : 'neutral'} />
-                        <CommandMetricCard label="Fraicheur audit" value={data?.summary?.auditFreshness || 'n.d.'} detail="Dernier audit structure" tone="neutral" />
+        <CommandPageShell header={header}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <CommandMetricCard label="Couverture Schéma" value={`${data.summary?.coveragePercent || 0}%`} detail={`${data.summary?.observedTypeCount || 0} types détectés`} tone={(data.summary?.coveragePercent || 0) >= 70 ? 'ok' : 'warning'} />
+                <CommandMetricCard label="Écarts Critiques" value={data.summary?.criticalGapCount || 0} detail="Impact visibilité IA" tone={(data.summary?.criticalGapCount || 0) > 0 ? 'critical' : 'neutral'} />
+                <CommandMetricCard label="Entités GMB/Graphe" value="Active" detail="Alignement détecté" tone="ok" />
+                <CommandMetricCard label="Fraîcheur" value={data.summary?.auditFreshness || 'n.d.'} detail="Dernière lecture" tone="neutral" />
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
+                <div className={cn(COMMAND_PANEL, "lg:col-span-5 flex flex-col overflow-hidden relative p-0")}>
+                    <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <NetworkIcon className="h-4 w-4 text-[#7c6aef]" />
+                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Entity Graph Mapping</h3>
+                        </div>
+                        <DatabaseIcon className="h-4 w-4 text-white/10" />
+                    </div>
+                    
+                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,_rgba(124,106,239,0.08)_0%,_transparent_70%)] bg-[#06070a]">
+                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                             style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                        
+                        <svg className="pointer-events-none absolute inset-0 h-full w-full">
+                            <g opacity="0.1">
+                                <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#7c6aef" strokeWidth="1" strokeDasharray="4 4" />
+                                <line x1="50%" y1="50%" x2="15%" y2="40%" stroke="#7c6aef" strokeWidth="1" />
+                                <line x1="50%" y1="50%" x2="85%" y2="40%" stroke="#7c6aef" strokeWidth="1" />
+                                <line x1="50%" y1="50%" x2="25%" y2="75%" stroke="#7c6aef" strokeWidth="1" strokeDasharray="4 4" />
+                                <line x1="50%" y1="50%" x2="75%" y2="75%" stroke="#7c6aef" strokeWidth="1" />
+                            </g>
+                        </svg>
+
+                        <div className="absolute inset-0">
+                            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+                                <motion.div 
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="flex h-20 w-20 items-center justify-center rounded-full border border-[#7c6aef]/30 bg-[#7c6aef]/10 shadow-[0_0_40px_rgba(124,106,239,0.1)] backdrop-blur-sm"
+                                >
+                                    <FingerprintIcon className="h-8 w-8 text-white/80" />
+                                </motion.div>
+                            </div>
+
+                            {orbitNodes.map((node, idx) => {
+                                const tone = toneFromStatus(node.status);
+                                return (
+                                    <motion.div
+                                        key={node.id}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: idx * 0.1, duration: 0.5, ease: EASE }}
+                                        className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+                                        style={{ top: node.top, left: node.left }}
+                                    >
+                                        <div className={cn(
+                                            'mb-2 flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-500 hover:scale-110 shadow-lg',
+                                            tone === 'valid' ? 'border-emerald-500/40 bg-emerald-500/10' : (tone === 'warning' ? 'border-amber-500/40 bg-amber-500/10' : 'border-rose-500/40 bg-rose-500/10'),
+                                        )}>
+                                            <HashIcon className={cn('h-4 w-4', tone === 'valid' ? 'text-emerald-400' : (tone === 'warning' ? 'text-amber-400' : 'text-rose-400'))} />
+                                        </div>
+                                        <span className="rounded-full border border-white/10 bg-black/80 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-white/40 backdrop-blur-md whitespace-nowrap">
+                                            {node.label}
+                                        </span>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                <div className={cn(COMMAND_PANEL, "lg:col-span-7 flex flex-col p-0 overflow-hidden")}>
+                    <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <ShieldAlertIcon className="h-4 w-4 text-[#7c6aef]" />
+                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Validation des Blocs Schema</h3>
+                        </div>
+                        <SearchIcon className="h-4 w-4 text-white/10" />
                     </div>
 
-                    <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3 h-[calc(100vh-280px)] min-h-[600px]">
-                        <div className={cn(COMMAND_PANEL, 'lg:col-span-1 p-0 flex flex-col overflow-hidden')}>
-                            <div className="flex items-center justify-between border-b border-white/[0.05] p-5">
-                                <div className="flex items-center gap-2 text-[13px] font-semibold text-white/90">
-                                    <NetworkIcon className="h-4 w-4 text-indigo-400" />
-                                    Graphe d'entite marque
-                                </div>
-                                <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400">Organization</span>
-                            </div>
-
-                            <div className="relative flex-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black/20 to-transparent">
-                                <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ opacity: 0.3 }}>
-                                    <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 4" />
-                                    <line x1="50%" y1="50%" x2="15%" y2="40%" stroke="#8b5cf6" strokeWidth="2" />
-                                    <line x1="50%" y1="50%" x2="85%" y2="40%" stroke="#8b5cf6" strokeWidth="2" />
-                                    <line x1="50%" y1="50%" x2="25%" y2="80%" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 4" />
-                                    <line x1="50%" y1="50%" x2="75%" y2="80%" stroke="#8b5cf6" strokeWidth="2" />
-                                </svg>
-
-                                <div className="absolute inset-0">
-                                    <div className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-indigo-400 bg-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.4)]">
-                                            <span className="text-sm font-bold text-white">Marque</span>
+                    <div className="flex-1 divide-y divide-white/[0.03] overflow-y-auto geo-scrollbar">
+                        {(data.coverageItems || []).map((item) => {
+                            const tone = toneFromStatus(item.operatorStatus);
+                            const isExpanded = expandedRow === item.key;
+                            return (
+                                <div key={item.key} className="flex flex-col">
+                                    <div 
+                                        onClick={() => setExpandedRow(isExpanded ? null : item.key)}
+                                        className="px-6 py-4 group hover:bg-white/[0.02] transition-all cursor-pointer flex items-center gap-4"
+                                    >
+                                        <div className={cn("h-2 w-2 rounded-full shrink-0", tone === 'valid' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : (tone === 'warning' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]'))} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <span className="text-[14px] font-bold text-white/80 group-hover:text-white transition-colors">{item.label}</span>
+                                                <span className="text-[10px] font-bold tabular-nums text-white/20">{item.coveragePercent}% couverture</span>
+                                            </div>
+                                            <div className="flex gap-1.5 overflow-hidden">
+                                                {(item.observedTypes || []).slice(0, 3).map((t, i) => (
+                                                    <span key={i} className="text-[9px] font-bold uppercase tracking-widest text-[#7c6aef]/60">#{t}</span>
+                                                ))}
+                                            </div>
                                         </div>
+                                        <div className="text-right shrink-0 mr-2">
+                                            <div className="text-[11px] font-bold text-white/50">{item.foundCount}/{item.expectedCount} props</div>
+                                            <div className="text-[9px] font-bold uppercase tracking-widest text-white/10 mt-0.5">{item.reliability || 'STABLE'}</div>
+                                        </div>
+                                        <ChevronRightIcon className={cn("h-4 w-4 text-white/10 transition-transform duration-300", isExpanded && "rotate-90 text-white/40")} />
                                     </div>
 
-                                    {orbitNodes.map((node) => (
-                                        <div
-                                            key={node.id}
-                                            className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                                            style={{ top: node.top, left: node.left }}
-                                        >
-                                            <div className={cn(
-                                                'mb-1 flex h-10 w-10 items-center justify-center rounded-full border',
-                                                toneFromStatus(node.status) === 'valid'
-                                                    ? 'border-emerald-500/30 bg-emerald-500/10'
-                                                    : toneFromStatus(node.status) === 'warning'
-                                                        ? 'border-amber-500/30 bg-amber-500/10'
-                                                        : 'border-rose-500/30 bg-rose-500/10',
-                                            )}>
-                                                <HashIcon className={cn(
-                                                    'h-4 w-4',
-                                                    toneFromStatus(node.status) === 'valid'
-                                                        ? 'text-emerald-400'
-                                                        : toneFromStatus(node.status) === 'warning'
-                                                            ? 'text-amber-400'
-                                                            : 'text-rose-400',
-                                                )} />
-                                            </div>
-                                            <span className="rounded border border-white/[0.05] bg-black/50 px-2 py-0.5 text-[10px] text-white/65">{node.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="absolute bottom-4 left-4 right-4 text-center text-[10px] text-white/40">
-                                    Graphe derive de la couverture schema observee sur le dernier audit.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={cn(COMMAND_PANEL, 'lg:col-span-2 flex flex-col overflow-hidden p-0')}>
-                            <div className="flex items-center justify-between border-b border-white/[0.05] bg-white/[0.01] p-4">
-                                <h3 className="text-[12px] font-semibold text-white/90">Validateur des blocs schema</h3>
-                                <div className="flex gap-2">
-                                    <span className="flex items-center gap-1 rounded border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white/50">{data.coverageItems.filter((item) => toneFromStatus(item.operatorStatus) === 'valid').length} valides</span>
-                                    <span className="flex items-center gap-1 rounded border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white/50">{data.coverageItems.filter((item) => toneFromStatus(item.operatorStatus) === 'warning').length} avert.</span>
-                                    <span className="flex items-center gap-1 rounded border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white/50">{data.summary.criticalGapCount || 0} erreurs</span>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 divide-y divide-white/[0.02] overflow-y-auto scrollbar-none">
-                                {(data.coverageItems || []).map((item) => (
-                                    <div key={item.key} className="flex flex-col">
-                                        <div
-                                            onClick={() => setExpandedRow(expandedRow === item.key ? null : item.key)}
-                                            className="group flex cursor-pointer items-center gap-4 p-3 transition-colors hover:bg-white/[0.03]"
-                                        >
-                                            <div className="w-6 flex justify-center">{statusIcon(item.operatorStatus)}</div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="mb-1 flex items-center gap-2">
-                                                    <span className="text-[12px] font-medium text-white/85">{item.label}</span>
-                                                    <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px] text-white/50">{item.coveragePercent}%</span>
-                                                </div>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {(item.observedTypes || []).slice(0, 4).map((type) => (
-                                                        <span key={type} className="rounded border border-indigo-500/20 bg-indigo-500/10 px-1.5 py-0.5 text-[9px] text-indigo-300/70">{type}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="hidden text-right sm:block">
-                                                <div className="text-[10px] text-white/40">{item.foundCount}/{item.expectedCount} proprietes</div>
-                                                <div className="text-[9px] text-white/30">{item.reliability || 'n.d.'}</div>
-                                            </div>
-                                            <ChevronRightIcon className={cn('h-4 w-4 text-white/20 transition-transform duration-200', expandedRow === item.key && 'rotate-90')} />
-                                        </div>
-
-                                        <AnimatePresence>
-                                            {expandedRow === item.key ? (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden border-t border-white/[0.05] bg-black/20"
-                                                >
-                                                    <div className="flex flex-col gap-4 p-4">
-                                                        {(item.missingProperties || []).length > 0 ? (
-                                                            <div className={cn(
-                                                                'rounded-lg border p-3',
-                                                                toneFromStatus(item.operatorStatus) === 'error' ? 'border-rose-500/20 bg-rose-500/5' : 'border-amber-500/20 bg-amber-500/5',
-                                                            )}>
-                                                                <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/65">Proprietes manquantes</div>
-                                                                <ul className="space-y-1">
-                                                                    {item.missingProperties.map((issue) => (
-                                                                        <li key={issue} className="flex items-start gap-2 text-[11px] text-white/70">
-                                                                            <span className="mt-1 h-1 w-1 rounded-full bg-white/20 shrink-0" />
-                                                                            {issue}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
+                                    <AnimatePresence>
+                                        {isExpanded && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: EASE }}
+                                                className="overflow-hidden bg-black/40 border-t border-white/[0.04]"
+                                            >
+                                                <div className="p-6 space-y-4">
+                                                    {(item.missingProperties || []).length > 0 && (
+                                                        <div className="p-4 rounded-xl bg-rose-500/[0.03] border border-rose-500/10">
+                                                            <div className="text-[10px] font-bold uppercase tracking-widest text-rose-400/40 mb-3">Propriétés manquantes</div>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                {item.missingProperties.map((p, i) => (
+                                                                    <div key={i} className="flex items-center gap-2 text-[11px] text-white/50">
+                                                                        <div className="h-1 w-1 rounded-full bg-rose-500/40 shrink-0" /> {p}
+                                                                    </div>
+                                                                ))}
                                                             </div>
-                                                        ) : null}
-
-                                                        <div className="rounded-lg border border-white/[0.05] bg-[#0d1117] p-3">
-                                                            <div className="mb-2 flex items-center justify-between">
-                                                                <span className="text-[10px] font-mono text-white/40">Preuve observee</span>
-                                                                <span className={cn('rounded px-2 py-0.5 text-[9px]', statusChip(item.operatorStatus))}>{item.operatorStatus}</span>
-                                                            </div>
-                                                            <div className="whitespace-pre-wrap text-[11px] leading-relaxed text-white/72">{item.evidence || 'Aucune preuve textuelle supplementaire.'}</div>
                                                         </div>
+                                                    )}
+                                                    <div className={cn(COMMAND_SURFACE, "p-4")}>
+                                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-2">Preuve détectée</div>
+                                                        <p className="text-[11px] text-white/50 leading-relaxed italic border-l-2 border-[#7c6aef]/30 pl-4 py-1">"{item.evidence || 'Aucun détail technique disponible.'}"</p>
                                                     </div>
-                                                </motion.div>
-                                            ) : null}
-                                        </AnimatePresence>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        })}
                     </div>
-                </>
-            )}
+                </div>
+            </div>
         </CommandPageShell>
     );
 }

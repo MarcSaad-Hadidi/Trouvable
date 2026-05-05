@@ -6,7 +6,7 @@ import { ArrowRight, Target, Brain, CheckCircle2, AlertTriangle, Lightbulb } fro
 import ContactButton from '@/features/public/shared/ContactButton';
 import { FaqSection, LinksSection } from './shared-primitives';
 
-export default function StrategieVisibiliteIaPage({ page }) {
+export default function StrategieVisibiliteIaPage({ page, trustBrief }) {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
     const op = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -26,6 +26,8 @@ export default function StrategieVisibiliteIaPage({ page }) {
                     </motion.div>
                 </div>
             </motion.section>
+            {trustBrief}
+
             <section className="border-t border-fuchsia-400/[0.06] bg-[#08060c] px-6 py-16 sm:px-10">
                 <div className="mx-auto max-w-[960px]">
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-fuchsia-400/12 bg-fuchsia-400/[0.02] p-6 sm:p-8">

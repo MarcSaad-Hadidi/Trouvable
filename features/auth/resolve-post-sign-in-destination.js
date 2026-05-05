@@ -7,7 +7,7 @@ import { resolvePortalMembership } from '@/features/portal/server/access';
 
 /**
  * Après authentification Clerk : destination selon le rôle.
- * - Admin (CLERK_ADMIN_EMAIL, etc.) ? back-office
+ * - Admin (CLERK_ADMIN_EMAIL, etc.) ? tableau de bord /admin
  * - Invité portail actif ? /portal ou /portal/[slug]
  * - Sinon ? null (afficher une page d’aide)
  */
@@ -17,7 +17,7 @@ export async function resolvePostSignInDestination() {
 
     const allEmails = user.emailAddresses?.map((e) => e.emailAddress).filter(Boolean) ?? [];
     if (allEmails.some((email) => isAdminEmail(email))) {
-        return '/admin/clients';
+        return '/admin';
     }
 
     const { memberships = [] } = await resolvePortalMembership();

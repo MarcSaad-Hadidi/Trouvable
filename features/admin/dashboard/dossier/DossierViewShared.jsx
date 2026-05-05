@@ -268,7 +268,7 @@ export function DossierRailTimelineItem({ item, isLast = false }) {
     const wrapped = (
         <div className="relative flex gap-4">
             <div className="relative flex w-5 shrink-0 flex-col items-center pt-1">
-                <span className="z-[1] h-2.5 w-2.5 rounded-full border-2 border-[#5b73ff] bg-[#060607] shadow-[0_0_14px_rgba(91,115,255,0.45)]" />
+                <span className="z-[1] h-2.5 w-2.5 rounded-full border-2 border-[#5b73ff] bg-[#000000] shadow-[0_0_14px_rgba(91,115,255,0.45)]" />
                 {!isLast ? <span className="mt-1 w-px flex-1 min-h-[24px] bg-gradient-to-b from-[#5b73ff]/35 to-white/[0.06]" /> : null}
             </div>
             <div className="min-w-0 flex-1 pb-6">{body}</div>

@@ -158,7 +158,6 @@ Thin route files under `app/admin/(workspace)/clients/[clientId]/seo/**` mount S
 - `/admin/clients/[clientId]/seo/cannibalization` -> `SeoCannibalizationView`
 - `/admin/clients/[clientId]/seo/correction-prompts` -> `SeoCorrectionPromptsView`
 - `/admin/clients/[clientId]/seo/opportunities` -> `SeoOpportunitiesView`
-- `/admin/clients/[clientId]/seo/actions` -> redirect to `/admin/clients/[clientId]/seo/opportunities`
 
 ## Admin AGENT section
 
