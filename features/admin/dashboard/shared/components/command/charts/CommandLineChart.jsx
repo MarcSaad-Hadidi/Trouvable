@@ -65,7 +65,7 @@ function SeriesLegend({ seriesList, hiddenKeys, onToggle, primaryId }) {
                         key={s.id}
                         type="button"
                         onClick={() => onToggle(s.id)}
-                        title={hidden ? 'Afficher la sÃ©rie' : 'Masquer la sÃ©rie'}
+                        title={hidden ? 'Afficher la serie' : 'Masquer la serie'}
                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all ${
                             hidden
                                 ? 'border-white/[0.06] bg-white/[0.03] text-white/35 line-through'
@@ -87,15 +87,15 @@ function SeriesLegend({ seriesList, hiddenKeys, onToggle, primaryId }) {
 }
 
 /**
- * Graphique dâ€™Ã©volution interactif (Recharts) : tooltip au survol, lÃ©gende cliquable pour masquer/afficher une sÃ©rie,
- * brush de plage lorsquâ€™il y a assez de points, grille et axes lisibles.
+ * Graphique d'evolution interactif (Recharts): tooltip au survol, legende cliquable pour masquer/afficher une serie,
+ * brush de plage lorsqu'il y a assez de points, grille et axes lisibles.
  */
 export default function CommandLineChart({
     labels = [],
     series = [],
     min = 0,
     max = 100,
-    /** RenseignÃ© seulement si le parent ne fixe pas la hauteur (ex. `className="h-[300px]"`). */
+    /** Renseigne seulement si le parent ne fixe pas la hauteur (ex. `className="h-[300px]"`). */
     height = null,
     className = '',
     valueFormatter = (value) => `${Math.round(value)}%`,

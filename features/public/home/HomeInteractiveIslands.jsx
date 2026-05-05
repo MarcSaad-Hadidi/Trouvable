@@ -210,7 +210,7 @@ export function PipelinePreview() {
             );
           })}
           {revealedSideCount >= 2 && (
-            <div className="transition-opacity duration-500 ease-out" style={{ opacity: revealedSideCount >= 2 ? 1 : 0 }}>
+            <div className="transition-opacity duration-500 ease-out">
               <div className="mb-4 mt-6 px-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#b8b8b8]">Livrables types</div>
               {LIVRABLE_ITEMS.map((item, j) => {
                 const show = j < livrableVisibleCount;

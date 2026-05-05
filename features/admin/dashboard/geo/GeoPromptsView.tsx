@@ -454,7 +454,7 @@ function TrackedPromptRow({
             !prompt.is_active && "opacity-30 grayscale"
         )}>
             <div className="flex items-start gap-6">
-                <div className={cn("mt-2.5 h-1.5 w-1.5 rounded-full shrink-0", promptStatusDotClass(prompt).replace('bg-', 'bg-'))} />
+                <div className={cn("mt-2.5 h-1.5 w-1.5 rounded-full shrink-0", promptStatusDotClass(prompt))} />
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
@@ -578,8 +578,8 @@ export default function GeoPromptsView() {
                 <CommandMetricCard label="Inactifs" value={prompts.filter(p => !p.is_active).length} detail="En pause" tone="neutral" />
             </div>
 
-            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
-                <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto geo-scrollbar pb-10">
+            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12">
+                <div className="lg:col-span-4 flex flex-col gap-4 pb-10">
                     <PromptCreationSurface
                         form={form} setForm={setForm}
                         categoryOptions={data.categoryOptions}
@@ -622,7 +622,7 @@ export default function GeoPromptsView() {
                     )}
                 </div>
 
-                <div className={cn(COMMAND_PANEL, "lg:col-span-8 flex flex-col overflow-hidden p-0 bg-[#06070a]")}>
+                <div className={cn(COMMAND_PANEL, "lg:col-span-8 p-0 bg-[#06070a]")}>
                     <div className="px-8 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <ListIcon className="h-4 w-4 text-[#7c6aef]" />
@@ -631,7 +631,7 @@ export default function GeoPromptsView() {
                         <div className="text-[10px] font-bold text-white/10 uppercase tracking-widest">{prompts.length} PROMPTS ACTIFS</div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto divide-y divide-white/[0.03] geo-scrollbar">
+                    <div className="divide-y divide-white/[0.03]">
                         {prompts.length === 0 ? (
                             <CommandEmptyState title="Registre vide" description="Ajoutez votre premier prompt d'audit pour démarrer le suivi." />
                         ) : prompts.map((p) => (

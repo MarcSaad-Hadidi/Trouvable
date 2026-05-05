@@ -51,7 +51,7 @@ export async function GET(request) {
 
     let statePayload;
     try {
-        statePayload = createGoogleOAuthState({
+        statePayload = await createGoogleOAuthState({
             clientId,
             returnTo,
             origin: appUrl,

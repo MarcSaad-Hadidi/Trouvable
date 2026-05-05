@@ -50,7 +50,7 @@ export async function GET(request) {
     // We dynamically use the request origin to avoid redirect_uri mismatches (www vs non-www, Vercel previews, etc.)
     const appUrl = new URL(request.url).origin;
 
-    const verifiedState = verifyGoogleOAuthState(statePayload);
+    const verifiedState = await verifyGoogleOAuthState(statePayload);
     if (!verifiedState.valid) {
         return NextResponse.json({
             error: 'invalid_google_oauth_state',

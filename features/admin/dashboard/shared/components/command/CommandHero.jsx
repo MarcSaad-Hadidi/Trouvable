@@ -50,7 +50,7 @@ export default function CommandHero({
                             {subtitle ? <span>{subtitle}</span> : null}
                             {websiteLabel ? (
                                 <>
-                                    <span className="text-white/[0.12]">â€¢</span>
+                                    <span className="text-white/[0.12]">•</span>
                                     <span className="truncate">{websiteLabel}</span>
                                 </>
                             ) : null}
@@ -105,12 +105,12 @@ export default function CommandHero({
                             />
                             <div className="space-y-3">
                                 <div>
-                                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Lecture stratÃ©gique</div>
+                                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Lecture strategique</div>
                                     <div className={cn('mt-3 text-[24px] font-semibold tracking-[-0.04em]', statusTone.text)}>{status?.label}</div>
                                     <div className="mt-2 text-[13px] leading-relaxed text-white/[0.68]">{scoreCaption}</div>
                                 </div>
                                 <div className="rounded-[18px] border border-white/[0.08] bg-black/20 p-3">
-                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">FraÃ®cheur</div>
+                                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">Fraicheur</div>
                                     <div className="mt-2 text-[15px] font-semibold text-white/[0.88]">{freshness?.detail}</div>
                                 </div>
                             </div>
