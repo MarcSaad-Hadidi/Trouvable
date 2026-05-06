@@ -77,7 +77,7 @@ function clientsListLink({ q, page, archived }) {
 export default async function AdminClientsPage({ searchParams }) {
     const paramsData = await searchParams;
     const rawQ = paramsData?.q || '';
-    const q = rawQ.slice(0, 60).replace(/[^a-zA-Z0-9 -éèàùâêîôûç]/g, '').trim();
+    const q = rawQ.slice(0, 60).replace(/[^a-zA-Z0-9 éèàùâêîôûç-]/g, '').trim();
     const page = parseInt(paramsData?.page, 10) || 1;
     const showArchived = paramsData?.archived === '1';
 

@@ -17,7 +17,6 @@ export default function ClientListActions({ client, showArchived }) {
     const allowedNext = getAllowedNextStates(currentLifecycle);
 
     function handleLifecycleTransition(targetState) {
-        const targetLabel = LIFECYCLE_META[targetState]?.label || targetState;
         if (targetState === 'archived' && !window.confirm('Archiver ce client ?')) return;
         startTransition(async () => {
             setErr(null);

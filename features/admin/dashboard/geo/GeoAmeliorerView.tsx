@@ -5,22 +5,17 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-    CalendarIcon,
     CheckCircle2Icon,
     CircleDashedIcon,
     ClockIcon,
-    ListTodoIcon,
-    MessageSquareIcon,
     ShieldAlertIcon,
     UserIcon,
-    PlayIcon,
-    ActivityIcon,
     PlusIcon,
     ArrowRightIcon
 } from 'lucide-react';
 
 import { CommandHeader, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_SURFACE, cn } from '@/lib/tokens';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 

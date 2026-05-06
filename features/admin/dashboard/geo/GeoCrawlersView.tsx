@@ -6,11 +6,7 @@ import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { 
     BotIcon, 
-    ShieldCheckIcon, 
     ShieldXIcon, 
-    ZapIcon, 
-    HistoryIcon, 
-    TerminalIcon, 
     ActivityIcon,
     SearchIcon
 } from 'lucide-react';

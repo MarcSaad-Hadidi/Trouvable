@@ -1,31 +1,25 @@
 // @ts-nocheck
 'use client';
 
-import { useMemo } from 'react';
 import { 
-    ZapIcon, 
-    ShieldCheckIcon, 
     FileTextIcon, 
     LayersIcon, 
     TargetIcon, 
-    CheckCircle2Icon, 
     AlertTriangleIcon, 
     ActivityIcon,
-    SparklesIcon,
-    ChevronRightIcon
+    SparklesIcon
 } from 'lucide-react';
 
 import { 
     CommandHeader, 
     CommandMetricCard, 
     CommandPageShell,
-    COMMAND_BUTTONS, 
     COMMAND_PANEL, 
     COMMAND_SURFACE, 
     cn 
 } from '@/features/admin/dashboard/shared/components/command';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
-import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
+import { useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 
 /* ── Components ── */
@@ -107,7 +101,6 @@ function PageCard({ page }) {
 /* ── Main View ── */
 
 export default function GeoReadinessView() {
-    const { client } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('readiness');
 
     const summary = data?.summary || {};

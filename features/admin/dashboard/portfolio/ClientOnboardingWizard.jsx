@@ -3,9 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { ProvenancePill } from '@/components/shared/metrics/ProvenancePill';
 import QualityPill from '@/components/shared/metrics/QualityPill';
-import { getQualityMeta, getQualityToneClasses } from '@/lib/quality-status';
 
 const INITIAL_INPUT = {
     business_name: '',

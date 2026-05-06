@@ -6,9 +6,7 @@ import Link from 'next/link';
 import { 
     ShieldCheckIcon, 
     AlertTriangleIcon, 
-    NetworkIcon, 
     ActivityIcon, 
-    FileTextIcon, 
     CheckCircle2Icon,
     ArrowRightIcon
 } from 'lucide-react';
@@ -26,13 +24,6 @@ function toneFromStatus(status) {
     if (normalized.includes('partiel') || normalized.includes('confirmer')) return 'warning';
     if (normalized.includes('ecart') || normalized.includes('incoher') || normalized.includes('manquant')) return 'critical';
     return 'neutral';
-}
-
-function statusIcon(status) {
-    const tone = toneFromStatus(status);
-    if (tone === 'ok') return <CheckCircle2Icon className="h-4 w-4 text-emerald-400" />;
-    if (tone === 'warning') return <AlertTriangleIcon className="h-4 w-4 text-amber-400" />;
-    return <AlertTriangleIcon className="h-4 w-4 text-rose-400" />;
 }
 
 function statusChip(status) {
@@ -104,7 +95,7 @@ export default function GeoConsistencyPage() {
                 <CommandMetricCard 
                     label="Alignement" 
                     value={`${alignedCount}/${dimensions.length}`} 
-                    detail="Dimensions conformes" 
+                    detail={`${partialCount} partiels`}
                     tone={alignedCount === dimensions.length ? 'ok' : 'warning'} 
                 />
                 <CommandMetricCard 

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 
 import { commandDrawer, commandFade } from './motion';
-import { COMMAND_BUTTONS, COMMAND_SURFACE, cn, getToneMeta } from './tokens';
+import { COMMAND_SURFACE, cn, getToneMeta } from './tokens';
 
 export default function CommandDrawer({
     open,

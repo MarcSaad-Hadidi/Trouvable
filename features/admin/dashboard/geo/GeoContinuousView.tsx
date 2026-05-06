@@ -4,16 +4,12 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-    BellIcon,
     GitCommitIcon,
     HistoryIcon,
     PlayIcon,
-    SettingsIcon,
     WorkflowIcon,
-    ActivityIcon,
     ChevronRightIcon,
     ZapIcon,
-    ShieldCheckIcon,
     TerminalIcon
 } from 'lucide-react';
 
@@ -57,11 +53,12 @@ export default function GeoContinuousPage() {
         setPendingAction(payload.action);
         setFeedback(null);
         try {
-            await fetch(`/api/admin/geo/client/${clientId}/continuous/actions`, {
+            const response = await fetch(`/api/admin/geo/client/${clientId}/continuous/actions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+            await parseJsonResponse(response);
             setFeedback(successMessage);
             invalidateWorkspace();
         } catch (e) { setFeedback(e.message); } finally { setPendingAction(null); }
@@ -96,6 +93,12 @@ export default function GeoContinuousPage() {
                 <CommandMetricCard label="Jobs Actifs" value={data.jobs?.summary?.activeJobs || 0} detail={`${data.jobs?.summary?.failedJobs || 0} échecs`} tone={(data.jobs?.summary?.failedJobs || 0) > 0 ? 'warning' : 'ok'} />
                 <CommandMetricCard label="Connecteurs" value={`${data.connectors?.summary?.configured || 0} Actifs`} detail="Intégrations live" tone="ok" />
             </div>
+
+            {feedback && (
+                <div className={cn(COMMAND_PANEL, "mt-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white/55")}>
+                    {feedback}
+                </div>
+            )}
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
                 <div className={cn(COMMAND_PANEL, "lg:col-span-8 flex flex-col p-0 overflow-hidden")}>

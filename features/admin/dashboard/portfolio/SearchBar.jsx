@@ -19,7 +19,7 @@ export default function SearchBar() {
         params.set('page', '1'); // Reset to page 1 on new search
 
         // Strict client-side sanitize for q: keep only letters, numbers, spaces, and dashes
-        const sanitizedQuery = query.trim().replace(/[^a-zA-Z0-9 -éèàùâêîôûç]/g, '');
+        const sanitizedQuery = query.trim().replace(/[^a-zA-Z0-9 éèàùâêîôûç-]/g, '');
 
         if (sanitizedQuery) {
             params.set('q', sanitizedQuery);

@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -17,11 +17,7 @@ import {
     ZapIcon,
     ChevronRightIcon,
     CheckCircle2Icon,
-    AlertCircleIcon,
-    ClockIcon,
-    SearchIcon,
     ListIcon,
-    ArrowUpRightIcon,
     PlayIcon
 } from 'lucide-react';
 
@@ -36,7 +32,6 @@ import {
     cn,
 } from '@/features/admin/dashboard/shared/components/command';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
-import QualityPill from '@/components/shared/metrics/QualityPill';
 
 /* --- Constants --- */
 
@@ -53,8 +48,6 @@ const PROMPT_MODE_LABELS = {
     user_like: 'Question naturelle',
     operator_probe: 'Sonde opérateur',
 };
-
-const EASE = [0.16, 1, 0.3, 1];
 
 /* --- Helpers --- */
 
@@ -313,6 +306,11 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                 </div>
                 <button onClick={() => setOpen(false)} className="px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold text-white/60 hover:text-white transition-all uppercase tracking-widest">Fermer</button>
             </div>
+            {error && (
+                <div className="rounded-xl border border-rose-500/15 bg-rose-500/[0.04] px-4 py-3 text-[12px] text-rose-200/80">
+                    {error}
+                </div>
+            )}
 
             {hasMandateContext && (
                 <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-4">

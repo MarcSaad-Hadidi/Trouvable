@@ -114,25 +114,26 @@ export default function ClientForm({ initialData = null }) {
     const inputSmClass = "w-full px-3 py-2 text-sm bg-[#161616] border border-white/10 rounded-lg text-white placeholder:text-white/25 focus:ring-[#5b73ff] focus:border-[#5b73ff] outline-none";
     const labelClass = "block text-sm font-medium text-[#a0a0a0] mb-1";
     const sectionTitle = "text-lg font-semibold text-white border-b border-white/10 pb-2";
+    const clientIdSegment = formData.id ? encodeURIComponent(String(formData.id)) : '';
 
     return (
         <div className="relative">
             {isEditMode && (
                 <div className="mb-6 flex flex-wrap justify-end gap-4">
                     <Link
-                        href={"/admin/clients/" + formData.id + "/seo/health"}
+                        href={`/admin/clients/${clientIdSegment}/seo/health`}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] border border-white/10 rounded-lg text-sm font-bold text-[#a0a0a0] hover:bg-white/[0.06] transition-colors"
                     >
                         <Activity size={16} className="text-[#7b8fff]" /> Santé SEO
                     </Link>
                     <Link
-                        href={"/admin/clients/" + formData.id + "/portal"}
+                        href={`/admin/clients/${clientIdSegment}/portal`}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] border border-white/10 rounded-lg text-sm font-bold text-[#a0a0a0] hover:bg-white/[0.06] transition-colors"
                     >
                         Portail client
                     </Link>
                     <Link
-                        href={"/admin/clients/" + formData.id + "/dossier"}
+                        href={`/admin/clients/${clientIdSegment}/dossier`}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-transparent rounded-lg text-sm font-bold text-black hover:bg-[#d6d6d6] transition-colors"
                     >
                         <Sparkles size={16} /> Ouvrir le Cockpit

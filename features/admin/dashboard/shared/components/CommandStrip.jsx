@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-import { Search, RefreshCw, Clock } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { useGeoClient } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { cn } from '@/features/admin/dashboard/shared/components/command';
 

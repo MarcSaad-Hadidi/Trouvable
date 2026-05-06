@@ -12,10 +12,7 @@ import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE } from '@/lib/tokens';
 import { CumulativeModelVisibilityChart } from '@/features/admin/dashboard/geo/components/GeoRealCharts';
 import { GeoEmptyPanel, GeoModelAvatar, GeoProvenancePill } from '@/features/admin/dashboard/geo/components/GeoPremium';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
-import { AlertTriangleIcon, BotIcon, FlaskConicalIcon, LayersIcon, SparklesIcon, ZapIcon, BarChart3Icon } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-const EASE = [0.16, 1, 0.3, 1];
+import { FlaskConicalIcon, LayersIcon, BarChart3Icon } from 'lucide-react';
 
 async function parseJsonResponse(response) {
     const json = await response.json().catch(() => ({}));
@@ -34,13 +31,6 @@ function formatDateTime(value) {
     }
 }
 
-function parseStatusPillClass(status) {
-    if (status === 'parsed_success') return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400';
-    if (status === 'parsed_partial') return 'border-amber-500/20 bg-amber-500/10 text-amber-400';
-    if (status === 'parsed_failed') return 'border-rose-500/20 bg-rose-500/10 text-rose-400';
-    return 'border-white/10 bg-white/[0.03] text-white/50';
-}
-
 function formatDisplayModelName(label, fallback) {
     const source = String(label || fallback || '').trim();
     const simplified = source.replace(/\s*\([^)]*\)/g, '').trim();
@@ -48,7 +38,7 @@ function formatDisplayModelName(label, fallback) {
 }
 
 export default function GeoModelesView() {
-    const { clientId, invalidateWorkspace, client } = useGeoClient();
+    const { clientId, invalidateWorkspace } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('models');
     const [benchmarkRunning, setBenchmarkRunning] = useState(false);
     const [benchmarkNotice, setBenchmarkNotice] = useState(null);
@@ -295,6 +285,7 @@ export default function GeoModelesView() {
                                 ))}
                             </div>
                             {benchmarkNotice && <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-[11px] text-emerald-400 font-bold uppercase tracking-widest">{benchmarkNotice}</div>}
+                            {benchmarkError && <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/10 text-[11px] text-rose-300 font-bold uppercase tracking-widest">{benchmarkError}</div>}
                         </div>
                     </div>
 

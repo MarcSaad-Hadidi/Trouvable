@@ -185,7 +185,7 @@ export default function PortalAccessPanel({ clientId, clientName, clientSlug, li
                 <h2 className="text-base font-bold text-white">Parcours client</h2>
                 <div className="mt-4 space-y-2">
                     {[
-                        { label: 'Connexion', path: '/espace' },
+                        { label: 'Connexion', path: portalSignInPath },
                         { label: 'Tableau de bord', path: portalDashboardPath },
                         { label: 'Aide', path: `${portalDashboardPath}#aide-espace-client` },
                     ].map(({ label, path }) => (

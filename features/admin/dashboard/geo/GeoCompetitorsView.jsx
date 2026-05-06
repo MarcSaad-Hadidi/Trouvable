@@ -4,8 +4,8 @@
 import Link from 'next/link';
 import React, { useMemo } from 'react';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
-import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
-import { AlertCircleIcon, ShieldAlertIcon, TargetIcon, UsersIcon, ShieldXIcon } from 'lucide-react';
+import { COMMAND_SURFACE, cn } from '@/lib/tokens';
+import { TargetIcon, UsersIcon, ShieldXIcon } from 'lucide-react';
 
 /* ── Utilities ── */
 

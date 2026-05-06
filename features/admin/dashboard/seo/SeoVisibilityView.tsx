@@ -106,7 +106,6 @@ export default function SeoVisibilityPage() {
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const topQueries = data?.topQueries || [];
-    const brandSplit = data?.brandSplit || {};
     const deviceSplit = data?.deviceSplit || {};
     const intentBreakdown = data?.intentBreakdown || [];
     const movers = data?.movers || { winners: [], losers: [] };

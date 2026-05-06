@@ -7,10 +7,7 @@ import {
     BellIcon, 
     ShieldCheckIcon, 
     ActivityIcon, 
-    FilterIcon, 
-    ChevronRightIcon, 
     ZapIcon, 
-    ClockIcon,
     TerminalIcon
 } from 'lucide-react';
 
@@ -18,13 +15,12 @@ import {
     CommandHeader, 
     CommandMetricCard, 
     CommandPageShell,
-    COMMAND_BUTTONS, 
     COMMAND_PANEL, 
     COMMAND_SURFACE, 
     cn 
 } from '@/features/admin/dashboard/shared/components/command';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
-import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
+import { useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 
 /* ── Constants ── */
@@ -105,7 +101,6 @@ function FreshnessItem({ label, state, hours }) {
 /* ── Main View ── */
 
 export default function GeoAlertsView() {
-    const { client, clientId } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('alerts');
     const [sevFilter, setSevFilter] = useState({ critique: true, avertissement: true, info: true, ok: false });
 

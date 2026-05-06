@@ -5,7 +5,7 @@ import { getUnifiedProblemModel } from '@/features/admin/dashboard/dossier/audit
 
 import IssueQuickAction from '@/features/admin/dashboard/shared/components/IssueQuickAction';
 
-import { Pill, getRemediationType } from './audit-helpers';
+import { Pill } from './audit-helpers';
 
 /**
  * Problèmes prioritaires — hiérarchie de sévérité.

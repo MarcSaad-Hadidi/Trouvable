@@ -6,12 +6,7 @@ import {
     ActivityIcon, 
     SearchIcon, 
     GlobeIcon, 
-    BarChart3Icon, 
-    TrendingUpIcon, 
-    MousePointerClickIcon, 
-    EyeIcon,
-    DatabaseIcon,
-    ShieldCheckIcon
+    TrendingUpIcon
 } from 'lucide-react';
 
 import { 
@@ -24,7 +19,7 @@ import {
     cn 
 } from '@/features/admin/dashboard/shared/components/command';
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
-import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
+import { useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 
 /* ── Utilities ── */
 
@@ -63,7 +58,6 @@ function ConnectorPill({ label, connector }) {
 }
 
 export default function GeoVisibilityView() {
-    const { client } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('visibility', {
         params: { range: '30d', segment: 'all' },
     });
@@ -79,7 +73,7 @@ export default function GeoVisibilityView() {
     if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Lecture des flux Google...</div></CommandPageShell>;
     if (error || !data) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error || "Impossible de charger les données Google."} /></CommandPageShell>;
 
-    const { kpis, trafficDaily, topPages, gscQueries, connectors } = data;
+    const { kpis, topPages, gscQueries, connectors } = data;
 
     return (
         <CommandPageShell header={header}>

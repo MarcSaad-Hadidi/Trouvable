@@ -10,20 +10,16 @@ import {
     CheckCircle2Icon,
     ClockIcon,
     CpuIcon,
-    FilterIcon,
     HistoryIcon,
     PlayIcon,
     RefreshCwIcon,
     SearchIcon,
-    ServerIcon,
     Trash2Icon,
     XCircleIcon,
     ArrowUpRightIcon,
-    ChevronRightIcon,
-    MessageSquareIcon,
     TerminalIcon
 } from 'lucide-react';
-import { BarChart, Bar, Cell, XAxis, YAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { BarChart, Bar, Cell, ResponsiveContainer } from 'recharts';
 
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
@@ -230,6 +226,12 @@ export default function GeoRunsPage() {
                 <CommandMetricCard label="Latence Moy." value={history.length ? `${Math.round(history.reduce((s, r) => s + latencySeconds(r), 0) / history.length)}s` : '—'} detail="Réponse moteur" tone="neutral" />
                 <CommandMetricCard label="Validité Parsing" value={`${Math.round((data.summary?.parseCounts?.parsed_success / (totalRuns || 1)) * 100)}%`} detail="Intégrité JSON" tone="ok" />
             </div>
+
+            {actionMessage && (
+                <div className={cn(COMMAND_PANEL, "mt-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white/55")}>
+                    {actionMessage}
+                </div>
+            )}
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
                 <div className="lg:col-span-8 flex flex-col gap-4">

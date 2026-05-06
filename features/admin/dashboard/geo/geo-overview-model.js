@@ -235,7 +235,7 @@ function buildTrend(recentAudits = [], recentQueryRuns = []) {
 
 function buildTimeline(recentActivity = [], geoBase, seoBase, dossierBase) {
     const items = (recentActivity || []).map((item) => {
-        let href = geoBase;
+        let href;
         if (item.type === 'audit') href = `${seoBase}/health`;
         else if (String(item.type).includes('tracked_query')) href = `${geoBase}/prompts`;
         else if (String(item.type).includes('publication')) href = `${dossierBase}/settings`;

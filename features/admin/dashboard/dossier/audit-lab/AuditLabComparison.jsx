@@ -85,13 +85,6 @@ function deltaLabel(delta, { suffix = ' pts' } = {}) {
     return `${sign}${delta}${suffix}`;
 }
 
-function DeltaPill({ a, b, invert = false, suffix = ' pts' }) {
-    const delta = formatDelta(a, b);
-    const tone = deltaTone(delta, { invert });
-    if (delta == null) return <LabPill label="—" tone="neutral" />;
-    return <LabPill label={deltaLabel(delta, { suffix })} tone={tone} />;
-}
-
 function ScoreCell({ label, value, highlight = false, suffix = '/100' }) {
     const tone = scoreToneClass(value);
     return (

@@ -4,17 +4,12 @@
 import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-    UsersIcon, 
     SparklesIcon, 
     MessageSquareIcon, 
-    AlertCircleIcon, 
     ZapIcon, 
     ShieldCheckIcon, 
     SearchIcon, 
     HistoryIcon, 
-    ArrowRightIcon,
-    GlobeIcon,
-    ChevronDownIcon,
     PlayIcon
 } from 'lucide-react';
 
@@ -179,7 +174,7 @@ function AiBriefingPanel({ clientId }) {
 /* ── Main View ── */
 
 export default function GeoSocialView() {
-    const { client, clientId, invalidateWorkspace } = useGeoClient();
+    const { clientId, invalidateWorkspace } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('social');
     const [launching, setLaunching] = useState(false);
 

@@ -18,11 +18,6 @@ function normalizeText(value) {
         .toLowerCase();
 }
 
-function formatNumber(value) {
-    if (value === null || value === undefined || Number.isNaN(Number(value))) return 'n.d.';
-    return Number(value).toLocaleString('fr-FR');
-}
-
 function formatRole(item) {
     return item?.role || item?.label || 'Rôle';
 }

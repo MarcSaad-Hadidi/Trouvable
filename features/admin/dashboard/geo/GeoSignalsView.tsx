@@ -1,9 +1,9 @@
 // @ts-nocheck
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Orbit, RadioTower, ZapIcon, ActivityIcon, TargetIcon, LayersIcon } from 'lucide-react';
+import { Orbit } from 'lucide-react';
 import Link from 'next/link';
 
 import { 
@@ -12,7 +12,6 @@ import {
     CommandPageShell,
     COMMAND_BUTTONS, 
     COMMAND_PANEL, 
-    COMMAND_SURFACE, 
     cn 
 } from '@/features/admin/dashboard/shared/components/command';
 import GeoCitationsView from '@/features/admin/dashboard/geo/GeoCitationsView';
@@ -24,7 +23,7 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/s
 export default function GeoSignalsView() {
     const searchParams = useSearchParams();
     const focus = searchParams.get('focus') || '';
-    const { client, clientId } = useGeoClient();
+    const { clientId } = useGeoClient();
     const { data: citationsData, loading: citationsLoading } = useGeoWorkspaceSlice('citations');
     const { data: competitorsData, loading: competitorsLoading } = useGeoWorkspaceSlice('competitors');
 

@@ -10,8 +10,7 @@ import {
     Search, 
     Globe2, 
     Bot, 
-    Settings,
-    LogOut
+    Settings
 } from 'lucide-react';
 import { cn } from '@/features/admin/dashboard/shared/components/command';
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import { SourcesTimelineChart } from '@/features/admin/dashboard/geo/components/GeoRealCharts';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
-import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_SURFACE, cn } from '@/lib/tokens';
 import { LayersIcon, MousePointerClickIcon, SignalHighIcon, ActivityIcon } from 'lucide-react';
 
 /* ── Utilities ── */

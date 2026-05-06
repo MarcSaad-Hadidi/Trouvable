@@ -78,7 +78,7 @@ function QuickLinkCard({ href, label, sublabel, accent = 'blue' }) {
 }
 
 export default function SeoOverviewView() {
-    const { client, clientId, audit } = useGeoClient();
+    const { client, clientId } = useGeoClient();
     const { data, loading, error } = useSeoWorkspaceSlice('overview');
 
     if (loading) {

@@ -7,19 +7,6 @@ import { SITE_CONTACT_EMAIL } from '@/lib/site-contact';
 
 export const dynamic = 'force-dynamic';
 
-function formatDateLong(iso) {
-    if (!iso) return null;
-    try {
-        return new Date(iso).toLocaleDateString('fr-CA', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-        });
-    } catch {
-        return null;
-    }
-}
-
 const ISSUE_LABEL = (() => {
     try {
         const date = new Date();

@@ -9,7 +9,6 @@ import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/dashboard/s
 import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
-import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 
 const severityOrder = { high: 0, medium: 1, low: 2 };
 
@@ -121,7 +120,7 @@ function ChevronRightIcon(props) {
 }
 
 export default function SeoCannibalizationPage() {
-    const { client, clientId } = useGeoClient();
+    const { clientId } = useGeoClient();
     const { data, loading, error } = useSeoWorkspaceSlice('cannibalization');
     const [expandedClusterId, setExpandedClusterId] = useState(null);
 

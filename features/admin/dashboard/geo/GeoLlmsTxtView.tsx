@@ -5,15 +5,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     CheckCircle2Icon,
     CopyIcon,
-    FileCodeIcon,
     RefreshCwIcon,
-    SaveIcon,
     AlertTriangleIcon,
     DownloadIcon,
     TerminalIcon,
     ShieldCheckIcon,
-    ActivityIcon,
-    FileTextIcon,
     LayersIcon
 } from 'lucide-react';
 
@@ -38,7 +34,6 @@ function splitSections(content) {
 
 export default function GeoLlmsTxtPage() {
     const { client, clientId, audit } = useGeoClient();
-    const [draft, setDraft] = useState(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [error, setError] = useState(null);
@@ -59,7 +54,6 @@ export default function GeoLlmsTxtPage() {
             if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
             const suggestions = json.suggestions || [];
             const latest = suggestions.find((item) => item.ai_output && item.status === 'draft') || null;
-            setDraft(latest);
             setContent(latest?.ai_output || '');
         } catch (e) { setError(e.message); } finally { setLoading(false); }
     }, [clientId]);

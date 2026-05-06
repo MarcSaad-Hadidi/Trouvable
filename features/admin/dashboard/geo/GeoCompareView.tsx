@@ -2,27 +2,18 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import {
-    ActivityIcon,
     BarChart3Icon,
     ChevronRightIcon,
-    CpuIcon,
     GlobeIcon,
-    HistoryIcon,
-    LayoutGridIcon,
     PlayIcon,
-    SearchIcon,
     Settings2Icon,
     SparklesIcon,
-    TrophyIcon,
-    ZapIcon,
-    ArrowUpRightIcon
+    TrophyIcon
 } from 'lucide-react';
 
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/dashboard/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
-import CommandEmptyState from '@/features/admin/dashboard/shared/components/command/CommandEmptyState';
 import {
     defaultGeoCompareForm,
 } from '@/lib/llm-comparison/geo-compare-form';
@@ -50,8 +41,6 @@ async function parseJsonResponse(response) {
     if (!response.ok) throw new Error(json?.error?.message || json?.error || `Erreur ${response.status}`);
     return json;
 }
-
-const EASE = [0.16, 1, 0.3, 1];
 
 /* --- Components --- */
 
@@ -171,6 +160,12 @@ export default function GeoCompareView({ linkedClientId = null }) {
                 <CommandMetricCard label="Flux Source" value={form.source_type === 'url' ? 'URL Crawler' : 'Texte Brut'} detail="Moteur d'extraction" tone="neutral" />
                 <CommandMetricCard label="Cohérence" value={viewModel ? `${viewModel.summary.successful_count}/4` : '—'} detail="Inter-moteurs" tone="neutral" />
             </div>
+
+            {error && (
+                <div className={cn(COMMAND_PANEL, "mt-2 border-rose-500/15 bg-rose-500/[0.04] px-4 py-3 text-[12px] text-rose-200/80")}>
+                    {error}
+                </div>
+            )}
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
                 <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto geo-scrollbar pb-10">

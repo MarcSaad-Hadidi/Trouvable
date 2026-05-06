@@ -7,29 +7,16 @@ import Link from 'next/link';
 import {
     Area,
     AreaChart,
-    Bar,
-    BarChart,
-    Cell,
     ResponsiveContainer,
-    Tooltip as RechartsTooltip,
-    XAxis,
-    YAxis,
 } from 'recharts';
 import {
-    AlertTriangleIcon,
     BotIcon,
-    QuoteIcon,
-    SparklesIcon,
     ActivityIcon,
-    TargetIcon,
-    LayersIcon,
     ZapIcon,
-    ArrowUpRightIcon
 } from 'lucide-react';
 
 import {
     CommandHeader,
-    CommandMetricCard,
     CommandPageShell,
     COMMAND_BUTTONS,
     COMMAND_PANEL,
@@ -46,11 +33,6 @@ const EASE = [0.16, 1, 0.3, 1];
 
 function providerColor(index) {
     const colors = ['bg-[#10b981]', 'bg-[#0ea5e9]', 'bg-[#7c6aef]', 'bg-[#f59e0b]', 'bg-[#f97316]'];
-    return colors[index % colors.length];
-}
-
-function providerAccent(index) {
-    const colors = ['#10b981', '#0ea5e9', '#7c6aef', '#f59e0b', '#f97316'];
     return colors[index % colors.length];
 }
 

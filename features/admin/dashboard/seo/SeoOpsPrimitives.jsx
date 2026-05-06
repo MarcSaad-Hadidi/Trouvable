@@ -5,7 +5,6 @@ import {
     CommandEmptyState,
     CommandHeader,
     CommandPageShell,
-    CommandSkeleton,
 } from '@/features/admin/dashboard/shared/components/command';
 
 const ACCENT_LINE_CLASSES = {

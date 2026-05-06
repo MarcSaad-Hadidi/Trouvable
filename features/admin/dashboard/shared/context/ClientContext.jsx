@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const ClientContext = createContext(null);
 
@@ -24,7 +24,6 @@ async function fetchNoStore(url) {
 }
 
 export function ClientProvider({ children, clientId }) {
-    const pathname = usePathname();
     const router = useRouter();
 
     const [client, setClient] = useState(null);

@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2Icon, FileTextIcon, SearchIcon, SparklesIcon, TagIcon, AlertTriangleIcon } from 'lucide-react';
+import { CheckCircle2Icon, SearchIcon, SparklesIcon, TagIcon, AlertTriangleIcon } from 'lucide-react';
 
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { useIssueHandoff } from '@/features/admin/dashboard/shared/context/IssueHandoffContext';

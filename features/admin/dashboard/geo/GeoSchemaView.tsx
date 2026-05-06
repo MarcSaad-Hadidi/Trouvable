@@ -5,14 +5,11 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    AlertTriangleIcon,
-    CheckCircle2Icon,
     ChevronRightIcon,
     FingerprintIcon,
     HashIcon,
     NetworkIcon,
     ShieldAlertIcon,
-    TerminalIcon,
     SearchIcon,
     DatabaseIcon,
     ActivityIcon

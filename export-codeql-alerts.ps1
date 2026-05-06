@@ -1,11 +1,37 @@
 $ErrorActionPreference = "Stop"
 
 $repo = "MarcSaad-Hadidi/Trouvable"
-$token = gh auth token
+
+function Get-GitHubToken {
+    $candidates = @(
+        $env:GITHUB_TOKEN,
+        $env:GH_TOKEN,
+        $env:GITHUB_OAUTH_TOKEN
+    )
+
+    foreach ($candidate in $candidates) {
+        if (-not [string]::IsNullOrWhiteSpace($candidate)) {
+            return $candidate.Trim()
+        }
+    }
+
+    $envFile = Join-Path $PSScriptRoot ".env.local"
+    if (Test-Path $envFile) {
+        foreach ($line in Get-Content $envFile) {
+            if ($line -match '^\s*(GITHUB_TOKEN|GH_TOKEN|GITHUB_OAUTH_TOKEN)\s*=\s*(.+?)\s*$') {
+                return $matches[2].Trim().Trim('"').Trim("'")
+            }
+        }
+    }
+
+    throw "No GitHub token found. Set GITHUB_TOKEN, GH_TOKEN, or GITHUB_OAUTH_TOKEN, or authenticate with gh auth login."
+}
+
+$token = Get-GitHubToken
 
 $headers = @{
-    "Authorization" = "Bearer $token"
-    "Accept" = "application/vnd.github+json"
+    "Authorization"        = "Bearer $token"
+    "Accept"               = "application/vnd.github+json"
     "X-GitHub-Api-Version" = "2022-11-28"
 }
 
@@ -67,7 +93,7 @@ foreach ($alert in $alerts) {
         }
     }
 
-    $markdown.Add("## Alert #$($alert.number) — $($alert.rule.description)")
+    $markdown.Add("## Alert #$($alert.number) - $($alert.rule.description)")
     $markdown.Add("")
     $markdown.Add("- State: $($alert.state)")
     $markdown.Add("- Severity: $severity")
@@ -98,14 +124,14 @@ $csvRows = foreach ($alert in $alerts) {
     }
 
     [PSCustomObject]@{
-        Number = $alert.number
-        State = $alert.state
-        Severity = $severity
-        Rule = $alert.rule.id
+        Number      = $alert.number
+        State       = $alert.state
+        Severity    = $severity
+        Rule        = $alert.rule.id
         Description = $alert.rule.description
-        File = $path
-        Line = $line
-        Url = $alert.html_url
+        File        = $path
+        Line        = $line
+        Url         = $alert.html_url
     }
 }
 

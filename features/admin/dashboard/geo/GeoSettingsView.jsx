@@ -6,13 +6,10 @@ import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { 
     Building2, 
-    Shield, 
     User, 
-    SettingsIcon, 
     ShieldCheckIcon, 
     GlobeIcon, 
     MailIcon, 
-    PhoneIcon,
     ChevronRightIcon
 } from 'lucide-react';
 
@@ -42,7 +39,7 @@ function SettingRow({ label, value, hint }) {
 }
 
 export default function GeoSettingsView() {
-    const { user, isLoaded } = useUser();
+    const { user } = useUser();
     const { client, clientId } = useGeoClient();
     const [zone, setZone] = useState('operator');
 
