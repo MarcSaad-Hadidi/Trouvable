@@ -215,11 +215,12 @@ async function createPromptDirectly({ clientId, queryText, category, promptMode,
     return parseJsonResponse(response);
 }
 
-function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOptions, submitting: parentSubmitting }) {
+function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOptions, discoveryModeOptions = [], submitting: parentSubmitting }) {
     const [open, setOpen] = useState(false);
     const [guidance, setGuidance] = useState('');
     const [category, setCategory] = useState('');
     const [promptMode, setPromptMode] = useState('');
+    const [discoveryMode, setDiscoveryMode] = useState('');
     const [count, setCount] = useState(4);
     const [generating, setGenerating] = useState(false);
     const [results, setResults] = useState(null);
@@ -242,6 +243,7 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                     intent: guidance.trim() || undefined,
                     category,
                     prompt_mode: promptMode || undefined,
+                    discovery_mode: discoveryMode.trim() || undefined,
                     count,
                     business_name: client?.client_name || '',
                     business_type: client?.business_type || '',
@@ -257,7 +259,14 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
         } finally {
             setGenerating(false);
         }
-    }, [guidance, category, promptMode, count, client]);
+    }, [guidance, category, promptMode, discoveryMode, count, client]);
+
+    const measureSelectOptions =
+        discoveryModeOptions.length > 0
+            ? discoveryModeOptions.filter((o) => o.key !== 'operator_extraction')
+            : [{ key: 'blind_discovery', label: 'Decouverte spontanee' }];
+
+    const measureLabelFor = (key) => measureSelectOptions.find((o) => o.key === key)?.label || key || '';
 
     const handleAddItem = useCallback(async (item) => {
         setAddingIds(prev => new Set(prev).add(item.id));
@@ -338,7 +347,7 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
             )}
 
             <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <select
                         className="bg-black/40 border border-[#7c6aef]/20 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/50"
                         value={category}
@@ -355,6 +364,16 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                         <option value="" className="bg-[#0a0a0c]">Mode (varié)</option>
                         <option value="user_like" className="bg-[#0a0a0c]">Question naturelle</option>
                         <option value="operator_probe" className="bg-[#0a0a0c]">Sonde opérateur</option>
+                    </select>
+                    <select
+                        className="bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30"
+                        value={discoveryMode}
+                        onChange={e => setDiscoveryMode(e.target.value)}
+                    >
+                        <option value="" className="bg-[#0a0a0c]">Mesure (auto)</option>
+                        {measureSelectOptions.map((o) => (
+                            <option key={o.key} value={o.key} className="bg-[#0a0a0c]">{o.label}</option>
+                        ))}
                     </select>
                     <select
                         className="bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-[#7c6aef]/30"
@@ -395,10 +414,16 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                         <div key={i} className={cn(COMMAND_SURFACE, "p-4 flex items-start gap-4 group relative")}>
                             <div className="flex-1 min-w-0">
                                 <p className="text-[12px] text-white/80 italic leading-relaxed">"{item.query_text}"</p>
-                                <div className="flex items-center gap-2 mt-2">
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-[#7c6aef]/60">{item.intent_family}</span>
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-white/10">·</span>
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-white/20">{PROMPT_MODE_LABELS[item.prompt_mode] || item.prompt_mode}</span>
+                                    {item.discovery_mode ? (
+                                        <>
+                                            <span className="text-[9px] font-bold uppercase tracking-widest text-white/10">·</span>
+                                            <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400/70">{measureLabelFor(item.discovery_mode)}</span>
+                                        </>
+                                    ) : null}
                                 </div>
                             </div>
                             <button
@@ -600,6 +625,7 @@ export default function GeoPromptsView() {
                         clientId={clientId}
                         invalidateWorkspace={invalidateWorkspace}
                         categoryOptions={data.categoryOptions}
+                        discoveryModeOptions={data.discoveryModeOptions}
                         submitting={submitting}
                     />
 

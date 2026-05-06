@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth';
 import { callAiJson } from '@/lib/ai/index';
+import { DISCOVERY_MODE_META, normalizeDiscoveryMode } from '@/lib/operator-intelligence/prompt-taxonomy';
 
 const MAX_PROMPT_COUNT = 6;
 const MIN_PROMPT_COUNT = 3;
@@ -18,17 +19,55 @@ const listSchema = z.object({
     target_region: z.string().max(200).optional().or(z.literal('')),
     seo_description: z.string().max(1000).optional().or(z.literal('')),
     services: z.string().max(1000).optional().or(z.literal('')),
+    discovery_mode: z.string().max(80).optional().or(z.literal('')),
 });
 
 const VALID_MODES = new Set(['user_like', 'operator_probe']);
 
-function buildSystemPrompt(count) {
+const GENERATION_BLOCKED_DISCOVERY = new Set(['operator_extraction']);
+
+function measurementInstructions(discoveryMode) {
+    if (!discoveryMode) return '';
+    const meta = DISCOVERY_MODE_META[discoveryMode];
+    if (!meta) return '';
+
+    const label = meta.label || discoveryMode;
+
+    /** @type {Record<string, string>} */
+    const rules = {
+        blind_discovery:
+            'Ne jamais inclure le nom de l\'entreprise cliente ni un pitch sur elle. Questions de marché pures ; le but est de mesurer une mention spontanee eventuelle.',
+        neutral_brand_check:
+            'Le nom de la marque peut apparaitre comme sujet neutre (« X a Montreal », verification factuelle courte). Pas de reformulation marketing du mandat.',
+        skeptical_brand_evaluation:
+            'Inclure le nom de la marque dans une posture critique ou prudente (fiabilite, promesses, comparaisons dures). Langage utilisateur reel.',
+        competitor_discovery:
+            'Ne pas cadrer la reponse sur la marque cliente comme sujet principal. Alternatives, « meilleurs choix », comparaisons de segment avec ancrage geo.',
+        source_grounded_evaluation:
+            'Formuler comme une demande d\'evaluation ou de synthese basee sur des sources, avis ou faits verifiables (sans inventer de sources).',
+        controlled_context_answer:
+            'Questions qui supposent un contexte connu sur l\'entreprise ou son offre (tests internes, QA). Peuvent etre plus directes sur le positionnement.',
+        brand_aware:
+            'Le nom de la marque et le contexte metier peuvent etre presupposes dans la question, comme en mode marque explicite historique.',
+    };
+
+    const body = rules[discoveryMode] || meta.description || '';
+    return `
+
+## TYPE DE MESURE — ${label}
+${body}
+
+Tous les prompts generes doivent respecter strictement ce cadre de mesure.`;
+}
+
+function buildSystemPrompt(count, discoveryMode) {
     return `Tu es expert en GEO (Generative Engine Optimization) — la visibilité d'une entreprise dans les réponses IA (ChatGPT, Perplexity, Gemini, Claude).
 
 ## MISSION
 
 Générer exactement ${count} prompts de recherche distincts basés sur le contexte du mandat client fourni.
 Chaque prompt reproduit ce qu'un vrai utilisateur taperait dans ChatGPT ou Perplexity.
+${measurementInstructions(discoveryMode)}
 
 ## RÈGLE #1 — NATURALITÉ
 - Langage quotidien québécois/canadien-français
@@ -57,6 +96,10 @@ Chaque prompt inclut un scénario ou besoin concret, pas de questions génériqu
 ## RÈGLE #7 — QUALITÉ
 Chaque prompt doit être immédiatement utilisable. Pas de placeholder, pas de [X].
 
+${discoveryMode ? '' : `## RÈGLE #8 — NOM D'ENTREPRISE (si aucun type de mesure impose)
+- Par defaut : ne pas mentionner le nom de l'entreprise cliente dans le texte du prompt, sauf consigne explicite de l'operateur.
+`}
+
 ## FORMAT DE SORTIE — JSON STRICT
 
 Réponds UNIQUEMENT avec un tableau JSON de ${count} objets. Aucun texte avant/après, aucun markdown.
@@ -66,7 +109,7 @@ Réponds UNIQUEMENT avec un tableau JSON de ${count} objets. Aucun texte avant/a
 ## STRICTEMENT INTERDIT
 - Prompts que personne ne taperait dans la vraie vie
 - Doublons conceptuels ou reformulations
-- Mentionner le nom de l'entreprise SAUF si l'opérateur le demande explicitement
+${discoveryMode ? '- Contredire le type de mesure impose ci-dessus' : "- Mentionner le nom de l'entreprise SAUF si l'opérateur le demande explicitement"}
 - Jargon technique (SEO, GEO, schema.org, tracking)`;
 }
 
@@ -95,6 +138,11 @@ function buildUserMessage(data) {
     if (data.locale) parts.push(`Locale : ${data.locale}`);
     if (data.prompt_mode) {
         parts.push(`Mode souhaité : ${data.prompt_mode === 'operator_probe' ? 'sonde opérateur (verbe d\'action)' : 'question utilisateur naturelle'}`);
+    }
+    if (data.discovery_mode) {
+        const meta = DISCOVERY_MODE_META[data.discovery_mode];
+        parts.push(`\nType de mesure impose : ${meta?.label || data.discovery_mode}`);
+        if (meta?.description) parts.push(meta.description);
     }
     parts.push(`\nGénère ${data.count || 4} prompts distincts basés sur ce mandat.`);
     return parts.join('\n');
@@ -138,11 +186,20 @@ export async function POST(request) {
 
     const count = parsed.data.count || 4;
 
+    const rawDiscovery = parsed.data.discovery_mode?.trim();
+    let resolvedDiscovery = null;
+    if (rawDiscovery) {
+        resolvedDiscovery = normalizeDiscoveryMode(rawDiscovery);
+        if (GENERATION_BLOCKED_DISCOVERY.has(resolvedDiscovery)) {
+            return NextResponse.json({ error: 'Type de mesure non pris en charge pour la generation.' }, { status: 400 });
+        }
+    }
+
     try {
         const result = await callAiJson({
             messages: [
-                { role: 'system', content: buildSystemPrompt(count) },
-                { role: 'user', content: buildUserMessage({ ...parsed.data, count }) },
+                { role: 'system', content: buildSystemPrompt(count, resolvedDiscovery) },
+                { role: 'user', content: buildUserMessage({ ...parsed.data, count, discovery_mode: resolvedDiscovery }) },
             ],
             purpose: 'onboarding',
             temperature: 0.7,
@@ -162,6 +219,7 @@ export async function POST(request) {
             intent_family: item.intent_family,
             prompt_mode: item.prompt_mode,
             rationale: item.rationale,
+            ...(resolvedDiscovery ? { discovery_mode: resolvedDiscovery } : {}),
         }));
 
         return NextResponse.json({
