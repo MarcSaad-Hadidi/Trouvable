@@ -9,6 +9,7 @@ import { analyzeCrawlerAccess } from '@/lib/audit/crawler-access';
 import { scoreAuditV2 } from '@/lib/audit/score';
 import { runLayer2Expert } from '@/lib/audit/layer2';
 import { isLayer2ExpertEnabled, isLayeredPipelineEnabled } from '@/lib/audit/audit-config';
+import { parsePublicHttpUrl } from '@/lib/audit/url-safety';
 
 /**
  * Internal-only comparison endpoint.
@@ -30,7 +31,9 @@ function normalizeUrl(raw) {
     try {
         const parsed = new URL(candidate);
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
-        return parsed.toString();
+        const safeParsed = parsePublicHttpUrl(parsed.toString());
+        if (!safeParsed) return null;
+        return safeParsed.toString();
     } catch {
         return null;
     }
