@@ -11,6 +11,22 @@ import { runLayer2Expert } from '@/lib/audit/layer2';
 import { isLayer2ExpertEnabled, isLayeredPipelineEnabled } from '@/lib/audit/audit-config';
 import { parsePublicHttpUrl } from '@/lib/audit/url-safety';
 
+const AUDIT_COMPARE_ALLOWED_HOSTS = (process.env.AUDIT_COMPARE_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+
+function isHostnameAllowed(hostname) {
+    if (!hostname) return false;
+    if (AUDIT_COMPARE_ALLOWED_HOSTS.length === 0) return true;
+    const normalized = hostname.toLowerCase();
+    return AUDIT_COMPARE_ALLOWED_HOSTS.some((allowed) => (
+        allowed.startsWith('.')
+            ? normalized === allowed.slice(1) || normalized.endsWith(allowed)
+            : normalized === allowed
+    ));
+}
+
 /**
  * Internal-only comparison endpoint.
  *
@@ -33,6 +49,7 @@ function normalizeUrl(raw) {
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
         const safeParsed = parsePublicHttpUrl(parsed.toString());
         if (!safeParsed) return null;
+        if (!isHostnameAllowed(safeParsed.hostname)) return null;
         return safeParsed.toString();
     } catch {
         return null;
