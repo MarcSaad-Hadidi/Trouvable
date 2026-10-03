@@ -168,7 +168,7 @@ export default function ClientForm({ initialData = null }) {
                                 <input required type="url" name="website_url" value={formData.website_url} onChange={handleChange} placeholder="https://..." className={inputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>Type d'Entreprise (Schema.org)</label>
+                                <label className={labelClass}>Type d&#39;Entreprise (Schema.org)</label>
                                 <input type="text" name="business_type" value={formData.business_type} onChange={handleChange} placeholder="ex: agence, logiciel rh, restaurant..." className={inputClass} />
                                 <p className="text-[11px] text-white/30 mt-1.5 leading-relaxed max-w-xl">
                                     Champ utile mais partiel : les prompts et le moteur s’appuient aussi sur l’audit, les services et la description. Évitez les valeurs trop génériques (ex. LocalBusiness seul) et préférez un libellé métier concret.

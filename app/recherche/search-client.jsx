@@ -84,7 +84,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
                     Que cherchez-vous ?
                 </h1>
                 <p className="mt-4 text-lg text-white/50 max-w-2xl mx-auto">
-                    Explorez notre documentation, nos services, nos expertises sectorielles et nos villes couvertes par l'intelligence Trouvable.
+                    Explorez notre documentation, nos services, nos expertises sectorielles et nos villes couvertes par l&#39;intelligence Trouvable.
                 </p>
             </motion.div>
 
@@ -198,7 +198,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
                             </div>
                             <h3 className="text-xl font-medium text-white">Aucun résultat</h3>
                             <p className="mt-2 text-[#a0a0a0] max-w-md">
-                                La recherche "{query}" n'a donné aucun résultat. Essayez d'élargir votre requête ou naviguez via les recommandations ci-dessous.
+                                La recherche &quot;{query}&quot; n&#39;a donné aucun résultat. Essayez d&#39;élargir votre requête ou naviguez via les recommandations ci-dessous.
                             </p>
                         </motion.div>
                     ) : (
@@ -211,7 +211,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
                         >
                             <div className="flex items-center gap-3 mb-8 px-2">
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#7b8fff]/70">Explorer l'écosystème</span>
+                                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#7b8fff]/70">Explorer l&#39;écosystème</span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                             </div>
                             

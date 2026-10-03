@@ -72,7 +72,7 @@ export default function DossierActivityView() {
                                 <div key={item.id || item.label} className="rounded-xl border border-white/[0.05] bg-white/[0.01] px-4 py-4 group hover:bg-white/[0.02] transition-colors">
                                     <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/20 group-hover:text-white/40 transition-colors">{item.label}</div>
                                     <div className="mt-1 text-2xl font-bold tabular-nums text-white/90">{item.value ?? '—'}</div>
-                                    {item.detail ? <div className="mt-1 text-[10px] text-white/20 italic">"{item.detail}"</div> : null}
+                                    {item.detail ? <div className="mt-1 text-[10px] text-white/20 italic">&quot;{item.detail}&quot;</div> : null}
                                 </div>
                             ))
                         ) : (
@@ -134,7 +134,7 @@ export default function DossierActivityView() {
                                             </div>
                                             <div className="mt-3 text-[15px] font-bold text-white/90">{item.title}</div>
                                             {item.description ? (
-                                                <p className="mt-1 text-[12px] leading-relaxed text-white/30 line-clamp-2 italic">"{item.description}"</p>
+                                                <p className="mt-1 text-[12px] leading-relaxed text-white/30 line-clamp-2 italic">&quot;{item.description}&quot;</p>
                                             ) : null}
                                             {item.timestamp ? (
                                                 <div className="mt-4 text-[10px] font-mono text-white/10 uppercase tracking-widest">{formatDateTime(item.timestamp)}</div>
@@ -171,7 +171,7 @@ export default function DossierActivityView() {
                                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7c6aef] mb-4">Payload</div>
                                     <h2 className="text-[18px] font-bold leading-snug text-white/90">{focused.title}</h2>
                                     {focused.description ? (
-                                        <p className="mt-4 text-[13px] leading-relaxed text-white/40 italic">"{focused.description}"</p>
+                                        <p className="mt-4 text-[13px] leading-relaxed text-white/40 italic">&quot;{focused.description}&quot;</p>
                                     ) : null}
                                     {focused.timestamp ? (
                                         <div className="mt-6 rounded-xl border border-white/[0.05] bg-black/40 px-4 py-3 text-[11px] font-mono text-white/20 uppercase tracking-widest">

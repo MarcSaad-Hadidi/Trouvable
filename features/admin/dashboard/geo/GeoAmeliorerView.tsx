@@ -67,7 +67,7 @@ function OpportunityCard({ card, columnId, pendingId, onUpdateStatus, index }) {
             </h4>
 
             <p className="text-[11px] leading-relaxed text-white/40 line-clamp-3 mb-4 italic">
-                "{description}"
+                &quot;{description}&quot;
             </p>
 
             <div className="flex items-center justify-between border-t border-white/[0.05] pt-3 mt-auto">
@@ -150,7 +150,7 @@ export default function GeoOpportunitiesPage() {
         />
     );
 
-    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Synchronisation de la file d'action...</div></CommandPageShell>;
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Synchronisation de la file d&#39;action...</div></CommandPageShell>;
     if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
 
     return (

@@ -90,7 +90,7 @@ function CompetitorPrompts({ promptsWithCompetitors }) {
                     <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.03] transition-colors group">
                         <div className={cn("mt-1.5 h-1 w-1 rounded-full shrink-0", item.recommended_competitors > 0 ? 'bg-rose-500' : 'bg-amber-500')} />
                         <div className="flex-1 min-w-0">
-                            <div className="text-[12px] font-bold text-white/70 leading-snug group-hover:text-white transition-colors line-clamp-2 italic">"{item.query_text}"</div>
+                            <div className="text-[12px] font-bold text-white/70 leading-snug group-hover:text-white transition-colors line-clamp-2 italic">&quot;{item.query_text}&quot;</div>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="text-[8px] font-bold uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded text-white/20">{item.category}</span>
                                 {item.recommended_competitors > 0 && (

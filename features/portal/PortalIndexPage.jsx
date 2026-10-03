@@ -35,10 +35,10 @@ export default async function PortalIndexPage() {
                         <span>{ISSUE_LABEL}</span>
                     </div>
                     <h1 className="mt-6 font-display text-[44px] font-semibold leading-[1.05] tracking-[-0.045em] text-white">
-                        Votre dossier n'est pas encore relié à ce compte.
+                        Votre dossier n&#39;est pas encore relié à ce compte.
                     </h1>
                     <p className="mt-5 max-w-2xl text-[15px] leading-[1.78] text-white/55">
-                        L'espace de restitution se débloque dès qu'un accès actif existe pour votre identifiant Clerk
+                        L&#39;espace de restitution se débloque dès qu&#39;un accès actif existe pour votre identifiant Clerk
                         ou pour une adresse vérifiée présente dans votre compte. Notre équipe peut établir le lien
                         sur demande, en quelques minutes.
                     </p>
@@ -85,7 +85,7 @@ export default async function PortalIndexPage() {
                 </h1>
                 <p className="mt-5 max-w-2xl text-[15px] leading-[1.78] text-white/55">
                     Chaque entrée ouvre une lecture en restitution stricte du mandat correspondant.
-                    Aucune action opérationnelle n'est exécutée depuis cet espace : tout y est observé,
+                    Aucune action opérationnelle n&#39;est exécutée depuis cet espace : tout y est observé,
                     pour comprendre où en est votre visibilité.
                 </p>
             </header>

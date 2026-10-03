@@ -155,7 +155,7 @@ function PromptCreationSurface({ form, setForm, categoryOptions, discoveryModeOp
 
                 {aiSuggestion && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-[#7c6aef]/20 bg-[#7c6aef]/5 p-4">
-                        <p className="text-[12px] text-white/80 leading-relaxed italic mb-4">"{aiSuggestion}"</p>
+                        <p className="text-[12px] text-white/80 leading-relaxed italic mb-4">&quot;{aiSuggestion}&quot;</p>
                         <div className="flex gap-3">
                             <button type="button" onClick={() => { setForm((c) => ({ ...c, query_text: aiSuggestion })); setAiSuggestion(null); }} className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 bg-[#7c6aef] text-white rounded-lg">Utiliser</button>
                             <button type="button" onClick={() => setAiSuggestion(null)} className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 text-white/40 hover:text-white transition-colors">Ignorer</button>
@@ -413,7 +413,7 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
                     {results.map((item, i) => (
                         <div key={i} className={cn(COMMAND_SURFACE, "p-4 flex items-start gap-4 group relative")}>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[12px] text-white/80 italic leading-relaxed">"{item.query_text}"</p>
+                                <p className="text-[12px] text-white/80 italic leading-relaxed">&quot;{item.query_text}&quot;</p>
                                 <div className="flex flex-wrap items-center gap-2 mt-2">
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-[#7c6aef]/60">{item.intent_family}</span>
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-white/10">·</span>
@@ -484,7 +484,7 @@ function TrackedPromptRow({
                         <span className={cn("text-[10px] font-bold uppercase tracking-widest", lifecycle.cls)}>{lifecycle.text}</span>
                         {prompt.last_run?.target_found && <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Target Found</span>}
                     </div>
-                    <p className="text-[15px] font-bold text-white/90 leading-relaxed group-hover:text-white transition-colors italic">"{prompt.query_text}"</p>
+                    <p className="text-[15px] font-bold text-white/90 leading-relaxed group-hover:text-white transition-colors italic">&quot;{prompt.query_text}&quot;</p>
                     {(prompt.context_injected || prompt.last_run?.context_injected) && (
                         <div className="mt-3 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/80">
                             Contexte injecte - hors visibilite naturelle
@@ -526,7 +526,7 @@ function TrackedPromptRow({
                         <SparklesIcon className="h-3 w-3" />
                         Suggestion IA
                     </div>
-                    <p className="text-[13px] text-white/90 italic leading-relaxed">"{improvedText}"</p>
+                    <p className="text-[13px] text-white/90 italic leading-relaxed">&quot;{improvedText}&quot;</p>
                     <div className="flex gap-2">
                         <button
                             onClick={() => onUseImproved(prompt.id, improvedText)}
@@ -638,7 +638,7 @@ export default function GeoPromptsView() {
                             <div className="space-y-3">
                                 {data.starterPack.prompts.map((p, i) => (
                                     <div key={i} className={cn(COMMAND_SURFACE, "p-4 group hover:bg-white/[0.04] transition-all cursor-pointer")} onClick={() => setForm(c => ({ ...c, query_text: p.query_text, category: p.category || c.category, discovery_mode: p.discovery_mode || c.discovery_mode }))}>
-                                        <p className="text-[11px] text-white/50 group-hover:text-white transition-colors italic">"{p.query_text}"</p>
+                                        <p className="text-[11px] text-white/50 group-hover:text-white transition-colors italic">&quot;{p.query_text}&quot;</p>
                                     </div>
                                 ))}
                             </div>

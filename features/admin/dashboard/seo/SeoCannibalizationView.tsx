@@ -194,7 +194,7 @@ export default function SeoCannibalizationPage() {
                                             <div className="flex min-w-0 items-center gap-4">
                                                 <div className={cn('h-2 w-2 rounded-full', group.confidenceTone === 'high' ? 'bg-rose-500' : group.confidenceTone === 'medium' ? 'bg-amber-400' : 'bg-white/20')} />
                                                 <div className="min-w-0">
-                                                    <div className="truncate text-[13px] font-bold text-white/90">"{getGroupKeyword(group)}"</div>
+                                                    <div className="truncate text-[13px] font-bold text-white/90">&quot;{getGroupKeyword(group)}&quot;</div>
                                                     <div className="mt-0.5 text-[10px] text-white/40">{group.pages.length} URLs en compétition</div>
                                                 </div>
                                             </div>
@@ -258,7 +258,7 @@ export default function SeoCannibalizationPage() {
                                                             <button type="button" onClick={() => setExpandedClusterId(null)} className={cn(COMMAND_BUTTONS.secondary, 'border-white/10')}>
                                                                 Ignorer
                                                             </button>
-                                                            <Link href={`${baseHref}/seo/actions`} className={COMMAND_BUTTONS.primary}>Générer Plan d'action</Link>
+                                                            <Link href={`${baseHref}/seo/actions`} className={COMMAND_BUTTONS.primary}>Générer Plan d&#39;action</Link>
                                                         </div>
                                                     </div>
                                                 </div>

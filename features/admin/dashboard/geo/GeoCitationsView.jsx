@@ -96,7 +96,7 @@ function PromptCoverageList({ promptCoverage }) {
                         <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.03] transition-colors group">
                             <SignalDot strength={strength} />
                             <div className="flex-1 min-w-0">
-                                <div className="text-[12px] font-bold text-white/80 leading-snug group-hover:text-white transition-colors line-clamp-2 italic">"{item.query_text}"</div>
+                                <div className="text-[12px] font-bold text-white/80 leading-snug group-hover:text-white transition-colors line-clamp-2 italic">&quot;{item.query_text}&quot;</div>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span className="text-[8px] font-bold uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded text-white/20">{item.category}</span>
                                     <span className="text-[9px] text-white/10 tabular-nums">Scan {item.last_seen_at ? new Date(item.last_seen_at).toLocaleDateString('fr-FR') : 'n.d.'}</span>

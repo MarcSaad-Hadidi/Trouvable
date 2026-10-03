@@ -238,7 +238,7 @@ export default function GeoModelesView() {
                                     </div>
                                 </div>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-1">{row.provider}</div>
-                                <div className="text-[15px] font-bold text-white mb-6 italic">"{formatDisplayModelName(row.label, row.model)}"</div>
+                                <div className="text-[15px] font-bold text-white mb-6 italic">&quot;{formatDisplayModelName(row.label, row.model)}&quot;</div>
                                 
                                 {row.hasData ? (
                                     <div className="mt-auto grid grid-cols-3 gap-4 pt-6 border-t border-white/5">

@@ -209,6 +209,7 @@ export default function GeoChart({ id, series, options = {} }) {
 
         setTooltip({
             x: exactX,
+            wrapWidth: wrapRef.current.offsetWidth || 400,
             date: labels[index] || `#${index}`,
             rows,
             lineTop: pad.t,
@@ -246,7 +247,7 @@ export default function GeoChart({ id, series, options = {} }) {
                     <div
                         className="absolute pointer-events-none z-20"
                         style={{
-                            left: Math.min(Math.max(tooltip.x, 70), (wrapRef.current?.offsetWidth || 400) - 70),
+                            left: Math.min(Math.max(tooltip.x, 70), tooltip.wrapWidth - 70),
                             top: tooltip.lineTop - 4,
                             transform: 'translate(-50%, -100%)',
                         }}

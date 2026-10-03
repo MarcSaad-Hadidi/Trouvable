@@ -166,7 +166,7 @@ export default async function ClientPage({ params }) {
                     <footer className="mt-16 pt-8 border-t border-white/10 text-center">
                         <p className="text-[#a0a0a0] mb-4">Vous repérez une information manquante ou vous souhaitez revendiquer ce profil ?</p>
                         <ContactButton className="inline-block px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-[#d6d6d6] transition-colors">
-                            Contacter l'équipe Trouvable
+                            Contacter l&#39;équipe Trouvable
                         </ContactButton>
                     </footer>
                 </article>

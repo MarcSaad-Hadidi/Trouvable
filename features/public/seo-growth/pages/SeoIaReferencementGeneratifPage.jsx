@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, FlaskConical, Microscope, Gauge, Beaker } from 'lucide-react';
@@ -13,9 +13,10 @@ function LabGrid() {
 }
 
 function ProgressBar({ label, delay, color }) {
+    const [width] = useState(() => `${60 + Math.random() * 35}%`);
     return (<motion.div initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay }}>
         <div className="mb-1.5 flex items-center justify-between"><span className="text-[12px] font-medium text-white/60">{label}</span><span className="font-mono text-[10px] text-emerald-400/60">ANALYZING</span></div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5"><motion.div className="h-full rounded-full" style={{ backgroundColor: color }} initial={{ width: '0%' }} whileInView={{ width: `${60 + Math.random() * 35}%` }} viewport={{ once: true }} transition={{ duration: 1.5, delay: delay + 0.3, ease: 'easeOut' }} /></div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5"><motion.div className="h-full rounded-full" style={{ backgroundColor: color }} initial={{ width: '0%' }} whileInView={{ width }} viewport={{ once: true }} transition={{ duration: 1.5, delay: delay + 0.3, ease: 'easeOut' }} /></div>
     </motion.div>);
 }
 

@@ -33,7 +33,7 @@ function SettingRow({ label, value, hint }) {
                 <span className="text-[13px] font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">{label}</span>
                 <span className="text-[12px] text-[#7c6aef] font-mono font-bold bg-[#7c6aef]/5 px-2 py-0.5 rounded border border-[#7c6aef]/20">{value}</span>
             </div>
-            {hint && <p className="text-[11px] text-white/20 italic">"{hint}"</p>}
+            {hint && <p className="text-[11px] text-white/20 italic">&quot;{hint}&quot;</p>}
         </div>
     );
 }
@@ -102,7 +102,7 @@ export default function GeoSettingsView() {
                             <ShieldCheckIcon className="h-4 w-4" />
                             <span className="text-[10px] font-bold uppercase tracking-widest">Sécurité</span>
                         </div>
-                        <p className="text-[11px] text-white/20 leading-relaxed italic">"L'authentification est gérée par Clerk. Les sessions sont persistées localement."</p>
+                        <p className="text-[11px] text-white/20 leading-relaxed italic">&quot;L&#39;authentification est gérée par Clerk. Les sessions sont persistées localement.&quot;</p>
                     </div>
                 </div>
 

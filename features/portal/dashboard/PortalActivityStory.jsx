@@ -26,7 +26,7 @@ function EmptyState() {
     return (
         <div className="rounded-2xl border border-dashed border-white/[0.05] bg-white/[0.01] px-8 py-14 text-center">
             <div className="text-[14px] text-white/25">
-                Les premières interventions apparaîtront ici dès qu'elles seront enregistrées.
+                Les premières interventions apparaîtront ici dès qu&#39;elles seront enregistrées.
             </div>
         </div>
     );

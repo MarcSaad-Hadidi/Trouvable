@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, Search, Mic, Paperclip, CheckCircle2, AlertTriangle, PackageOpen, PenSquare, Clock, MessageSquare, MoreHorizontal } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
@@ -14,7 +14,7 @@ function buildChats(page) {
 }
 
 export default function CopilotPage({ page, trustBrief }) {
-    const chats = buildChats(page);
+    const chats = useMemo(() => buildChats(page), [page]);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
 
@@ -193,7 +193,7 @@ export default function CopilotPage({ page, trustBrief }) {
                                                                         </div>
                                                                         <div className="rounded-xl border border-[#E5E5E5] bg-[#F7F7F8] p-5">
                                                                             <div className="flex items-center gap-2 text-[#0078D4] mb-3 font-semibold text-sm">
-                                                                                <CheckCircle2 className="w-4 h-4" /> Solutions d'optimisation
+                                                                                <CheckCircle2 className="w-4 h-4" /> Solutions d&#39;optimisation
                                                                             </div>
                                                                             <ul className="space-y-2 text-[13px] text-[#616161]">
                                                                                 {page.corrections.map((p, i) => (

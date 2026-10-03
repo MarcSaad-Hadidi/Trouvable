@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Plus, MessageSquare, Book, Sparkles, Settings, Share, MoreVertical, Mic, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
@@ -42,7 +42,7 @@ function buildChats(page) {
 }
 
 export default function GeminiPage({ page, trustBrief }) {
-    const chats = buildChats(page);
+    const chats = useMemo(() => buildChats(page), [page]);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
     const [animKey, setAnimKey] = useState(0);
@@ -115,10 +115,10 @@ export default function GeminiPage({ page, trustBrief }) {
                                 </div>
                                 <div className="space-y-1 mt-1">
                                     <div className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 cursor-pointer text-white/80">
-                                        <Book className="w-4 h-4 shrink-0" /> <span className="truncate">Directives d'audit SEO local...</span>
+                                        <Book className="w-4 h-4 shrink-0" /> <span className="truncate">Directives d&#39;audit SEO local...</span>
                                     </div>
                                     <div className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 cursor-pointer text-white/80">
-                                        <Book className="w-4 h-4 shrink-0" /> <span className="truncate">Checklist d'optimisation GEO...</span>
+                                        <Book className="w-4 h-4 shrink-0" /> <span className="truncate">Checklist d&#39;optimisation GEO...</span>
                                     </div>
                                     <div className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/10 cursor-pointer text-[#8ab4f8]">
                                         <Plus className="w-4 h-4" /> Nouveau notebook

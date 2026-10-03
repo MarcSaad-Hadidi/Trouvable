@@ -16,7 +16,7 @@ function buildChats(page) {
 export default function PerplexityPage({ page, trustBrief }) {
     const chats = buildChats(page);
     const [activeChat, setActiveChat] = useState('main');
-    const [isSearching, setIsSearching] = useState(false);
+    const [isSearching, setIsSearching] = useState(true);
     const [showResults, setShowResults] = useState(false);
 
     const activeConversation = chats.find(c => c.id === activeChat) || chats[0];
@@ -33,7 +33,6 @@ export default function PerplexityPage({ page, trustBrief }) {
     };
 
     useEffect(() => {
-        setIsSearching(true);
         const timer1 = setTimeout(() => {
             setIsSearching(false);
             setShowResults(true);
@@ -188,7 +187,7 @@ export default function PerplexityPage({ page, trustBrief }) {
                                                     </div>
 
                                                     <div className="mt-6 space-y-4">
-                                                        <h3 className="text-[18px] font-semibold text-white">Livrables de l'expert</h3>
+                                                        <h3 className="text-[18px] font-semibold text-white">Livrables de l&#39;expert</h3>
                                                         <ul className="grid sm:grid-cols-2 gap-3">
                                                             {page.deliverables.map((p, i) => (
                                                                 <li key={i} className="text-white/80 bg-white/5 px-4 py-2.5 rounded-xl border border-white/5"><span className="text-white font-medium block mb-1">Étape {i + 1}</span> {p}</li>

@@ -141,7 +141,7 @@ export default function SeoLocalView() {
             {/* Business summary from LLM */}
             {data.businessSummary && (
                 <motion.div variants={fadeUp} className="geo-card p-4 border border-white/[0.06]">
-                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">Résumé IA de l'activité</div>
+                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">Résumé IA de l&#39;activité</div>
                     <div className="text-[12px] text-white/60 leading-relaxed">{data.businessSummary}</div>
                 </motion.div>
             )}
@@ -191,7 +191,7 @@ export default function SeoLocalView() {
                 <div className="text-[10px] text-white/30 leading-relaxed">
                     • {data.localScoreProvenance}<br />
                     • Cette vue affiche les indicateurs locaux depuis la perspective SEO.<br />
-                    • L'espace GEO Ops contient sa propre grille d'analyse GEO.
+                    • L&#39;espace GEO Ops contient sa propre grille d&#39;analyse GEO.
                 </div>
             </motion.div>
         </motion.div>

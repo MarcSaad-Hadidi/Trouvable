@@ -21,10 +21,14 @@ export function AiThinking() {
 export function TypewriterText({ text, delay = 0, speed = 10, onComplete }) {
     const [displayedText, setDisplayedText] = useState('');
     const [started, setStarted] = useState(false);
-
-    useEffect(() => {
+    const [previousInput, setPreviousInput] = useState({ text, delay });
+    if (previousInput.text !== text || previousInput.delay !== delay) {
+        setPreviousInput({ text, delay });
         setDisplayedText('');
         setStarted(false);
+    }
+
+    useEffect(() => {
         const startTimer = setTimeout(() => setStarted(true), delay);
         return () => clearTimeout(startTimer);
     }, [text, delay]);
@@ -143,7 +147,9 @@ const ScrambleText = ({ text }) => {
         let iteration = 0;
         let interval = null;
         
-        setDisplayText(text.replace(/./g, (char) => char === ' ' ? ' ' : letters[Math.floor(Math.random() * letters.length)]));
+        const frame = requestAnimationFrame(() => {
+            setDisplayText(text.replace(/./g, (char) => char === ' ' ? ' ' : letters[Math.floor(Math.random() * letters.length)]));
+        });
         
         const timeout = setTimeout(() => {
             interval = setInterval(() => {
@@ -164,6 +170,7 @@ const ScrambleText = ({ text }) => {
         }, 400);
         
         return () => {
+            cancelAnimationFrame(frame);
             clearTimeout(timeout);
             clearInterval(interval);
         };

@@ -102,11 +102,11 @@ export default function GeoVisibilityView() {
                         className="flex-1"
                         headers={['Requête', 'Clics', 'Impressions', 'CTR', 'Pos.']}
                         rows={(gscQueries || []).slice(0, 50).map((row) => [
-                            <span className="text-[13px] font-bold text-white/90 truncate max-w-[250px] inline-block italic">"{row.query}"</span>,
-                            <span className="text-[12px] font-bold tabular-nums text-white/80">{formatNumber(row.clicks)}</span>,
-                            <span className="text-[12px] text-white/40 tabular-nums">{formatNumber(row.impressions)}</span>,
-                            <span className="text-[12px] text-emerald-400/80 tabular-nums">{formatCtr(row.ctr)}</span>,
-                            <span className="text-[12px] text-white/20 tabular-nums">{formatPosition(row.position)}</span>
+                            <span key="query" className="text-[13px] font-bold text-white/90 truncate max-w-[250px] inline-block italic">&quot;{row.query}&quot;</span>,
+                            <span key="clicks" className="text-[12px] font-bold tabular-nums text-white/80">{formatNumber(row.clicks)}</span>,
+                            <span key="impressions" className="text-[12px] text-white/40 tabular-nums">{formatNumber(row.impressions)}</span>,
+                            <span key="ctr" className="text-[12px] text-emerald-400/80 tabular-nums">{formatCtr(row.ctr)}</span>,
+                            <span key="position" className="text-[12px] text-white/20 tabular-nums">{formatPosition(row.position)}</span>
                         ])}
                     />
                 </div>
@@ -123,8 +123,8 @@ export default function GeoVisibilityView() {
                             className="flex-1"
                             headers={['Page', 'Sessions']}
                             rows={(topPages || []).slice(0, 20).map((row) => [
-                                <span className="text-[11px] font-mono text-white/30 truncate max-w-[200px] inline-block">{row.landing_page}</span>,
-                                <span className="text-[12px] font-bold tabular-nums text-white/80">{formatNumber(row.sessions)}</span>
+                                <span key="page" className="text-[11px] font-mono text-white/30 truncate max-w-[200px] inline-block">{row.landing_page}</span>,
+                                <span key="sessions" className="text-[12px] font-bold tabular-nums text-white/80">{formatNumber(row.sessions)}</span>
                             ])}
                         />
                     </div>
@@ -145,7 +145,7 @@ export default function GeoVisibilityView() {
                             </div>
                             <div className="mt-6 p-4 rounded-xl bg-black/40 border border-white/5">
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-2">Note Opérateur</div>
-                                <p className="text-[11px] text-white/40 leading-relaxed italic">"Le trafic est stable. La corrélation entre les mentions GEO et les clics GSC est en cours d'analyse."</p>
+                                <p className="text-[11px] text-white/40 leading-relaxed italic">&quot;Le trafic est stable. La corrélation entre les mentions GEO et les clics GSC est en cours d&#39;analyse.&quot;</p>
                             </div>
                         </div>
                     </div>

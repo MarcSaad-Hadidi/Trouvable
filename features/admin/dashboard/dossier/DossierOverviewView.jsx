@@ -95,7 +95,7 @@ function FreshnessLanes({ items }) {
                 >
                     <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">{item.label}</div>
                     <div className="mt-2 text-[15px] font-bold text-white/90">{item.value ?? '—'}</div>
-                    {item.detail ? <p className="mt-1 text-[11px] text-white/30 italic">"{item.detail}"</p> : null}
+                    {item.detail ? <p className="mt-1 text-[11px] text-white/30 italic">&quot;{item.detail}&quot;</p> : null}
                 </div>
             ))}
         </div>

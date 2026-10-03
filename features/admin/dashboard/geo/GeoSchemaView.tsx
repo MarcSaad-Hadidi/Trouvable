@@ -62,7 +62,7 @@ export default function GeoSchemaPage() {
         />
     );
 
-    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Cartographie du graphe d'entités...</div></CommandPageShell>;
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Cartographie du graphe d&#39;entités...</div></CommandPageShell>;
     if (error || !data) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error || "Impossible d'accéder aux données structurées."} /></CommandPageShell>;
 
     return (
@@ -198,7 +198,7 @@ export default function GeoSchemaPage() {
                                                     )}
                                                     <div className={cn(COMMAND_SURFACE, "p-4")}>
                                                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-2">Preuve détectée</div>
-                                                        <p className="text-[11px] text-white/50 leading-relaxed italic border-l-2 border-[#7c6aef]/30 pl-4 py-1">"{item.evidence || 'Aucun détail technique disponible.'}"</p>
+                                                        <p className="text-[11px] text-white/50 leading-relaxed italic border-l-2 border-[#7c6aef]/30 pl-4 py-1">&quot;{item.evidence || 'Aucun détail technique disponible.'}&quot;</p>
                                                     </div>
                                                 </div>
                                             </motion.div>

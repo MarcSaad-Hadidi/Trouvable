@@ -163,7 +163,7 @@ export default function GeoConsistencyPage() {
                                 {(data.criticalContradictions || []).map((item, index) => (
                                     <div key={index} className={cn(COMMAND_SURFACE, "p-3 border-l-2 border-rose-500/40")}>
                                         <div className="text-[12px] font-bold text-rose-100/90 mb-1">{item.label}</div>
-                                        <div className="text-[10px] leading-relaxed text-rose-100/40 italic">"{item.detail || item.evidence}"</div>
+                                        <div className="text-[10px] leading-relaxed text-rose-100/40 italic">&quot;{item.detail || item.evidence}&quot;</div>
                                     </div>
                                 ))}
                             </div>

@@ -286,11 +286,11 @@ export default function ClientOnboardingWizard() {
             {step === 'input' ? (
                 <form onSubmit={handleStart} className="rounded-2xl border border-white/10 bg-[#0f0f0f] p-6 space-y-4">
                     <h2 className="text-lg font-bold text-white">Étape 1 : Saisie minimale</h2>
-                    <p className="text-sm text-white/40">Cela crée un brouillon, lance un premier audit d'enrichissement et ouvre un écran de validation.</p>
+                    <p className="text-sm text-white/40">Cela crée un brouillon, lance un premier audit d&#39;enrichissement et ouvre un écran de validation.</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Nom de l'entreprise</label>
+                            <label className={labelClass}>Nom de l&#39;entreprise</label>
                             <input required className={inputClass} value={input.business_name} onChange={(event) => setInput((current) => ({ ...current, business_name: event.target.value }))} />
                         </div>
                         <div>
@@ -322,7 +322,7 @@ export default function ClientOnboardingWizard() {
             {step === 'enriching' ? (
                 <div className="rounded-2xl border border-white/10 bg-[#0f0f0f] p-8">
                     <h2 className="text-lg font-bold text-white">Étape 2 : Auto-enrichissement en cours</h2>
-                    <p className="mt-2 text-sm text-white/45">Exécution de l'audit initial et préparation des suggestions...</p>
+                    <p className="mt-2 text-sm text-white/45">Exécution de l&#39;audit initial et préparation des suggestions...</p>
                 </div>
             ) : null}
 

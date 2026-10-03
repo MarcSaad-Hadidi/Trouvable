@@ -8,7 +8,7 @@ function EmptyState() {
     return (
         <div className="rounded-2xl border border-dashed border-white/[0.05] bg-white/[0.01] px-8 py-14 text-center">
             <div className="text-[14px] text-white/25">
-                Les priorités seront définies lors du prochain cycle d'analyse.
+                Les priorités seront définies lors du prochain cycle d&#39;analyse.
             </div>
         </div>
     );
@@ -26,7 +26,7 @@ export default function PortalPriorityBoard({ priorities = [] }) {
             <div className="absolute left-8 right-8 top-0 h-px bg-gradient-to-r from-transparent via-[#a78bfa]/12 to-transparent" />
 
             <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#7b8fff]/45">
-                Plan d'action
+                Plan d&#39;action
             </div>
             <h2 className="mb-9 text-[20px] font-bold tracking-[-0.03em] text-white">Priorités actuelles</h2>
 

@@ -58,7 +58,7 @@ export default function GeoSignalsView() {
                 <div className={cn(COMMAND_PANEL, "p-20 text-center")}>
                     <Orbit className="mx-auto mb-4 h-12 w-12 text-white/10" />
                     <h3 className="text-lg font-bold text-white mb-2">Signaux en attente</h3>
-                    <p className="text-sm text-white/40 max-w-md mx-auto mb-8">Les indicateurs radar s'activeront dès que les premières exécutions GEO seront disponibles.</p>
+                    <p className="text-sm text-white/40 max-w-md mx-auto mb-8">Les indicateurs radar s&#39;activeront dès que les premières exécutions GEO seront disponibles.</p>
                     <Link href={clientId ? `/admin/clients/${clientId}/geo/runs` : '/admin/clients'} className={COMMAND_BUTTONS.primary}>Démarrer un scan</Link>
                 </div>
             </CommandPageShell>

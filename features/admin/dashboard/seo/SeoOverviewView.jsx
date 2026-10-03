@@ -149,7 +149,7 @@ export default function SeoOverviewView() {
                         <div className="text-[26px] font-bold text-amber-300/90 tabular-nums">
                             {data.auditScores.issueCount ?? 'n.d.'}
                         </div>
-                        <div className="text-[10px] text-white/30 mt-1">Tous les problèmes de l'audit</div>
+                        <div className="text-[10px] text-white/30 mt-1">Tous les problèmes de l&#39;audit</div>
                     </div>
                 </motion.div>
             )}

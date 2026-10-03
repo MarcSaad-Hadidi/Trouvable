@@ -309,7 +309,7 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                         </div>
                                     </div>
                                     <h4 className="text-[18px] text-[#8ab4f8] group-hover:underline mb-2 leading-tight">Augmentez votre visibilité IA</h4>
-                                    <p className="text-[14px] text-[#bdc1c6] mb-4 leading-relaxed">Passez d'introuvable à leader de votre marché avec notre méthodologie GEO avancée.</p>
+                                    <p className="text-[14px] text-[#bdc1c6] mb-4 leading-relaxed">Passez d&#39;introuvable à leader de votre marché avec notre méthodologie GEO avancée.</p>
                                     <div className="inline-flex items-center gap-2 text-[#8ab4f8] text-[14px] font-medium">
                                         Commencer maintenant <ArrowRight className="w-4 h-4" />
                                     </div>

@@ -92,7 +92,7 @@ export function DossierErrorState({ message }) {
                 <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-red-100/70">État du dossier</div>
                 <div className="text-[18px] font-semibold text-red-50 mt-2">Chargement impossible</div>
                 <div className="text-[12px] text-red-100/75 mt-2 leading-relaxed">
-                    Le dossier partagé n'a pas pu être chargé proprement.
+                    Le dossier partagé n&#39;a pas pu être chargé proprement.
                 </div>
                 {message ? <div className="text-[11px] text-red-100/60 mt-3 break-words">Dernier signal : {message}</div> : null}
             </GeoPremiumCard>

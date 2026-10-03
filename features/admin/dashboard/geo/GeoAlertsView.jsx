@@ -64,8 +64,8 @@ function AlertCard({ alert }) {
             
             <div className="p-5 rounded-2xl bg-black/80 border border-white/[0.08] mb-8 relative overflow-hidden group-hover:border-white/20 transition-colors">
                 <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-40", isCrit ? "bg-rose-500" : "bg-white/10")} />
-                <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/20 mb-3 ml-2">Preuve de l'Incident</div>
-                <p className="text-[14px] text-white/80 leading-relaxed italic pr-4 ml-2 font-medium">"{alert.evidence}"</p>
+                <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/20 mb-3 ml-2">Preuve de l&#39;Incident</div>
+                <p className="text-[14px] text-white/80 leading-relaxed italic pr-4 ml-2 font-medium">&quot;{alert.evidence}&quot;</p>
             </div>
  
             <div className="flex flex-wrap items-center gap-6">
@@ -121,7 +121,7 @@ export default function GeoAlertsView() {
         />
     );
 
-    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Agrégation des signaux d'alerte...</div></CommandPageShell>;
+    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Agrégation des signaux d&#39;alerte...</div></CommandPageShell>;
     if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
 
     return (
@@ -139,7 +139,7 @@ export default function GeoAlertsView() {
                         <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <BellIcon className="h-4 w-4 text-[#7c6aef]" />
-                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Flux d'incidents</h3>
+                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Flux d&#39;incidents</h3>
                             </div>
                             <div className="flex items-center gap-4">
                                 {SEVERITY_KEYS.map(k => (

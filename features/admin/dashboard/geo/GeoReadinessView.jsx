@@ -45,13 +45,13 @@ function DimensionCard({ dimension }) {
             </div>
             
             <div className="p-4 rounded-xl bg-black/60 border border-white/[0.05] mb-6">
-                <p className="text-[12px] text-white/50 leading-relaxed italic line-clamp-3">"{dimension.summary}"</p>
+                <p className="text-[12px] text-white/50 leading-relaxed italic line-clamp-3">&quot;{dimension.summary}&quot;</p>
             </div>
 
             <div className="space-y-5">
                 {dimension.evidence?.length > 0 && (
                     <div className="space-y-2">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c6aef]">Points d'Appui</div>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c6aef]">Points d&#39;Appui</div>
                         <div className="flex flex-wrap gap-2">
                             {dimension.evidence.slice(0, 3).map((e, i) => (
                                 <span key={i} className="text-[10px] px-2 py-0.5 rounded-lg bg-[#7c6aef]/5 border border-[#7c6aef]/20 text-[#b8adff]">{e}</span>
@@ -179,7 +179,7 @@ export default function GeoReadinessView() {
                             <h3 className="text-[12px] font-bold uppercase tracking-[0.14em]">Lecture IA Persistée</h3>
                         </div>
                         <div className="p-4 rounded-xl bg-white/[0.03] border border-[#7c6aef]/10 text-[13px] text-white/70 leading-relaxed italic">
-                            "{data.auditContext?.aiSummary?.text || 'La structure actuelle favorise l\'extraction directe mais manque de preuves sémantiques pour les requêtes complexes.'}"
+                            &quot;{data.auditContext?.aiSummary?.text || 'La structure actuelle favorise l\'extraction directe mais manque de preuves sémantiques pour les requêtes complexes.'}&quot;
                         </div>
                         <div className="mt-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-white/20">
                             <span>Moteur: Mistral Large</span>

@@ -216,7 +216,7 @@ export default function SeoContentPage() {
                 <div className={cn(COMMAND_PANEL, 'flex h-[480px] flex-col overflow-hidden p-0')}>
                     <div className="border-b border-white/[0.05] bg-white/[0.02] p-5">
                         <h3 className="text-[12px] font-semibold text-white/90">Matrice Sémantique vs Tunnel</h3>
-                        <p className="mt-1 text-[11px] text-white/50">Identification des opportunités ("gaps") par cluster thématique.</p>
+                        <p className="mt-1 text-[11px] text-white/50">Identification des opportunités (&quot;gaps&quot;) par cluster thématique.</p>
                     </div>
 
                     <div className="flex-1 overflow-x-auto overflow-y-auto p-5">

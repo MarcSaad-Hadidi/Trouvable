@@ -122,16 +122,16 @@ export default function GeoCrawlersPage() {
                         className="flex-1"
                         headers={['Agent', 'Directive robots.txt', 'Impact GEO', 'Statut']}
                         rows={(data.botRows || []).map((row) => [
-                            <div className="flex items-center gap-3">
+                            <div key="agent" className="flex items-center gap-3">
                                 <div className={cn("h-1.5 w-1.5 rounded-full", toneFromStatus(row.operatorStatus) === 'ok' ? 'bg-emerald-500' : 'bg-rose-500')} />
                                 <span className="text-[13px] font-bold text-white/90">{row.name}</span>
                             </div>,
-                            <span className="text-[11px] font-mono text-white/30">{row.ruleSource || 'Global'}</span>,
-                            <div className="max-w-[300px]">
+                            <span key="rule" className="text-[11px] font-mono text-white/30">{row.ruleSource || 'Global'}</span>,
+                            <div key="impact" className="max-w-[300px]">
                                 <div className="text-[12px] text-white/70 line-clamp-1">{row.impact || 'Standard'}</div>
-                                <div className="text-[10px] text-white/20 mt-0.5 truncate italic">"{row.evidence || 'N/A'}"</div>
+                                <div className="text-[10px] text-white/20 mt-0.5 truncate italic">&quot;{row.evidence || 'N/A'}&quot;</div>
                             </div>,
-                            <div className={cn("inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border", chipClass(row.operatorStatus))}>{row.operatorStatus}</div>
+                            <div key="status" className={cn("inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border", chipClass(row.operatorStatus))}>{row.operatorStatus}</div>
                         ])}
                     />
                 </div>

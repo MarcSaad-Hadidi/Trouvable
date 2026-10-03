@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, Compass, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
@@ -43,7 +43,7 @@ function buildChats(page) {
 }
 
 export default function ChatgptPage({ page, trustBrief }) {
-    const chats = buildChats(page);
+    const chats = useMemo(() => buildChats(page), [page]);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
     const [animKey, setAnimKey] = useState(0);
@@ -196,7 +196,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                                         <div className="relative flex items-center bg-[#2f2f2f] rounded-[24px] px-4 py-3 border border-white/5 shadow-inner min-h-[56px]">
                                             <Plus className="w-5 h-5 text-white/40 mr-2" />
                                             <div className="w-full text-white/40 text-[16px] bg-transparent outline-none cursor-text px-2">
-                                                Posez n'importe quelle question
+                                                Posez n&#39;importe quelle question
                                             </div>
                                             <div className="absolute right-3 w-8 h-8 bg-white/20 text-white rounded-full flex items-center justify-center pointer-events-none">
                                                 <ArrowUp className="w-4 h-4" />
@@ -312,7 +312,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                                         <div className="max-w-[768px] mx-auto relative flex items-center bg-[#2f2f2f] rounded-[24px] px-4 py-3 border border-white/5 shadow-inner">
                                             <Plus className="w-5 h-5 text-white/40 mr-2" />
                                             <div className="w-full text-white/40 text-[15px] bg-transparent outline-none cursor-text px-2">
-                                                Posez n'importe quelle question
+                                                Posez n&#39;importe quelle question
                                             </div>
                                             <div className="absolute right-3 w-8 h-8 bg-white/20 text-white rounded-full flex items-center justify-center pointer-events-none">
                                                 <ArrowUp className="w-4 h-4" />

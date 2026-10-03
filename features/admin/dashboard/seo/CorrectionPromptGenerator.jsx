@@ -485,7 +485,7 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                                 )
                             ) : (
                                 <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[12px] leading-relaxed text-white/58">
-                                    Prompt masque. Utilise "Afficher le prompt" pour lecture et copie.
+                                    Prompt masque. Utilise &quot;Afficher le prompt&quot; pour lecture et copie.
                                 </div>
                             )}
                         </div>

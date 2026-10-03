@@ -77,7 +77,7 @@ function OpportunityCard({ item }) {
     return (
         <div className={cn(COMMAND_SURFACE, "p-5 border-l-2 border-[#7c6aef]/30 group hover:border-[#7c6aef] transition-all")}>
             <div className="text-[14px] font-bold text-white/90 mb-2">{item.title}</div>
-            <p className="text-[12px] text-white/40 leading-relaxed italic">"{item.rationale}"</p>
+            <p className="text-[12px] text-white/40 leading-relaxed italic">&quot;{item.rationale}&quot;</p>
             {item.mention_count != null && (
                 <div className="mt-4 flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-emerald-400">
                     <ZapIcon className="h-2.5 w-2.5" /> {item.mention_count} signaux associés
@@ -126,7 +126,7 @@ function AiBriefingPanel({ clientId }) {
                 ) : briefing ? (
                     <div className="space-y-6">
                         <div className="p-5 rounded-2xl bg-[#7c6aef]/5 border border-[#7c6aef]/10">
-                            <p className="text-[15px] font-bold text-white/90 leading-relaxed italic">"{briefing.headline}"</p>
+                            <p className="text-[15px] font-bold text-white/90 leading-relaxed italic">&quot;{briefing.headline}&quot;</p>
                         </div>
                         
                         {briefing.key_findings?.length > 0 && (
@@ -150,7 +150,7 @@ function AiBriefingPanel({ clientId }) {
                                 </ul>
                             </div>
                             <div className="space-y-3">
-                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">Signaux d'achat</h4>
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">Signaux d&#39;achat</h4>
                                 <ul className="space-y-2">
                                     {briefing.buying_signals?.map((s, i) => (
                                         <li key={i} className="flex gap-3 text-[12px] text-white/50"><div className="h-1 w-1 rounded-full bg-emerald-400 mt-2 shrink-0" /> {s}</li>
@@ -269,7 +269,7 @@ export default function GeoSocialView() {
                         <div className={cn(COMMAND_PANEL, "p-6")}>
                             <div className="flex items-center gap-2 mb-6">
                                 <ZapIcon className="h-4 w-4 text-[#7c6aef]" />
-                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Angles d'Action (IA)</h3>
+                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Angles d&#39;Action (IA)</h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[...(data.faqOpportunities || []), ...(data.contentOpportunities || [])].slice(0, 4).map((o, i) => (

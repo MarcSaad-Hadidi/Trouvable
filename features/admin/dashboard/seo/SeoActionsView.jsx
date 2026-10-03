@@ -166,7 +166,7 @@ export default function SeoActionsView() {
                 <motion.div variants={fadeUp}>
                     <GeoPremiumCard className="p-0 overflow-hidden">
                         <div className="px-5 py-4 border-b border-white/[0.08] bg-black/25">
-                            <div className="text-sm font-semibold text-white/95">Problèmes SEO de l'audit</div>
+                            <div className="text-sm font-semibold text-white/95">Problèmes SEO de l&#39;audit</div>
                             <div className="text-[11px] text-white/35">
                                 {data.auditIssues.length} problèmes catégorisés techniques / SEO / trust.
                             </div>

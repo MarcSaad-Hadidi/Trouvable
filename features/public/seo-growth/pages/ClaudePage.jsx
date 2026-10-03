@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, MessageSquare, Folder, Code2, Settings, Download, MoreHorizontal, ChevronDown, AlignLeft } from 'lucide-react';
 import { FaqSection, LinksSection, AiThinking, TypewriterText, PlatformEditorialLead } from './shared-primitives';
@@ -22,7 +22,7 @@ function buildChats(page) {
 }
 
 export default function ClaudePage({ page, trustBrief }) {
-    const chats = buildChats(page);
+    const chats = useMemo(() => buildChats(page), [page]);
     const [activeChat, setActiveChat] = useState('main');
     const [messages, setMessages] = useState([]);
     const [animKey, setAnimKey] = useState(0);
