@@ -1,6 +1,6 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import { frFR } from '@clerk/localizations';
-import { dark } from '@clerk/themes';
+import { clerkProviderAppearance } from '@/features/auth/clerk-provider-appearance';
 
 export const metadata = {
     title: 'Espace client | Trouvable',
@@ -11,20 +11,7 @@ export default function EspaceLayout({ children }) {
     return (
         <ClerkProvider
             localization={frFR}
-            appearance={{
-                baseTheme: dark,
-                variables: {
-                    colorPrimary: '#5b73ff',
-                    colorBackground: '#0f0f0f',
-                    colorInputBackground: '#161616',
-                    colorInputText: '#ffffff',
-                    borderRadius: '0.75rem',
-                },
-                layout: {
-                    logoImageUrl: '/logos/trouvable_logo_blanc1.png',
-                    socialButtonsVariant: 'iconButton',
-                },
-            }}
+            appearance={clerkProviderAppearance}
             signInUrl="/espace"
             signUpUrl="/espace"
             afterSignInUrl="/espace/apres-connexion"
