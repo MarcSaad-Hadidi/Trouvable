@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 import CoverageMeter from '@/components/shared/metrics/CoverageMeter';
 import PremiumSparkline from '@/components/shared/metrics/PremiumSparkline';
 
-export default function PortalMomentumStrip({ visibility, openOpportunitiesCount = 0, sparklines = {} }) {
+export default function PortalMomentumStrip({ visibility, openOpportunitiesCount = null, sparklines = {} }) {
     const visProxy = visibility?.visibility_proxy_percent;
     const citCoverage = visibility?.citation_coverage_percent;
     const mentionRate = visibility?.tracked_prompt_mention_rate_percent;
-    const totalRuns = visibility?.total_query_runs ?? 0;
+    const totalRuns = visibility?.total_query_runs;
 
     const hasAnyMetric = visProxy != null || citCoverage != null || mentionRate != null || totalRuns > 0;
     if (!hasAnyMetric) return null;
@@ -115,16 +115,16 @@ export default function PortalMomentumStrip({ visibility, openOpportunitiesCount
                                     Runs exécutés
                                 </div>
                                 <div className="mt-1 text-[22px] font-black tabular-nums tracking-[-0.03em] text-white/85">
-                                    {totalRuns}
+                                    {totalRuns ?? 'n.d.'}
                                 </div>
                             </div>
-                            {openOpportunitiesCount > 0 && (
+                            {(openOpportunitiesCount == null || openOpportunitiesCount > 0) && (
                                 <div className="text-right">
                                     <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/20">
                                         Opportunités
                                     </div>
                                     <div className="mt-1 text-[22px] font-black tabular-nums tracking-[-0.03em] text-amber-300/80">
-                                        {openOpportunitiesCount}
+                                        {openOpportunitiesCount ?? 'n.d.'}
                                     </div>
                                 </div>
                             )}

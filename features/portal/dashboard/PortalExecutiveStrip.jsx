@@ -60,12 +60,13 @@ const TILES = [
 
 const ease = [0.16, 1, 0.3, 1];
 
-export default function PortalExecutiveStrip({ visibility, completeness, recentWorkItems, trendSummary }) {
+export default function PortalExecutiveStrip({ visibility, completeness, recentWorkItems, trendSummary, dataSources = {} }) {
     const sparklines = trendSummary?.sparklines || {};
+    const unavailable = { label: 'Indisponible', sub: 'La source de données ne répond pas.', accent: 'text-white/50', bar: 0 };
     const states = {
-        state: deriveOverallState(visibility, completeness),
-        work: deriveWorkState(recentWorkItems),
-        trend: deriveTrendState(trendSummary),
+        state: dataSources.workspace === 'unavailable' ? unavailable : deriveOverallState(visibility, completeness),
+        work: dataSources.actions === 'unavailable' ? unavailable : deriveWorkState(recentWorkItems),
+        trend: dataSources.history === 'unavailable' ? unavailable : deriveTrendState(trendSummary),
     };
 
     return (

@@ -75,6 +75,7 @@ function getBasePaths(clientId) {
 }
 
 function getRunStatus({ completedRunsTotal, trackedPromptsTotal, latestRunAt, parseFailureRate }) {
+    if (completedRunsTotal === null) return 'unavailable';
     if ((completedRunsTotal ?? 0) === 0 && (trackedPromptsTotal ?? 0) > 0) return 'critical';
     if ((completedRunsTotal ?? 0) === 0) return 'unavailable';
 
@@ -499,7 +500,7 @@ function buildRiskItems({ seoScore, geoScore, mentionRatePercent, visibilityReli
             label: 'Runs / moteur',
             status: runs,
             statusLabel: labelForStatus(runs),
-            metric: completedRunsTotal > 0 ? `${completedRunsTotal}` : '0',
+            metric: completedRunsTotal === null ? 'n.d.' : `${completedRunsTotal}`,
             detail: latestRunAt ? `Dernier run ${formatRelativeTime(latestRunAt)}` : 'Aucun run observé',
             href: `${geoBase}/runs`,
         },
@@ -551,19 +552,19 @@ function buildHeroMetrics({ trackedPromptsTotal, completedRunsTotal, openOpportu
         {
             id: 'tracked-prompts',
             label: 'Prompts suivis',
-            value: trackedPromptsTotal ?? 0,
+            value: trackedPromptsTotal ?? 'n.d.',
             tone: 'info',
         },
         {
             id: 'completed-runs',
             label: 'Runs terminés',
-            value: completedRunsTotal ?? 0,
+            value: completedRunsTotal ?? 'n.d.',
             tone: 'neutral',
         },
         {
             id: 'open-opportunities',
             label: 'Actions ouvertes',
-            value: openOpportunitiesCount ?? 0,
+            value: openOpportunitiesCount ?? 'n.d.',
             tone: 'warning',
         },
         {
@@ -594,11 +595,14 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
     const recentAudits = Array.isArray(data?.recentAudits) ? data.recentAudits : [];
     const recentQueryRuns = Array.isArray(data?.recentQueryRuns) ? data.recentQueryRuns : [];
 
-    const trackedPromptsTotal = Number(kpis.trackedPromptsTotal ?? workspace?.trackedPromptCount ?? 0);
-    const completedRunsTotal = Number(kpis.completedRunsTotal ?? workspace?.completedRunCount ?? 0);
-    const openOpportunitiesCount = Number(opportunities?.summary?.open ?? kpis.openOpportunitiesCount ?? workspace?.openOpportunityCount ?? 0);
-    const seoScore = isFiniteNumber(audit?.seo_score) ? audit.seo_score : kpis.seoScore;
-    const geoScore = isFiniteNumber(audit?.geo_score) ? audit.geo_score : kpis.geoScore;
+    const dataSources = data?.dataSources || workspace?.sources || {};
+    const observedCount = (source, value, fallback) => dataSources[source] === 'unavailable' || value === null
+        ? null : Number(value ?? fallback ?? 0);
+    const trackedPromptsTotal = observedCount('trackedQueries', kpis.trackedPromptsTotal, workspace?.trackedPromptCount);
+    const completedRunsTotal = observedCount('totalQueryRuns', kpis.completedRunsTotal, workspace?.completedRunCount);
+    const openOpportunitiesCount = observedCount('opportunities', opportunities?.summary?.open ?? kpis.openOpportunitiesCount, workspace?.openOpportunityCount);
+    const seoScore = dataSources.audit === 'unavailable' ? null : (isFiniteNumber(audit?.seo_score) ? audit.seo_score : kpis.seoScore);
+    const geoScore = dataSources.audit === 'unavailable' ? null : (isFiniteNumber(audit?.geo_score) ? audit.geo_score : kpis.geoScore);
     const mentionRatePercent = kpis.mentionRatePercent;
     const visibilityProxyPercent = kpis.visibilityProxyPercent;
     const citationCoveragePercent = kpis.citationCoveragePercent;
@@ -620,7 +624,7 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
     const seoStatus = scoreStatus(seoScore);
     const geoStatus = getGeoStatus(geoScore, mentionRatePercent, visibilityReliability);
     const auditStatus = getAuditStatus(lastAuditAt, seoScore);
-    const globalStatus = getGlobalStatus({
+    const observedStatus = getGlobalStatus({
         criticalWarnings,
         activeWarnings,
         noRunsYet,
@@ -629,6 +633,9 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
         seoStatus,
         geoStatus,
     });
+    const globalStatus = data?.status === 'partial' || data?.status === 'unavailable'
+        ? { tone: observedStatus.tone === 'critical' ? 'critical' : 'warning', label: observedStatus.tone === 'critical' ? `${observedStatus.label} · signaux indisponibles` : 'Signaux partiellement indisponibles', summary: 'Certaines sources de données ne répondent pas.' }
+        : observedStatus;
 
     const topActions = buildPriorityActions({
         criticalWarnings,

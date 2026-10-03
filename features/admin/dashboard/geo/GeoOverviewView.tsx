@@ -62,14 +62,14 @@ function GeoPulseRing({ score, tone }) {
                     cx={center} cy={center} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: circumference - (score / 100) * circumference }}
+                    animate={{ strokeDashoffset: circumference - ((score ?? 0) / 100) * circumference }}
                     transition={{ duration: 1.5, ease: EASE }}
                     strokeLinecap="round"
                     style={{ opacity: 0.8 }}
                 />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-[28px] font-bold text-white tabular-nums">{score}</div>
+                <div className="text-[28px] font-bold text-white tabular-nums">{score ?? 'n.d.'}</div>
                 <div className="text-[9px] font-bold uppercase tracking-widest text-white/20">Index</div>
             </div>
         </div>
@@ -101,7 +101,7 @@ export default function GeoOverviewView() {
     if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Calcul du score de situation...</div></CommandPageShell>;
     if (error || !data || !model) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error || "Signaux en attente."} /></CommandPageShell>;
 
-    const score = model.hero?.score?.value || 0;
+    const score = model.hero?.score?.value ?? null;
     const tone = model.hero?.status?.tone || 'info';
 
     return (
@@ -144,7 +144,7 @@ export default function GeoOverviewView() {
                     <div className="relative z-10 p-8 h-full flex flex-col justify-between">
                         <div>
                             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 mb-2">Trajectoire Visibilité</div>
-                            <h3 className="text-[20px] font-bold text-white/90 max-w-md leading-snug italic">"{model.hero?.status?.summary}"</h3>
+                            <h3 className="text-[20px] font-bold text-white/90 max-w-md leading-snug italic">&quot;{model.hero?.status?.summary}&quot;</h3>
                         </div>
                         <div className="flex items-center gap-6 mt-6">
                             {model.hero?.supportingMetrics?.slice(2, 4).map((m, i) => (
@@ -200,7 +200,7 @@ export default function GeoOverviewView() {
                                     <div className={cn("mt-1.5 h-1.5 w-1.5 rounded-full shrink-0", item.tone === 'critical' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-[#7c6aef] shadow-[0_0_8px_rgba(124,106,239,0.4)]')} />
                                     <div className="flex-1 min-w-0">
                                         <div className="text-[12px] font-bold text-white/80 group-hover:text-white transition-colors line-clamp-1">{item.title}</div>
-                                        <div className="text-[11px] text-white/30 italic line-clamp-2 mt-1">"{item.description}"</div>
+                                        <div className="text-[11px] text-white/30 italic line-clamp-2 mt-1">&quot;{item.description}&quot;</div>
                                     </div>
                                 </div>
                             ))}

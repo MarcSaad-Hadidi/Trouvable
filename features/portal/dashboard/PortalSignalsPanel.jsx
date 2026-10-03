@@ -12,9 +12,14 @@ function fmtDate(iso) {
 }
 
 function PromptPositionSummary({ prompts }) {
-    const found = prompts.filter((p) => p.target_found).length;
-    const notFound = prompts.length - found;
-    const foundPct = Math.round((found / prompts.length) * 100);
+    const observed = prompts.filter((prompt) => typeof prompt.target_found === 'boolean');
+    const found = observed.filter((prompt) => prompt.target_found).length;
+    const notFound = observed.length - found;
+    const foundPct = observed.length ? Math.round((found / observed.length) * 100) : null;
+
+    if (foundPct === null) {
+        return <p className="mb-5 text-[11px] text-white/35">Taux de détection : Indisponible</p>;
+    }
 
     return (
         <motion.div
@@ -126,7 +131,7 @@ export default function PortalSignalsPanel({ prompts = [], sources = [] }) {
                                             ? prompt.target_position != null
                                                 ? `#${prompt.target_position}`
                                                 : 'Cité'
-                                            : 'Non cité'}
+                                            : prompt.target_found === false ? 'Non cité' : 'Indisponible'}
                                     </div>
                                 </motion.div>
                             ))}

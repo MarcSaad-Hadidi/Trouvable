@@ -240,5 +240,37 @@ describe('buildGeoOverviewCommandModel', () => {
         expect(model.riskMap.items.find((item) => item.id === 'geo')?.href).toBe('/admin/clients/client-123/geo/signals');
         expect(model.connectorHealth.items.find((item) => item.id === 'audit')?.href).toBe('/admin/clients/client-123/seo/health');
     });
+
+    it('keeps failed count sources unavailable without replacing them with stale workspace zeroes', () => {
+        const input = createBaseInput();
+        input.data.status = 'partial';
+        input.data.dataSources = { trackedQueries: 'unavailable', totalQueryRuns: 'unavailable', opportunities: 'unavailable' };
+        input.data.kpis.trackedPromptsTotal = null;
+        input.data.kpis.completedRunsTotal = null;
+        input.data.kpis.openOpportunitiesCount = null;
+        input.workspace.completedRunCount = 0;
+        const model = buildGeoOverviewCommandModel(input);
+        expect(model.hero.supportingMetrics.slice(0, 3).map((item) => item.value)).toEqual(['n.d.', 'n.d.', 'n.d.']);
+        expect(model.hero.status.label).toContain('indisponibles');
+        expect(model.riskMap.items.find((item) => item.id === 'runs').status).toBe('unavailable');
+    });
+
+    it('preserves observed zero counts', () => {
+        const input = createBaseInput();
+        input.data.kpis.trackedPromptsTotal = 0;
+        input.data.kpis.completedRunsTotal = 0;
+        input.data.opportunities.summary.open = 0;
+        expect(buildGeoOverviewCommandModel(input).hero.supportingMetrics.slice(0, 3).map((item) => item.value)).toEqual([0, 0, 0]);
+    });
+
+    it('does not replace failed audit scores with a stale shell audit and preserves observed critical warnings', () => {
+        const input = createBaseInput();
+        input.data.status = 'partial';
+        input.data.dataSources = { audit: 'unavailable' };
+        const model = buildGeoOverviewCommandModel(input);
+        expect(model.hero.score.value).toBeNull();
+        expect(model.hero.status.tone).toBe('critical');
+        expect(model.hero.status.label).toContain('indisponibles');
+    });
 });
 
