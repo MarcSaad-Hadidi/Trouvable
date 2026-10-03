@@ -52,6 +52,7 @@ export default function GeoModelesView() {
         const observed = data?.modelPerformance || [];
         const variants = data?.benchmark?.variantsCatalog || [];
         const sessions = data?.benchmark?.sessions || [];
+        const dataSources = data?.dataSources || {};
 
         const observedMap = new Map();
         for (const row of observed) {
@@ -77,7 +78,7 @@ export default function GeoModelesView() {
                 for (const attempt of history) {
                     agg.runs += 1;
                     if (attempt.target_found) agg.targetFound += 1;
-                    agg.sources += attempt.citations || 0;
+                    agg.sources = agg.sources === null || attempt.citations === null ? null : agg.sources + (attempt.citations || 0);
                 }
 
                 if (row.provider) agg.runtimeProvider = row.provider;
@@ -95,9 +96,12 @@ export default function GeoModelesView() {
 
             const obs = observedMap.get(key);
             const bench = benchmarkVariantMap.get(variant.id);
-            const totalRuns = (obs?.runs ?? 0) + (bench?.runs ?? 0);
-            const totalTargetFound = (obs?.targetFound ?? 0) + (bench?.targetFound ?? 0);
-            const totalSources = (obs?.sources ?? 0) + (bench?.sources ?? 0);
+            const aggregateCount = (field) => dataSources.runs === 'unavailable' || dataSources.benchmarks === 'unavailable'
+                || obs?.[field] === null || bench?.[field] === null
+                ? null : (obs?.[field] ?? 0) + (bench?.[field] ?? 0);
+            const totalRuns = aggregateCount('runs');
+            const totalTargetFound = aggregateCount('targetFound');
+            const totalSources = dataSources.mentions === 'unavailable' ? null : aggregateCount('sources');
 
             merged.push({
                 provider: variant.provider,
@@ -105,7 +109,7 @@ export default function GeoModelesView() {
                 label: variant.label,
                 runs: totalRuns,
                 targetFound: totalTargetFound,
-                targetRatePercent: totalRuns > 0 ? Math.round((totalTargetFound / totalRuns) * 100) : 0,
+                targetRatePercent: totalRuns === null || totalTargetFound === null ? null : (totalRuns > 0 ? Math.round((totalTargetFound / totalRuns) * 100) : 0),
                 sources: totalSources,
                 hasData: !!(obs || bench),
                 productionRuns: obs?.runs ?? 0,
@@ -208,11 +212,14 @@ export default function GeoModelesView() {
 
     return (
         <CommandPageShell header={header}>
+            {data.status === 'partial' || data.status === 'unavailable' ? (
+                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certaines mesures et sessions sont indisponibles.</p>
+            ) : null}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <CommandMetricCard label="Top Rate" value={`${allModels[0]?.targetRatePercent || 0}%`} detail="Meilleur modèle" tone="ok" />
+                <CommandMetricCard label="Top Rate" value={(allModels[0]?.targetRatePercent ?? null) === null ? 'n.d.' : `${allModels[0].targetRatePercent}%`} detail="Meilleur modèle" tone="ok" />
                 <CommandMetricCard label="Leader" value={formatDisplayModelName(allModels[0]?.label, allModels[0]?.model)} detail="Recommandé" tone="info" />
                 <CommandMetricCard label="Audités" value={allModels.filter(m => m.hasData).length} detail="Sur catalogue" tone="neutral" />
-                <CommandMetricCard label="Sessions" value={data.benchmark?.sessions?.length || 0} detail="Expériences" tone="neutral" />
+                <CommandMetricCard label="Sessions" value={data.dataSources?.benchmarks === 'unavailable' || data.benchmark?.sessions === null ? 'n.d.' : (data.benchmark?.sessions?.length || 0)} detail="Expériences" tone="neutral" />
             </div>
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
@@ -244,15 +251,15 @@ export default function GeoModelesView() {
                                     <div className="mt-auto grid grid-cols-3 gap-4 pt-6 border-t border-white/5">
                                         <div>
                                             <div className="text-[9px] font-bold uppercase text-white/20">ROI</div>
-                                            <div className="text-[16px] font-bold text-emerald-400">{row.targetRatePercent}%</div>
+                                            <div className="text-[16px] font-bold text-emerald-400">{(row.targetRatePercent ?? null) === null ? 'n.d.' : `${row.targetRatePercent}%`}</div>
                                         </div>
                                         <div>
                                             <div className="text-[9px] font-bold uppercase text-white/20">Runs</div>
-                                            <div className="text-[16px] font-bold text-white/60">{row.runs}</div>
+                                            <div className="text-[16px] font-bold text-white/60">{row.runs ?? 'n.d.'}</div>
                                         </div>
                                         <div>
                                             <div className="text-[9px] font-bold uppercase text-white/20">Sources</div>
-                                            <div className="text-[16px] font-bold text-white/60">{row.sources}</div>
+                                            <div className="text-[16px] font-bold text-white/60">{row.sources ?? 'n.d.'}</div>
                                         </div>
                                     </div>
                                 ) : (

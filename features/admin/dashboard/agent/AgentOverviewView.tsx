@@ -63,6 +63,9 @@ export default function AgentOverviewPage() {
             emptyState={data?.emptyState || null}
             loadingMessage="Calcul du score AGENT et agrégation des remédiations liées aux dimensions réelles."
         >
+            {data?.status === 'partial' || data?.status === 'unavailable' ? (
+                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+            ) : null}
             <MetricGrid
                 items={[
                     {
@@ -75,22 +78,22 @@ export default function AgentOverviewPage() {
                     {
                         id: 'runs',
                         label: 'Exécutions complétées',
-                        value: snapshot?.completedRunsTotal ?? 0,
-                        detail: snapshot?.lastRunAt || 'Aucune exécution observée',
+                        value: snapshot?.completedRunsTotal ?? 'n.d.',
+                        detail: (snapshot?.completedRunsTotal ?? null) === null ? 'Exécutions indisponibles' : (snapshot?.lastRunAt || 'Aucune exécution observée'),
                         tone: snapshot?.completedRunsTotal > 0 ? 'ok' : 'neutral',
                     },
                     {
                         id: 'prompts',
                         label: 'Prompts suivis',
-                        value: snapshot?.trackedPromptsTotal ?? 0,
+                        value: snapshot?.trackedPromptsTotal ?? 'n.d.',
                         detail: 'Base de lecture AGENT',
                         tone: snapshot?.trackedPromptsTotal > 0 ? 'info' : 'neutral',
                     },
                     {
                         id: 'open',
                         label: 'Correctifs actifs',
-                        value: snapshot?.openOpportunitiesCount ?? 0,
-                        detail: `${snapshot?.highPriorityOpen ?? 0} priorité(s) haute(s)`,
+                        value: snapshot?.openOpportunitiesCount ?? 'n.d.',
+                        detail: (snapshot?.highPriorityOpen ?? null) === null ? 'Priorités hautes indisponibles' : `${snapshot.highPriorityOpen} priorité(s) haute(s)`,
                         tone: (snapshot?.highPriorityOpen ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}
@@ -137,7 +140,7 @@ export default function AgentOverviewPage() {
                     title="Correctifs prioritaires"
                     subtitle="Remédiations consolidées depuis les problèmes réels détectés dans les dimensions AGENT."
                     items={data?.topFixes || []}
-                    emptyTitle="Aucun correctif prioritaire dans la fenêtre courante."
+                    emptyTitle={data?.status === 'partial' || data?.status === 'unavailable' ? 'Correctifs prioritaires indisponibles.' : 'Aucun correctif prioritaire dans la fenêtre courante.'}
                     renderItem={(item) => (
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
@@ -156,7 +159,7 @@ export default function AgentOverviewPage() {
                     title="Blocages majeurs"
                     subtitle="Blocages critiques consolidés depuis la préparation et les correctifs à priorité haute."
                     items={data?.topBlockers || []}
-                    emptyTitle="Aucun blocage majeur détecté."
+                    emptyTitle={data?.status === 'partial' || data?.status === 'unavailable' ? 'Blocages majeurs indisponibles.' : 'Aucun blocage majeur détecté.'}
                     renderItem={(item) => (
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
