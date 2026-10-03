@@ -11,14 +11,13 @@
  * `issues`, `strengths`). Layer 1 and Layer 2 outputs are diagnostic only.
  */
 
+import { finiteNumberOrNull } from '@/lib/numbers';
+
 function toArray(value) {
     return Array.isArray(value) ? value : [];
 }
 
-function asNumber(value) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-}
+const asNumber = finiteNumberOrNull;
 
 /**
  * Authoritative Trouvable final score (stable product truth).
@@ -844,15 +843,15 @@ export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dime
 
     const layer2 = getLayer2ViewModel(audit);
     if (layer2.hasAny) {
-        for (const module of layer2.modules) {
-            if (LAYER2_MODULE_TO_BUCKET[module.key] !== bucketName) continue;
-            const data = module.data || {};
+        for (const expertModule of layer2.modules) {
+            if (LAYER2_MODULE_TO_BUCKET[expertModule.key] !== bucketName) continue;
+            const data = expertModule.data || {};
             const issues = toArray(data.issues || data.findings).slice(0, 2);
             for (const finding of issues) {
                 synthesized.push({
-                    id: `synth:layer2:${module.key}:${finding.id || finding.code || finding.title || Math.random().toString(36).slice(2, 8)}`,
-                    title: finding.title || finding.message || `Finding expert — ${module.label}`,
-                    description: finding.detail || finding.description || `Signal expert détecté sur « ${module.label} ».`,
+                    id: `synth:layer2:${expertModule.key}:${finding.id || finding.code || finding.title || Math.random().toString(36).slice(2, 8)}`,
+                    title: finding.title || finding.message || `Finding expert — ${expertModule.label}`,
+                    description: finding.detail || finding.description || `Signal expert détecté sur « ${expertModule.label} ».`,
                     severity: String(finding.severity || 'medium').toLowerCase(),
                     source: 'layer2',
                 });
