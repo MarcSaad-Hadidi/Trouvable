@@ -136,7 +136,7 @@ export function getSeoGeoBucketsViewModel(audit) {
             .map(([key]) => ({ key, dimension: byKey.get(key) || null, meta: dimensionFrMeta(key) }));
 
         const applicableScores = bucketDimensions
-            .map((entry) => (entry.dimension && typeof entry.dimension.score === 'number' && entry.dimension.applicability !== 'N/A' ? entry.dimension.score : null))
+            .map((entry) => (entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A' ? entry.dimension.score : null))
             .filter((score) => score !== null);
         const bucketScore = applicableScores.length > 0
             ? Math.round(applicableScores.reduce((acc, score) => acc + score, 0) / applicableScores.length)
@@ -499,7 +499,7 @@ export function buildCompareSnapshotFromAudit(audit, { label = null } = {}) {
     const scores = getFinalStableScores(audit);
     const dimensions = getDimensions(audit).map((dim) => ({
         key: String(dim.key || dim.id || '').toLowerCase(),
-        score: typeof dim.score === 'number' ? dim.score : null,
+        score: Number.isFinite(dim.score) ? dim.score : null,
         applicability: dim.applicability || null,
     }));
     const classification = getClassification(audit);
@@ -1064,7 +1064,7 @@ const REWRITE_HINTS = {
 
 function identifyWeakestSubScore(block) {
     const sub = block?.sub_scores || {};
-    const entries = Object.entries(sub).filter(([, v]) => typeof v === 'number');
+    const entries = Object.entries(sub).filter(([, v]) => Number.isFinite(v));
     if (entries.length === 0) return null;
     entries.sort((a, b) => a[1] - b[1]);
     const [key, value] = entries[0];
@@ -1078,7 +1078,7 @@ export function getCitabilityActionableModel(audit) {
     const allBlocks = [];
     for (const page of pageSummaries) {
         for (const block of toArray(page?.citability?.top_blocks)) {
-            if (block && typeof block.citability_score === 'number') {
+            if (block && Number.isFinite(block.citability_score)) {
                 allBlocks.push({ ...block, page_url: block.page_url || page.url || null });
             }
         }
@@ -1131,7 +1131,7 @@ export function getCitabilityActionableModel(audit) {
         .sort((a, b) => (b.lowBlocks - a.lowBlocks) || ((a.pageScore ?? 100) - (b.pageScore ?? 100)))
         .slice(0, 4);
 
-    const scores = allBlocks.map((b) => b.citability_score).filter((n) => typeof n === 'number');
+    const scores = allBlocks.map((b) => b.citability_score).filter((n) => Number.isFinite(n));
     const avg = scores.length > 0 ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : null;
 
     return {

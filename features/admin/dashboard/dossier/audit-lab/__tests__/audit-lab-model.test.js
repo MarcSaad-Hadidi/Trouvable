@@ -16,6 +16,10 @@ describe('stable client audit scores', () => {
     it('keeps an old record without scores unavailable', () => {
         expect(getFinalStableScores({}).finalScore).toBeNull();
     });
+    it('never exposes nonfinite dimension diagnostics', () => {
+        const audit = { geo_breakdown: { dimensions: [{ key: 'technical_seo', score: Infinity }, { key: 'local_readiness', score: NaN }] } };
+        expect(getSeoGeoBucketsViewModel(audit)).toMatchObject({ seo: { score: null }, geo: { score: null } });
+    });
     it('keeps dimension diagnostics separate from the client score', () => {
         const audit = { seo_score: 50, geo_score: 60, geo_breakdown: { overall: { hybrid_score: 72 }, dimensions: [{ key: 'technical_seo', score: 95 }, { key: 'local_readiness', score: 30 }] } };
         expect(getFinalStableScores(audit).finalScore).toBe(72);
