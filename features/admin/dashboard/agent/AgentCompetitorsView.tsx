@@ -6,9 +6,9 @@ import {
     GenericTablePanel,
     KeyValuePanel,
     MetricGrid,
-    RealPageFrame,
+    AgentPageFrame,
     pageActionLink,
-} from '@/features/admin/dashboard/agent/real-page';
+} from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import { formatAgentCategory, formatAgentPriority, toneForPriority } from '@/features/admin/dashboard/agent/agent-copy';
 
@@ -24,7 +24,7 @@ export default function AgentCompetitorsPage() {
     } : null);
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Comparatif AGENT"
             subtitle={`Lecture concurrentielle réelle pour ${client?.client_name || 'ce mandat'} : concurrents cités, prompts perdus et mentions génériques.`}
@@ -134,6 +134,6 @@ export default function AgentCompetitorsPage() {
                     </div>
                 )}
             />
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }

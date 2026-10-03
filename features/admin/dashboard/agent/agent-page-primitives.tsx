@@ -17,6 +17,7 @@ export function formatValue(value: unknown) {
     if (value === null || value === undefined || value === '') return 'n.d.';
     if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
     if (typeof value === 'number') {
+        if (!Number.isFinite(value)) return 'n.d.';
         if (Number.isInteger(value)) return value.toLocaleString('fr-CA');
         return value.toFixed(2);
     }
@@ -44,7 +45,7 @@ export function pageActionLink(href: string | undefined | null, label: string, v
     );
 }
 
-export function RealPageFrame({
+export function AgentPageFrame({
     eyebrow,
     title,
     subtitle,

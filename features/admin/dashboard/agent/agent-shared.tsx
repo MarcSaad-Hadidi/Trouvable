@@ -2,7 +2,7 @@
 
 import { CommandChartCard } from '@/features/admin/dashboard/shared/components/command/CommandChartCard';
 import { COMMAND_PANEL, cn } from '@/lib/tokens';
-import { toneFromStatus } from '@/features/admin/dashboard/agent/real-page';
+import { toneFromStatus } from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { formatAgentStatus } from '@/features/admin/dashboard/agent/agent-copy';
 
 function toneClasses(tone) {

@@ -4,9 +4,9 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/s
 import {
     KeyValuePanel,
     MetricGrid,
-    RealPageFrame,
+    AgentPageFrame,
     pageActionLink,
-} from '@/features/admin/dashboard/agent/real-page';
+} from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import { formatAgentStatus, toneForStatus } from '@/features/admin/dashboard/agent/agent-copy';
 
@@ -31,7 +31,7 @@ export default function AgentReadinessPage() {
     } : null);
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Préparation AGENT"
             subtitle={`Lecture réelle de la préparation technique pour ${client?.client_name || 'ce mandat'} : dimensions readiness, blocages majeurs et fraîcheur du signal.`}
@@ -114,7 +114,7 @@ export default function AgentReadinessPage() {
                 subtitle="Dimensions issues du moteur readiness réel, sans score ni libellé artificiels."
                 dimensions={dimensions}
             />
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }
 

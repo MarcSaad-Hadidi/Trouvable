@@ -1,7 +1,7 @@
 'use client';
 
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
-import { GenericTablePanel, KeyValuePanel, MetricGrid, RealPageFrame, pageActionLink } from '@/features/admin/dashboard/agent/real-page';
+import { GenericTablePanel, KeyValuePanel, MetricGrid, AgentPageFrame, pageActionLink } from '@/features/admin/dashboard/agent/agent-page-primitives';
 
 export default function AgentVisibilityPage() {
     const { client, clientId } = useGeoClient();
@@ -11,7 +11,7 @@ export default function AgentVisibilityPage() {
     const promptCoverage = data?.promptCoverage || null;
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Visibilité AGENT"
             subtitle={`Lecture réelle de la présence du mandat ${client?.client_name || ''} dans les réponses IA, à partir des prompts, exécutions, concurrents et sources observés.`.trim()}
@@ -104,6 +104,6 @@ export default function AgentVisibilityPage() {
                     ]}
                 />
             </div>
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }

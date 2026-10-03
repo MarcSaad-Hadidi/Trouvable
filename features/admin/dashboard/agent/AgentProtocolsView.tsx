@@ -4,9 +4,9 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/s
 import {
     KeyValuePanel,
     MetricGrid,
-    RealPageFrame,
+    AgentPageFrame,
     pageActionLink,
-} from '@/features/admin/dashboard/agent/real-page';
+} from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import { formatAgentPriority, formatAgentReliability, toneForPriority } from '@/features/admin/dashboard/agent/agent-copy';
 
@@ -29,7 +29,7 @@ export default function AgentProtocolsPage() {
     } : null);
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Protocoles AGENT"
             subtitle={`Lecture réelle des signaux techniques exposés pour ${client?.client_name || 'ce mandat'} : protocoles, preuves et manques observables par un agent.`}
@@ -128,7 +128,7 @@ export default function AgentProtocolsPage() {
                     </div>
                 )}
             />
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }
 

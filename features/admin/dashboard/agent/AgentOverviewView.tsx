@@ -2,7 +2,7 @@
 
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { CommandChartCard } from '@/features/admin/dashboard/shared/components/command/CommandChartCard';
-import { KeyValuePanel, MetricGrid, RealPageFrame, pageActionLink } from '@/features/admin/dashboard/agent/real-page';
+import { KeyValuePanel, MetricGrid, AgentPageFrame, pageActionLink } from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import {
     formatAgentCategory,
@@ -47,7 +47,7 @@ export default function AgentOverviewPage() {
         : [];
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Vue AGENT"
             subtitle={`Lecture consolidée AGENT pour ${client?.client_name || 'ce mandat'} : sous-scores, blocages et remédiation issus des mêmes signaux réels.`}
@@ -168,7 +168,7 @@ export default function AgentOverviewPage() {
                     )}
                 />
             </div>
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }
 

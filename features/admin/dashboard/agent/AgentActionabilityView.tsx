@@ -4,9 +4,9 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/dashboard/s
 import {
     KeyValuePanel,
     MetricGrid,
-    RealPageFrame,
+    AgentPageFrame,
     pageActionLink,
-} from '@/features/admin/dashboard/agent/real-page';
+} from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import { formatAgentPriority, formatAgentReliability, toneForPriority } from '@/features/admin/dashboard/agent/agent-copy';
 
@@ -31,7 +31,7 @@ export default function AgentActionabilityPage() {
     } : null);
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Actionnabilité AGENT"
             subtitle={`Lecture réelle de l’actionnabilité pour ${client?.client_name || 'ce mandat'} : dimensions, forces et correctifs dérivés de l’audit courant.`}
@@ -130,7 +130,7 @@ export default function AgentActionabilityPage() {
                     </div>
                 )}
             />
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }
 

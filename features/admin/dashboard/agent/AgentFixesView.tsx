@@ -5,9 +5,9 @@ import { CommandChartCard } from '@/features/admin/dashboard/shared/components/c
 import {
     KeyValuePanel,
     MetricGrid,
-    RealPageFrame,
+    AgentPageFrame,
     pageActionLink,
-} from '@/features/admin/dashboard/agent/real-page';
+} from '@/features/admin/dashboard/agent/agent-page-primitives';
 import { AgentChip, AgentMessageList } from '@/features/admin/dashboard/agent/agent-shared';
 import {
     formatAgentCategory,
@@ -27,7 +27,7 @@ export default function AgentFixesPage() {
     const uncoveredSubscores = data?.coherence?.uncoveredSubscores || [];
 
     return (
-        <RealPageFrame
+        <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Correctifs AGENT"
             subtitle={`Remédiation AGENT consolidée pour ${client?.client_name || 'ce mandat'} : problèmes détectés, priorisation et file de traitement alignés.`}
@@ -146,6 +146,6 @@ export default function AgentFixesPage() {
                     )}
                 />
             </div>
-        </RealPageFrame>
+        </AgentPageFrame>
     );
 }
