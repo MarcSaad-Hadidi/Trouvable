@@ -27,13 +27,16 @@ export default function AgentVisibilityPage() {
             emptyState={data?.emptyState || null}
             loadingMessage="Lecture du taux de mention, de la couverture source et des modèles réellement actifs."
         >
+            {data?.status === 'partial' || data?.status === 'unavailable' ? (
+                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+            ) : null}
             <MetricGrid
                 items={[
                     {
                         id: 'mention',
                         label: 'Taux de mention',
                         value: kpis?.mentionRatePercent != null ? `${kpis.mentionRatePercent}%` : 'n.d.',
-                        detail: `${kpis?.completedRunsTotal ?? 0} exécution(s) complétée(s)`,
+                        detail: (kpis?.completedRunsTotal ?? null) === null ? 'Exécutions indisponibles' : `${kpis.completedRunsTotal} exécution(s) complétée(s)`,
                         tone: 'ok',
                     },
                     {
@@ -47,14 +50,14 @@ export default function AgentVisibilityPage() {
                         id: 'sources',
                         label: 'Couverture citations',
                         value: kpis?.citationCoveragePercent != null ? `${kpis.citationCoveragePercent}%` : 'n.d.',
-                        detail: `${kpis?.genericMentionsCount ?? 0} mention(s) générique(s)`,
+                        detail: (kpis?.genericMentionsCount ?? null) === null ? 'Mentions génériques indisponibles' : `${kpis.genericMentionsCount} mention(s) générique(s)`,
                         tone: 'neutral',
                     },
                     {
                         id: 'competitors',
                         label: 'Concurrents cités',
-                        value: kpis?.competitorMentionsCount ?? 0,
-                        detail: `${kpis?.trackedPromptsTotal ?? 0} prompt(s) suivi(s)`,
+                        value: kpis?.competitorMentionsCount ?? 'n.d.',
+                        detail: (kpis?.trackedPromptsTotal ?? null) === null ? 'Prompts indisponibles' : `${kpis.trackedPromptsTotal} prompt(s) suivi(s)`,
                         tone: (kpis?.competitorMentionsCount ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}

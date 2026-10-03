@@ -42,34 +42,37 @@ export default function AgentFixesPage() {
             emptyState={data?.emptyState || null}
             loadingMessage="Assemblage des correctifs AGENT depuis les dimensions, blocages et opportunités réelles."
         >
+            {data?.status === 'partial' || data?.status === 'unavailable' ? (
+                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+            ) : null}
             <MetricGrid
                 items={[
                     {
                         id: 'open',
                         label: 'Correctifs actifs',
-                        value: summary.open ?? 0,
-                        detail: `${summary.total ?? 0} action(s) au total`,
+                        value: summary.open ?? 'n.d.',
+                        detail: (summary.total ?? null) === null ? 'Total des actions indisponible' : `${summary.total} action(s) au total`,
                         tone: (summary.open ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                     {
                         id: 'high',
                         label: 'Priorité haute',
-                        value: summary.highPriorityOpen ?? 0,
-                        detail: `${summary.derivedOpen ?? 0} signal(aux) issu(s) des dimensions`,
+                        value: summary.highPriorityOpen ?? 'n.d.',
+                        detail: (summary.derivedOpen ?? null) === null ? 'Signaux dérivés indisponibles' : `${summary.derivedOpen} signal(aux) issu(s) des dimensions`,
                         tone: (summary.highPriorityOpen ?? 0) > 0 ? 'critical' : 'neutral',
                     },
                     {
                         id: 'progress',
                         label: 'En cours',
-                        value: summary.inProgress ?? 0,
+                        value: summary.inProgress ?? 'n.d.',
                         detail: 'Actions engagées',
                         tone: (summary.inProgress ?? 0) > 0 ? 'info' : 'neutral',
                     },
                     {
                         id: 'review',
                         label: 'À revoir',
-                        value: summary.reviewQueueCount ?? 0,
-                        detail: `${summary.remediationDraftCount ?? 0} brouillon(s)`,
+                        value: summary.reviewQueueCount ?? 'n.d.',
+                        detail: (summary.remediationDraftCount ?? null) === null ? 'Brouillons indisponibles' : `${summary.remediationDraftCount} brouillon(s)`,
                         tone: (summary.reviewQueueCount ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}
