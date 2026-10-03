@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen --webpack && tsc --noEmit"
   },
   "browserslist": {
     "production": [
