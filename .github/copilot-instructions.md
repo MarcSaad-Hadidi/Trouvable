@@ -2,12 +2,12 @@
 
 ## Identity
 
-Trouvable is a production-grade SaaS platform for local business visibility, SEO/GEO optimization, and AI-powered audit intelligence.
+Trouvable is an operator tool for local visibility, SEO/GEO and audit intelligence. Production is a static parking page; the application and services are dormant. Do not reactivate deployments, cron, Supabase, providers or email for code validation.
 Every change may affect real users, real search rankings, and real revenue.
 
 ## Stack
 
-Next.js 16 App Router · React 18 · Tailwind 3 · Supabase (Postgres + RLS) · Clerk 7 · Vercel · Stripe
+Next.js 16.3 App Router · React 19 · Tailwind 3 · Supabase (Postgres + RLS) · Clerk 7 · Vercel
 Testing: Vitest · AI: Mistral, Groq, Gemini · Email: Resend · Bot protection: Cloudflare Turnstile
 
 ## MCP tool routing
@@ -58,11 +58,11 @@ Route work to the right specialist — see `.github/agents/` for the full roster
 |---|---|
 | Project rules & architecture | `AGENTS.md` |
 | Engineering instructions | `.github/instructions/trouvable.instructions.md` |
-| Schema DDL | `supabase/schema.sql` |
-| Auth helpers | `lib/auth.js` |
-| Supabase facade | `lib/db.js` |
-| Service-role client | `lib/supabase-admin.js` |
-| Implementation plans | `docs/` |
+| SQL history and retained reconstruction references | `supabase/migrations/`, `supabase/schema.sql`, `supabase/setup_*.sql` |
+| Auth helpers | `src/lib/auth.js` |
+| Domain data modules | `src/lib/db/` |
+| Service-role client | `src/lib/supabase-admin.js` |
+| Architecture and operating contracts | `docs/architecture/` and `docs/operations/` |
 
 ## Git workflow
 
@@ -71,7 +71,7 @@ Route work to the right specialist — see `.github/agents/` for the full roster
 - Commit messages: `type(scope): description` — types: feat, fix, refactor, docs, test, chore, perf, style
 - Keep commits small and atomic — one logical change per commit
 - No force-pushes to `main`
-- Run `npm run lint` and `npm test` before considering a PR ready
+- Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and the hibernation validator before considering an application PR ready. Automatic Hibernation Gate is not application CI; the application job is manual and must not use production secrets or deploy.
 
 ## Environment & secrets
 

@@ -1,27 +1,29 @@
 ---
-applyTo: "app/**,components/**,middleware.ts,next.config.*,lib/actions/**"
+applyTo: "src/app/**,src/features/**,src/components/**,src/proxy.js,next.config.*,src/lib/actions/**"
 ---
 
 # Next.js App Router instructions
 
+Read the relevant `node_modules/next/dist/docs/` guide before writing framework code. Preserve the dormant application and static hibernation contract; no service revival is implied by these instructions.
+
 ## Server vs Client components
 
 - **Default is server** — only add `'use client'` when the component needs browser APIs, hooks, or event handlers.
-- Never import server-only modules (`lib/db.js`, `lib/supabase-admin.js`, `lib/auth.js`) in client components.
+- Never import server-only modules (`src/lib/db/*`, `src/lib/supabase-admin.js`, `src/lib/auth.js`) in client components.
 - Keep `'use client'` components as leaf nodes — push interactivity to the smallest possible boundary.
-- Use `components/ui/` primitives for reusable client-side elements.
+- Use `src/components/ui/` primitives for reusable client-side elements.
 
 ## Data fetching
 
 - Fetch data in server components or route handlers — not in client components via useEffect.
-- Use server actions (`lib/actions/`) for mutations from client components.
+- Use server actions (`src/lib/actions/`) for mutations from client components.
 - For dynamic data: fetch in `page.jsx` or `layout.jsx` and pass as props.
 - For static data with revalidation: use `export const revalidate = <seconds>`.
 
 ## Route structure
 
 ```
-app/
+src/app/
 ├── layout.jsx          # Root layout (Clerk provider, globals)
 ├── page.jsx            # Homepage
 ├── admin/              # Operator workspace (Clerk email-gated)
@@ -43,15 +45,15 @@ app/
 - Use `generateMetadata()` for dynamic pages (villes, expertises, etudes-de-cas).
 - Metadata must be truthful — no fabricated page titles, descriptions, or structured data.
 - JSON-LD structured data: use `<script type="application/ld+json">` in page components.
-- Check `lib/seo/` for shared metadata utilities.
+- Check `src/lib/seo/` for shared metadata utilities.
 
-## Middleware
+## Proxy
 
-- Middleware lives at `middleware.ts` (root level).
+- Next 16 Proxy lives at `src/proxy.js`, beside `src/app`. Read the installed proxy guide; do not restore the deprecated middleware convention.
 - Clerk auth middleware handles route protection.
 - Do not add heavy logic to middleware — keep it fast.
 - Admin routes: gated by Clerk email allowlist.
-- Portal routes: gated by membership/subscription scope.
+- Portal routes: gated by server-resolved membership scope.
 
 ## Caching and revalidation
 
@@ -63,8 +65,8 @@ app/
 
 ## Server actions
 
-- Define in `lib/actions/` — not inline in components.
-- Always validate inputs server-side (use `lib/admin-schemas.js` patterns).
+- Define in `src/lib/actions/` — not inline in components.
+- Always validate inputs server-side (use `src/lib/admin-schemas.js` patterns).
 - Return structured responses: `{ success: true, data }` or `{ success: false, error }`.
 - Handle Supabase errors explicitly — never let them bubble unhandled.
 
@@ -86,5 +88,5 @@ app/
 
 - Check `vercel.json` for custom configuration.
 - Environment variables: set in Vercel dashboard, reference via `process.env`.
-- Edge functions: only if explicitly needed (middleware is edge by default).
-- Build command: `npm run build` — ensure it passes before PR.
+- Proxy uses the runtime supported by the installed Next version; do not assume middleware edge behavior.
+- Application check: `npm run build`, plus lint/typecheck/tests. Production hibernation deploys `parking/` through `node scripts/validate-hibernation.mjs`, without npm or Next. Do not change that contract or deploy to validate a refactor.

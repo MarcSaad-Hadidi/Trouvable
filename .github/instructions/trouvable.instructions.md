@@ -1,8 +1,13 @@
 ---
-applyTo: "app/**,components/**,lib/**,middleware.ts,server/**,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json"
+applyTo: "src/app/**,src/features/**,src/components/**,src/lib/**,src/proxy.js,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json"
 ---
 
 # Trouvable engineering instructions
+
+## Hibernation
+
+- Preserve the static parking, disabled deployments and dormant services. Local validation does not authorize remote calls, migrations, email or service revival.
+- Read AGENTS.md and the relevant installed Next guide before framework changes.
 
 ## App Router architecture
 
@@ -14,7 +19,7 @@ applyTo: "app/**,components/**,lib/**,middleware.ts,server/**,scripts/**,supabas
 ## Supabase safety
 
 For any schema, policy, auth, or query change — follow the workflow in `supabase.instructions.md`.
-When touching Supabase from `lib/` code: inspect current schema, explain RLS impact, propose SQL explicitly.
+When touching Supabase from `src/lib/` code: inspect current schema, explain RLS impact, propose SQL explicitly.
 
 ## SEO/GEO truthfulness
 
