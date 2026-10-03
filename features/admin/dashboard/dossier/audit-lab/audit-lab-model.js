@@ -794,7 +794,7 @@ export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dime
     const synthesized = [];
 
     const applicableDims = dimensions
-        .filter((entry) => entry.dimension && typeof entry.dimension.score === 'number' && entry.dimension.applicability !== 'N/A')
+        .filter((entry) => entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A')
         .map((entry) => ({ key: entry.key, score: entry.dimension.score, label: entry.meta?.label || entry.key }))
         .sort((a, b) => a.score - b.score);
 
@@ -1120,7 +1120,7 @@ export function getCitabilityActionableModel(audit) {
         if (!cit) continue;
         pageMap.set(page.url, {
             url: page.url,
-            pageScore: cit.page_score ?? null,
+            pageScore: asNumber(cit.page_score),
             totalBlocks: cit.block_count || 0,
             highBlocks: cit.high_citability_count || 0,
             lowBlocks: cit.low_citability_count || 0,
