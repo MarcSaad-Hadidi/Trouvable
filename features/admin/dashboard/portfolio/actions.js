@@ -4,7 +4,7 @@ import { getAdminSupabase } from '@/lib/supabase-admin';
 import { syncClientProfileCompatibilityFields } from '@/lib/client-profile';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/auth';
-import { logAction } from '@/lib/db';
+import { logAction } from '@/lib/db/actions';
 import { z } from 'zod';
 import { validateTransition, LIFECYCLE_META, LIFECYCLE_SERVICEABLE_STATES } from '@/lib/lifecycle';
 
