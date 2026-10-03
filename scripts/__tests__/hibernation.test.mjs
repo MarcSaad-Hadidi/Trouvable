@@ -59,6 +59,7 @@ test('closed contract accepts static parking and isolated manual validation with
 
 const ciFile = '.github/workflows/ci.yml';
 const mutations = [
+    ['parking unquoted inline CSS resource', directory => rewrite(directory, 'parking/index.html', raw => raw.replace('<body>', '<body style=background:url(https://example.invalid/x)>'))],
     ['parking encoded second slash navigation', directory => rewrite(directory, 'parking/404.html', raw => raw.replace('href="/"', 'href="/&#x2f;example.invalid"'))],
     ['parking control-character external navigation', directory => rewrite(directory, 'parking/404.html', raw => raw.replace('href="/"', 'href="/\n/example.invalid"'))],
     ['parking secondary external srcset candidate', directory => rewrite(directory, 'parking/index.html', raw => raw.replace('</body>', '<img srcset="/local.png 1x, https://example.invalid/x 2x"></body>'))],

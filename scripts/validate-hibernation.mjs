@@ -34,7 +34,7 @@ function assertStaticHtml(relativePath, html) {
   }
   // Parking has no resource-loading CSS; reject escapes that could conceal URLs.
   const styles = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(match => match[1]);
-  styles.push(...[...html.matchAll(/\bstyle\s*=\s*["']([^"']*)["']/gi)].map(match => match[1]));
+  styles.push(...[...html.matchAll(/\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)].map(match => match[1] ?? match[2] ?? match[3]));
   if (styles.some(css => /&|\\|@import\b|(?:url|image-set|image|src)\s*\(|@font-face\b/i.test(css))) fail(relativePath + ': resource-loading CSS is forbidden');
   if (/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i.test(html)) fail(relativePath + ': runtime network calls are forbidden');
 }
