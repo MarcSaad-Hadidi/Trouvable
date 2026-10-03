@@ -1,4 +1,4 @@
-﻿# Phase 3.1 - Schema Decisions
+# Phase 3.1 - Schema Decisions
 
 Migration principale: `supabase/migrations/20260322100000_phase31_quality_engine_v2.sql`
 
@@ -117,4 +117,3 @@ La migration ajoute des checks defensifs et des index utiles:
 - `benchmark_sessions` est un regroupement leger, non un second systeme de runs.
 - `competitor_aliases` formalise le matching sans hardcoder dans la logique metier.
 - `query_mentions` conserve la preuve (evidence) pour auditabilite operateur.
-

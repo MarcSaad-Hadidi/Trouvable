@@ -1,87 +1,27 @@
-# Prompt Contract Unification
+# Contrat prompt canonique
 
-## Audit des sources actuelles
+Contrat de l’application dormante, commun à onboarding, starter pack, create/update et projection opérateur. Les migrations préservent les anciennes lignes ; cette note ne prouve pas l’état d’une base distante.
 
-### Generation de prompts
-- `lib/operator-intelligence/prompts.js`
-  - `buildPromptBlueprints()`
-  - `buildStarterPromptPack()`
-- `lib/onboarding/client-onboarding.js`
-  - `startClientOnboarding()` (pack onboarding)
-  - `activateClientOnboarding()` (normalisation avant persistence)
+## Responsabilités
 
-### Evaluation / scoring / validation
-- Base canonique (nouvelle): `lib/queries/onboarding-prompt-contract.js`
-  - `buildCanonicalPromptContract()`
-  - `evaluateOnboardingPromptContract()`
-- Couche compat / usage transverse: `lib/queries/prompt-intelligence.js`
-  - `buildPromptMetadata()` -> delegue au contrat canonique
-  - `evaluatePromptQuality()` -> delegue au contrat canonique
+- `src/lib/queries/onboarding-prompt-contract.js` : builder et évaluation contextualisée.
+- `src/lib/queries/prompt-intelligence.js` : wrappers de qualification partagés.
+- `src/lib/queries/prompt-contract-persistence.js` : `PROMPT_CONTRACT_DB_FIELDS`, sérialisation et désérialisation.
+- `src/lib/operator-intelligence/prompts.js` : blueprints, starter pack et `getPromptSlice`.
+- `src/lib/onboarding/client-onboarding.js` : préparation et activation.
+- `src/lib/db/tracked-queries.js` : accès ciblé aux prompts.
+- `src/app/api/admin/queries/create/route.js` et `update/route.js` : validation serveur.
 
-### Persistence / lecture
-- Create / update prompt: `app/api/admin/queries/create/route.js`, `app/api/admin/queries/update/route.js`
-- DB access: `lib/db.js`
-- Projection operateur: `lib/operator-intelligence/prompts.js` (`getPromptSlice()`)
+## Sémantique
 
-## Divergences detectees avant convergence
+`query_text` et locale identifient la requête. `prompt_mode` distingue `user_like` et `operator_probe`. `quality_status` et `validation_status` restent cohérents : `strong/review/weak`. Le contrat calcule score/raisons, famille d’intention, origine, funnel, scopes géographique/marque/comparaison et ancrage d’offre.
 
-- Deux systemes de verite:
-  - Qualite globale (`evaluatePromptQuality`)
-  - Contrat onboarding (`evaluateOnboardingPromptContract`)
-- Champs contractuels partiellement persistes:
-  - `prompt_mode`, `validation_status`, `validation_reasons` surtout dans des objets heterogenes
-- UI non uniforme:
-  - onboarding lisait le nouveau contrat
-  - vue prompts suivis restait orientee legacy
+`strong` est sélectionnable par défaut ; `review` est visible sans sélection implicite ; `weak` bloque l’activation. `is_valid`, `is_selected_default`, `activation_blocked` sont dérivés du contrat, pas d’un validateur onboarding concurrent. Ne pas exiger comparaison/preuves/structure pour toutes les intentions ; ne pas injecter de labels internes dans les requêtes utilisateur.
 
-## Strategie de convergence appliquee
+## Persistence et formats historiques
 
-1. Definir un builder canonique unique:
-   - `buildCanonicalPromptContract()` dans `onboarding-prompt-contract.js`
-2. Faire converger les wrappers historiques:
-   - `buildPromptMetadata()` et `evaluatePromptQuality()` deleguent tous deux au builder canonique
-3. Unifier la projection operateur:
-   - `getPromptSlice()` reconstruit/fallback tous les champs via le contrat canonique
-4. Unifier create/update prompts:
-   - metadata canoniques calculees partout
-   - champs structurants persistes explicitement dans `prompt_metadata` (quand colonnes dediees non garanties)
-5. Aligner UI prompts suivis:
-   - affichage `prompt_mode`, raisons de validation, statuts uniformes
+`PROMPT_CONTRACT_DB_FIELDS` porte les champs structurants : origine, intention, qualité, scopes, modes/raisons, `offer_anchor`, `user_visible_offering`, `target_audience`, `primary_use_case`, `differentiation_angle`.
 
-## Contrat canonique cible
+La sérialisation projette colonnes et metadata en conservant les metadata existantes. La lecture privilégie les colonnes présentes, puis `prompt_metadata` historique, puis le contrat recalculé. Les metadata gardent compatibilité et attributs évolutifs. Ne pas retirer ce fallback après une réorganisation d’imports.
 
-Champs principaux:
-- `query_text` (obligatoire)
-- `intent_family` (derive)
-- `prompt_mode` (derive ou fourni)
-- `quality_status` (derive)
-- `quality_score` (derive)
-- `quality_reasons` (derive)
-- `validation_status` (derive, aligne sur quality_status)
-- `validation_reasons` (derive)
-- `prompt_origin` (fourni)
-- `query_type_v2`, `funnel_stage`, `geo_scope`, `brand_scope`, `comparison_scope` (derives)
-- `locale` (obligatoire avec fallback)
-- `offer_anchor`, `user_visible_offering`, `target_audience`, `primary_use_case`, `differentiation_angle` (derive/fourni selon contexte)
-- `is_valid`, `is_selected_default`, `activation_blocked` (derive)
-
-## Persistence recommandee
-
-- Colonnes deja stables:
-  - `quality_status`, `quality_score`, `quality_reasons`, `intent_family`, `prompt_origin`, `query_type_v2`, `funnel_stage`, `geo_scope`, `brand_scope`, `comparison_scope`, `locale`
-- Champs structurants additionnels:
-  - persistes de facon explicite dans `prompt_metadata`:
-    - `prompt_mode`
-    - `validation_status`
-    - `validation_reasons`
-    - `offer_anchor`
-    - `user_visible_offering`
-    - `target_audience`
-    - `primary_use_case`
-    - `differentiation_angle`
-
-## Resultat attendu
-
-- Une seule logique de qualification/scoring.
-- Meme semantique onboarding + prompts suivis + starter pack + UI operateur.
-- Fin des contradictions `strong` vs `refused`.
+Les migrations v2 ajoutent colonnes/contraintes/index et backfill depuis JSON ; aucune migration distante n’est autorisée pour ce chantier. Les tests vérifient les formes structurées et historiques.

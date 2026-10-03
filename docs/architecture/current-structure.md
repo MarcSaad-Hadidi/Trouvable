@@ -1,117 +1,53 @@
-# Current Structure
+# Structure du dépôt
 
-This document is the source of truth for the active repository structure after the April 2026 product-structure consolidation.
+L’application est conservée en hibernation. `vercel.json` déploie uniquement `parking/`, sans installation npm, fonction Next ou Cron. Les répertoires applicatifs décrivent le produit dormant, pas la production statique.
 
-## Top-level boundaries
+## Responsabilités
 
-- `app/`
-  - Next.js App Router only.
-  - Keeps route files, layouts, metadata assets, redirects, loading states, and API route handlers.
-  - Does not host public page implementations, portal widgets, auth screens, admin dashboard UI, or reusable feature logic.
-- `features/public/`
-  - Canonical home for every public marketing and discovery surface.
-  - Public pages now live directly under this folder, one folder per surface:
-    - `about/`
-    - `case-studies/`
-    - `case-study-sample/`
-    - `city/`
-    - `client-profile/`
-    - `contact/`
-    - `expertise/`
-    - `home/`
-    - `legal-notice/`
-    - `measurement/`
-    - `methodology/`
-    - `offers/`
-    - `privacy-policy/`
-  - `shared/`
-    - public-only shared site elements such as navbar, footer, contact flow, FAQ, and SEO injection.
-- `features/admin/dashboard/`
-  - Canonical home for the operator workspace, grouped by actual dashboard sections.
-  - `home/`
-  - `portfolio/`
-  - `dossier/`
-  - `geo/`
-  - `seo/`
-  - `agent/`
-  - `portal/`
-  - `shared/`
-- `features/portal/`
-  - Dedicated client-portal product surface.
-  - Keeps portal route entrypoints, dashboard widgets, and portal-only server helpers.
-  - `dashboard/`
-  - `server/`
-- `features/espace/`
-  - Dedicated `/espace` surface.
-  - Keeps the espace layout and post-sign-in routing result page.
-- `features/auth/`
-  - Auth-only code across product worlds.
-  - `admin/`
-  - `portal/`
-  - `espace/`
-  - shared auth shell and post-sign-in resolver at the feature root.
-- `components/ui/`
-  - reusable primitives only.
-  - Active contents: `button.jsx`, `card.jsx`
-- `components/shared/`
-  - cross-product shared helpers that are not low-level primitives.
-  - `animation/`
-  - `metrics/`
-- `lib/`
-  - low-level and broad shared services: database, auth primitives, AI, background jobs, operator slices, and technical helpers.
-  - Portal and auth surface-specific helpers were moved out when they clearly belonged to a product universe.
-- `docs/architecture/`
-  - architecture source of truth.
-- `archive/`
-  - archived references and inactive material only.
+| Chemin | Responsabilité |
+|---|---|
+| `src/app/` | Routes explicites, layouts, handlers API, boundaries et métadonnées Next. |
+| `src/features/public/` | Pages marketing, villes, expertises, profils et ressources SEO/GEO. |
+| `src/features/admin/` | Portefeuille, dossier, SEO, GEO, Agent et chrome opérateur. |
+| `src/features/portal/` | Portail client ; loaders et contrôle d’accès dans `server/`. |
+| `src/features/espace/` | Orientation après connexion. |
+| `src/features/auth/` | Écrans Clerk et résolution de la destination autorisée. |
+| `src/components/ui/` | Primitives UI. |
+| `src/components/shared/` | Affichage partagé, dont les widgets de métriques. |
+| `src/lib/db/` | Accès aux données par domaine. Aucun barrel global `db.js`. |
+| `src/lib/operator-intelligence/` | Agrégations et slices opérateur, au-dessus des accès ciblés. |
+| `src/lib/audit/`, `queries/`, `ai/` | Crawl, scoring, prompts, extraction et fournisseurs. |
+| `src/lib/continuous/`, `connectors/`, `remediation/` | Jobs, intégrations et workflow de corrections. |
+| `src/proxy.js` | Frontière de requête Clerk et en-têtes applicatifs. |
+| `parking/` | `index.html`, `404.html`, `robots.txt` déployés pendant l’hibernation. |
+| `public/` | Assets de l’application, conservés à la racine. |
+| `supabase/` | Migrations ordonnées et anciens scripts SQL conservés. |
+| `scripts/` | Validateurs et opérations nommées explicitement. |
+| `.github/` | CI, agents, prompts, skills et instructions Copilot. |
+| `.cursor/` | Réglages de l’outil et installation des worktrees. |
 
-## Product map
+## Frontières
 
-- Public site pages: `features/public/*`
-- Admin dashboard sections: `features/admin/dashboard/*`
-- Client portal: `features/portal/*`
-- Espace flow: `features/espace/*`
-- Auth-only screens and helpers: `features/auth/*`
-- Shared UI primitives: `components/ui/*`
-- Shared cross-product display helpers: `components/shared/*`
+`src/app` décrit les URLs et monte les implémentations dans `src/features`. Les groupes `(workspace)` et `(app)` n’apparaissent pas dans les URLs. Les layouts racine et de segment gardent les responsabilités Next : styles globaux, metadata, providers et boundaries.
 
-## App Router discipline
+Les modules métier partagés entre APIs, pages serveur et jobs restent dans `src/lib`. Les accès DB ne dépendent pas des agrégations opérateur. Les exports de domaine sont importés directement ; une façade générale ne doit pas recréer ce cycle.
 
-`app/` is routing only.
+Clerk authentifie. `src/lib/auth.js` contrôle les opérateurs par allowlist serveur ; `src/features/portal/server/access.js` résout les memberships client depuis l’identité Clerk vérifiée. Le navigateur ne choisit pas librement un `client_id` autorisé. Le client Supabase de service reste serveur uniquement et contourne RLS : chaque consommateur doit conserver son contrôle d’accès.
 
-Allowed in `app/`:
+## Navigation rapide
 
-- `page.*`, `layout.*`, `loading.*`, `error.*`, `not-found.*`, `template.*`, `default.*`
-- `route.*`
-- route metadata assets (`robots`, `sitemap`, icons, social images)
-- thin redirects and compatibility aliases
-- thin imports or re-exports toward `features/public/*`, `features/portal/*`, `features/espace/*`, `features/auth/*`, or `features/admin/dashboard/*`
+- Une URL ou un redirect : [carte des routes](routing-map.md), puis `src/app`.
+- Un écran opérateur : `src/features/admin/<section>`.
+- Une restitution client : `src/features/portal` et ses loaders `server/`.
+- Une métrique ou un problème : `src/lib/operator-intelligence`, `audit` et `truth`.
+- Une contrainte métier : [décisions techniques](refactor-decisions.md).
+- Une validation locale : [CONTRIBUTING.md](../../CONTRIBUTING.md).
+- Une opération distante : [hibernation](../operations/trouvable-hibernation.md), avec autorisation distincte.
 
-Disallowed in `app/`:
+## Conventions préservées
 
-- page composition for public surfaces
-- portal dashboard widgets
-- auth screen bodies
-- admin dashboard views and shells
-- feature contexts, builders, and transforms
-- reusable feature components
+Next 16 accepte `src/app` et exige `src/proxy.js` lorsque les sources sont sous `src`. `public`, les configurations et `.env.*` restent à la racine. Les alias TypeScript/Vitest et le scan Tailwind suivent `src`, sans deuxième arborescence active à la racine.
 
-## How To Find Things Fast
+Les routes restent explicites ; les alias historiques conservent leurs redirections. Auth et espace ont des responsabilités distinctes : le regroupement des sources ne change ni les URLs ni les autorisations.
 
-- Public page implementation: open `features/public/<surface>/`
-- Admin dashboard section: open `features/admin/dashboard/<section>/`
-- Portal route entrypoint or portal-only server logic: open `features/portal/`
-- Espace route flow: open `features/espace/`
-- Any sign-in screen or auth redirect logic: open `features/auth/`
-- Shared metrics widgets used across admin and portal: open `components/shared/metrics/`
-
-## Remaining intentional exceptions
-
-- `app/layout.jsx`
-  - required root layout
-  - still owns global styles, analytics, and the lazy public contact modal mount
-- route-local metadata layouts such as `app/contact/layout.jsx`, `app/methodologie/layout.jsx`, `app/notre-mesure/layout.jsx`, `app/etudes-de-cas/layout.jsx`
-  - still App Router concerns because they only attach metadata or segment-level wrappers
-- `lib/operator-intelligence/*`, `lib/operator-data.js`, and related admin backend modules
-  - still live in `lib/` because they are shared across server pages, route handlers, and recurring jobs
-  - splitting them further would be a separate backend refactor, not just a structure cleanup
+Les migrations appliquées et les fixtures utiles ne sont pas des déchets. L’historique Git conserve les anciens prototypes et plans retirés ; aucun dossier d’archive concurrent n’est nécessaire à l’exécution.

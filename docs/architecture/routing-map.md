@@ -1,133 +1,133 @@
 # Routing Map
 
-This map links active Next.js routes to their canonical implementation modules after the public/admin/portal/espace/auth split.
+The application is dormant; production serves parking only. This map links preserved Next.js routes to their canonical implementation modules after the public/admin/portal/espace/auth split.
 
 ## Public marketing routes
 
 - `/`
-  - route: `app/page.jsx`
-  - implementation: `features/public/home/HomePage.jsx`
+  - route: `src/app/page.jsx`
+  - implementation: `src/features/public/home/HomePage.jsx`
 - `/a-propos`
-  - route layout: `app/a-propos/layout.jsx`
-  - implementation: `features/public/about/AboutLayout.jsx`
-  - page: `features/public/about/AboutPage.jsx`
+  - route layout: `src/app/a-propos/layout.jsx`
+  - implementation: `src/features/public/about/AboutLayout.jsx`
+  - page: `src/features/public/about/AboutPage.jsx`
 - `/contact`
-  - route: `app/contact/page.jsx`
-  - implementation: `features/public/contact/ContactPage.jsx`
+  - route: `src/app/contact/page.jsx`
+  - implementation: `src/features/public/contact/ContactPage.jsx`
 - `/methodologie`
-  - route: `app/methodologie/page.jsx`
-  - implementation: `features/public/methodology/MethodologyPage.jsx`
+  - route: `src/app/methodologie/page.jsx`
+  - implementation: `src/features/public/methodology/MethodologyPage.jsx`
 - `/offres`
-  - route: `app/offres/page.jsx`
-  - implementation: `features/public/offers/OffersPage.jsx`
+  - route: `src/app/offres/page.jsx`
+  - implementation: `src/features/public/offers/OffersPage.jsx`
 - `/notre-mesure`
-  - route: `app/notre-mesure/page.jsx`
-  - implementation: `features/public/measurement/MeasurementPage.jsx`
+  - route: `src/app/notre-mesure/page.jsx`
+  - implementation: `src/features/public/measurement/MeasurementPage.jsx`
 - `/etudes-de-cas`
-  - route: `app/etudes-de-cas/page.jsx`
-  - implementation: `features/public/case-studies/CaseStudiesPage.jsx`
+  - route: `src/app/etudes-de-cas/page.jsx`
+  - implementation: `src/features/public/case-studies/CaseStudiesPage.jsx`
 - `/etudes-de-cas/dossier-type`
-  - route: `app/etudes-de-cas/dossier-type/page.jsx`
-  - implementation: `features/public/case-study-sample/CaseStudySamplePage.jsx`
+  - route: `src/app/etudes-de-cas/dossier-type/page.jsx`
+  - implementation: `src/features/public/case-study-sample/CaseStudySamplePage.jsx`
 - `/mentions-legales`
-  - route: `app/mentions-legales/page.jsx`
-  - implementation: `features/public/legal-notice/LegalNoticePage.jsx`
+  - route: `src/app/mentions-legales/page.jsx`
+  - implementation: `src/features/public/legal-notice/LegalNoticePage.jsx`
 - `/politique-confidentialite`
-  - route: `app/politique-confidentialite/page.jsx`
-  - implementation: `features/public/privacy-policy/PrivacyPolicyPage.jsx`
+  - route: `src/app/politique-confidentialite/page.jsx`
+  - implementation: `src/features/public/privacy-policy/PrivacyPolicyPage.jsx`
 - `/clients/[clientSlug]`
-  - route: `app/clients/[clientSlug]/page.jsx`
-  - implementation: `features/public/client-profile/ClientProfilePage.jsx`
+  - route: `src/app/clients/[clientSlug]/page.jsx`
+  - implementation: `src/features/public/client-profile/ClientProfilePage.jsx`
 - `/expertises/[expertiseSlug]`
-  - route: `app/expertises/[expertiseSlug]/page.jsx`
-  - implementation: `features/public/expertise/ExpertisePage.jsx`
+  - route: `src/app/expertises/[expertiseSlug]/page.jsx`
+  - implementation: `src/features/public/expertise/ExpertisePage.jsx`
 - `/villes/[villeSlug]`
-  - route: `app/villes/[villeSlug]/page.jsx`
-  - implementation: `features/public/city/VillePage.jsx`
+  - route: `src/app/villes/[villeSlug]/page.jsx`
+  - implementation: `src/features/public/city/VillePage.jsx`
 
 ## Portal routes
 
 - `/portal`
-  - outer layout: `app/portal/layout.jsx`
-  - implementation: `features/portal/PortalLayout.jsx`
+  - outer layout: `src/app/portal/layout.jsx`
+  - implementation: `src/features/portal/PortalLayout.jsx`
 - `/portal`
-  - app layout: `app/portal/(app)/layout.jsx`
-  - implementation: `features/portal/PortalAppLayout.jsx`
+  - app layout: `src/app/portal/(app)/layout.jsx`
+  - implementation: `src/features/portal/PortalAppLayout.jsx`
 - `/portal`
-  - route: `app/portal/(app)/page.jsx`
-  - implementation: `features/portal/PortalIndexPage.jsx`
+  - route: `src/app/portal/(app)/page.jsx`
+  - implementation: `src/features/portal/PortalIndexPage.jsx`
 - `/portal/[clientSlug]`
-  - route: `app/portal/(app)/[clientSlug]/page.jsx`
-  - implementation: `features/portal/PortalClientPage.jsx`
+  - route: `src/app/portal/(app)/[clientSlug]/page.jsx`
+  - implementation: `src/features/portal/PortalClientPage.jsx`
 - `/portal/sign-in`
-  - route: `app/portal/sign-in/[[...sign-in]]/page.jsx`
-  - implementation: `features/auth/portal/PortalSignInPage.jsx`
+  - route: `src/app/portal/sign-in/[[...sign-in]]/page.jsx`
+  - implementation: `src/features/auth/portal/PortalSignInPage.jsx`
 
 ## Espace routes
 
 - `/espace`
-  - route layout: `app/espace/layout.jsx`
-  - implementation: `features/espace/EspaceLayout.jsx`
+  - route layout: `src/app/espace/layout.jsx`
+  - implementation: `src/features/espace/EspaceLayout.jsx`
 - `/espace`
-  - route: `app/espace/[[...sign-in]]/page.jsx`
-  - implementation: `features/auth/espace/EspaceSignInPage.jsx`
+  - route: `src/app/espace/[[...sign-in]]/page.jsx`
+  - implementation: `src/features/auth/espace/EspaceSignInPage.jsx`
 - `/espace/apres-connexion`
-  - route: `app/espace/apres-connexion/page.jsx`
-  - implementation: `features/espace/PostSignInPage.jsx`
+  - route: `src/app/espace/apres-connexion/page.jsx`
+  - implementation: `src/features/espace/PostSignInPage.jsx`
 
 ## Admin access and workspace shell
 
 - `/admin`
-  - outer layout: `app/admin/layout.jsx`
+  - outer layout: `src/app/admin/layout.jsx`
   - implementation: metadata shell only
 - `/admin/sign-in`
-  - layout: `app/admin/sign-in/layout.jsx`
-  - implementation: `features/auth/admin/AdminClerkProvider.jsx`
+  - layout: `src/app/admin/sign-in/layout.jsx`
+  - implementation: `src/features/auth/admin/AdminClerkProvider.jsx`
 - `/admin/sign-in`
-  - route: `app/admin/sign-in/[[...sign-in]]/page.jsx`
-  - implementation: `features/auth/admin/AdminSignInPage.jsx`
+  - route: `src/app/admin/sign-in/[[...sign-in]]/page.jsx`
+  - implementation: `src/features/auth/admin/AdminSignInPage.jsx`
 - `/admin`
-  - workspace layout: `app/admin/(workspace)/layout.jsx`
-  - implementation: `features/admin/dashboard/shared/layout/AdminWorkspaceLayout.jsx`
+  - workspace layout: `src/app/admin/(workspace)/layout.jsx`
+  - implementation: `src/features/admin/shared/layout/AdminWorkspaceLayout.jsx`
 - `/admin`
-  - route: `app/admin/(workspace)/page.jsx`
-  - implementation: `features/admin/dashboard/home/AdminDashboardPage.jsx`
+  - route: `src/app/admin/(workspace)/page.jsx`
+  - implementation: `src/features/admin/home/AdminDashboardPage.jsx`
 
 ## Admin portfolio routes
 
 - `/admin/clients`
-  - route: `app/admin/(workspace)/clients/page.jsx`
-  - implementation: `features/admin/dashboard/portfolio/AdminClientsPage.jsx`
+  - route: `src/app/admin/(workspace)/clients/page.jsx`
+  - implementation: `src/features/admin/portfolio/AdminClientsPage.jsx`
 - `/admin/clients/onboarding`
-  - route: `app/admin/(workspace)/clients/onboarding/page.jsx`
-  - implementation: `features/admin/dashboard/portfolio/ClientOnboardingPage.jsx`
+  - route: `src/app/admin/(workspace)/clients/onboarding/page.jsx`
+  - implementation: `src/features/admin/portfolio/ClientOnboardingPage.jsx`
 - `/admin/clients/new`
-  - route: `app/admin/(workspace)/clients/new/page.jsx`
+  - route: `src/app/admin/(workspace)/clients/new/page.jsx`
   - behavior: redirect to `/admin/clients/onboarding`
 - `/admin/clients/create`
-  - route: `app/admin/(workspace)/clients/create/page.jsx`
+  - route: `src/app/admin/(workspace)/clients/create/page.jsx`
   - behavior: redirect to `/admin/clients/onboarding`
 - `/admin/clients/[clientId]/edit`
-  - route: `app/admin/(workspace)/clients/[clientId]/edit/page.jsx`
-  - implementation: `features/admin/dashboard/portfolio/ClientEditPage.jsx`
+  - route: `src/app/admin/(workspace)/clients/[clientId]/edit/page.jsx`
+  - implementation: `src/features/admin/portfolio/ClientEditPage.jsx`
 - `/admin/clients/[clientId]`
-  - layout: `app/admin/(workspace)/clients/[clientId]/layout.jsx`
-  - implementation: `features/admin/dashboard/shared/layout/ClientWorkspaceLayout.jsx`
+  - layout: `src/app/admin/(workspace)/clients/[clientId]/layout.jsx`
+  - implementation: `src/features/admin/shared/layout/ClientWorkspaceLayout.jsx`
 
 ## Admin dossier section
 
-Thin route files under `app/admin/(workspace)/clients/[clientId]/dossier/**` mount dossier implementations under `features/admin/dashboard/dossier/*`.
+Thin route files under `src/app/admin/(workspace)/clients/[clientId]/dossier/**` mount dossier implementations under `src/features/admin/dossier/*`.
 
 - `/admin/clients/[clientId]/dossier` -> `DossierOverviewView`
 - `/admin/clients/[clientId]/dossier/activity` -> `DossierActivityView`
 - `/admin/clients/[clientId]/dossier/connectors` -> `DossierConnectorsView`
-- `/admin/clients/[clientId]/dossier/settings` -> `features/admin/dashboard/geo/GeoSettingsView.jsx`
-- `/admin/clients/[clientId]/dossier/audit` -> `features/admin/dashboard/dossier/audit-lab/OperatorAuditLabView.jsx`
-- `/admin/clients/[clientId]/dossier/audit/comparison` -> `features/admin/dashboard/dossier/audit-lab/OperatorAuditComparisonView.jsx`
+- `/admin/clients/[clientId]/dossier/settings` -> `src/features/admin/geo/GeoSettingsView.jsx`
+- `/admin/clients/[clientId]/dossier/audit` -> `src/features/admin/dossier/audit-lab/OperatorAuditLabView.jsx`
+- `/admin/clients/[clientId]/dossier/audit/comparison` -> `src/features/admin/dossier/audit-lab/OperatorAuditComparisonView.jsx`
 
 ## Admin GEO section
 
-Thin route files under `app/admin/(workspace)/clients/[clientId]/geo/**` mount GEO implementations under `features/admin/dashboard/geo/*`.
+Thin route files under `src/app/admin/(workspace)/clients/[clientId]/geo/**` mount GEO implementations under `src/features/admin/geo/*`.
 
 - `/admin/clients/[clientId]/geo` -> `GeoOverviewView`
 - `/admin/clients/[clientId]/geo/alerts` -> `GeoAlertsView`
@@ -147,7 +147,7 @@ Thin route files under `app/admin/(workspace)/clients/[clientId]/geo/**` mount G
 
 ## Admin SEO section
 
-Thin route files under `app/admin/(workspace)/clients/[clientId]/seo/**` mount SEO implementations under `features/admin/dashboard/seo/*` or redirect.
+Thin route files under `src/app/admin/(workspace)/clients/[clientId]/seo/**` mount SEO implementations under `src/features/admin/seo/*` or redirect.
 
 - `/admin/clients/[clientId]/seo` -> redirect to `/admin/clients/[clientId]/seo/visibility`
 - `/admin/clients/[clientId]/seo/visibility` -> `SeoVisibilityView`
@@ -161,7 +161,7 @@ Thin route files under `app/admin/(workspace)/clients/[clientId]/seo/**` mount S
 
 ## Admin AGENT section
 
-Thin route files under `app/admin/(workspace)/clients/[clientId]/agent/**` mount AGENT implementations under `features/admin/dashboard/agent/*`.
+Thin route files under `src/app/admin/(workspace)/clients/[clientId]/agent/**` mount AGENT implementations under `src/features/admin/agent/*`.
 
 - `/admin/clients/[clientId]/agent` -> `AgentOverviewView`
 - `/admin/clients/[clientId]/agent/actionability` -> `AgentActionabilityView`
@@ -174,8 +174,8 @@ Thin route files under `app/admin/(workspace)/clients/[clientId]/agent/**` mount
 ## Admin portal section
 
 - `/admin/clients/[clientId]/portal`
-  - route: `app/admin/(workspace)/clients/[clientId]/portal/page.jsx`
-  - implementation: `features/admin/dashboard/portal/ClientPortalPage.jsx`
+  - route: `src/app/admin/(workspace)/clients/[clientId]/portal/page.jsx`
+  - implementation: `src/features/admin/portal/ClientPortalPage.jsx`
 
 ## Admin compatibility aliases
 
@@ -196,3 +196,25 @@ Legacy admin aliases remain as redirect-only route files so existing bookmarks c
 - `/admin/clients/[clientId]/signals` -> `/admin/clients/[clientId]/geo/signals`
 - `/admin/clients/[clientId]/social` -> `/admin/clients/[clientId]/geo/social`
 - `/admin/clients/[clientId]/visibility` -> `/admin/clients/[clientId]/seo/visibility`
+
+## Other preserved public and machine-readable routes
+
+- `/agence-geo-montreal`, `/agence-geo-quebec`, `/services/*`, `/ressources/*`, `/plateformes/*`: explicit route files mount `src/features/public/seo-growth/SeoGrowthPage.jsx`; data and metadata come from `src/lib/data/seo-growth-pages.js`. These are preserved application URLs, not pages served by the dormant production parking.
+- `/recherche`: route-local search surface under `src/app/recherche/`.
+- `/docs/api`: explicit documentation page under `src/app/docs/api/`.
+- `/robots.txt`, `/sitemap.xml`, `/rss.xml`, `/llms.txt`, `/llms-full.txt`, `/ai.txt`, `/ai/*.json`, `/markdown`, `/__agent/markdown`, `/mcp`: explicit handlers/metadata files in `src/app`; discovery helpers remain in `src/lib/agent-discovery/`. The encoded `%5F%5Fagent` folder preserves the public `__agent` URL convention.
+- `/api/admin/*`: operator-authorized handlers for clients, audits, prompts, slices, comparison and remediation.
+- `/api/connectors/google/*`: Google OAuth entry/callback; `/api/oauth/*`: authorization/token handlers.
+- `/api/cron/continuous/{dispatch,snapshot,worker}`: dormant authenticated job handlers, with no automatic Cron schedule.
+- `/api/health` and `/api/submit-lead`: explicit health/form handlers. They are not invoked by the static parking.
+
+## Additional operator routes and redirects
+
+- `/admin/geo-compare`: global comparison mounting `src/features/admin/geo/GeoCompareView.tsx`.
+- `/admin/clients/[clientId]/seo/content`: `src/features/admin/seo/SeoContentView.tsx`.
+- `/admin/clients/[clientId]/seo/actions` redirects to `/admin/clients/[clientId]/seo/opportunities`.
+- `/admin/clients/[clientId]/continuous` redirects to `/admin/clients/[clientId]/geo/continuous`.
+- `/admin/clients/[clientId]/citations` redirects to `/admin/clients/[clientId]/geo/signals?focus=citations`.
+- `/admin/clients/[clientId]/competitors` redirects to `/admin/clients/[clientId]/geo/signals?focus=competitors`.
+
+`next.config.mjs` also preserves permanent historical redirects: `/admin/dashboard` → `/admin/clients`, `/admin/dashboard/new` → `/admin/clients/new`, `/admin/dashboard/:clientId` → `/admin/clients/:clientId/overview`, and `/admin/clients/:id/seo-geo` → `/admin/clients/:id/overview`. Route aliases run inside the existing auth/layout boundaries; they must preserve status, destination, query parameters and request order when refactored.

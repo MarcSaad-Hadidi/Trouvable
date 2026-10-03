@@ -1,5 +1,7 @@
 # DB Reconciliation Audit
 
+> Référence historique du 20 mars 2026 conservée pour dérives SQL et reconstruction. Les observations live sont celles de cette période, sans preuve du catalogue distant actuel. Les anciens chemins/propositions restent historiques ; le code actuel utilise `src/lib/db/*` et `src/features/portal/server/*`. Ne pas appliquer ce SQL à une base distante ni retirer les scripts historiques sans reconstruction locale jetable et comparaison des contraintes/RLS.
+
 Date: 2026-03-20
 
 ## Scope
