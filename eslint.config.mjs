@@ -1,29 +1,16 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import next from 'eslint-config-next';
 
 export default [
+    ...next,
     {
-        ignores: [
-            '.next/**',
-            'node_modules/**',
-            'out/**',
-            'build/**',
-            'dist/**',
-            'public/**',
-            'archive/**',
-        ],
+        ignores: ['.next/**', 'node_modules/**', 'out/**', 'build/**', 'dist/**', 'public/**', 'archive/**'],
     },
     {
+        files: ['**/*.{js,jsx,mjs,ts,tsx}'],
         rules: {
-            // --- BLOQUANT : failles de sécurité critiques ---
             'no-eval': 'error',
             'no-implied-eval': 'error',
             'no-script-url': 'error',
-
-            // --- WARNINGS : code quality progressif ---
             'no-console': ['warn', { allow: ['error', 'warn'] }],
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
             'eqeqeq': ['warn', 'always'],

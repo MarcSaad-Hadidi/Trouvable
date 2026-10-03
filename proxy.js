@@ -88,9 +88,9 @@ function createRobotsResponse() {
 }
 
 // ---------------------------------------------------------------------------
-// Content-Security-Policy — authoritative source of truth
-// vercel.json mirrors this policy as an edge fallback for non-middleware routes.
-// Any change here MUST be reflected in vercel.json to avoid CSP drift.
+// Content-Security-Policy — application runtime policy
+// Static hibernation parking uses a separate restrictive CSP in vercel.json.
+// Validate each policy against its own security contract; they intentionally differ.
 //
 // Directive rationale (per integration):
 //   Clerk v7      — *.clerk.com, *.clerk.accounts.dev (dev), clerk.trouvable.app,
