@@ -53,6 +53,7 @@ export default function GeoModelesView() {
         const variants = data?.benchmark?.variantsCatalog || [];
         const sessions = data?.benchmark?.sessions || [];
         const dataSources = data?.dataSources || {};
+        const observedRunsUnavailable = dataSources.runs === 'unavailable' || dataSources.recentRuns === 'unavailable';
 
         const observedMap = new Map();
         for (const row of observed) {
@@ -96,7 +97,7 @@ export default function GeoModelesView() {
 
             const obs = observedMap.get(key);
             const bench = benchmarkVariantMap.get(variant.id);
-            const aggregateCount = (field) => dataSources.runs === 'unavailable' || dataSources.benchmarks === 'unavailable'
+            const aggregateCount = (field) => observedRunsUnavailable || dataSources.benchmarks === 'unavailable'
                 || obs?.[field] === null || bench?.[field] === null
                 ? null : (obs?.[field] ?? 0) + (bench?.[field] ?? 0);
             const totalRuns = aggregateCount('runs');
@@ -123,14 +124,14 @@ export default function GeoModelesView() {
             const key = `${row.provider}|||${row.model}`;
             if (!seen.has(key)) {
                 seen.add(key);
-                const totalRuns = row.runs;
+                const totalRuns = observedRunsUnavailable ? null : row.runs;
                 merged.push({
                     ...row,
                     label: null,
                     runs: totalRuns,
-                    targetFound: row.targetFound,
-                    targetRatePercent: totalRuns > 0 ? Math.round((row.targetFound / totalRuns) * 100) : row.targetRatePercent,
-                    sources: row.sources,
+                    targetFound: observedRunsUnavailable ? null : row.targetFound,
+                    targetRatePercent: totalRuns === null ? null : (totalRuns > 0 ? Math.round((row.targetFound / totalRuns) * 100) : row.targetRatePercent),
+                    sources: observedRunsUnavailable ? null : row.sources,
                     hasData: true,
                     productionRuns: row.runs,
                     benchmarkRuns: 0,
