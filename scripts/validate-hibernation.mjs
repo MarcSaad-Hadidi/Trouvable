@@ -1,5 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const root = process.cwd();
 const failures = [];
@@ -26,14 +27,15 @@ function assertStaticHtml(relativePath, html) {
   if (!['noindex', 'nofollow', 'noarchive'].every(value => robots.includes(value))) fail(relativePath + ': must declare robots noindex, nofollow, noarchive');
   if (/<(?:script|form|iframe|object|embed)\b/i.test(html) || /\bon[a-z]+\s*=/i.test(html)) fail(relativePath + ': executable content and forms are forbidden');
   if (/<meta[^>]+http-equiv\s*=/i.test(html)) fail(relativePath + ': refresh navigation is forbidden');
+  if (/\bsrcset\s*=/i.test(html)) fail(relativePath + ': responsive resource lists are forbidden');
   for (const match of html.matchAll(/\b(?:src|href|poster|action|srcset)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)) {
     const value = match[1] ?? match[2] ?? match[3];
-    if (!/^(?:\/(?![\/\\])[^\\]*|#[a-z0-9_-]*)$/i.test(value)) fail(relativePath + ': external or executable resource reference is forbidden');
+    if (/[&\u0000-\u0020]/.test(value) || !/^(?:\/(?![\/\\])[^\\]*|#[a-z0-9_-]*)$/i.test(value)) fail(relativePath + ': external or executable resource reference is forbidden');
   }
   // Parking has no resource-loading CSS; reject escapes that could conceal URLs.
   const styles = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(match => match[1]);
   styles.push(...[...html.matchAll(/\bstyle\s*=\s*["']([^"']*)["']/gi)].map(match => match[1]));
-  if (styles.some(css => /\\|@import\b|url\s*\(|@font-face\b/i.test(css))) fail(relativePath + ': resource-loading CSS is forbidden');
+  if (styles.some(css => /&|\\|@import\b|(?:url|image-set|image|src)\s*\(|@font-face\b/i.test(css))) fail(relativePath + ': resource-loading CSS is forbidden');
   if (/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i.test(html)) fail(relativePath + ': runtime network calls are forbidden');
 }
 
@@ -234,8 +236,10 @@ if (ignoreScript) {
 assertCiWorkflow(ciWorkflow, packageRaw);
 
 assertManualOnlyWorkflow('.github/workflows/external-cron.yml', cronWorkflow);
-if (cronWorkflow && (!/default: CANCEL/.test(cronWorkflow) || !cronWorkflow.includes("if: ${{ inputs.confirm == 'RUN_ONCE' }}"))) {
-  fail('.github/workflows/external-cron.yml: explicit RUN_ONCE confirmation is required');
+// Freeze the reviewed manual cron as a whole: comments cannot satisfy guards,
+// and an extra job cannot bypass explicit confirmation. Review any change.
+if (cronWorkflow && createHash('sha256').update(normalizeWorkflow(cronWorkflow)).digest('hex') !== '30f98b56b3a9ee870e2faaf8895861814fd5f284ff4d6f6b6ad8eeb8ee9c3ed8') {
+  fail('.github/workflows/external-cron.yml: must retain the reviewed manual workflow and explicit RUN_ONCE confirmation');
 }
 assertManualOnlyWorkflow('.github/workflows/codeql.yml', codeqlWorkflow);
 assertManualOnlyWorkflow('.github/workflows/dependency-review.yml', dependencyWorkflow);

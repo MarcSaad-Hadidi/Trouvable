@@ -59,6 +59,14 @@ test('closed contract accepts static parking and isolated manual validation with
 
 const ciFile = '.github/workflows/ci.yml';
 const mutations = [
+    ['parking encoded second slash navigation', directory => rewrite(directory, 'parking/404.html', raw => raw.replace('href="/"', 'href="/&#x2f;example.invalid"'))],
+    ['parking control-character external navigation', directory => rewrite(directory, 'parking/404.html', raw => raw.replace('href="/"', 'href="/\n/example.invalid"'))],
+    ['parking secondary external srcset candidate', directory => rewrite(directory, 'parking/index.html', raw => raw.replace('</body>', '<img srcset="/local.png 1x, https://example.invalid/x 2x"></body>'))],
+    ['parking CSS image-set resource', directory => rewrite(directory, 'parking/index.html', raw => raw.replace('</style>', 'body{background:image-set("https://example.invalid/x" 1x)}</style>'))],
+    ['parking entity encoded inline CSS resource', directory => rewrite(directory, 'parking/index.html', raw => raw.replace('<body>', '<body style="background:&#117;rl(https://example.invalid/x)">'))],
+    ['external cron condition only in comment', directory => rewrite(directory, '.github/workflows/external-cron.yml', raw => raw.replace("inputs.confirm == 'RUN_ONCE'", 'true') + "\n# if: ${{ inputs.confirm == 'RUN_ONCE' }}\n")],
+    ['external cron default only in comment', directory => rewrite(directory, '.github/workflows/external-cron.yml', raw => raw.replace('default: CANCEL', 'default: RUN_ONCE') + '\n# default: CANCEL\n')],
+    ['extra external cron job without confirmation', directory => rewrite(directory, '.github/workflows/external-cron.yml', raw => raw + '\n  unchecked:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo should-require-confirmation\n')],
     ['legacy Vercel builder', directory => vercel(directory, config => ({ ...config, builds: [{ src: 'package.json', use: '@vercel/next' }] }))],
     ['duplicate quoted workflow event', directory => rewrite(directory, '.github/workflows/codeql.yml', raw => raw + '\n"on":\n  push:\n')],
 
@@ -139,4 +147,3 @@ test('Vercel ignore guard ignores the integration branch and retains explicit do
     assert.equal(ignored.status, 0);
     assert.equal(allowed.status, 1);
 });
-
