@@ -46,7 +46,7 @@ Les comparaisons ponctuelles sont séparées des runs GEO standard et des varian
 
 ## 6. Invariants UI opérateur préservés des brouillons
 
-Le brouillon de redesign de racine proposait une palette sombre et plusieurs écrans futurs ; un plan ultérieur décrit un shell clair. Aucune nouvelle direction visuelle n’est imposée par le nettoyage. Les tokens et composants actuels constituent la référence du rendu. Les propositions de pages restent historiques, pas une liste de fonctionnalités à créer.
+Le brouillon de redesign de racine proposait une palette sombre et plusieurs écrans futurs ; un ancien plan proposait un shell clair. Aucune nouvelle direction visuelle n’est imposée par le nettoyage. Les tokens et composants actuels constituent la référence du rendu. Les propositions de pages restent historiques, pas une liste de fonctionnalités à créer.
 
 Les principes durables du brouillon sont conservés :
 
