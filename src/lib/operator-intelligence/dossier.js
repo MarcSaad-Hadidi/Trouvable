@@ -7,6 +7,7 @@ import { getOperatorWorkspaceShell } from '@/lib/operator-intelligence/base';
 import { getRecentSafeActivity } from '@/lib/operator-intelligence/activity';
 import { getRecurringJobHealthSlice } from '@/lib/continuous/jobs';
 import { LIFECYCLE_META } from '@/lib/lifecycle';
+import { finiteNumberOrNull } from '@/lib/numbers';
 import {
     mapOpportunitySourceToReliability,
     mapProvenanceToReliability,
@@ -505,6 +506,24 @@ async function getSharedDossierContract(clientId) {
 
     const client = shell.client;
     const workspace = shell.workspace || {};
+    const completedRunCount = shell.dataSources?.totalQueryRuns === 'unavailable'
+        ? null : finiteNumberOrNull(workspace.completedRunCount);
+    const latestRunAge = timeSince(workspace.latestRunAt);
+    let geoRunSummary;
+    let geoRunFreshness;
+    if (completedRunCount === null) {
+        geoRunSummary = 'Nombre d’exécutions terminées indisponible'
+            + (latestRunAge ? ` · Dernière exécution ${latestRunAge}` : '');
+        geoRunFreshness = 'Nombre d’exécutions terminées indisponible';
+    } else {
+        geoRunSummary = completedRunCount > 0
+            ? `${completedRunCount} exécution(s) terminée(s) · ${latestRunAge || 'Date indisponible'}`
+            : 'Aucune exécution IA finalisée';
+        geoRunFreshness = completedRunCount === 0 && !latestRunAge && shell.dataSources?.lastRun !== 'unavailable'
+            ? 'Aucune exécution terminée à date'
+            : `${completedRunCount} exécution(s) terminée(s) au total`
+                + (latestRunAge ? '' : ' · Date de dernière exécution indisponible');
+    }
     const baseHref = `/admin/clients/${clientId}`;
     const completeness = getProfileCompletenessSummary(client);
     const territory = getTerritorySummary(client);
@@ -614,9 +633,7 @@ async function getSharedDossierContract(clientId) {
                 id: 'geo_summary',
                 label: 'Visibilité IA',
                 value: workspace.geoScore ?? 'n.d.',
-                detail: workspace.completedRunCount > 0
-                    ? `${workspace.completedRunCount} exécution(s) terminée(s) · ${timeSince(workspace.latestRunAt) || 'Indisponible'}`
-                    : 'Aucune exécution IA finalisée',
+                detail: geoRunSummary,
                 reliability: workspace.geoScore !== null && workspace.geoScore !== undefined ? 'measured' : 'unavailable',
                 href: `${baseHref}/geo`,
                 accent: 'violet',
@@ -636,7 +653,7 @@ async function getSharedDossierContract(clientId) {
                 id: 'latest_geo_run',
                 label: 'Dernière exécution IA',
                 value: timeSince(workspace.latestRunAt) || 'Indisponible',
-                detail: workspace.latestRunAt ? `${workspace.completedRunCount} exécution(s) terminée(s) au total` : 'Aucune exécution terminée à date',
+                detail: geoRunFreshness,
                 reliability: workspace.latestRunAt ? 'measured' : 'unavailable',
                 href: `${baseHref}/geo/runs`,
                 accent: 'violet',
