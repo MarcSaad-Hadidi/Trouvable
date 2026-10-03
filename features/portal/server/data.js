@@ -1,6 +1,7 @@
 import 'server-only';
+import { finiteNumberOrNull } from '@/lib/numbers';
+import { getLastRunPerTrackedQuery } from '@/lib/db/query-runs';
 
-import * as db from '@/lib/db';
 import {
     getBusinessShortDescription,
     getProfileCompletenessSummary,
@@ -91,7 +92,7 @@ function buildPortalTrendSummary(snapshots = []) {
     definitions.forEach((def) => {
         sparklines[def.key] = snapshots.map((s) => {
             const v = s[def.key];
-            return v !== null && v !== undefined ? Number(v) : null;
+            return finiteNumberOrNull(v);
         });
     });
 
@@ -259,7 +260,7 @@ function buildTopTrackedPrompts(trackedQueries, lastRunMap) {
                 query_text: query.query_text,
                 category: categoryMeta.label,
                 last_run_at: lastRun?.created_at || null,
-                target_found: lastRun?.target_found === true,
+                target_found: lastRun ? lastRun.target_found === true : null,
                 target_position: lastRun?.target_position ?? null,
             };
         })
@@ -284,70 +285,87 @@ export async function getPortalDashboardData(clientId) {
     }
 
     const client = normalizeClientProfileShape(clientRow);
+    const sources = {};
+    const errors = [];
+    function unavailable(source) {
+        if (sources[source] === 'unavailable') return;
+        sources[source] = 'unavailable';
+        errors.push({ source, message: 'Certaines données sont temporairement indisponibles.' });
+    }
 
-    const { data: auditRows, error: auditError } = await supabase
+    async function loadRows(source, fetch) {
+        try {
+            const result = await fetch();
+            if (result.error) throw result.error;
+            return result;
+        } catch {
+            unavailable(source);
+            return { data: null, error: true };
+        }
+    }
+
+    const { data: auditRows, error: auditError } = await loadRows('audits', () => supabase
         .from('client_site_audits')
         .select('id, created_at, scan_status, seo_score, geo_score, issues, strengths, extracted_data')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(6));
 
-    if (auditError) {
-        throw new Error(`[PortalData] audits: ${auditError.message}`);
-    }
+    if (auditError) unavailable('audits');
+    else sources.audits = auditRows?.length ? 'available' : 'empty';
 
-    const recentAudits = auditRows || [];
+    const recentAudits = auditError ? [] : auditRows || [];
     const latestAudit = recentAudits.find((audit) => audit.scan_status === 'success' || audit.scan_status === 'partial_error') || null;
 
-    const [ws, trackedQueries, lastRunMap, opportunitiesResult, actionsResult, snapshotsResult, readinessSlice] = await Promise.all([
-        getGeoWorkspaceSnapshot(clientId).catch((error) => {
-            console.error('[PortalData] metrics:', error.message);
+    const [ws, latestRunMap, opportunitiesResult, actionsResult, snapshotsResult, readinessSlice] = await Promise.all([
+        getGeoWorkspaceSnapshot(clientId).catch(() => {
+            unavailable('workspace');
             return null;
         }),
-        db.getTrackedQueriesAll(clientId).catch((error) => {
-            console.error('[PortalData] tracked queries:', error.message);
-            return [];
+        getLastRunPerTrackedQuery(clientId).catch(() => {
+            unavailable('lastRuns');
+            return null;
         }),
-        db.getLastRunPerTrackedQuery(clientId).catch((error) => {
-            console.error('[PortalData] last runs:', error.message);
-            return new Map();
-        }),
-        supabase
+        loadRows('opportunities', () => supabase
             .from('opportunities')
             .select('id, title, description, priority, category, status, created_at')
             .eq('client_id', clientId)
             .eq('status', 'open')
             .order('created_at', { ascending: false })
-            .limit(12),
-        supabase
+            .limit(12)),
+        loadRows('actions', () => supabase
             .from('actions')
             .select('id, action_type, details, created_at')
             .eq('client_id', clientId)
             .in('action_type', ['geo_queries_run', 'publication_state_changed'])
             .order('created_at', { ascending: false })
-            .limit(12),
-        supabase
+            .limit(12)),
+        loadRows('history', () => supabase
             .from('visibility_metric_snapshots')
             .select('snapshot_date, seo_score, geo_score, visibility_proxy_percent, citation_coverage_percent, mention_rate_percent')
             .eq('client_id', clientId)
             .order('snapshot_date', { ascending: true })
-            .limit(120),
-        getReadinessSlice(clientId).catch((error) => {
-            console.error('[PortalData] readiness:', error.message);
+            .limit(120)),
+        getReadinessSlice(clientId).catch(() => {
+            unavailable('readiness');
             return null;
         }),
     ]);
 
-    if (opportunitiesResult.error) {
-        throw new Error(`[PortalData] opportunities: ${opportunitiesResult.error.message}`);
+    for (const [source, result] of [['opportunities', opportunitiesResult], ['actions', actionsResult], ['history', snapshotsResult]]) {
+        if (result.error) {
+            unavailable(source);
+            result.data = null;
+        } else sources[source] = result.data?.length ? 'available' : 'empty';
     }
-
-    if (actionsResult.error) {
-        throw new Error(`[PortalData] actions: ${actionsResult.error.message}`);
+    if (ws) {
+        sources.workspace = ws.snapshot.status;
+        errors.push(...ws.snapshot.errors);
     }
-    if (snapshotsResult.error) {
-        throw new Error(`[PortalData] snapshots: ${snapshotsResult.error.message}`);
-    }
+    if (sources.readiness !== 'unavailable') sources.readiness = readinessSlice?.available === false || !readinessSlice ? 'empty' : 'available';
+    const trackedQueries = ws?.trackedQueries || [];
+    if (sources.lastRuns !== 'unavailable') sources.lastRuns = latestRunMap?.size ? 'available' : 'empty';
+    const lastRunMap = latestRunMap || new Map();
 
     const metrics = ws ? flattenSnapshotToLegacy(ws.snapshot, ws.latestAudit) : null;
     if (ws) metrics.modelPerformance = ws.modelPerformance;
@@ -391,7 +409,8 @@ export async function getPortalDashboardData(clientId) {
         { value: metrics?.citationCoveragePercent, weight: 0.2 },
     ].filter((c) => typeof c.value === 'number' && Number.isFinite(c.value));
 
-    const visibilityScore = visibilityComponents.length > 0
+    const visibilitySourcesFailed = !ws || ['runs', 'mentions', 'trackedQueries', 'totalQueryRuns', 'brandRecommendations'].some(source => ws.snapshot.sources[source] === 'unavailable');
+    const visibilityScore = !visibilitySourcesFailed && visibilityComponents.length > 0
         ? Math.round(
             visibilityComponents.reduce((acc, c) => acc + c.value * c.weight, 0)
             / visibilityComponents.reduce((acc, c) => acc + c.weight, 0),
@@ -421,6 +440,10 @@ export async function getPortalDashboardData(clientId) {
     });
 
     return {
+        status: errors.length > 0 ? 'partial' : 'available',
+        sources,
+        errors,
+        workspaceSources: ws?.snapshot.sources || {},
         client: {
             id: client.id,
             client_name: client.client_name,
@@ -432,11 +455,11 @@ export async function getPortalDashboardData(clientId) {
             public_email: publicEmail,
         },
         visibility: {
-            seo_score: latestAudit?.seo_score ?? null,
-            geo_score: latestAudit?.geo_score ?? null,
+            seo_score: finiteNumberOrNull(latestAudit?.seo_score),
+            geo_score: finiteNumberOrNull(latestAudit?.geo_score),
             audit_freshness: auditFreshness,
             last_audit_at: latestAudit?.created_at || null,
-            total_query_runs: metrics?.totalQueryRuns ?? 0,
+            total_query_runs: metrics?.totalQueryRuns ?? null,
             visibility_proxy_percent: metrics?.visibilityProxyPercent ?? null,
             citation_coverage_percent: metrics?.citationCoveragePercent ?? null,
             tracked_prompt_mention_rate_percent: metrics?.trackedPromptStats?.mentionRatePercent ?? null,
@@ -447,7 +470,7 @@ export async function getPortalDashboardData(clientId) {
         topSources,
         trendSummary,
         nextPriorities,
-        openOpportunitiesCount: openOpportunities.length,
+        openOpportunitiesCount: sources.opportunities === 'unavailable' ? null : openOpportunities.length,
         periodNarrativeNote,
         agent: {
             score: agentScorePayload.agent_score,
