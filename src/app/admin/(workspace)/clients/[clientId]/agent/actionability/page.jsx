@@ -5,4 +5,3 @@ import AgentActionabilityView from '@/features/admin/agent/AgentActionabilityVie
 export default function AgentActionabilityPage() {
     return <AgentActionabilityView />;
 }
-

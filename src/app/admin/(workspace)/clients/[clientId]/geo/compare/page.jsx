@@ -7,4 +7,3 @@ export default function GeoComparePage() {
     const { clientId, client } = useGeoClient();
     return <GeoCompareView linkedClientId={clientId} linkedClientName={client?.client_name || ''} />;
 }
-

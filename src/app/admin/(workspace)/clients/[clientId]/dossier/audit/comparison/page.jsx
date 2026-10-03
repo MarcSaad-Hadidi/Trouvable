@@ -5,4 +5,3 @@ import OperatorAuditComparisonView from '@/features/admin/dossier/audit-lab/Oper
 export default function DossierAuditComparisonPage() {
     return <OperatorAuditComparisonView />;
 }
-

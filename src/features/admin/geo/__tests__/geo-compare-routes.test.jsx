@@ -45,4 +45,3 @@ describe('geo compare route wiring', () => {
         expect(redirectMock).toHaveBeenCalledWith('/admin/clients/client-123/geo/compare');
     });
 });
-
