@@ -3,7 +3,7 @@ import next from 'eslint-config-next';
 export default [
     ...next,
     {
-        ignores: ['.next/**', 'node_modules/**', 'out/**', 'build/**', 'dist/**', 'public/**', 'archive/**'],
+        ignores: ['.next/**', 'node_modules/**', 'out/**', 'build/**', 'dist/**', 'public/**'],
     },
     {
         files: ['**/*.{js,jsx,mjs,ts,tsx}'],

@@ -4,19 +4,15 @@ import animate from 'tailwindcss-animate'
  * Trouvable Tailwind theme.
  *
  * Design tokens reference CSS variables defined in
- * `features/admin/dashboard/shared/admin-shell.css`. This keeps a
+ * `src/features/admin/shared/admin-shell.css`. This keeps a
  * single runtime palette swappable per `data-discipline`.
  *
  * preflight remains disabled — the project ships its own reset
- * via `app/globals.css` and the marketing site relies on it.
+ * via `src/app/globals.css` and the marketing site relies on it.
  */
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        './app/**/*.{js,ts,jsx,tsx,mdx}',
-        './components/**/*.{js,ts,jsx,tsx,mdx}',
-        './features/**/*.{js,ts,jsx,tsx,mdx}',
-        './lib/**/*.{js,ts,jsx,tsx,mdx}',
         './src/**/*.{js,ts,jsx,tsx,mdx}',
     ],
     theme: {
