@@ -32,7 +32,7 @@ description: Audit a Next.js App Router page for metadata, performance, accessib
 ### 3. Component boundaries
 
 - Verify server/client split is correct — no unnecessary `'use client'`
-- Check that server-only imports (`lib/db.js`, `lib/supabase-admin.js`) are not in client components
+- Check that server-only imports (`src/lib/db/*`, `src/lib/supabase-admin.js`, `src/lib/supabase/server.js`) are not in client components
 - Verify data fetching happens server-side
 
 ### 4. Performance check
@@ -81,6 +81,6 @@ description: Audit a Next.js App Router page for metadata, performance, accessib
 
 ## References
 
-- `app/` — page components
-- `lib/seo/` — SEO utilities
+- `src/app/` — page components
+- `src/lib/seo/` — SEO utilities
 - `.github/instructions/nextjs.instructions.md` — App Router rules

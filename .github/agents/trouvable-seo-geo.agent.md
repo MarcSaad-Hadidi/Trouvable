@@ -94,10 +94,10 @@ Do NOT:
 
 | Route pattern | Purpose |
 |---|---|
-| `app/villes/[slug]/` | City-level GEO pages |
-| `app/expertises/[slug]/` | Expertise-level pages |
-| `app/villes/[ville]/[expertise]/` | City × expertise intersection |
-| `app/etudes-de-cas/[slug]/` | Case study pages |
+| `src/app/villes/[villeSlug]/` | City-level GEO pages |
+| `src/app/expertises/[expertiseSlug]/` | Expertise-level pages |
+| City × expertise intersection | Prospective route; no intersection route exists today |
+| `src/app/etudes-de-cas/`, `src/app/etudes-de-cas/dossier-type/` | Case study listing and sample dossier |
 
 Always check existing pages in these directories before creating new ones.
 All GEO pages must follow the same metadata, JSON-LD, and internal-linking patterns.

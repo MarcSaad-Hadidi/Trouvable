@@ -17,7 +17,7 @@ Create a new GEO landing page for Trouvable following existing patterns.
 
 ## Steps
 
-1. **Verify the page does not already exist** — check `app/villes/`, `app/expertises/`, or `app/villes/[ville]/[expertise]/` depending on type.
+1. **Verify the page does not already exist** — check `src/app/villes/[villeSlug]/` and `src/app/expertises/[expertiseSlug]/`. City × expertise routes are prospective and do not exist today.
 
 2. **Copy the nearest existing page** as a structural template. Reuse layout, metadata shape, and JSON-LD schema.
 
@@ -28,7 +28,7 @@ Create a new GEO landing page for Trouvable following existing patterns.
    - Internal links to related city/expertise pages
    - CTA section with `ContactButton`
 
-4. **Add the slug to `app/sitemap.js`** if not dynamically generated.
+4. **Add the slug to `src/app/sitemap.js`** if not dynamically generated.
 
 5. **Verify** — run `npm run lint` and check the page renders with `npm run dev`.
 

@@ -20,12 +20,7 @@ description: Review and improve UI components for premium visual quality, consis
 - Labels: `text-xs` or `text-sm` with `uppercase tracking-wider` for badges/tags
 
 ### Color palette
-- Primary actions: blue tones (`bg-blue-600`, `hover:bg-blue-700`)
-- Success: green tones (`text-green-600`, `bg-green-50`)
-- Warning: amber tones (`text-amber-600`, `bg-amber-50`)
-- Error: red tones (`text-red-600`, `bg-red-50`)
-- Neutral surfaces: `bg-white`, `bg-gray-50`, `bg-gray-100`
-- Text: `text-gray-900` primary, `text-gray-600` secondary, `text-gray-400` tertiary
+Use the existing surface's palette: operator discipline CSS variables in `src/features/admin/shared/admin-shell.css`, canonical `src/lib/design/tokens.ts`, and `tailwind.config.mjs`. Public pages keep the styles of neighboring `src/features/public/` components. Do not replace these with a generic palette.
 
 ### Spacing rhythm
 - Section padding: `py-16` or `py-20`
@@ -75,7 +70,7 @@ Every interactive element must have:
 - Default values are sensible
 - Component handles empty/null/loading data gracefully
 - No hardcoded pixel values — use Tailwind scale
-- Consistent with existing `components/ui/` patterns
+- Consistent with existing `src/components/ui/` patterns
 
 ### 6. Output format
 
@@ -96,8 +91,9 @@ Every interactive element must have:
 
 ## References
 
-- `components/ui/` — reusable primitives
-- `components/premium/` — premium feature components
-- `app/globals.css` — global styles
-- `tailwind.config.js` — Tailwind configuration
+- `src/components/ui/` — reusable primitives
+- `src/features/public/` and `src/features/admin/` — product surface components
+- `src/lib/design/tokens.ts` — canonical operator design tokens
+- `src/app/globals.css` — global styles
+- `tailwind.config.mjs` — Tailwind configuration
 - `.github/agents/trouvable-frontend.agent.md` — Frontend specialist agent

@@ -22,10 +22,10 @@ Trouvable uses multiple AI providers (Mistral, Groq, Gemini) for audit intellige
 ### 1. Identify citation sources
 
 - Trace where citations originate in the pipeline:
-  - `lib/ai/` — AI prompt construction and response parsing
-  - `lib/audit/` — Audit report generation
-  - `lib/continuous/` — Continuous visibility engine
-  - `lib/seo/` — SEO content generation
+  - `src/lib/ai/` — AI prompt construction and response parsing
+  - `src/lib/audit/` — Audit report generation
+  - `src/lib/continuous/` — Continuous visibility engine
+  - `src/lib/seo/` — SEO content generation
 - Identify the AI provider used for the specific content
 - Check prompt templates for citation instructions
 
@@ -89,8 +89,8 @@ citation: { source: aiResponse.sourceName, verified: false }
 
 ## References
 
-- `lib/ai/` — AI integration layer
-- `lib/audit/` — Audit report generation
-- `lib/continuous/` — Continuous visibility engine
-- `lib/seo/` — SEO content utilities
+- `src/lib/ai/` — AI integration layer
+- `src/lib/audit/` — Audit report generation
+- `src/lib/continuous/` — Continuous visibility engine
+- `src/lib/seo/` — SEO content utilities
 - `.github/agents/trouvable-seo-geo.agent.md` — SEO/GEO specialist

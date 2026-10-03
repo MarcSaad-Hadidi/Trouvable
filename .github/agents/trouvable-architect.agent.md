@@ -103,12 +103,15 @@ A bad plan:
 
 | Purpose | Location |
 |---|---|
-| Schema DDL | `supabase/schema.sql` |
-| Auth helpers | `lib/auth.js` |
-| Supabase facade | `lib/db.js` |
-| Service-role client | `lib/supabase-admin.js` |
+| Ordered migrations; historical DDL | `supabase/migrations/`; `supabase/schema.sql` |
+| Auth helpers | `src/lib/auth.js` |
+| Targeted domain data access (service role) | `src/lib/db/`, `src/lib/queries/` |
+| Public SSR profile reads (anon/RLS) | `src/lib/supabase/server.js` |
+| Service-role client | `src/lib/supabase-admin.js` |
 | Implementation plans | `docs/` |
-| Site config | `lib/site-config.js` |
+| Site config | `src/lib/site-config.js` |
+
+Service-role domain modules bypass RLS: trace and preserve explicit server authorization before every user-facing read or write. The public SSR profile loader is a separate anon/RLS path; there is no global db.js facade. Historical SQL is not proof of the remote catalogue.
 
 ## Skill integration
 

@@ -27,7 +27,7 @@ agent: "agent"
    - Hydration mismatch from `'use client'` / server boundary
    - Clerk auth state not available where expected
    - JSON-LD or metadata using undefined variables
-   - Stripe webhook missing idempotency check
+   - Future Stripe webhook missing idempotency check, only if separately implemented (Stripe is currently not implemented or connected)
 3. Identify the **root cause**, not just the symptom.
 
 ### Phase 3 — Fix

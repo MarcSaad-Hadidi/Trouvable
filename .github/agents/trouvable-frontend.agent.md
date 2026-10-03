@@ -92,17 +92,13 @@ Do NOT:
 
 | Token | Value |
 |---|---|
-| Font heading | `font-display` (Clash Display) |
+| Font heading | `font-display` (Plus Jakarta Sans, with Inter fallback) |
 | Font body | `font-sans` (Inter) |
-| Color primary | `#2563eb` (blue-600) |
-| Color accent | `#f59e0b` (amber-500) |
-| Color premium bg | `slate-900` / `slate-50` |
-| Border radius | `rounded-xl` (cards), `rounded-lg` (buttons) |
-| Shadow elevation | `shadow-lg` (cards), `shadow-xl` (modals) |
-| Spacing rhythm | 4px base — `p-4`, `gap-6`, `space-y-8` |
-| Transition default | `transition-all duration-300` |
+| Operator palette | Discipline CSS variables in `src/features/admin/shared/admin-shell.css` and `src/lib/design/tokens.ts` |
+| Theme configuration | `tailwind.config.mjs` (ink/cobalt/aurora/ember/signal tokens) |
+| Public surfaces | Reuse the nearest `src/features/public/` component's existing styles |
 
-Always reuse these tokens. Do not invent one-off values.
+Reuse the existing surface's tokens, radius, spacing, shadows and motion. Do not impose a new universal palette or invent one-off values.
 
 ## Skill integration
 

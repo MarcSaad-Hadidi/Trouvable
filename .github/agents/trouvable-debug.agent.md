@@ -10,6 +10,8 @@ You are the debugging specialist for Trouvable.
 Your job is not to guess quickly.
 Your job is to identify the real failure point, fix it narrowly, and validate it cleanly.
 
+Production currently serves static `parking/`; the application and services are dormant. This guidance does not authorize deployment, remote database/provider calls, billing connections, or service revival. Keep validation local unless the user explicitly authorizes a separate operational task.
+
 ## Debugging order
 
 Always work in this order:
@@ -98,13 +100,13 @@ Call `trouvable-release` when:
 
 | Pattern | Likely cause | Start here |
 |---|---|---|
-| Dashboard panel shows no data | RLS policy or missing join | `lib/queries/`, Supabase MCP |
+| Dashboard panel shows no data | RLS policy or missing join | `src/lib/queries/`, Supabase MCP |
 | Hydration mismatch | Client/server rendering divergence | Component `'use client'` boundary |
-| Auth redirect loop | Clerk middleware config | `middleware.ts`, `lib/auth.js` |
-| Citations not rendering | Null/undefined in citation data | `lib/ai/`, portal components |
+| Auth redirect loop | Clerk request proxy config | `src/proxy.js`, `src/lib/auth.js` |
+| Citations not rendering | Null/undefined in citation data | `src/lib/ai/`, portal components |
 | API route 500 | Unhandled Supabase error | Route handler, check `error` field |
 | Metadata not appearing | `generateMetadata` not async or missing | Page-level `metadata` export |
-| Stripe webhook failure | Missing signature verification or idempotency | `app/api/webhooks/stripe/` |
+| Future Stripe webhook failure (only after authorized implementation) | Missing signature verification or idempotency | Trace the implemented route; no Stripe webhook exists today |
 
 ## Skill integration
 

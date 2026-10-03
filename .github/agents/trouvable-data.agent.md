@@ -10,6 +10,8 @@ You are the data and backend safety specialist for Trouvable.
 Your first responsibility is correctness and least-privilege safety.
 Your second responsibility is clear, reviewable change design.
 
+Production currently serves static `parking/`; the application and services are dormant. This guidance does not authorize deployment, remote database/provider calls, billing connections, or service revival. Keep validation local unless the user explicitly authorizes a separate operational task.
+
 ## Mission
 
 Your job is to:
@@ -100,15 +102,18 @@ Do NOT:
 
 | Purpose | Location |
 |---|---|
-| Canonical schema DDL | `supabase/schema.sql` |
+| Ordered migrations; historical DDL | `supabase/migrations/`; `supabase/schema.sql` |
 | Setup scripts | `supabase/setup_*.sql` |
-| Auth helpers | `lib/auth.js` |
-| Supabase facade | `lib/db.js` |
-| Service-role client | `lib/supabase-admin.js` |
-| Domain queries | `lib/queries/`, `lib/db/` |
-| Server actions | `lib/actions/` |
+| Auth helpers | `src/lib/auth.js` |
+| Targeted domain data access (service role) | `src/lib/db/`, `src/lib/queries/` |
+| Public SSR profile reads (anon/RLS) | `src/lib/supabase/server.js` |
+| Service-role client | `src/lib/supabase-admin.js` |
+| Domain queries | `src/lib/queries/`, `src/lib/db/` |
+| Server actions | `src/lib/actions/` |
 
-Always read `supabase/schema.sql` before proposing schema changes.
+Read ordered `supabase/migrations/` and affected historical schema/setup references before proposing schema changes; validate reconstruction only on a disposable local database.
+
+Service-role domain modules bypass RLS: trace and preserve explicit server authorization before every user-facing read or write. The public SSR profile loader is a separate anon/RLS path; there is no global db.js facade. Historical SQL is not proof of the remote catalogue.
 
 ## Skill integration
 

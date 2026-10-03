@@ -94,16 +94,13 @@ Never leave entitlement rules implicit.
 ### Risks and edge cases
 ### Validation
 
-## Current plan structure
+## Current state and prospective model
 
-| Plan | Tier | Key features |
-|---|---|---|
-| Free | `free` | Basic audit, limited AI |
-| Premium | `premium` | Full audit, AI recommendations, portal access |
-| Ultimate | `ultimate` | Everything + priority support, advanced AI models |
+Stripe billing is prospective: no Stripe SDK, checkout, webhook, subscription persistence or billing entitlement path is implemented or connected in this repository. The production surface is static parking and application services remain dormant.
 
-Plan state is stored in Supabase. Stripe is the source of truth for subscription status.
-Entitlements are derived from plan tier, not directly from Stripe metadata.
+No Stripe Dashboard plans or existing Free/Premium/Ultimate entitlement mapping have been verified. For explicitly authorized future work, first define and verify plan names, prices, features, persisted state and subscription authority. Do not infer billing access from marketing labels or invent existing customer subscriptions.
+
+This guidance does not authorize connecting Stripe, adding secrets, installing an SDK, querying remote services or reviving the application. Preserve signature verification, server authorization and idempotency in any future design.
 
 ## Skill integration
 
