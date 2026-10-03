@@ -74,3 +74,9 @@ Une mesure manuelle de marque, lorsqu’elle est explicitement autorisée, note 
 ## 8. Instructions d’outils
 
 `AGENTS.md`, `.github/copilot-instructions.md`, les `.github/instructions/*.instructions.md` et les agents/skills/prompts ont des consommateurs par convention. Ils restent à leurs emplacements. Les scopes `applyTo` suivent `src` ; un lien documentaire n’est pas un mécanisme d’inclusion automatique. `.cursor/settings.json` et `.cursor/worktrees.json` sont des réglages réellement utilisables ; les plans terminés ne sont pas des instructions chargées automatiquement.
+
+## 9. Traçabilité de la consolidation
+
+L’[annexe des fichiers](consolidation-files.csv) donne la disposition finale et les raisons de chaque fichier changé depuis `2c817e2479b66fdcc849f1e4da77660443366912`. Elle distingue déplacements, corrections, fusions et suppressions. L’exporteur Code Scanning est conservé sous `scripts/export-codeql-alerts.ps1`.
+
+Les mesures de la PR comptent les fichiers suivis et les lignes physiques, lignes vides comprises. Archives, lockfiles et généré ont des catégories séparées ; un déplacement conserve sa catégorie et ne constitue pas une suppression. La documentation inclut cette annexe. Les hashes et validations finales sont consignés dans la description de la PR.
