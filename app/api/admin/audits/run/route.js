@@ -6,7 +6,7 @@ import { requireAdmin } from '@/lib/auth';
 import { auditRunPayloadSchema } from '@/lib/ai/schemas';
 import { runFullAudit } from '@/lib/audit/run-audit';
 import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/jobs';
-import * as db from '@/lib/db';
+import { getClientById as dbGetClientById, getClientBySlug as dbGetClientBySlug, createClient as dbCreateClient } from '@/lib/db/clients';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -30,7 +30,7 @@ export async function POST(request) {
         let client;
 
         if (clientId) {
-            client = await db.getClientById(clientId);
+            client = await dbGetClientById(clientId);
         } else if (websiteUrl && clientName) {
             const slug = clientName
                 .toLowerCase()
@@ -38,11 +38,11 @@ export async function POST(request) {
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
 
-            const existing = await db.getClientBySlug(slug);
+            const existing = await dbGetClientBySlug(slug);
             if (existing) {
                 client = existing;
             } else {
-                client = await db.createClient({
+                client = await dbCreateClient({
                     client_name: clientName,
                     client_slug: slug,
                     website_url: websiteUrl,

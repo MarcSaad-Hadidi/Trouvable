@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryToggleSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { updateTrackedQuery as dbUpdateTrackedQuery } from '@/lib/db/tracked-queries';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 import { getAdminSupabase } from '@/lib/supabase-admin';
 
 export async function POST(request) {
@@ -44,8 +45,8 @@ export async function POST(request) {
             }
         }
 
-        const row = await db.updateTrackedQuery(id, { is_active: requestedState });
-        await db.logAction({
+        const row = await dbUpdateTrackedQuery(id, { is_active: requestedState });
+        await dbLogAction({
             client_id: row.client_id,
             action_type: 'tracked_query_toggled',
             details: { id, is_active: requestedState },

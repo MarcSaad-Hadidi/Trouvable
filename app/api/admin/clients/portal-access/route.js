@@ -4,7 +4,8 @@ import { clerkClient } from '@clerk/nextjs/server';
 
 import { requireAdmin } from '@/lib/auth';
 import { listClientPortalMembers, setClientPortalAccessStatus, upsertClientPortalAccess } from '@/features/portal/server/access';
-import { logAction, getClientById } from '@/lib/db';
+import { logAction } from '@/lib/db/actions';
+import { getClientById } from '@/lib/db/clients';
 import { sendPortalInvitationEmail } from '@/features/portal/server/email';
 
 const upsertBody = z.object({

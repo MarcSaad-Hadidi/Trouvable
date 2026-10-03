@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import * as db from '@/lib/db';
+import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
+import { getOpportunities as dbGetOpportunities } from '@/lib/db/opportunities';
+import { getMergeSuggestions as dbGetMergeSuggestions } from '@/lib/db/merge-suggestions';
 
 export async function GET(request, { params }) {
     const admin = await requireAdmin();
@@ -9,7 +11,7 @@ export async function GET(request, { params }) {
     const { clientId } = await params;
 
     try {
-        const audit = await db.getLatestAudit(clientId);
+        const audit = await dbGetLatestAudit(clientId);
         if (!audit) {
             return NextResponse.json({
                 audit: null,
@@ -18,8 +20,8 @@ export async function GET(request, { params }) {
             });
         }
 
-        const opportunities = await db.getOpportunities(clientId);
-        const mergeSuggestions = await db.getMergeSuggestions(clientId);
+        const opportunities = await dbGetOpportunities(clientId);
+        const mergeSuggestions = await dbGetMergeSuggestions(clientId);
 
         return NextResponse.json({
             audit: {

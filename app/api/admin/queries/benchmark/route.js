@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const maxDuration = 300;
 
 import { requireAdmin } from '@/lib/auth';
-import * as db from '@/lib/db';
+import { createBenchmarkSession as dbCreateBenchmarkSession, updateBenchmarkSession as dbUpdateBenchmarkSession } from '@/lib/db/benchmarks';
 import { resolveRequestedBenchmarkVariants } from '@/lib/queries/engine-variants';
 import { runTrackedQueriesForClient } from '@/lib/queries/run-tracked-queries';
 
@@ -38,7 +38,7 @@ export async function POST(request) {
     }
 
     try {
-        const session = await db.createBenchmarkSession({
+        const session = await dbCreateBenchmarkSession({
             client_id: clientId,
             tracked_query_id: trackedQueryId || null,
             status: 'running',
@@ -58,7 +58,7 @@ export async function POST(request) {
         });
 
         const hasError = (result.runs || []).some((run) => run.error);
-        await db.updateBenchmarkSession(session.id, {
+        await dbUpdateBenchmarkSession(session.id, {
             status: hasError ? 'failed' : 'completed',
             notes: note || null,
         });

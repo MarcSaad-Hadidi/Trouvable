@@ -9,7 +9,7 @@ import {
     listClusters,
     listOpportunities,
 } from '@/lib/db/community';
-import * as db from '@/lib/db';
+import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { resolveBusinessType } from '@/lib/ai/business-type-resolver';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export async function POST(_, { params }) {
     }
 
     try {
-        const client = await db.getClientById(clientId).catch(() => null);
+        const client = await dbGetClientById(clientId).catch(() => null);
         if (!client) {
             return noStoreJson({ error: 'Client introuvable' }, { status: 404 });
         }

@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryCreateSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { getClientById as dbGetClientById } from '@/lib/db/clients';
+import { createTrackedQuery as dbCreateTrackedQuery } from '@/lib/db/tracked-queries';
+import { logAction as dbLogAction } from '@/lib/db/actions';
+import { isTrackedQueryConstraintDrift as dbIsTrackedQueryConstraintDrift } from '@/lib/db/query-support';
 import { inferDiscoveryMode, normalizeDiscoveryMode } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { buildPromptMetadata, shouldSoftBlockPromptActivation } from '@/lib/queries/prompt-intelligence';
 import { serializePromptContractForDb } from '@/lib/queries/prompt-contract-persistence';
@@ -28,7 +31,7 @@ export async function POST(request) {
 
     const input = validation.data;
     try {
-        const client = await db.getClientById(input.clientId);
+        const client = await dbGetClientById(input.clientId);
         const promptMetadata = buildPromptMetadata({
             queryText: input.query_text,
             clientName: client?.client_name || '',
@@ -65,7 +68,7 @@ export async function POST(request) {
             },
         });
 
-        const row = await db.createTrackedQuery({
+        const row = await dbCreateTrackedQuery({
             client_id: input.clientId,
             query_text: input.query_text,
             category: input.category,
@@ -77,7 +80,7 @@ export async function POST(request) {
             prompt_metadata: serialized.prompt_metadata,
         });
 
-        await db.logAction({
+        await dbLogAction({
             client_id: input.clientId,
             action_type: 'tracked_query_created',
             details: {
@@ -100,7 +103,7 @@ export async function POST(request) {
         });
     } catch (error) {
         console.error('[queries/create]', error);
-        if (db.isTrackedQueryConstraintDrift(error)) {
+        if (dbIsTrackedQueryConstraintDrift(error)) {
             return NextResponse.json({ error: TRACKED_QUERY_DRIFT_ERROR }, { status: 500 });
         }
         return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });

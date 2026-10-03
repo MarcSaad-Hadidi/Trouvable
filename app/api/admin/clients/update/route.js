@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { clientUpdateSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { updateClient as dbUpdateClient } from '@/lib/db/clients';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -23,8 +24,8 @@ export async function POST(request) {
     const updates = Object.fromEntries(Object.entries(rest).filter(([, val]) => val !== undefined));
 
     try {
-        const client = await db.updateClient(id, updates);
-        await db.logAction({
+        const client = await dbUpdateClient(id, updates);
+        await dbLogAction({
             client_id: id,
             action_type: 'client_updated',
             details: { fields: Object.keys(updates) },

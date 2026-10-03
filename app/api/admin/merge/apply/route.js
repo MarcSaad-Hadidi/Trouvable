@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { mergeApplyPayloadSchema } from '@/lib/ai/schemas';
-import * as db from '@/lib/db';
+import { getMergeSuggestionById as dbGetMergeSuggestionById, updateMergeSuggestion as dbUpdateMergeSuggestion } from '@/lib/db/merge-suggestions';
+import { getClientById as dbGetClientById, updateClient as dbUpdateClient } from '@/lib/db/clients';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 const FIELD_TO_COLUMN_MAP = {
     phone: { table: 'contact_info', key: 'phone' },
@@ -39,7 +41,7 @@ export async function POST(request) {
     const { mergeSuggestionId } = validation.data;
 
     try {
-        const suggestion = await db.getMergeSuggestionById(mergeSuggestionId);
+        const suggestion = await dbGetMergeSuggestionById(mergeSuggestionId);
         if (!suggestion) {
             return NextResponse.json({ error: 'Merge suggestion introuvable' }, { status: 404 });
         }
@@ -47,7 +49,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Suggestion déjà appliquée' }, { status: 409 });
         }
 
-        const client = await db.getClientById(suggestion.client_id);
+        const client = await dbGetClientById(suggestion.client_id);
         const mapping = FIELD_TO_COLUMN_MAP[suggestion.field_name];
 
         let value = suggestion.suggested_value;
@@ -65,14 +67,14 @@ export async function POST(request) {
             return NextResponse.json({ error: `Champ "${suggestion.field_name}" non mappé` }, { status: 400 });
         }
 
-        await db.updateClient(suggestion.client_id, updates);
+        await dbUpdateClient(suggestion.client_id, updates);
 
-        await db.updateMergeSuggestion(mergeSuggestionId, {
+        await dbUpdateMergeSuggestion(mergeSuggestionId, {
             status: 'applied',
             applied_at: new Date().toISOString(),
         });
 
-        await db.logAction({
+        await dbLogAction({
             client_id: suggestion.client_id,
             action_type: 'merge_applied',
             details: {

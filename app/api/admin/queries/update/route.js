@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryUpdateSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { getClientById as dbGetClientById } from '@/lib/db/clients';
+import { updateTrackedQuery as dbUpdateTrackedQuery } from '@/lib/db/tracked-queries';
+import { logAction as dbLogAction } from '@/lib/db/actions';
+import { isTrackedQueryConstraintDrift as dbIsTrackedQueryConstraintDrift } from '@/lib/db/query-support';
 import { inferDiscoveryMode, normalizeDiscoveryMode } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { buildPromptMetadata, shouldSoftBlockPromptActivation } from '@/lib/queries/prompt-intelligence';
 import { serializePromptContractForDb } from '@/lib/queries/prompt-contract-persistence';
@@ -45,7 +48,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Prompt suivi introuvable.' }, { status: 404 });
         }
 
-        const client = await db.getClientById(trackedQuery.client_id);
+        const client = await dbGetClientById(trackedQuery.client_id);
         const resolvedQueryText = updates.query_text || trackedQuery.query_text;
         const promptMetadata = buildPromptMetadata({
             queryText: resolvedQueryText,
@@ -91,8 +94,8 @@ export async function POST(request) {
             ...(activationBlocked ? { is_active: false } : {}),
         };
 
-        const row = await db.updateTrackedQuery(id, mergedUpdates);
-        await db.logAction({
+        const row = await dbUpdateTrackedQuery(id, mergedUpdates);
+        await dbLogAction({
             client_id: row.client_id,
             action_type: 'tracked_query_updated',
             details: {
@@ -116,7 +119,7 @@ export async function POST(request) {
         });
     } catch (error) {
         console.error('[queries/update]', error);
-        if (db.isTrackedQueryConstraintDrift(error)) {
+        if (dbIsTrackedQueryConstraintDrift(error)) {
             return NextResponse.json({ error: TRACKED_QUERY_DRIFT_ERROR }, { status: 500 });
         }
         return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });

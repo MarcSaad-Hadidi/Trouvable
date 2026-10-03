@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { clientCreateSchema } from '@/lib/admin-schemas';
 import { LIFECYCLE_DEFAULTS } from '@/lib/lifecycle';
-import * as db from '@/lib/db';
+import { createClient as dbCreateClient } from '@/lib/db/clients';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -22,7 +23,7 @@ export async function POST(request) {
 
     const d = v.data;
     try {
-        const client = await db.createClient({
+        const client = await dbCreateClient({
             client_name: d.client_name,
             client_slug: d.client_slug,
             website_url: d.website_url,
@@ -31,7 +32,7 @@ export async function POST(request) {
             target_region: d.target_region ?? undefined,
             lifecycle_status: LIFECYCLE_DEFAULTS.quickCreate,
         });
-        await db.logAction({
+        await dbLogAction({
             client_id: client.id,
             action_type: 'client_created',
             details: { via: 'api' },

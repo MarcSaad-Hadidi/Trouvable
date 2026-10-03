@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { mergeApplyPayloadSchema } from '@/lib/ai/schemas';
-import * as db from '@/lib/db';
+import { getMergeSuggestionById as dbGetMergeSuggestionById, updateMergeSuggestion as dbUpdateMergeSuggestion } from '@/lib/db/merge-suggestions';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -22,7 +23,7 @@ export async function POST(request) {
     const { mergeSuggestionId } = validation.data;
 
     try {
-        const suggestion = await db.getMergeSuggestionById(mergeSuggestionId);
+        const suggestion = await dbGetMergeSuggestionById(mergeSuggestionId);
         if (!suggestion) {
             return NextResponse.json({ error: 'Merge suggestion introuvable' }, { status: 404 });
         }
@@ -30,9 +31,9 @@ export async function POST(request) {
             return NextResponse.json({ error: `Suggestion déjà traitée` }, { status: 409 });
         }
 
-        await db.updateMergeSuggestion(mergeSuggestionId, { status: 'rejected' });
+        await dbUpdateMergeSuggestion(mergeSuggestionId, { status: 'rejected' });
 
-        await db.logAction({
+        await dbLogAction({
             client_id: suggestion.client_id,
             action_type: 'merge_rejected',
             details: { merge_suggestion_id: mergeSuggestionId, field_name: suggestion.field_name },

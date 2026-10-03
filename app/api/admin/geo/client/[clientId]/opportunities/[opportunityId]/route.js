@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { requireAdmin } from '@/lib/auth';
-import * as db from '@/lib/db';
+import { getOpportunities as dbGetOpportunities, updateOpportunity as dbUpdateOpportunity } from '@/lib/db/opportunities';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 const VALID_STATUSES = new Set(['open', 'in_progress', 'done', 'dismissed']);
 
@@ -36,15 +37,15 @@ export async function POST(request, { params }) {
     }
 
     try {
-        const existingOpts = await db.getOpportunities(clientId);
+        const existingOpts = await dbGetOpportunities(clientId);
         const existingOpp = existingOpts.find((o) => o.id === opportunityId);
         
         if (!existingOpp) {
             return noStoreJson({ error: 'Opportunity introuvable pour ce client' }, { status: 404 });
         }
 
-        const row = await db.updateOpportunity(opportunityId, { status });
-        await db.logAction({
+        const row = await dbUpdateOpportunity(opportunityId, { status });
+        await dbLogAction({
             client_id: clientId,
             action_type: 'opportunity_status_updated',
             details: { opportunity_id: opportunityId, status },

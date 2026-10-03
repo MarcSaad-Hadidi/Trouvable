@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { trackedQueryIdSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { deleteTrackedQuery as dbDeleteTrackedQuery } from '@/lib/db/tracked-queries';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -23,9 +24,9 @@ export async function POST(request) {
         const { getAdminSupabase } = await import('@/lib/supabase-admin');
         const supa = getAdminSupabase();
         const { data: tq } = await supa.from('tracked_queries').select('client_id').eq('id', v.data.id).single();
-        await db.deleteTrackedQuery(v.data.id);
+        await dbDeleteTrackedQuery(v.data.id);
         if (tq?.client_id) {
-            await db.logAction({
+            await dbLogAction({
                 client_id: tq.client_id,
                 action_type: 'tracked_query_deleted',
                 details: { id: v.data.id },

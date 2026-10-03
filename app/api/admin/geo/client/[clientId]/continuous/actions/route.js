@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth';
-import * as db from '@/lib/db';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 import {
     getRecurringJobHealthSlice,
     processContinuousTick,
@@ -141,7 +141,7 @@ export async function POST(request, { params }) {
             });
         }
 
-        await db.logAction({
+        await dbLogAction({
             client_id: clientId,
             action_type: 'continuous_operator_action',
             details: {

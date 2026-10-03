@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { clientIdSchema } from '@/lib/admin-schemas';
-import * as db from '@/lib/db';
+import { restoreClient as dbRestoreClient } from '@/lib/db/clients';
+import { logAction as dbLogAction } from '@/lib/db/actions';
 import { validateTransition } from '@/lib/lifecycle';
 import { getAdminSupabase } from '@/lib/supabase-admin';
 
@@ -37,8 +38,8 @@ export async function POST(request) {
         } catch (transitionErr) {
             return NextResponse.json({ error: transitionErr.message }, { status: 422 });
         }
-        const client = await db.restoreClient(v.data.clientId);
-        await db.logAction({
+        const client = await dbRestoreClient(v.data.clientId);
+        await dbLogAction({
             client_id: v.data.clientId,
             action_type: 'client_restored',
             details: { from: fromState, to: 'active' },

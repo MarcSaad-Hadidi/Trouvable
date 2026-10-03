@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { z } from 'zod';
-import * as db from '@/lib/db';
+import { getClientById as dbGetClientById, deleteClientHard as dbDeleteClientHard } from '@/lib/db/clients';
 
 const deleteSchema = z.object({
     clientId: z.string().uuid(),
@@ -25,14 +25,14 @@ export async function POST(request) {
     }
 
     try {
-        const client = await db.getClientById(v.data.clientId);
+        const client = await dbGetClientById(v.data.clientId);
         if (client.client_slug !== v.data.confirmSlug.trim()) {
             return NextResponse.json(
                 { error: 'Confirmation invalide : saisissez le slug exact du client pour supprimer définitivement.' },
                 { status: 400 }
             );
         }
-        await db.deleteClientHard(v.data.clientId);
+        await dbDeleteClientHard(v.data.clientId);
         return NextResponse.json({ success: true, deletedId: v.data.clientId });
     } catch (err) {
         console.error('[clients/delete]', err);
