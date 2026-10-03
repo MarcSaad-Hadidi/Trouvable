@@ -112,9 +112,11 @@ export default function SeoHealthPage() {
     const indicators = data?.indicators || [];
     const history = data?.history || [];
 
-    useEffect(() => {
+    const [previousWebsiteUrl, setPreviousWebsiteUrl] = useState(client?.website_url);
+    if (previousWebsiteUrl !== client?.website_url) {
+        setPreviousWebsiteUrl(client?.website_url);
         if (client?.website_url) setScanUrl(client.website_url);
-    }, [client?.website_url]);
+    }
 
     const sortedIssues = useMemo(() => {
         const order = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -160,7 +162,7 @@ export default function SeoHealthPage() {
                 tone: healthyCount > 0 ? 'ok' : 'neutral',
             },
         ];
-    }, [checks, data?.seoScore, history, issues]);
+    }, [checks, data, history, issues]);
 
     const chartData = useMemo(() => {
         return history.map((entry) => ({

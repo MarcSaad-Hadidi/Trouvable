@@ -60,17 +60,14 @@ export default function SeoCorrectionPromptsPage() {
         return promptableIssues.filter((issue) => `${issue.title || ''} ${issue.description || ''} ${issue.evidence || ''}`.toLowerCase().includes(needle));
     }, [promptableIssues, search]);
 
-    useEffect(() => {
-        if (!filteredIssues.length) {
-            setSelectedIssueId(null);
-            return;
-        }
-        if (preferredIssueId && filteredIssues.some((issue) => issue.id === preferredIssueId)) {
-            setSelectedIssueId(preferredIssueId);
-            return;
-        }
-        setSelectedIssueId((current) => current && filteredIssues.some((issue) => issue.id === current) ? current : filteredIssues[0].id);
-    }, [preferredIssueId, filteredIssues]);
+    const [previousSelectionInput, setPreviousSelectionInput] = useState({ preferredIssueId, filteredIssues });
+    if (previousSelectionInput.preferredIssueId !== preferredIssueId || previousSelectionInput.filteredIssues !== filteredIssues) {
+        setPreviousSelectionInput({ preferredIssueId, filteredIssues });
+        const nextIssueId = preferredIssueId && filteredIssues.some((issue) => issue.id === preferredIssueId)
+            ? preferredIssueId
+            : (filteredIssues.some((issue) => issue.id === selectedIssueId) ? selectedIssueId : (filteredIssues[0]?.id ?? null));
+        setSelectedIssueId(nextIssueId);
+    }
 
     const selectedIssue = filteredIssues.find((issue) => issue.id === selectedIssueId) || null;
     const grouped = useMemo(() => ({

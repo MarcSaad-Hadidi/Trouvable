@@ -2,7 +2,7 @@
 
 import AdminTray from '@/features/admin/dashboard/shared/components/AdminTray';
 import CommandStrip from '@/features/admin/dashboard/shared/components/CommandStrip';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { ClientProvider, useGeoClient } from '@/features/admin/dashboard/shared/context/ClientContext';
 import { motion } from 'framer-motion';
 import LifecycleBadge from '@/features/admin/dashboard/portfolio/LifecycleBadge';
@@ -14,6 +14,11 @@ function MissionCommandHeader() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [transitionErr, setTransitionErr] = useState(null);
     const [isPending, startTransition] = useTransition();
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+        const timer = setInterval(() => setNow(Date.now()), 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     const currentLifecycle = client?.lifecycle_status || 'prospect';
     const allowedNext = getAllowedNextStates(currentLifecycle);
@@ -32,8 +37,9 @@ function MissionCommandHeader() {
         });
     }
 
-    const freshness = workspace?.latestRunAt
-        ? Math.floor((Date.now() - new Date(workspace.latestRunAt).getTime()) / 3600000)
+    const latestRunTime = workspace?.latestRunAt ? new Date(workspace.latestRunAt).getTime() : NaN;
+    const freshness = Number.isFinite(latestRunTime)
+        ? Math.floor((now - latestRunTime) / 3600000)
         : null;
 
     const freshnessStatus = freshness === null ? 'idle'
@@ -82,6 +88,9 @@ function MissionCommandHeader() {
                         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                             {client?.business_type && (
                                 <span className="text-[11px] font-medium text-white/35">{client.business_type}</span>
+                            )}
+                            {workspace?.latestRunAt && freshnessStatus === 'idle' && (
+                                <span className="text-[11px] font-medium text-white/35">{statusLabels.idle}</span>
                             )}
                             {freshnessStatus !== 'idle' && (
                                 <>

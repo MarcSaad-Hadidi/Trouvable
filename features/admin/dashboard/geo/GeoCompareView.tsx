@@ -115,6 +115,8 @@ export default function GeoCompareView({ linkedClientId = null }) {
     }
 
     useEffect(() => {
+        // All updates in this loader follow awaited external fetch and JSON responses.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (linkedClientId) loadClientWorkspace(linkedClientId);
     }, [linkedClientId]);
 
@@ -250,7 +252,7 @@ export default function GeoCompareView({ linkedClientId = null }) {
                             <div className="h-20 w-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-8 opacity-20">
                                 <BarChart3Icon className="h-10 w-10" />
                             </div>
-                            <h3 className="text-[15px] font-bold text-white/50 mb-3">Banc d'essai en attente</h3>
+                            <h3 className="text-[15px] font-bold text-white/50 mb-3">Banc d&#39;essai en attente</h3>
                             <p className="text-[12px] text-white/20 max-w-sm mx-auto leading-relaxed uppercase tracking-widest font-bold">Lancez la comparaison pour évaluer les modèles.</p>
                         </div>
                     ) : (
@@ -276,7 +278,7 @@ export default function GeoCompareView({ linkedClientId = null }) {
 
                                             <div className="p-6 flex-1 flex flex-col gap-5">
                                                 {provider.error ? (
-                                                    <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-[12px] text-rose-300 italic leading-relaxed">"{provider.error.message}"</div>
+                                                    <div className="p-5 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-[12px] text-rose-300 italic leading-relaxed">&quot;{provider.error.message}&quot;</div>
                                                 ) : (
                                                     <>
                                                         <div className="grid grid-cols-2 gap-3">
@@ -320,7 +322,7 @@ export default function GeoCompareView({ linkedClientId = null }) {
                                         <div className="space-y-4">
                                             {viewModel.hints.map((hint, i) => (
                                                 <div key={i} className="flex items-start gap-4 text-[13px] text-white/50 leading-relaxed border-l border-white/5 pl-6 italic">
-                                                    "{hint}"
+                                                    &quot;{hint}&quot;
                                                 </div>
                                             ))}
                                         </div>

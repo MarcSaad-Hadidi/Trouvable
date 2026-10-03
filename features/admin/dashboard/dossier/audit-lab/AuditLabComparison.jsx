@@ -350,15 +350,20 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
 
 function HistoryMode({ clientId, currentAudit }) {
     const [history, setHistory] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(Boolean(clientId));
     const [loadError, setLoadError] = useState(null);
     const [selectedId, setSelectedId] = useState(null);
+    const historyKey = `${clientId || ''}:${currentAudit?.id || ''}`;
+    const [previousHistoryKey, setPreviousHistoryKey] = useState(historyKey);
+    if (previousHistoryKey !== historyKey) {
+        setPreviousHistoryKey(historyKey);
+        setLoading(Boolean(clientId));
+        setLoadError(null);
+    }
 
     useEffect(() => {
         if (!clientId) return undefined;
         const controller = new AbortController();
-        setLoading(true);
-        setLoadError(null);
         fetch(`/api/admin/audits/history/${clientId}?limit=6`, { cache: 'no-store', signal: controller.signal })
             .then(async (response) => {
                 const payload = await response.json().catch(() => ({}));
@@ -366,15 +371,18 @@ function HistoryMode({ clientId, currentAudit }) {
                 return payload;
             })
             .then((payload) => {
+                if (controller.signal.aborted) return;
                 setHistory(payload);
                 const currentId = currentAudit?.id;
                 const candidates = (payload.audits || []).filter((audit) => audit.id !== currentId);
                 if (candidates[0]) setSelectedId(candidates[0].id);
             })
             .catch((err) => {
-                if (err.name !== 'AbortError') setLoadError(err.message);
+                if (!controller.signal.aborted && err.name !== 'AbortError') setLoadError(err.message);
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (!controller.signal.aborted) setLoading(false);
+            });
         return () => controller.abort();
     }, [clientId, currentAudit?.id]);
 
@@ -428,19 +436,19 @@ function HistoryMode({ clientId, currentAudit }) {
                     <div>
                         <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40">Audit à comparer</div>
                         <p className="mt-0.5 text-[11px] text-white/55">
-                            Comparer l'audit actuel ({formatDate(currentAudit.created_at)}) à l'un des précédents.
+                            Comparer l&#39;audit actuel ({formatDate(currentAudit.created_at)}) à l&#39;un des précédents.
                         </p>
                     </div>
-                    {loading && <span className="text-[11px] text-white/45">Chargement de l'historique…</span>}
+                    {loading && <span className="text-[11px] text-white/45">Chargement de l&#39;historique…</span>}
                 </div>
                 {loadError && (
                     <p className="mt-2 rounded-md border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] text-red-300">
-                        Impossible de charger l'historique : {loadError}
+                        Impossible de charger l&#39;historique : {loadError}
                     </p>
                 )}
                 {!loading && eligibleAudits.length === 0 && !loadError && (
                     <p className="mt-2 text-[11px] italic text-white/45">
-                        Aucun audit précédent n'est enregistré pour ce mandat — revenez après un prochain lancement.
+                        Aucun audit précédent n&#39;est enregistré pour ce mandat — revenez après un prochain lancement.
                     </p>
                 )}
                 {eligibleAudits.length > 0 && (
@@ -554,8 +562,8 @@ function BenchmarkMode({ currentAudit }) {
                             disabled={running}
                         />
                         <p className="mt-1 text-[10.5px] text-white/40">
-                            L'audit actuel du mandat sert de référence (« Côté A »). Le site externe est exploré en dry-run, sans persistance.
-                            L'analyse IA narrative est désactivée pour rester reproductible.
+                            L&#39;audit actuel du mandat sert de référence (« Côté A »). Le site externe est exploré en dry-run, sans persistance.
+                            L&#39;analyse IA narrative est désactivée pour rester reproductible.
                         </p>
                     </div>
                     <div className="flex items-end">
@@ -611,9 +619,11 @@ function DryRunMode({ defaultUrlA }) {
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
 
-    useEffect(() => {
+    const [previousDefaultUrlA, setPreviousDefaultUrlA] = useState(defaultUrlA);
+    if (previousDefaultUrlA !== defaultUrlA) {
+        setPreviousDefaultUrlA(defaultUrlA);
         if (defaultUrlA) setUrlA(defaultUrlA);
-    }, [defaultUrlA]);
+    }
 
     const handleRun = useCallback(async () => {
         if (!urlA.trim() || !urlB.trim() || running) return;
@@ -677,7 +687,7 @@ function DryRunMode({ defaultUrlA }) {
                     </div>
                 </div>
                 <p className="mt-2 text-[10.5px] text-white/40">
-                    Les deux sites sont explorés en parallèle (~60–120 s). Rien n'est enregistré : cette comparaison ne remplace pas un audit client officiel.
+                    Les deux sites sont explorés en parallèle (~60–120 s). Rien n&#39;est enregistré : cette comparaison ne remplace pas un audit client officiel.
                 </p>
                 {error && (
                     <p className="mt-2 rounded-md border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] text-red-300">

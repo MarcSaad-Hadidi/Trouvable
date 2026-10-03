@@ -2,7 +2,7 @@
 
 import { Check, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 function statusLabel(status) {
     if (status === 'active') return { text: 'Actif', cls: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200' };
@@ -12,8 +12,9 @@ function statusLabel(status) {
 }
 
 const PORTAL_READY_STATES = new Set(['active', 'paused']);
+const EMPTY_MEMBERS = [];
 
-export default function PortalAccessPanel({ clientId, clientName, clientSlug, lifecycleStatus, initialMembers = [] }) {
+export default function PortalAccessPanel({ clientId, clientName, clientSlug, lifecycleStatus, initialMembers = EMPTY_MEMBERS }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [members, setMembers] = useState(initialMembers);
@@ -22,9 +23,11 @@ export default function PortalAccessPanel({ clientId, clientName, clientSlug, li
     const [success, setSuccess] = useState(null);
     const [copiedPath, setCopiedPath] = useState(null);
 
-    useEffect(() => {
+    const [previousMembers, setPreviousMembers] = useState(initialMembers);
+    if (previousMembers !== initialMembers) {
+        setPreviousMembers(initialMembers);
         setMembers(initialMembers);
-    }, [initialMembers]);
+    }
 
     const portalSignInPath = '/portal/sign-in';
     const portalDashboardPath = `/portal/${clientSlug}`;
@@ -223,7 +226,7 @@ export default function PortalAccessPanel({ clientId, clientName, clientSlug, li
                 <div className="mt-4 pb-4 border-b border-white/10 w-full flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                     <div className="flex flex-col">
                         <span className="text-xs font-semibold text-white/60 uppercase tracking-[0.05em] mb-1">Email de bienvenue</span>
-                        <span className="text-[11px] text-white/40">Le dernier accès actif recevra l'invitation (incluant le lien GSC automatique).</span>
+                        <span className="text-[11px] text-white/40">Le dernier accès actif recevra l&#39;invitation (incluant le lien GSC automatique).</span>
                     </div>
                     {members.length > 0 && <ResendInvitationButton clientId={clientId} />}
                 </div>

@@ -116,6 +116,9 @@ export default function GeoRunsPage() {
     const history = data?.history || [];
     const statusCounts = data?.summary?.statusCounts || {};
     const totalRuns = data?.summary?.total || 0;
+    const parsedSuccess = data?.summary?.parseCounts?.parsed_success;
+    const parseValidity = typeof parsedSuccess === 'number' && Number.isFinite(parsedSuccess)
+        ? `${Math.round((parsedSuccess / (totalRuns || 1)) * 100)}%` : 'n.d.';
 
     const filteredRuns = useMemo(() => {
         const query = search.trim().toLowerCase();
@@ -138,32 +141,33 @@ export default function GeoRunsPage() {
         }));
     }, [history]);
 
-    useEffect(() => {
-        if (!visibleRuns.length) {
-            setSelectedRunId(null);
-            return;
-        }
-        if (!selectedRunId || !visibleRuns.some((run) => run.id === selectedRunId)) {
-            setSelectedRunId(visibleRuns[0].id);
-        }
-    }, [selectedRunId, visibleRuns]);
+    const nextSelectedRunId = visibleRuns.some((run) => run.id === selectedRunId)
+        ? selectedRunId : (visibleRuns[0]?.id ?? null);
+    if (selectedRunId !== nextSelectedRunId) setSelectedRunId(nextSelectedRunId);
+
+    const detailKey = `${clientId}:${selectedRunId}:${refreshToken}`;
+    const [previousDetailKey, setPreviousDetailKey] = useState(detailKey);
+    if (previousDetailKey !== detailKey) {
+        setPreviousDetailKey(detailKey);
+        setDetailLoading(Boolean(clientId && selectedRunId));
+        setDetailError(null);
+        setShowAllCitations(false);
+        if (!clientId || !selectedRunId) setSelectedRunDetail(null);
+    }
 
     useEffect(() => {
         if (!clientId || !selectedRunId) {
-            setSelectedRunDetail(null);
             return;
         }
 
         const controller = new AbortController();
-        setDetailLoading(true);
-        setDetailError(null);
 
         fetch(`/api/admin/geo/client/${clientId}/runs/${selectedRunId}?refresh=${refreshToken}`, {
             cache: 'no-store',
             signal: controller.signal,
         })
             .then(parseJsonResponse)
-            .then((json) => setSelectedRunDetail(json))
+            .then((json) => { if (!controller.signal.aborted) setSelectedRunDetail(json); })
             .catch((loadError) => {
                 if (loadError.name === 'AbortError') return;
                 setDetailError(loadError.message);
@@ -172,7 +176,6 @@ export default function GeoRunsPage() {
                 if (!controller.signal.aborted) setDetailLoading(false);
             });
 
-        setShowAllCitations(false);
         return () => controller.abort();
     }, [clientId, refreshToken, selectedRunId]);
 
@@ -224,7 +227,7 @@ export default function GeoRunsPage() {
                 <CommandMetricCard label="Total Runs" value={totalRuns} detail="Historique global" tone="info" />
                 <CommandMetricCard label="Succès" value={`${totalRuns ? Math.round(((statusCounts.completed || 0) / totalRuns) * 100) : 0}%`} detail={`${(statusCounts.failed || 0)} échecs`} tone={(statusCounts.failed || 0) > 0 ? 'warning' : 'ok'} />
                 <CommandMetricCard label="Latence Moy." value={history.length ? `${Math.round(history.reduce((s, r) => s + latencySeconds(r), 0) / history.length)}s` : '—'} detail="Réponse moteur" tone="neutral" />
-                <CommandMetricCard label="Validité Parsing" value={`${Math.round((data.summary?.parseCounts?.parsed_success / (totalRuns || 1)) * 100)}%`} detail="Intégrité JSON" tone="ok" />
+                <CommandMetricCard label="Validité Parsing" value={parseValidity} detail="Intégrité JSON" tone={parseValidity === 'n.d.' ? 'neutral' : 'ok'} />
             </div>
 
             {actionMessage && (
@@ -308,7 +311,7 @@ export default function GeoRunsPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-[12px] text-white/50 line-clamp-1 italic group-hover:text-white/80 transition-colors">"{run.query_text}"</div>
+                                                    <div className="text-[12px] text-white/50 line-clamp-1 italic group-hover:text-white/80 transition-colors">&quot;{run.query_text}&quot;</div>
                                                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                                         <span className={cn("rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest", riskChipClass(run.bias_risk))}>
                                                             {modeLabel(run)}
@@ -376,7 +379,7 @@ export default function GeoRunsPage() {
                                             </div>
 
                                             <h2 className="text-[14px] font-bold text-white leading-relaxed mb-6 italic">
-                                                "{selectedRunDetail?.run?.query_text}"
+                                                &quot;{selectedRunDetail?.run?.query_text}&quot;
                                             </h2>
 
                                             <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -440,7 +443,7 @@ export default function GeoRunsPage() {
                                             <section>
                                                 <div className="flex items-center gap-2 mb-6 text-amber-400/60">
                                                     <TerminalIcon className="h-4 w-4" />
-                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Détails de l'échange</h3>
+                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Détails de l&#39;échange</h3>
                                                 </div>
                                                 <div className="space-y-6">
                                                     <div>
@@ -488,7 +491,7 @@ export default function GeoRunsPage() {
                                                                 <span className="text-[12px] font-bold text-white/80 group-hover:text-white">{c.host}</span>
                                                                 <ArrowUpRightIcon className="h-3 w-3 text-white/10 group-hover:text-[#7c6aef] transition-colors" />
                                                             </div>
-                                                            <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-2">"{c.evidence_span}"</p>
+                                                            <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-2">&quot;{c.evidence_span}&quot;</p>
                                                         </div>
                                                     ))}
                                                     {!selectedRunDetail?.citations?.length && (

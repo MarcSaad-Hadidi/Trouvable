@@ -102,14 +102,17 @@ export default function IssueActionsDrawer() {
     const [error, setError] = useState(null);
     const [copiedVariant, setCopiedVariant] = useState(null);
 
-    useEffect(() => {
-        if (!open) return;
-        setState('idle');
-        setPayload(null);
-        setError(null);
-        setCopiedVariant(null);
-        setVariant(ref?.presetVariant || 'standard');
-    }, [open, ref?.presetVariant]);
+    const [previousInput, setPreviousInput] = useState({ open, presetVariant: ref?.presetVariant });
+    if (previousInput.open !== open || previousInput.presetVariant !== ref?.presetVariant) {
+        setPreviousInput({ open, presetVariant: ref?.presetVariant });
+        if (open) {
+            setState('idle');
+            setPayload(null);
+            setError(null);
+            setCopiedVariant(null);
+            setVariant(ref?.presetVariant || 'standard');
+        }
+    }
 
     useEffect(() => {
         if (!open || !ref) return;

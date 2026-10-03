@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const ClientContext = createContext(null);
@@ -16,8 +16,8 @@ function getInitials(name) {
     return name.slice(0, 2).toUpperCase();
 }
 
-async function fetchNoStore(url) {
-    const response = await fetch(url, { cache: 'no-store' });
+async function fetchNoStore(url, signal) {
+    const response = await fetch(url, { cache: 'no-store', signal });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Erreur ${response.status}`);
     return data;
@@ -34,20 +34,22 @@ export function ClientProvider({ children, clientId }) {
     const [error, setError] = useState(null);
     const [refreshToken, setRefreshToken] = useState(0);
 
-    const loadClientShell = useCallback(async (id) => {
+    const loadClientShell = useCallback(async (id, signal) => {
         if (!id) { setClient(null); setAudit(null); setWorkspace(null); setLoading(false); return; }
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchNoStore(`/api/admin/geo/client/${id}`);
+            const data = await fetchNoStore(`/api/admin/geo/client/${id}`, signal);
+            if (signal?.aborted) return;
             setClient(data.client || null);
             setAudit(data.audit || null);
             setWorkspace(data.workspace || null);
         } catch (loadError) {
+            if (signal?.aborted) return;
             setError(loadError.message);
             setClient(null); setAudit(null); setWorkspace(null);
         } finally {
-            setLoading(false);
+            if (!signal?.aborted) setLoading(false);
         }
     }, []);
 
@@ -60,7 +62,15 @@ export function ClientProvider({ children, clientId }) {
         }
     }, []);
 
-    useEffect(() => { loadClientShell(clientId); }, [clientId, loadClientShell, refreshToken]);
+    useEffect(() => {
+        const controller = new AbortController();
+        // The effect starts an external request and keeps its loading feedback until the response.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadClientShell(clientId, controller.signal);
+        return () => controller.abort();
+    }, [clientId, loadClientShell, refreshToken]);
+    // loadClients only updates React state after await fetchNoStore resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => { loadClients(); }, [loadClients]);
 
     const switchClient = useCallback((id) => {
@@ -72,9 +82,9 @@ export function ClientProvider({ children, clientId }) {
     }, []);
 
     const value = useMemo(() => ({
-        client,
-        audit,
-        workspace,
+        client: client?.id === clientId ? client : null,
+        audit: client?.id === clientId ? audit : null,
+        workspace: client?.id === clientId ? workspace : null,
         clients,
         clientId,
         loading,
@@ -84,7 +94,7 @@ export function ClientProvider({ children, clientId }) {
         switchClient,
         invalidateWorkspace,
         refetch: invalidateWorkspace,
-        getInitials: (name) => getInitials(name || client?.client_name),
+        getInitials: (name) => getInitials(name || (client?.id === clientId ? client?.client_name : null)),
     }), [client, audit, workspace, clients, clientId, loading, error, refreshToken, switchClient, invalidateWorkspace]);
 
     return <ClientContext.Provider value={value}>{children}</ClientContext.Provider>;
@@ -94,8 +104,10 @@ export function useGeoWorkspaceSlice(slice, options = {}) {
     const { clientId, refreshToken } = useGeoClient();
     const { enabled = true, params = null } = options;
     const [data, setData] = useState(null);
+    const [dataClientId, setDataClientId] = useState(null);
     const [loading, setLoading] = useState(Boolean(enabled));
     const [error, setError] = useState(null);
+    const requestSequence = useRef(0);
 
     const serializedParams = useMemo(() => {
         if (!params || typeof params !== 'object') return '';
@@ -115,6 +127,7 @@ export function useGeoWorkspaceSlice(slice, options = {}) {
     }, [params]);
 
     const fetchSlice = useCallback(async (signal) => {
+        const requestId = ++requestSequence.current;
         if (!enabled || !clientId || !slice) { setData(null); setLoading(false); setError(null); return; }
         setLoading(true);
         setError(null);
@@ -130,30 +143,36 @@ export function useGeoWorkspaceSlice(slice, options = {}) {
             const response = await fetch(`/api/admin/geo/client/${clientId}/${slice}?${query.toString()}`, { cache: 'no-store', signal });
             const json = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+            if (signal?.aborted || requestId !== requestSequence.current) return;
             setData(json);
+            setDataClientId(clientId);
         } catch (fetchError) {
-            if (fetchError.name === 'AbortError') return;
+            if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError') return;
             setError(fetchError.message);
         } finally {
-            if (!signal?.aborted) setLoading(false);
+            if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
         }
     }, [clientId, enabled, refreshToken, serializedParams, slice]);
 
     useEffect(() => {
         const controller = new AbortController();
+        // Starts a cancellable external request; retain its loading/reset feedback.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchSlice(controller.signal);
         return () => controller.abort();
     }, [fetchSlice]);
 
-    return { data, loading, error, refetch: () => fetchSlice() };
+    return { data: dataClientId === clientId ? data : null, loading, error, refetch: () => fetchSlice() };
 }
 
 export function useSeoWorkspaceSlice(slice, options = {}) {
     const { clientId, refreshToken } = useGeoClient();
     const { enabled = true, params = null } = options;
     const [data, setData] = useState(null);
+    const [dataClientId, setDataClientId] = useState(null);
     const [loading, setLoading] = useState(Boolean(enabled));
     const [error, setError] = useState(null);
+    const requestSequence = useRef(0);
     const serializedParams = useMemo(() => {
         if (!params || typeof params !== 'object') return '';
         const searchParams = new URLSearchParams();
@@ -172,6 +191,7 @@ export function useSeoWorkspaceSlice(slice, options = {}) {
     }, [params]);
 
     const fetchSlice = useCallback(async (signal) => {
+        const requestId = ++requestSequence.current;
         if (!enabled || !clientId || !slice) { setData(null); setLoading(false); setError(null); return; }
         setLoading(true);
         setError(null);
@@ -187,20 +207,24 @@ export function useSeoWorkspaceSlice(slice, options = {}) {
             const response = await fetch(`/api/admin/seo/client/${clientId}/${slice}?${query.toString()}`, { cache: 'no-store', signal });
             const json = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+            if (signal?.aborted || requestId !== requestSequence.current) return;
             setData(json);
+            setDataClientId(clientId);
         } catch (fetchError) {
-            if (fetchError.name === 'AbortError') return;
+            if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError') return;
             setError(fetchError.message);
         } finally {
-            if (!signal?.aborted) setLoading(false);
+            if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
         }
     }, [clientId, enabled, refreshToken, serializedParams, slice]);
 
     useEffect(() => {
         const controller = new AbortController();
+        // Starts a cancellable external request; retain its loading/reset feedback.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchSlice(controller.signal);
         return () => controller.abort();
     }, [fetchSlice]);
 
-    return { data, loading, error, refetch: () => fetchSlice() };
+    return { data: dataClientId === clientId ? data : null, loading, error, refetch: () => fetchSlice() };
 }

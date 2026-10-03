@@ -24,9 +24,9 @@ const ITEMS_PER_PAGE = 50;
 
 const ATTENTION_ORDER = { critical: 0, needs_attention: 1, watch: 2, stable: 3 };
 
-function FreshnessIndicator({ dateStr }) {
+function FreshnessIndicator({ dateStr, now }) {
     if (!dateStr) return null;
-    const hours = Math.floor((Date.now() - new Date(dateStr).getTime()) / 3600000);
+    const hours = Math.floor((now - new Date(dateStr).getTime()) / 3600000);
     const color = hours < 24 ? 'bg-emerald-400' : hours < 72 ? 'bg-amber-400' : 'bg-red-400';
     return <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${color}`} />;
 }
@@ -76,6 +76,9 @@ function clientsListLink({ q, page, archived }) {
 
 export default async function AdminClientsPage({ searchParams }) {
     const paramsData = await searchParams;
+    // Dynamic async server request: capture freshness after awaited request params, then pass it to pure indicators.
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now();
     const rawQ = paramsData?.q || '';
     const q = rawQ.slice(0, 60).replace(/[^a-zA-Z0-9 éèàùâêîôûç-]/g, '').trim();
     const page = parseInt(paramsData?.page, 10) || 1;
@@ -325,7 +328,7 @@ export default async function AdminClientsPage({ searchParams }) {
                                                 <td className="px-5 py-3.5 whitespace-nowrap text-[11px] text-white/30">
                                                     {s?.latestRunAt ? (
                                                         <div className="flex items-center gap-2">
-                                                            <FreshnessIndicator dateStr={s.latestRunAt} />
+                                                            <FreshnessIndicator dateStr={s.latestRunAt} now={now} />
                                                             <span title="Dernière exécution">
                                                                 Exécution · {new Date(s.latestRunAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                             </span>

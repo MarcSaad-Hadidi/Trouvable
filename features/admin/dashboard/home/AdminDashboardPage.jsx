@@ -176,8 +176,7 @@ function NextDecisionCard({ client }) {
 
 /* ── Freshness Indicators ── */
 
-function FreshnessCard({ rows }) {
-    const now = Date.now();
+function FreshnessCard({ rows, now }) {
     const withRun = rows.filter((r) => r.operatorSignals?.latestRunAt);
     const fresh = withRun.filter((r) => (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000 < 24).length;
     const aging = withRun.filter((r) => { const h = (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000; return h >= 24 && h < 72; }).length;
@@ -282,6 +281,9 @@ export default async function AdminDashboard() {
         enrichError = err.message;
     }
 
+    // Dynamic async server request: capture freshness once after the awaited data boundary, then pass it to pure cards.
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now();
     const sorted = [...clients].sort((a, b) => {
         const da = ATTENTION_ORDER[a.operatorSignals?.attention] ?? 9;
         const db = ATTENTION_ORDER[b.operatorSignals?.attention] ?? 9;
@@ -344,7 +346,7 @@ export default async function AdminDashboard() {
 
                     {/* ── Row 2: Freshness + Actions Pipeline ── */}
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <FreshnessCard rows={clients} />
+                        <FreshnessCard rows={clients} now={now} />
                         <ActionsPipelineCard
                             totalActions={totalActions}
                             criticalCount={counts.critical}

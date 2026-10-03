@@ -22,9 +22,11 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
     const [runtime, setRuntime] = useState(null);
     const [runtimeError, setRuntimeError] = useState(null);
 
-    useEffect(() => {
+    const [previousDefaultUrl, setPreviousDefaultUrl] = useState(defaultUrl);
+    if (previousDefaultUrl !== defaultUrl) {
+        setPreviousDefaultUrl(defaultUrl);
         if (defaultUrl) setScanUrl(defaultUrl);
-    }, [defaultUrl]);
+    }
 
     useEffect(() => {
         let cancelled = false;

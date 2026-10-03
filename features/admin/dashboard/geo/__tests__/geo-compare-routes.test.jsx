@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const geoCompareViewMock = vi.fn(() => null);
+const redirectMock = vi.fn();
+vi.mock('next/navigation', () => ({ redirect: redirectMock }));
 vi.mock('@/features/admin/dashboard/geo/GeoCompareView', () => ({
     default: geoCompareViewMock,
 }));
@@ -17,10 +19,9 @@ describe('geo compare route wiring', () => {
 
     it('keeps global route in free mode', async () => {
         const { default: GeoComparePage } = await import('@/app/admin/(workspace)/geo-compare/page');
-        GeoComparePage();
-
-        expect(geoCompareViewMock).toHaveBeenCalledTimes(1);
-        expect(geoCompareViewMock).toHaveBeenCalledWith({}, undefined);
+        const element = GeoComparePage();
+        expect(element.type).toBe(geoCompareViewMock);
+        expect(element.props).toEqual({});
     });
 
     it('wires client route with linked client context', async () => {
@@ -29,14 +30,19 @@ describe('geo compare route wiring', () => {
             client: { client_name: 'Trouvable Test' },
         });
 
-        const { default: ClientGeoComparePage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo-compare/page');
-        ClientGeoComparePage();
-
-        expect(geoCompareViewMock).toHaveBeenCalledTimes(1);
-        expect(geoCompareViewMock).toHaveBeenCalledWith({
+        const { default: ClientGeoComparePage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo/compare/page');
+        const element = ClientGeoComparePage();
+        expect(element.type).toBe(geoCompareViewMock);
+        expect(element.props).toEqual({
             linkedClientId: 'client-123',
             linkedClientName: 'Trouvable Test',
-        }, undefined);
+        });
+    });
+
+    it('keeps the legacy client alias redirect explicit', async () => {
+        const { default: RedirectPage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo-compare/page');
+        await RedirectPage({ params: Promise.resolve({ clientId: 'client-123' }) });
+        expect(redirectMock).toHaveBeenCalledWith('/admin/clients/client-123/geo/compare');
     });
 });
 

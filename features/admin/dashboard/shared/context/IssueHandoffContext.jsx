@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 import {
@@ -33,6 +32,11 @@ export function IssueHandoffProvider({ children }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const routeKey = `${pathname || ''}?${searchParams?.toString() || ''}`;
+    const [previousRouteKey, setPreviousRouteKey] = useState(routeKey);
+    if (previousRouteKey !== routeKey) {
+        setPreviousRouteKey(routeKey);
+        setOpen(false);
+    }
 
     const openHandoff = useCallback((input) => {
         const normalized = normalizeProblemRef(input);
@@ -55,9 +59,6 @@ export function IssueHandoffProvider({ children }) {
 
     // Ferme le drawer automatiquement à chaque navigation (changement de route
     // ou de query params), y compris quand on reste dans le même layout admin.
-    useEffect(() => {
-        setOpen(false);
-    }, [routeKey]);
 
     const value = useMemo(() => ({
         open,

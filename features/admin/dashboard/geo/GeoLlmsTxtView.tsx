@@ -45,20 +45,27 @@ export default function GeoLlmsTxtPage() {
         return strengths.some((item) => String(item?.title || '').toLowerCase().includes('llms.txt'));
     }, [audit]);
 
-    const fetchDrafts = useCallback(async () => {
+    const fetchDrafts = useCallback(async (signal) => {
         if (!clientId) return;
         setLoading(true); setError(null);
         try {
-            const response = await fetch(`/api/admin/remediation/suggestions/${clientId}?type=llms_txt_missing`, { cache: 'no-store' });
+            const response = await fetch(`/api/admin/remediation/suggestions/${clientId}?type=llms_txt_missing`, { cache: 'no-store', signal });
             const json = await response.json().catch(() => ({}));
+            if (signal?.aborted) return;
             if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
             const suggestions = json.suggestions || [];
             const latest = suggestions.find((item) => item.ai_output && item.status === 'draft') || null;
             setContent(latest?.ai_output || '');
-        } catch (e) { setError(e.message); } finally { setLoading(false); }
+        } catch (e) { if (!signal?.aborted) setError(e.message); } finally { if (!signal?.aborted) setLoading(false); }
     }, [clientId]);
 
-    useEffect(() => { fetchDrafts(); }, [fetchDrafts]);
+    useEffect(() => {
+        const controller = new AbortController();
+        // Request lifecycle feedback remains visible; cleanup prevents older client responses from replacing the draft.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchDrafts(controller.signal);
+        return () => controller.abort();
+    }, [fetchDrafts]);
 
     async function handleGenerate() {
         if (!clientId || generating) return;
@@ -204,7 +211,7 @@ export default function GeoLlmsTxtPage() {
                             </div>
                             <div>
                                 <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Mission</div>
-                                <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-4">"{client?.short_description || client?.business_description || '—'}"</p>
+                                <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-4">&quot;{client?.short_description || client?.business_description || '—'}&quot;</p>
                             </div>
                         </div>
                     </div>
