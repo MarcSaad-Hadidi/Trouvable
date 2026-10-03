@@ -2,19 +2,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const REPO_ROOT = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));
+const SOURCE_ROOT = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));
+const REPO_ROOT = path.dirname(SOURCE_ROOT);
 
 const REPO_PATHS = {
-    appLayout: path.join(REPO_ROOT, 'app', 'layout.jsx'),
-    appPage: path.join(REPO_ROOT, 'app', 'page.jsx'),
-    appRobotsRoute: path.join(REPO_ROOT, 'app', 'robots.txt', 'route.js'),
-    appRobotsMetadata: path.join(REPO_ROOT, 'app', 'robots.js'),
-    appSitemap: path.join(REPO_ROOT, 'app', 'sitemap.js'),
+    appLayout: path.join(SOURCE_ROOT, 'app', 'layout.jsx'),
+    appPage: path.join(SOURCE_ROOT, 'app', 'page.jsx'),
+    appRobotsRoute: path.join(SOURCE_ROOT, 'app', 'robots.txt', 'route.js'),
+    appRobotsMetadata: path.join(SOURCE_ROOT, 'app', 'robots.js'),
+    appSitemap: path.join(SOURCE_ROOT, 'app', 'sitemap.js'),
     publicRobots: path.join(REPO_ROOT, 'public', 'robots.txt'),
-    geoSeoInjector: path.join(REPO_ROOT, 'features', 'public', 'shared', 'GeoSeoInjector.jsx'),
-    faqAccordion: path.join(REPO_ROOT, 'features', 'public', 'shared', 'FaqAccordion.jsx'),
-    expertisesDir: path.join(REPO_ROOT, 'app', 'expertises'),
-    villesDir: path.join(REPO_ROOT, 'app', 'villes'),
+    geoSeoInjector: path.join(SOURCE_ROOT, 'features', 'public', 'shared', 'GeoSeoInjector.jsx'),
+    faqAccordion: path.join(SOURCE_ROOT, 'features', 'public', 'shared', 'FaqAccordion.jsx'),
+    expertisesDir: path.join(SOURCE_ROOT, 'app', 'expertises'),
+    villesDir: path.join(SOURCE_ROOT, 'app', 'villes'),
 };
 const HOMEPAGE_PATTERN = /\b(homepage|page d accueil|page d'accueil|accueil)\b/i;
 const CANONICAL_PATTERN = /\bcanonical\b/i;
@@ -119,37 +120,37 @@ function buildRepoSignals(issueCategory, issue = {}, sourceUrl = null) {
     const homepageIssue = isHomepageUrl(sourceUrl) || HOMEPAGE_PATTERN.test(haystack);
 
     if (repoEntryExists('appLayout')) {
-        verifiedPaths.push('app/layout.jsx');
-        repoFacts.push('Chemin verifie present dans le repo: app/layout.jsx.');
+        verifiedPaths.push('src/app/layout.jsx');
+        repoFacts.push('Chemin verifie present dans le repo: src/app/layout.jsx.');
     }
 
     if (homepageIssue && repoEntryExists('appPage')) {
-        verifiedPaths.push('app/page.jsx');
-        repoFacts.push('Chemin verifie present dans le repo: app/page.jsx (page d accueil App Router).');
+        verifiedPaths.push('src/app/page.jsx');
+        repoFacts.push('Chemin verifie present dans le repo: src/app/page.jsx (page d accueil App Router).');
     }
 
     if (issueCategory === 'schema_readiness' && repoEntryExists('geoSeoInjector')) {
-        verifiedPaths.push('features/public/shared/GeoSeoInjector.jsx');
-        repoFacts.push('Chemin verifie present dans le repo: features/public/shared/GeoSeoInjector.jsx.');
+        verifiedPaths.push('src/features/public/shared/GeoSeoInjector.jsx');
+        repoFacts.push('Chemin verifie present dans le repo: src/features/public/shared/GeoSeoInjector.jsx.');
         validationTargets.push('Verifier la presence du JSON-LD rendu sur la page observee apres correction.');
     }
 
     if (issueCategory === 'citation_ai' || CRAWLER_PATTERN.test(haystack)) {
         if (repoEntryExists('appRobotsRoute')) {
-            verifiedPaths.push('app/robots.txt/route.js');
-            repoFacts.push('Chemin verifie present dans le repo: app/robots.txt/route.js.');
-            repoFacts.push('Le repo genere /robots.txt depuis app/robots.txt/route.js.');
+            verifiedPaths.push('src/app/robots.txt/route.js');
+            repoFacts.push('Chemin verifie present dans le repo: src/app/robots.txt/route.js.');
+            repoFacts.push('Le repo genere /robots.txt depuis src/app/robots.txt/route.js.');
             validationTargets.push('Verifier la reponse generee sur /robots.txt apres correction.');
         } else if (repoEntryExists('appRobotsMetadata')) {
-            verifiedPaths.push('app/robots.js');
-            repoFacts.push('Chemin verifie present dans le repo: app/robots.js.');
-            repoFacts.push('Le repo genere /robots.txt depuis app/robots.js.');
+            verifiedPaths.push('src/app/robots.js');
+            repoFacts.push('Chemin verifie present dans le repo: src/app/robots.js.');
+            repoFacts.push('Le repo genere /robots.txt depuis src/app/robots.js.');
             validationTargets.push('Verifier la reponse generee sur /robots.txt apres correction.');
         }
 
         if (repoEntryExists('appSitemap')) {
-            verifiedPaths.push('app/sitemap.js');
-            repoFacts.push('Chemin verifie present dans le repo: app/sitemap.js.');
+            verifiedPaths.push('src/app/sitemap.js');
+            repoFacts.push('Chemin verifie present dans le repo: src/app/sitemap.js.');
         }
 
         if (!repoEntryExists('publicRobots')) {
@@ -162,26 +163,26 @@ function buildRepoSignals(issueCategory, issue = {}, sourceUrl = null) {
     }
 
     if (issueCategory === 'content_problem' && repoEntryExists('faqAccordion')) {
-        verifiedPaths.push('features/public/shared/FaqAccordion.jsx');
-        repoFacts.push('Chemin verifie present dans le repo: features/public/shared/FaqAccordion.jsx.');
+        verifiedPaths.push('src/features/public/shared/FaqAccordion.jsx');
+        repoFacts.push('Chemin verifie present dans le repo: src/features/public/shared/FaqAccordion.jsx.');
         validationTargets.push('Verifier le rendu visible du contenu ou de la FAQ apres correction.');
     }
 
     if (issueCategory === 'coverage_opportunity') {
         if (repoEntryExists('expertisesDir')) {
-            verifiedPaths.push('app/expertises/');
-            repoFacts.push('Chemin verifie present dans le repo: app/expertises/.');
+            verifiedPaths.push('src/app/expertises/');
+            repoFacts.push('Chemin verifie present dans le repo: src/app/expertises/.');
         }
         if (repoEntryExists('villesDir')) {
-            verifiedPaths.push('app/villes/');
-            repoFacts.push('Chemin verifie present dans le repo: app/villes/.');
+            verifiedPaths.push('src/app/villes/');
+            repoFacts.push('Chemin verifie present dans le repo: src/app/villes/.');
         }
     }
 
     if (CANONICAL_PATTERN.test(haystack)) {
         const layoutContent = readRepoText('appLayout');
         if (layoutContent && /(alternates\s*:\s*{[\s\S]*canonical|canonical\s*:)/.test(layoutContent)) {
-            repoFacts.push("app/layout.jsx contient deja une declaration canonique dans metadata; verifier pourquoi le rendu audite ne l expose pas avant d ajouter une seconde source.");
+            repoFacts.push("src/app/layout.jsx contient deja une declaration canonique dans metadata; verifier pourquoi le rendu audite ne l expose pas avant d ajouter une seconde source.");
         }
 
         validationTargets.push('Verifier qu une seule balise canonical correcte est rendue sur la page observee apres correction.');
@@ -227,7 +228,7 @@ function getInspectionTargets(issueCategory, issue = {}, repoSignals = {}) {
 
     if (targets.length === 0) {
         targets.push('Route App Router correspondant a la page observee');
-        targets.push('app/layout.jsx');
+        targets.push('src/app/layout.jsx');
     }
 
     return uniqueStrings(targets);

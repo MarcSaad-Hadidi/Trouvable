@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import {
     buildSeoHealthCorrectionPromptContext,
@@ -60,8 +62,8 @@ describe('buildSeoHealthCorrectionPromptContext', () => {
         expect(context.problem.category).toBe('schema_readiness');
         expect(context.problem.truthState).toBe('observed');
         expect(context.evidence.summary).toContain('Schema.org');
-        expect(context.inspectionTargets).toContain('features/public/shared/GeoSeoInjector.jsx');
-        expect(context.inspectionTargets).toContain('app/layout.jsx');
+        expect(context.inspectionTargets).toContain('src/features/public/shared/GeoSeoInjector.jsx');
+        expect(context.inspectionTargets).toContain('src/app/layout.jsx');
         expect(context.missingFields).toContain('Fichier exact a modifier non confirme par les donnees detectees.');
         expect(context.missingFields).toContain('Route ou page precise a confirmer humainement si le probleme n est pas sitewide.');
         expect(context.constraints.absolute).toContain('Ne pas inventer de preuve, de fichier ou de donnees manquantes.');
@@ -94,10 +96,42 @@ describe('buildSeoHealthCorrectionPromptContext', () => {
         });
 
         expect(context.problem.category).toBe('citation_ai');
-        expect(context.verifiedPaths).toContain('app/robots.txt/route.js');
-        expect(context.verifiedPaths).toContain('app/sitemap.js');
-        expect(context.repoFacts.some((item) => item.includes('app/robots.txt/route.js'))).toBe(true);
+        expect(context.verifiedPaths).toContain('src/app/robots.txt/route.js');
+        expect(context.verifiedPaths).toContain('src/app/sitemap.js');
+        expect(context.repoFacts.some((item) => item.includes('src/app/robots.txt/route.js'))).toBe(true);
         expect(context.repoFacts.some((item) => item.includes('public/robots.txt'))).toBe(true);
         expect(context.validationTargets.some((item) => item.includes('/robots.txt'))).toBe(true);
+    });
+});
+
+describe('SEO correction paths after source relocation', () => {
+    it.each([
+        'Homepage canonical missing',
+        'Structured data schema issue',
+        'FAQ content issue',
+        'New page coverage opportunity',
+    ])('verifies repository-relative source paths for %s', (title) => {
+        const context = buildSeoHealthCorrectionPromptContext({
+            client: { id: 'fixture', client_name: 'Fixture locale QA' },
+            audit: { resolved_url: 'https://fixture.invalid/' },
+            issue: { title, sourceUrl: 'https://fixture.invalid/' },
+        });
+        expect(context.verifiedPaths).toContain('src/app/layout.jsx');
+        expect(context.verifiedPaths.filter((file) => !fs.existsSync(path.resolve(process.cwd(), file)))).toEqual([]);
+    });
+
+    it('checks public robots at the repository root rather than under src', () => {
+        const actualExists = fs.existsSync;
+        const robots = path.resolve(process.cwd(), 'public/robots.txt');
+        const probe = vi.spyOn(fs, 'existsSync').mockImplementation((file) =>
+            path.resolve(String(file)) === robots || actualExists(file));
+        try {
+            const context = buildSeoHealthCorrectionPromptContext({
+                client: {}, audit: {}, issue: { title: 'Robots crawler issue' },
+            });
+            expect(context.repoFacts.some((fact) => fact.startsWith('Aucun fichier public/robots.txt'))).toBe(false);
+        } finally {
+            probe.mockRestore();
+        }
     });
 });

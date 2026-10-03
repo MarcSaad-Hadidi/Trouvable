@@ -77,7 +77,7 @@ function collectInternalHrefs(html) {
 /** Rough route existence: prerendered HTML or app segment with page.jsx */
 function loadKnownRoutesFromDisk() {
     const known = new Set(['/']);
-    const appDir = path.join(ROOT, 'app');
+    const appDir = path.join(ROOT, 'src', 'app');
 
     function walk(dir, segments) {
         if (!fs.existsSync(dir)) return;
@@ -235,8 +235,8 @@ async function main() {
         if (!ok && !normalized.endsWith(']]')) {
             ok =
                 knownRoutes.has(`${normalized}/`)
-                || fs.existsSync(path.join(ROOT, 'app', ...normalized.split('/').filter(Boolean), 'page.jsx'))
-                || fs.existsSync(path.join(ROOT, 'app', ...normalized.split('/').filter(Boolean), 'page.tsx'));
+                || fs.existsSync(path.join(ROOT, 'src', 'app', ...normalized.split('/').filter(Boolean), 'page.jsx'))
+                || fs.existsSync(path.join(ROOT, 'src', 'app', ...normalized.split('/').filter(Boolean), 'page.tsx'));
         }
         if (!ok) linkIssues.push(`broken internal href (aggregate scan): ${href}`);
     }
