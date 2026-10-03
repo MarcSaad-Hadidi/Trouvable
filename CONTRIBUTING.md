@@ -51,3 +51,7 @@ Créer une branche propre depuis le dernier `origin/main` : `feat/...`, `fix/...
 Les commits suivent `type(scope): description`, avec un changement logique par commit. Relire le diff complet contre la base de PR, y compris les suppressions et déplacements. Identifier leurs consommateurs possibles (imports dynamiques, conventions Next, scripts, workflows, CSS, assets et opérations documentées) avant de retirer un fichier. Conserver tout élément dont l’usage reste incertain.
 
 La PR décrit le problème, le comportement obtenu, les validations et les risques. Garder la PR en draft si un contrôle indispensable est bloqué ou en échec. Un retour arrière se prépare par revert ciblé dans une nouvelle branche ; aucune restauration destructive de données n’est requise pour une consolidation de code.
+
+## Export manuel des alertes Code Scanning
+
+`scripts/export-codeql-alerts.ps1` est un outil manuel de lecture des alertes ouvertes de ce dépôt sur GitHub. Il nécessite un token GitHub avec les droits de lecture Code Scanning, fourni par `GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_OAUTH_TOKEN` ou les variables correspondantes du `.env.local` de la racine. Il ne lance pas CodeQL et ne modifie pas les alertes. Exécuter depuis un dossier de travail hors du dépôt pour y produire `codeql-alerts.md` et `codeql-alerts.csv`. Ne pas committer ces exports ni les secrets. Cet outil est conservé ; aucune extraction distante n’est nécessaire à la consolidation.
