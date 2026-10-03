@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { authorizeGoogleOAuthClient } from '@/lib/connectors/google-oauth-access';
 import { updateConnectorState, getClientConnectorRows } from '@/lib/connectors/repository';
 import { mapGoogleOAuthError } from '@/lib/seo/gsc-property';
 import { hasGoogleOAuthEnv, verifyGoogleOAuthState } from '@/lib/connectors/google-oauth-state';
@@ -40,7 +41,7 @@ async function failWithError({ clientId, returnTo, appUrl, code, fallbackMessage
 }
 
 export async function GET(request) {
-    // Support non-admin portal flow when callback state is valid.
+    // Signed state identifies the target; current access still authorizes the caller.
 
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
@@ -60,6 +61,10 @@ export async function GET(request) {
     }
 
     const { clientId, returnTo } = verifiedState.payload;
+    const access = await authorizeGoogleOAuthClient(clientId);
+    if (access.error) {
+        return NextResponse.json({ error: access.error, status: access.status }, { status: access.status });
+    }
 
     if (errorParam) {
         return failWithError({ clientId, returnTo, appUrl, code: errorParam });

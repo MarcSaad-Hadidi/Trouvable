@@ -109,9 +109,9 @@ export async function sendPortalInvitationEmail({ contactEmail, clientName, clie
                         <!-- Connect GSC button -->
                         <div style="text-align: center; margin: 0 0 32px 0;">
                             <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin: 0 0 12px 0;">
-                                Connectez votre compte Search Console pour nous autoriser à lire vos performances de visibilité en temps réel.
+                                Connectez-vous à votre espace client, puis connectez votre compte Search Console pour nous autoriser à lire vos performances de visibilité.
                             </p>
-                            <a href="${appUrl}/api/connectors/google/auth?clientId=${escapeHtml(clientId)}&returnTo=${escapeHtml('/portal/' + clientSlug)}" style="display: inline-block; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(234,88,12,0.25);">
+                            <a href="${escapeHtml(`${appUrl}/portal/${encodeURIComponent(clientSlug)}`)}" style="display: inline-block; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(234,88,12,0.25);">
                                 Connecter Google Search Console
                             </a>
                         </div>

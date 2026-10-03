@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { authorizeGoogleOAuthClient } from '@/lib/connectors/google-oauth-access';
 import {
     createGoogleOAuthState,
     hasGoogleOAuthEnv,
@@ -8,8 +9,6 @@ import {
 } from '@/lib/connectors/google-oauth-state';
 
 export async function GET(request) {
-    // Allow clients to initiate OAuth from the private email link without being logged into Clerk yet.
-    // The clientId is a UUID and acts as an obscure token in this context.
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('clientId');
     const fallbackReturnTo = clientId ? `/admin/clients/${clientId}/dossier/connectors` : null;
@@ -25,6 +24,11 @@ export async function GET(request) {
             status: 400,
             detail: 'Google OAuth return target must be a relative admin, portal, or espace path.',
         }, { status: 400 });
+    }
+
+    const access = await authorizeGoogleOAuthClient(clientId);
+    if (access.error) {
+        return NextResponse.json({ error: access.error, status: access.status }, { status: access.status });
     }
 
     if (!hasGoogleOAuthEnv()) {

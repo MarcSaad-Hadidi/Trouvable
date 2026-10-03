@@ -107,7 +107,7 @@ function sortMemberships(memberships) {
     });
 }
 
-export async function resolvePortalMembership() {
+export async function resolvePortalMembership({ backfill = true } = {}) {
     const { userId } = await auth();
 
     if (!userId) {
@@ -172,7 +172,7 @@ export async function resolvePortalMembership() {
                 .filter((row) => !row.clerk_user_id)
                 .map((row) => row.id);
 
-            if (rowsToBackfill.length > 0) {
+            if (backfill && rowsToBackfill.length > 0) {
                 const { error: updateError } = await supabase
                     .from('client_portal_access')
                     .update({ clerk_user_id: userId })
