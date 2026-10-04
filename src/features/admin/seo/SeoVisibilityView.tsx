@@ -11,6 +11,7 @@ import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/cont
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
+import { SeoSourceNotice } from './SeoOpsPrimitives';
 
 const TIME_RANGES = ['7d', '30d', '90d', '12m'];
 const SEGMENT_LABELS = {
@@ -108,11 +109,16 @@ export default function SeoVisibilityPage() {
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const topQueries = data?.topQueries || EMPTY_ROWS;
+    const trackedKeywordCount = data?.trackedKeywordCount === undefined ? topQueries.length : data.trackedKeywordCount;
     const deviceSplit = data?.deviceSplit || {};
     const intentBreakdown = data?.intentBreakdown || [];
     const movers = data?.movers || { winners: [], losers: [] };
     const freshness = data?.freshness;
     const gscSource = data?.gscSource || {};
+    const querySourceStatus = data?.dataSources?.gscQueries;
+    const querySourceLabel = querySourceStatus === 'unavailable' ? 'indisponible'
+        : querySourceStatus === 'partial' ? 'partiel'
+            : gscSource?.mode === 'live' ? 'GSC brut' : 'indisponible';
     const trendLabel = range === '12m' ? '12m' : range;
     const gscFilterSummary = [
         `type ${gscSource?.filters?.searchType || 'web'}`,
@@ -140,10 +146,10 @@ export default function SeoVisibilityPage() {
             { label: 'Search Console', detail: freshness?.gsc?.status || 'unavailable' },
             { label: 'GA4', detail: freshness?.ga4?.status || 'unavailable' },
             { label: `Fenêtre ${range}`, detail: segment === 'all' ? 'tout' : SEGMENT_LABELS[segment] },
-            { label: `${formatNumber(data?.trackedKeywordCount || topQueries.length)} requêtes`, detail: gscSource?.mode === 'live' ? 'GSC brut' : 'indisponible' },
+            { label: `${formatNumber(trackedKeywordCount)} requêtes`, detail: querySourceLabel },
         ];
         return items;
-    }, [data?.trackedKeywordCount, freshness, gscSource?.mode, range, segment, topQueries.length]);
+    }, [trackedKeywordCount, freshness, querySourceLabel, range, segment]);
 
     const filteredQueries = useMemo(() => {
         const needle = query.trim().toLowerCase();
@@ -220,6 +226,7 @@ export default function SeoVisibilityPage() {
                     />
                 )}
             >
+                <SeoSourceNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState title={data?.emptyState?.title || 'Visibilité SEO indisponible'} description={data?.emptyState?.description || 'Aucune donnée organique exploitable n a été trouvée pour cette période.'} />
             </CommandPageShell>
         );
@@ -258,6 +265,7 @@ export default function SeoVisibilityPage() {
                 />
             )}
         >
+            <SeoSourceNotice status={data.status} errors={data.errors} />
             {gscSource?.mode !== 'live' && (
                 <div className="rounded-[18px] border border-amber-300/25 bg-amber-400/[0.08] px-4 py-3 text-[12px] text-amber-100/90">
                     Données Search Console brutes indisponibles pour cette vue. {gscSource?.reason || 'Aucune raison détaillée fournie.'}

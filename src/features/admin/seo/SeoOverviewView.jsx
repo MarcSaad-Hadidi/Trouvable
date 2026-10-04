@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import ScoreRing from '@/components/shared/metrics/ScoreRing';
+import { SeoSourceNotice } from './SeoOpsPrimitives';
 import {
     GeoEmptyPanel,
     GeoKpiCard,
@@ -32,6 +33,7 @@ function connectorStatusLabel(status) {
         configured: 'Configuré',
         syncing: 'Synchronisation',
         error: 'Erreur',
+        unavailable: 'Indisponible',
         disabled: 'Désactivé',
         not_connected: 'Non connecté',
         sample_mode: 'Échantillon',
@@ -42,7 +44,7 @@ function connectorStatusLabel(status) {
 function connectorDotStatus(status) {
     if (status === 'healthy' || status === 'configured') return 'ok';
     if (status === 'syncing') return 'ok';
-    if (status === 'error') return 'critical';
+    if (status === 'error' || status === 'unavailable') return 'critical';
     if (status === 'not_connected') return 'idle';
     return 'warning';
 }
@@ -115,6 +117,8 @@ export default function SeoOverviewView() {
                     subtitle={`Visibilité organique et santé technique pour ${client?.client_name || 'ce client'}.`}
                 />
             </motion.div>
+
+            <SeoSourceNotice status={data?.status} errors={data?.errors} />
 
             {/* Audit scores row */}
             {data?.auditScores && (
