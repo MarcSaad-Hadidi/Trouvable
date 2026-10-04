@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { toArray, compactString, timeSince } from './geo-foundation-shared';
+
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
 import { getProfileCompletenessSummary, getPublicationStatus } from '@/lib/client-profile';
 import { getConnectorOverviewForClient } from '@/lib/connectors/index';
@@ -80,30 +82,8 @@ const DEFAULT_CONNECTOR_MESSAGES = {
     syncing: 'Synchronisation en cours.',
 };
 
-function compactString(value) {
-    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
-
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
 function uniqueStrings(values) {
     return [...new Set(toArray(values).map((value) => compactString(value)).filter(Boolean))];
-}
-
-function timeSince(value) {
-    if (!value) return null;
-
-    const timestamp = new Date(value).getTime();
-    if (Number.isNaN(timestamp)) return null;
-
-    const diff = Date.now() - timestamp;
-    const hours = Math.floor(diff / 3600000);
-
-    if (hours < 1) return '< 1h';
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}j`;
 }
 
 function buildMetric({ id, label, value, detail = null, reliability = 'unavailable', href = null, accent = 'default' }) {

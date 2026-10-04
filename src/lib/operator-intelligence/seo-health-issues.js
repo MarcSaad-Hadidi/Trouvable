@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { toArray, compactString } from './geo-foundation-shared';
+
 import { normalizeAuditProblems } from '@/lib/truth/problems';
 
 const PRIORITY_ORDER = {
@@ -8,14 +10,6 @@ const PRIORITY_ORDER = {
     medium: 2,
     low: 3,
 };
-
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
-function compactString(value) {
-    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
 
 function sortIssues(left, right) {
     const leftPriority = PRIORITY_ORDER[left.priority] ?? 99;

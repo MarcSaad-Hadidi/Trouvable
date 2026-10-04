@@ -1,5 +1,9 @@
 import 'server-only';
 
+import { toArray, compactString, timeSince } from './geo-foundation-shared';
+
+import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows } from './seo-gsc';
+
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getRecentGscRows } from '@/lib/db/gsc';
 
@@ -10,39 +14,9 @@ import { getVisibilitySlice } from './visibility';
 
 const CURRENT_WINDOW_DAYS = 28;
 
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
-function compactString(value) {
-    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
-
 function toNumber(value) {
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
-}
-
-function timeSince(value) {
-    if (!value) return null;
-
-    const timestamp = new Date(value).getTime();
-    if (Number.isNaN(timestamp)) return null;
-
-    const diff = Date.now() - timestamp;
-    const hours = Math.floor(diff / 3600000);
-
-    if (hours < 1) return '< 1h';
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}j`;
-}
-
-function getSinceDate(days) {
-    return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-}
-
-function filterRowsSince(rows, sinceDate) {
-    return (rows || []).filter((row) => String(row?.date || '') >= sinceDate);
 }
 
 function normalizePathname(pathname) {
@@ -62,17 +36,6 @@ function getPathname(value) {
     }
 }
 
-function normalizeUrl(value) {
-    if (!value) return null;
-
-    try {
-        const parsed = new URL(value);
-        return `${parsed.origin}${normalizePathname(parsed.pathname || '/')}`.toLowerCase();
-    } catch {
-        return compactString(value)?.toLowerCase() || null;
-    }
-}
-
 function getPageLabelFromUrl(value) {
     const pathname = getPathname(value);
     return pathname || compactString(value) || 'Page observée';
@@ -86,66 +49,6 @@ function pageTypeLabel(pageType) {
     if (pageType === 'about') return 'Support confiance';
     if (pageType === 'contact') return 'Support contact';
     return 'Page auditée';
-}
-
-function weightedPosition(impressions, weightedPositionSum, fallbackPositionSum, fallbackCount) {
-    if (impressions > 0) return weightedPositionSum / impressions;
-    if (fallbackCount > 0) return fallbackPositionSum / fallbackCount;
-    return null;
-}
-
-function aggregatePageRows(rows) {
-    const aggregated = new Map();
-
-    for (const row of rows || []) {
-        const key = normalizeUrl(row?.page);
-        if (!key) continue;
-
-        if (!aggregated.has(key)) {
-            aggregated.set(key, {
-                key,
-                url: compactString(row?.page) || key,
-                clicks: 0,
-                impressions: 0,
-                weightedPositionSum: 0,
-                fallbackPositionSum: 0,
-                fallbackCount: 0,
-            });
-        }
-
-        const bucket = aggregated.get(key);
-        const clicks = toNumber(row?.clicks);
-        const impressions = toNumber(row?.impressions);
-        const position = toNumber(row?.position);
-
-        bucket.clicks += clicks;
-        bucket.impressions += impressions;
-        bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
-
-        if (position > 0) {
-            bucket.fallbackPositionSum += position;
-            bucket.fallbackCount += 1;
-        }
-    }
-
-    return new Map(
-        Array.from(aggregated.entries()).map(([key, bucket]) => ([
-            key,
-            {
-                key,
-                url: bucket.url,
-                clicks: bucket.clicks,
-                impressions: bucket.impressions,
-                ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-                position: weightedPosition(
-                    bucket.impressions,
-                    bucket.weightedPositionSum,
-                    bucket.fallbackPositionSum,
-                    bucket.fallbackCount,
-                ),
-            },
-        ])),
-    );
 }
 
 function buildPageIndex(audit) {
@@ -255,7 +158,7 @@ function buildPagesInBandSection(clientId, pageMetricsMap, pageIndex, gscFreshne
     }
 
     const baseHref = `/admin/clients/${clientId}/seo/visibility`;
-    const items = Array.from(pageMetricsMap.values())
+    const items = Array.from(pageMetricsMap, ([key, page]) => ({ ...page, key }))
         .filter((page) => page.position !== null && page.position >= 4 && page.position <= 20 && page.impressions >= 20)
         .map((page) => {
             const auditPage = pageIndex.get(page.key) || null;
@@ -312,7 +215,7 @@ function buildClickGapSection(clientId, pageMetricsMap, pageIndex, gscFreshness)
     }
 
     const baseHref = `/admin/clients/${clientId}/seo/visibility`;
-    const items = Array.from(pageMetricsMap.values())
+    const items = Array.from(pageMetricsMap, ([key, page]) => ({ ...page, key }))
         .filter((page) => page.position !== null && page.position >= 4 && page.position <= 20 && page.impressions >= 60)
         .map((page) => {
             const auditPage = pageIndex.get(page.key) || null;

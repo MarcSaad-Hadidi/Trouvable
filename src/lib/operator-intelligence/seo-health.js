@@ -1,30 +1,10 @@
 import 'server-only';
 
+import { toArray, compactString, timeSince } from './geo-foundation-shared';
+
 import { getLatestAudit as dbGetLatestAudit, getRecentAudits as dbGetRecentAudits } from '@/lib/db/audits';
 import { filterSeoRelevant } from './seo-categories';
 import { getSeoHealthIssues } from './seo-health-issues';
-
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
-function compactString(value) {
-    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
-}
-
-function timeSince(value) {
-    if (!value) return null;
-
-    const timestamp = new Date(value).getTime();
-    if (Number.isNaN(timestamp)) return null;
-
-    const diff = Date.now() - timestamp;
-    const hours = Math.floor(diff / 3600000);
-
-    if (hours < 1) return '< 1h';
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}j`;
-}
 
 function getTechnicalDimension(audit) {
     return toArray(audit?.seo_breakdown?.dimensions).find((dimension) => dimension?.key === 'technical_seo') || null;
