@@ -102,7 +102,7 @@ describe('buildProtocolsReport — observed signal guardrail', () => {
 });
 
 describe('buildProtocolsReport — per-dimension behaviour', () => {
-    it.each([null, undefined, '', '  ', false, true, {}, [], NaN, Infinity, 'invalid'])('does not invent a crawler blockage from unavailable score %s', (value) => {
+    it.each([null, undefined, '', '  ', false, true, {}, [], NaN, Infinity, 'invalid'].map((value) => [value]))('does not invent a crawler blockage from unavailable score %s', (value) => {
         const audit = makeAudit();
         audit.extracted_data.layered_v1.subsystem_scores.crawler_access_score = value;
         const crawler = buildProtocolsReport({ audit }).dimensions.find((d) => d.key === 'crawler_access');
