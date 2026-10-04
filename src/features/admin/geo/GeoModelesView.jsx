@@ -116,11 +116,9 @@ export default function GeoModelesView() {
                 runs: totalRuns,
                 targetFound: totalTargetFound,
                 targetRatePercent:
-                    totalRuns === null || totalTargetFound === null
-                        ? null
-                        : totalRuns > 0
-                          ? Math.round((totalTargetFound / totalRuns) * 100)
-                          : 0,
+                    Number.isFinite(totalRuns) && totalRuns > 0 && Number.isFinite(totalTargetFound)
+                        ? Math.round((totalTargetFound / totalRuns) * 100)
+                        : null,
                 sources: totalSources,
                 hasData: !!(obs || bench),
                 productionRuns: obs?.runs ?? 0,
@@ -141,11 +139,9 @@ export default function GeoModelesView() {
                     runs: totalRuns,
                     targetFound: observedRunsUnavailable ? null : row.targetFound,
                     targetRatePercent:
-                        totalRuns === null
-                            ? null
-                            : totalRuns > 0
-                              ? Math.round((row.targetFound / totalRuns) * 100)
-                              : row.targetRatePercent,
+                        Number.isFinite(totalRuns) && totalRuns > 0 && Number.isFinite(row.targetFound)
+                            ? Math.round((row.targetFound / totalRuns) * 100)
+                            : null,
                     sources: observedRunsUnavailable ? null : row.sources,
                     hasData: true,
                     productionRuns: row.runs,
@@ -159,6 +155,10 @@ export default function GeoModelesView() {
             return b.runs - a.runs;
         });
     }, [data]);
+
+    const mostTestedModel = allModels.find(
+        (row) => row.hasData && Number.isFinite(row.runs) && row.runs > 0 && Number.isFinite(row.targetRatePercent),
+    );
 
     const selected = useMemo(() => {
         const defaults = variantsCatalog.map((item) => item.id);
@@ -247,20 +247,18 @@ export default function GeoModelesView() {
             ) : null}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <CommandMetricCard
-                    label="Top Rate"
-                    value={
-                        (allModels[0]?.targetRatePercent ?? null) === null
-                            ? 'n.d.'
-                            : `${allModels[0].targetRatePercent}%`
-                    }
-                    detail="Meilleur modèle"
-                    tone="ok"
+                    label="Taux de détection"
+                    value={mostTestedModel ? `${mostTestedModel.targetRatePercent}%` : 'n.d.'}
+                    detail="Modèle le plus testé"
+                    tone={mostTestedModel ? 'ok' : 'neutral'}
                 />
                 <CommandMetricCard
-                    label="Leader"
-                    value={formatDisplayModelName(allModels[0]?.label, allModels[0]?.model)}
-                    detail="Recommandé"
-                    tone="info"
+                    label="Plus testé"
+                    value={
+                        mostTestedModel ? formatDisplayModelName(mostTestedModel.label, mostTestedModel.model) : 'n.d.'
+                    }
+                    detail="Exécutions observées"
+                    tone={mostTestedModel ? 'info' : 'neutral'}
                 />
                 <CommandMetricCard
                     label="Audités"
@@ -280,8 +278,8 @@ export default function GeoModelesView() {
                 />
             </div>
 
-            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
-                <div className="lg:col-span-8 flex flex-col gap-4 overflow-y-auto geo-scrollbar pb-10">
+            <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12">
+                <div className="lg:col-span-8 flex flex-col gap-4 pb-10">
                     <div className={cn(COMMAND_PANEL, 'p-8 bg-[#06070a]')}>
                         <div className="flex items-center gap-2 mb-8 text-[#7c6aef]">
                             <BarChart3Icon className="h-4 w-4" />
@@ -357,7 +355,7 @@ export default function GeoModelesView() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto geo-scrollbar pb-10">
+                <div className="lg:col-span-4 flex flex-col gap-4 pb-10">
                     <div className={cn(COMMAND_PANEL, 'p-8 bg-[#06070a]')}>
                         <div className="flex items-center gap-2 mb-8 text-[#7c6aef]">
                             <FlaskConicalIcon className="h-4 w-4" />
