@@ -63,7 +63,7 @@ function HeatmapCell({ severity }) {
     );
 }
 
-function buildMetricCards(groups) {
+function buildMetricCards(groups, groupsKnown) {
     const criticalCount = groups.filter((group) => group.confidenceTone === 'high').length;
     const trafficAtRisk = groups.reduce((sum, group) => sum + Number(group?.measured?.sharedClicks || 0), 0);
     const pageCount = new Set(
@@ -75,8 +75,12 @@ function buildMetricCards(groups) {
         {
             id: 'critical',
             label: 'Conflits Critiques',
-            value: criticalCount,
-            detail: criticalCount > 0 ? 'Perte de position directe potentielle' : 'Aucun conflit critique mesuré',
+            value: groupsKnown ? criticalCount : 'n.d.',
+            detail: !groupsKnown
+                ? 'Inventaire des conflits indisponible'
+                : criticalCount > 0
+                  ? 'Perte de position directe potentielle'
+                  : 'Aucun conflit critique mesuré',
             tone: criticalCount > 0 ? 'critical' : 'neutral',
         },
         {
@@ -90,18 +94,23 @@ function buildMetricCards(groups) {
         {
             id: 'pages',
             label: 'Pages Impliquées',
-            value: pageCount,
-            detail: pageCount > 0 ? 'Dans des clusters de conflit' : 'Aucune page en conflit visible',
+            value: groupsKnown ? pageCount : 'n.d.',
+            detail: !groupsKnown
+                ? 'Inventaire des pages en conflit indisponible'
+                : pageCount > 0
+                  ? 'Dans des clusters de conflit'
+                  : 'Aucune page en conflit visible',
             tone: pageCount > 0 ? 'info' : 'neutral',
         },
         {
             id: 'actionable',
             label: 'Arbitrages Prêts',
-            value: actionableCount,
-            detail:
-                actionableCount > 0
-                    ? 'Groupes avec recommandation ou page gagnante'
-                    : 'Aucun arbitrage encore exploitable',
+            value: groupsKnown ? actionableCount : 'n.d.',
+            detail: !groupsKnown
+                ? 'Arbitrages temporairement indisponibles'
+                : actionableCount > 0
+                  ? 'Groupes avec recommandation ou page gagnante'
+                  : 'Aucun arbitrage encore exploitable',
             tone: actionableCount > 0 ? 'ok' : 'neutral',
         },
     ];
@@ -159,7 +168,8 @@ export default function SeoCannibalizationPage() {
         [data?.groups],
     );
     const selectedGroup = groups.find((group) => group.id === expandedClusterId) || groups[0] || null;
-    const metricCards = useMemo(() => buildMetricCards(groups), [groups]);
+    const groupsKnown = data?.summaryCards?.find((card) => card.id === 'group_count')?.value != null;
+    const metricCards = useMemo(() => buildMetricCards(groups, groupsKnown), [groups, groupsKnown]);
 
     if (loading) {
         return (

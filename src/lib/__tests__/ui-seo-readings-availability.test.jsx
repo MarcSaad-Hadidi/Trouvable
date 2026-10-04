@@ -58,3 +58,31 @@ describe.each(views)('source availability in %s', (Component) => {
         },
     );
 });
+
+describe('cannibalization metrics distinguish an unknown group inventory from observed zero', () => {
+    const render = () => renderToStaticMarkup(createElement(SeoCannibalizationView));
+    it.each([
+        { status: 'partial', emptyState: { title: 'Lecture sans données', description: 'Sources absentes.' } },
+        { status: 'partial', groups: [], summaryCards: [{ id: 'group_count', value: null }] },
+    ])('does not assert empty conflict counts when group inventory is unknown', (payload) => {
+        fixture.data = { errors: [], ...payload };
+        const html = render();
+        expect(html).not.toContain('Aucun conflit critique mesuré');
+        expect(html).not.toContain('Aucune page en conflit visible');
+        expect(html).not.toContain('Aucun arbitrage encore exploitable');
+        expect((html.match(/n\.d\./g) || []).length).toBeGreaterThanOrEqual(3);
+    });
+    it('preserves known zero when the backend successfully measured no groups', () => {
+        fixture.data = {
+            status: 'available',
+            errors: [],
+            groups: [],
+            summaryCards: [{ id: 'group_count', value: 0 }],
+        };
+        const html = render();
+        expect(html).toContain('Aucun conflit critique mesuré');
+        expect(html).toContain('Aucune page en conflit visible');
+        expect(html).toContain('Aucun arbitrage encore exploitable');
+        expect((html.match(/>0<\/div>/g) || []).length).toBeGreaterThanOrEqual(3);
+    });
+});
