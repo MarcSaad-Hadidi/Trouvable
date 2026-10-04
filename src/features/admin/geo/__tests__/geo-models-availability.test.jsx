@@ -265,4 +265,36 @@ describe('model laboratory observed summary and page scroll', () => {
         expect(markup).not.toContain('overflow-y-auto');
         expect(markup).not.toContain('geo-scrollbar');
     });
+    it('keeps observed benchmark runs and detection while citation history is incomplete', () => {
+        const text = visibleText(
+            renderFixture([], { runs: 'empty', recentRuns: 'empty', benchmarks: 'available' }, undefined, [
+                {
+                    id: 'session-citations',
+                    created_at: '2026-10-04T10:00:00Z',
+                    rows: [
+                        {
+                            engine_variant: 'tavily-fixture',
+                            provider: 'orchestrated',
+                            model: 'composite-free',
+                            target_found: true,
+                            citations: null,
+                            history: [
+                                { target_found: true, citations: 0 },
+                                { target_found: true, citations: null },
+                            ],
+                        },
+                    ],
+                },
+            ]),
+        );
+        expect(text).toContain('Sourcesn.d.');
+        expect(text).not.toContain('Sources0');
+        expect(text).toContain('Détection100%Runs2Sourcesn.d.');
+        expect(text).toContain('Taux de détection100%Modèle le plus testé');
+        expect(text).toContain('Plus testéTavilyExécutions observées');
+        expect(text).toContain('Audités1');
+        expect(text).toContain('Sessions1');
+        expect(text).toContain('CIBLE OK');
+        expect(text).not.toContain('Données partielles');
+    });
 });

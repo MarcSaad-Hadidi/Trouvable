@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { finiteNumberOrNull } from '@/lib/numbers';
+
 import {
     getRecentQueryRuns as dbGetRecentQueryRuns,
     getBenchmarkRunsBySession as dbGetBenchmarkRunsBySession,
@@ -21,8 +23,8 @@ function summarizeBenchmarkSession(session, runs = []) {
         parse_status: normalizeRunParseStatus(run),
         parse_confidence: run.parse_confidence ?? null,
         latency_ms: run.latency_ms ?? null,
-        citations: Number(
-            run.normalized_response?.external_source_mentions ?? run.normalized_response?.source_mentions ?? 0,
+        citations: finiteNumberOrNull(
+            run.normalized_response?.external_source_mentions ?? run.normalized_response?.source_mentions,
         ),
         competitors: Number(run.normalized_response?.competitor_mentions || 0),
         cost_estimate_usd: run.raw_analysis?.benchmark?.cost_estimate_usd ?? null,

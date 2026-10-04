@@ -113,4 +113,53 @@ describe('snapshot consumer partial results', () => {
         expect(models.benchmark.sessions[0].dataStatus).toBe('unavailable');
         expect(models.status).toBe('partial');
     });
+    it.each([
+        ['missing metrics', {}, null],
+        ['absent response', null, null],
+        ['explicit missing count', { external_source_mentions: null }, null],
+        ['invalid count', { external_source_mentions: 'invalid' }, null],
+        ['non-finite count', { external_source_mentions: Infinity }, null],
+        ['observed zero', { external_source_mentions: 0 }, 0],
+        ['historical zero', { source_mentions: 0 }, 0],
+        ['historical numeric count', { source_mentions: '3' }, 3],
+        ['external zero priority', { external_source_mentions: 0, source_mentions: 9 }, 0],
+        ['external count priority', { external_source_mentions: 2, source_mentions: 9 }, 2],
+        [
+            'invalid external count with historical count',
+            { external_source_mentions: 'invalid', source_mentions: 9 },
+            null,
+        ],
+    ])(
+        'preserves benchmark citations for %s without inventing a zero',
+        async (label, normalizedResponse, citations) => {
+            mocks.sessions.mockResolvedValue([{ id: 'session-a' }]);
+            mocks.benchmarkRuns.mockResolvedValue([
+                {
+                    id: 'run-a',
+                    engine_variant: 'fixture-variant',
+                    provider: 'fixture-provider',
+                    model: 'fixture-model',
+                    target_found: true,
+                    normalized_response: normalizedResponse,
+                    parse_status: 'parsed_success',
+                },
+            ]);
+            const models = await getModelsSlice('client-a');
+            const session = models.benchmark.sessions[0];
+            expect(mocks.sessions).toHaveBeenCalledWith('client-a', 6);
+            expect(mocks.benchmarkRuns).toHaveBeenCalledWith('session-a');
+            expect(session.dataStatus).toBe('available');
+            expect(session.rows[0]).toMatchObject({
+                run_id: 'run-a',
+                provider: 'fixture-provider',
+                model: 'fixture-model',
+                target_found: true,
+                attempts: 1,
+                citations,
+            });
+            expect(session.rows[0].history[0].citations).toBe(citations);
+            expect(models.status).toBe('available');
+            expect(models.dataSources.benchmarks).toBe('available');
+        },
+    );
 });
