@@ -11,7 +11,7 @@ import animate from 'tailwindcss-animate'
  * via `src/app/globals.css` and the marketing site relies on it.
  */
 /** @type {import('tailwindcss').Config} */
-export default {
+const tailwindConfig = {
     content: [
         './src/**/*.{js,ts,jsx,tsx,mdx}',
     ],
@@ -191,3 +191,5 @@ export default {
     },
     plugins: [animate],
 }
+
+export default tailwindConfig;
