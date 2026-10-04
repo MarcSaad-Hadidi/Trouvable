@@ -61,15 +61,6 @@ export function ClientProvider({ children, clientId }) {
         }
     }, []);
 
-    const loadClients = useCallback(async () => {
-        try {
-            const data = await fetchNoStore('/api/admin/geo/clients');
-            setClients(data.clients || []);
-        } catch (loadError) {
-            console.error('[ClientContext] loadClients', loadError);
-        }
-    }, []);
-
     useEffect(() => {
         const controller = new AbortController();
         // The effect starts an external request and keeps its loading feedback until the response.
@@ -77,11 +68,17 @@ export function ClientProvider({ children, clientId }) {
         loadClientShell(clientId, controller.signal);
         return () => controller.abort();
     }, [clientId, loadClientShell, refreshToken]);
-    // loadClients only updates React state after await fetchNoStore resolves.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
-        loadClients();
-    }, [loadClients]);
+        const controller = new AbortController();
+        fetchNoStore('/api/admin/geo/clients', controller.signal)
+            .then((data) => {
+                if (!controller.signal.aborted) setClients(data.clients || []);
+            })
+            .catch((loadError) => {
+                if (!controller.signal.aborted) console.error('[ClientContext] loadClients', loadError);
+            });
+        return () => controller.abort();
+    }, []);
 
     const switchClient = useCallback(
         (id) => {
