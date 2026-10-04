@@ -128,6 +128,153 @@ function createBaseInput(overrides = {}) {
 }
 
 describe('buildGeoOverviewCommandModel', () => {
+    function createMissingSignalsInput() {
+        return createBaseInput({
+            workspace: {},
+            audit: null,
+            data: {
+                status: 'available',
+                dataSources: { audit: 'empty', totalQueryRuns: 'empty', trackedQueries: 'empty' },
+                kpis: {
+                    seoScore: null,
+                    geoScore: null,
+                    trackedPromptsTotal: 0,
+                    completedRunsTotal: 0,
+                    mentionRatePercent: null,
+                },
+                guardrails: [{ severity: 'info', message: 'Aucun audit observé.' }],
+            },
+        });
+    }
+
+    it.each(['available', 'partial', 'unavailable'])('keeps wholly missing core signals neutral when the slice is %s', (status) => {
+        const input = createMissingSignalsInput();
+        input.data.status = status;
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status).toEqual({
+            tone: 'neutral',
+            label: 'Signaux indisponibles',
+            summary: 'Aucun signal principal ne permet encore d’évaluer le mandat.',
+        });
+        expect(model.hero.score.value).toBeNull();
+        expect(model.hero.supportingMetrics.slice(0, 2).map((item) => item.value)).toEqual([0, 0]);
+        expect(model.topActions).toEqual([]);
+    });
+
+    it.each(['runs', 'audit'])('reports partial availability when only %s are observed and healthy', (source) => {
+        const input = createMissingSignalsInput();
+        if (source === 'runs') {
+            input.data.kpis.completedRunsTotal = 5;
+            input.workspace.latestRunAt = hoursAgo(3);
+        } else {
+            input.audit = { seo_score: 80, geo_score: 80 };
+            input.data.dataSources.audit = 'available';
+            input.workspace.latestAuditAt = hoursAgo(3);
+        }
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status.tone).toBe('warning');
+        expect(model.hero.status.label).toBe('Signaux partiellement indisponibles');
+        expect(model.hero.status.summary).toContain('Certains signaux principaux');
+    });
+
+    it.each(['available', 'partial'])('preserves a known warning and its explanation when sources are missing (%s)', (status) => {
+        const input = createMissingSignalsInput();
+        input.data.status = status;
+        input.audit = { seo_score: 60, geo_score: 80 };
+        input.data.dataSources.audit = 'available';
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status.tone).toBe('warning');
+        expect(model.hero.status.label).toBe('Mandat sous surveillance · signaux indisponibles');
+        expect(model.hero.status.summary).toContain('plusieurs signaux doivent être consolidés');
+        expect(model.hero.status.summary).toContain('indisponibles');
+    });
+
+    it('retains an observed zero score as a critical signal alongside unavailable sources', () => {
+        const input = createMissingSignalsInput();
+        input.audit = { seo_score: 0, geo_score: 0 };
+        input.data.dataSources.audit = 'available';
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.score.value).toBe(0);
+        expect(model.hero.status.tone).toBe('critical');
+        expect(model.hero.status.label).toBe('Mandat à stabiliser · signaux indisponibles');
+        expect(model.hero.status.summary).toContain('signal cœur du mandat est dégradé');
+    });
+
+    it.each([
+        ['warning', 'warning', 'Mandat sous surveillance'],
+        ['critical', 'critical', 'Mandat sous contrainte'],
+    ])('keeps known %s guardrails actionable when core signals are unavailable', (severity, tone, label) => {
+        const input = createMissingSignalsInput();
+        input.data.guardrails = [{ severity, message: 'Signal observé à traiter.' }];
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status.tone).toBe(tone);
+        expect(model.hero.status.label).toBe(`${label} · signaux indisponibles`);
+        expect(model.topActions[0].id).toBe(severity === 'critical' ? 'critical-guardrails' : 'seo-watch');
+    });
+
+    it('keeps zero runs with tracked prompts critical and below a known critical guardrail', () => {
+        const input = createMissingSignalsInput();
+        input.data.kpis.trackedPromptsTotal = 12;
+        let model = buildGeoOverviewCommandModel(input);
+        expect(model.hero.status.tone).toBe('critical');
+        expect(model.hero.status.label).toBe('Signal GEO absent · signaux indisponibles');
+        expect(model.topActions[0].id).toBe('first-runs');
+        expect(model.hero.supportingMetrics[1].value).toBe(0);
+
+        input.data.guardrails = [{ severity: 'critical', message: 'Blocage observé.' }];
+        model = buildGeoOverviewCommandModel(input);
+        expect(model.hero.status.label).toBe('Mandat sous contrainte · signaux indisponibles');
+        expect(model.topActions.map((action) => action.id)).toEqual(['critical-guardrails', 'first-runs']);
+    });
+
+    it.each([[12, 'ok'], [24 * 31, 'warning'], [24 * 61, 'critical']])('preserves known audit freshness at %s hours without claiming score availability', (hours, status) => {
+        const input = createMissingSignalsInput();
+        input.workspace.latestAuditAt = hoursAgo(hours);
+        const model = buildGeoOverviewCommandModel(input);
+        expect(model.connectorHealth.items.find((item) => item.id === 'audit').status).toBe(status);
+        expect(model.hero.status.tone).toBe('neutral');
+    });
+
+    it('keeps failed audit, run and prompt sources unavailable despite stale shell counts', () => {
+        const input = createMissingSignalsInput();
+        input.data.status = 'unavailable';
+        input.data.dataSources = { audit: 'unavailable', totalQueryRuns: 'unavailable', trackedQueries: 'unavailable' };
+        input.workspace.completedRunCount = 0;
+        input.workspace.trackedPromptCount = 12;
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status.tone).toBe('neutral');
+        expect(model.hero.status.label).toBe('Signaux indisponibles');
+        expect(model.hero.supportingMetrics.slice(0, 2).map((item) => item.value)).toEqual(['n.d.', 'n.d.']);
+        expect(model.topActions).toEqual([]);
+    });
+
+    it.each([false, true])('respects slice-level source failure with otherwise observed signals (warning=%s)', (hasWarning) => {
+        const input = createBaseInput();
+        input.data.status = 'partial';
+        input.data.guardrails = [];
+        input.audit.geo_score = 80;
+        input.audit.seo_score = hasWarning ? 60 : 80;
+        input.data.kpis.mentionRatePercent = 80;
+        const model = buildGeoOverviewCommandModel(input);
+
+        expect(model.hero.status.tone).toBe('warning');
+        expect(model.hero.status.label).toBe(hasWarning ? 'Mandat sous surveillance · signaux indisponibles' : 'Signaux partiellement indisponibles');
+        expect(model.hero.status.summary).toContain('Certaines sources de données ne répondent pas.');
+        if (hasWarning) expect(model.hero.status.summary).toContain('plusieurs signaux doivent être consolidés');
+    });
+    it('keeps a fully observed healthy mandate in control', () => {
+        const input = createBaseInput();
+        input.data.guardrails = [];
+        input.audit.geo_score = 80;
+        input.data.kpis.mentionRatePercent = 80;
+        expect(buildGeoOverviewCommandModel(input).hero.status.label).toBe('Mandat en contrôle');
+    });
     it('prioritizes blocking issues and keeps unavailable domains honest', () => {
         const model = buildGeoOverviewCommandModel(createBaseInput());
 
@@ -273,4 +420,3 @@ describe('buildGeoOverviewCommandModel', () => {
         expect(model.hero.status.label).toContain('indisponibles');
     });
 });
-

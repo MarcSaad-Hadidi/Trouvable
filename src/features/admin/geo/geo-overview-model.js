@@ -107,43 +107,67 @@ function getGeoStatus(geoScore, mentionRatePercent, reliability) {
     return scoreStatus(geoScore);
 }
 
-function getGlobalStatus({ criticalWarnings, activeWarnings, noRunsYet, trackedPromptsTotal, runStatus, seoStatus, geoStatus }) {
+function getGlobalStatus({ criticalWarnings, activeWarnings, noRunsYet, trackedPromptsTotal, runStatus, seoStatus, geoStatus, dataStatus }) {
+    const coreStatuses = [runStatus, seoStatus, geoStatus];
+    const missingCoreSignals = coreStatuses.filter((status) => status === 'unavailable').length;
+    const hasUnavailableSources = missingCoreSignals > 0 || dataStatus === 'partial' || dataStatus === 'unavailable';
+    let observedStatus;
+
     if (criticalWarnings.length > 0) {
-        return {
+        observedStatus = {
             tone: 'critical',
             label: 'Mandat sous contrainte',
             summary: `${criticalWarnings.length} alerte${criticalWarnings.length > 1 ? 's' : ''} critique${criticalWarnings.length > 1 ? 's' : ''} demandent une action immédiate.`,
         };
-    }
-
-    if (noRunsYet && trackedPromptsTotal > 0) {
-        return {
+    } else if (noRunsYet && trackedPromptsTotal > 0) {
+        observedStatus = {
             tone: 'critical',
             label: 'Signal GEO absent',
             summary: 'Des prompts sont suivis mais aucun run n’a encore alimenté le poste de pilotage.',
         };
-    }
-
-    if (runStatus === 'critical' || seoStatus === 'critical' || geoStatus === 'critical') {
-        return {
+    } else if (runStatus === 'critical' || seoStatus === 'critical' || geoStatus === 'critical') {
+        observedStatus = {
             tone: 'critical',
             label: 'Mandat à stabiliser',
             summary: 'Un signal cœur du mandat est dégradé et mérite une reprise rapide.',
         };
-    }
-
-    if (activeWarnings.length > 0 || runStatus === 'warning' || seoStatus === 'warning' || geoStatus === 'warning') {
-        return {
+    } else if (activeWarnings.length > 0 || runStatus === 'warning' || seoStatus === 'warning' || geoStatus === 'warning') {
+        observedStatus = {
             tone: 'warning',
             label: 'Mandat sous surveillance',
             summary: 'Le mandat avance, mais plusieurs signaux doivent être consolidés pour rester fiables.',
         };
+    } else {
+        if (missingCoreSignals === coreStatuses.length) {
+            return {
+                tone: 'neutral',
+                label: 'Signaux indisponibles',
+                summary: 'Aucun signal principal ne permet encore d’évaluer le mandat.',
+            };
+        }
+        observedStatus = {
+            tone: 'ok',
+            label: 'Mandat en contrôle',
+            summary: 'Les signaux principaux sont disponibles et aucun blocage majeur ne remonte dans la synthèse.',
+        };
     }
 
+    if (!hasUnavailableSources) return observedStatus;
+
+    const availabilitySummary = missingCoreSignals > 0
+        ? 'Certains signaux principaux sont indisponibles.'
+        : 'Certaines sources de données ne répondent pas.';
+    if (observedStatus.tone === 'ok') {
+        return {
+            tone: 'warning',
+            label: 'Signaux partiellement indisponibles',
+            summary: availabilitySummary,
+        };
+    }
     return {
-        tone: 'ok',
-        label: 'Mandat en contrôle',
-        summary: 'Les signaux principaux sont disponibles et aucun blocage majeur ne remonte dans la synthèse.',
+        ...observedStatus,
+        label: `${observedStatus.label} · signaux indisponibles`,
+        summary: `${observedStatus.summary} ${availabilitySummary}`,
     };
 }
 
@@ -624,7 +648,7 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
     const seoStatus = scoreStatus(seoScore);
     const geoStatus = getGeoStatus(geoScore, mentionRatePercent, visibilityReliability);
     const auditStatus = getAuditStatus(lastAuditAt, seoScore);
-    const observedStatus = getGlobalStatus({
+    const globalStatus = getGlobalStatus({
         criticalWarnings,
         activeWarnings,
         noRunsYet,
@@ -632,10 +656,8 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
         runStatus,
         seoStatus,
         geoStatus,
+        dataStatus: data?.status,
     });
-    const globalStatus = data?.status === 'partial' || data?.status === 'unavailable'
-        ? { tone: observedStatus.tone === 'critical' ? 'critical' : 'warning', label: observedStatus.tone === 'critical' ? `${observedStatus.label} · signaux indisponibles` : 'Signaux partiellement indisponibles', summary: 'Certaines sources de données ne répondent pas.' }
-        : observedStatus;
 
     const topActions = buildPriorityActions({
         criticalWarnings,
