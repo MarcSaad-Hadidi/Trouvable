@@ -46,6 +46,8 @@ const ADMIN = [
     '/seo/on-page',
     '/seo/opportunities',
     '/seo/visibility',
+    '/seo/local',
+    '/seo/actions',
     '/geo',
     '/geo/prompts',
     '/geo/social',
