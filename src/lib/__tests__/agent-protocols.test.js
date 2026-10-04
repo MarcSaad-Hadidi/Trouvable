@@ -102,6 +102,23 @@ describe('buildProtocolsReport — observed signal guardrail', () => {
 });
 
 describe('buildProtocolsReport — per-dimension behaviour', () => {
+    it.each([null, undefined, '', '  ', false, true, {}, [], NaN, Infinity, 'invalid'])('does not invent a crawler blockage from unavailable score %s', (value) => {
+        const audit = makeAudit();
+        audit.extracted_data.layered_v1.subsystem_scores.crawler_access_score = value;
+        const crawler = buildProtocolsReport({ audit }).dimensions.find((d) => d.key === 'crawler_access');
+        expect(crawler.score).toBe(0);
+        expect(crawler.evidence).toEqual([]);
+        expect(crawler.gaps).toEqual(['Score crawler access indisponible — audit trop ancien ou erreur de fetch.']);
+    });
+
+    it.each([0, '0'])('preserves the observed crawler blockage for score %s', (value) => {
+        const audit = makeAudit();
+        audit.extracted_data.layered_v1.subsystem_scores.crawler_access_score = value;
+        const crawler = buildProtocolsReport({ audit }).dimensions.find((d) => d.key === 'crawler_access');
+        expect(crawler.score).toBe(0);
+        expect(crawler.gaps[0]).toContain('robots.txt bloque des crawlers');
+    });
+
     it('llms.txt missing produces a high-priority fix', () => {
         const report = buildProtocolsReport({ audit: makeAudit() });
         const llms = report.dimensions.find((d) => d.key === 'llms_txt');

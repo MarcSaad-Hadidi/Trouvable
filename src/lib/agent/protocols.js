@@ -17,6 +17,8 @@
  * protocol posture cannot inflate the bonus.
  */
 
+import { finiteNumberOrNull } from '@/lib/numbers';
+
 export const PROTOCOL_DIMENSION_WEIGHTS = Object.freeze({
     llms_txt: 0.35,
     ai_discovery: 0.20,
@@ -246,7 +248,7 @@ function buildSchemaEntityDimension({ extracted, expert }) {
 
 function buildCrawlerAccessDimension({ layered }) {
     const subsystem = layered?.subsystem_scores || null;
-    const rawScore = Number(subsystem?.crawler_access_score);
+    const rawScore = finiteNumberOrNull(subsystem?.crawler_access_score);
     const evidence = [];
     const gaps = [];
     let observed = false;
