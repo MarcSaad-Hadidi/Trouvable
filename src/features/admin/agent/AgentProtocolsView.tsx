@@ -1,5 +1,6 @@
 'use client';
 
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import {
     KeyValuePanel,
@@ -36,6 +37,7 @@ export default function AgentProtocolsPage() {
             loading={loading}
             error={error}
             emptyState={emptyState}
+            notice={<SourceStatusNotice domain="AGENT" status={data?.status} errors={data?.errors} />}
             loadingMessage="Lecture des protocoles exposés et des correctifs réels issus du dernier audit."
         >
             <MetricGrid
@@ -108,4 +110,3 @@ export default function AgentProtocolsPage() {
         </AgentPageFrame>
     );
 }
-

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import ScoreRing from '@/components/shared/metrics/ScoreRing';
-import { SeoSourceNotice } from './SeoOpsPrimitives';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import {
     GeoEmptyPanel,
     GeoKpiCard,
@@ -118,7 +118,7 @@ export default function SeoOverviewView() {
                 />
             </motion.div>
 
-            <SeoSourceNotice status={data?.status} errors={data?.errors} />
+            <SourceStatusNotice status={data?.status} errors={data?.errors} />
 
             {/* Audit scores row */}
             {data?.auditScores && (

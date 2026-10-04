@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { 
@@ -40,7 +41,8 @@ function classifyRunUsefulness(summary, lastRun) {
     if (lastRun.status === 'running') return { level: 'running', label: 'En cours', tone: 'text-[#7c6aef]', bg: 'bg-[#7c6aef]/10 border-[#7c6aef]/20' };
     if (lastRun.status === 'failed') return { level: 'failed', label: 'Échec', tone: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20' };
 
-    const docs = summary?.documents_count || 0;
+    const docs = summary?.documents_count;
+    if (docs == null) return { level: 'unavailable', label: 'Indisponible', tone: 'text-white/30', bg: 'bg-white/5 border-white/10' };
     if (docs === 0) return { level: 'empty', label: 'Aucun signal', tone: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' };
     return { level: 'useful', label: 'Analysé', tone: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' };
 }
@@ -181,6 +183,9 @@ export default function GeoSocialView() {
     const summary = data?.summary || {};
     const lastRun = summary.last_run || null;
     const runUsefulness = classifyRunUsefulness(summary, lastRun);
+    const connectorStatus = data?.connection?.status || 'unavailable';
+    const connectorLabel = { connected: 'Actif', connected_empty: 'Connecté, sans données', syncing: 'Synchronisation', not_connected: 'Non connecté', error: 'En erreur', unavailable: 'Indisponible' }[connectorStatus] || 'Indisponible';
+    const noSignalLabel = data?.dataSources?.clusters === 'unavailable' ? 'Signaux indisponibles.' : 'Aucun signal.';
     
     const topSignals = useMemo(() => {
         if (!data) return { complaints: [], questions: [], themes: [] };
@@ -230,11 +235,12 @@ export default function GeoSocialView() {
 
     return (
         <CommandPageShell header={header}>
+            <SourceStatusNotice domain="GEO" status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <CommandMetricCard label="Documents" value={summary.documents_count || 0} detail="Sources collectées" tone="info" />
-                <CommandMetricCard label="Clusters Thématiques" value={summary.clusters_count || 0} detail="Patterns sémantiques" tone="neutral" />
+                <CommandMetricCard label="Documents" value={summary.documents_count ?? 'n.d.'} detail="Sources collectées" tone="info" />
+                <CommandMetricCard label="Clusters Thématiques" value={summary.clusters_count ?? 'n.d.'} detail="Patterns sémantiques" tone="neutral" />
                 <CommandMetricCard label="Statut Collecte" value={runUsefulness.label} detail={formatDateTime(lastRun?.started_at)} tone={runUsefulness.level === 'useful' ? 'ok' : 'warning'} />
-                <CommandMetricCard label="Actionnabilité" value={summary.opportunities_count || 0} detail="Opportunités IA" tone="neutral" />
+                <CommandMetricCard label="Actionnabilité" value={summary.opportunities_count ?? 'n.d.'} detail="Opportunités IA" tone="neutral" />
             </div>
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
@@ -244,22 +250,22 @@ export default function GeoSocialView() {
                         <div className="px-6 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
                             <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Signaux Observés</h3>
                             <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-white/20">
-                                <SearchIcon className="h-3.5 w-3.5" /> {summary.total_discussions || 0} discussions
+                                <SearchIcon className="h-3.5 w-3.5" /> {summary.total_discussions ?? 'n.d.'} discussions
                             </div>
                         </div>
                         
                         <div className="p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
                             <div className="space-y-4">
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-rose-400/60 mb-2">Plaintes & Irritants</div>
-                                {topSignals.complaints.length > 0 ? topSignals.complaints.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">Aucun signal.</p>}
+                                {topSignals.complaints.length > 0 ? topSignals.complaints.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">{noSignalLabel}</p>}
                             </div>
                             <div className="space-y-4">
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-[#7c6aef]/60 mb-2">Questions Fréquentes</div>
-                                {topSignals.questions.length > 0 ? topSignals.questions.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">Aucun signal.</p>}
+                                {topSignals.questions.length > 0 ? topSignals.questions.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">{noSignalLabel}</p>}
                             </div>
                             <div className="space-y-4">
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60 mb-2">Thèmes Porteurs</div>
-                                {topSignals.themes.length > 0 ? topSignals.themes.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">Aucun signal.</p>}
+                                {topSignals.themes.length > 0 ? topSignals.themes.map((s, i) => <SignalCard key={i} item={s} />) : <p className="text-[11px] text-white/10 italic">{noSignalLabel}</p>}
                             </div>
                         </div>
                     </div>
@@ -303,15 +309,15 @@ export default function GeoSocialView() {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between text-[11px]">
                                 <span className="text-white/35 uppercase tracking-widest">Connecteur</span>
-                                <span className="text-emerald-400 font-bold uppercase tracking-widest">Actif</span>
+                                <span className={cn("font-bold uppercase tracking-widest", connectorStatus === 'connected' || connectorStatus === 'connected_empty' ? 'text-emerald-400' : 'text-white/40')}>{connectorLabel}</span>
                             </div>
                             <div className="flex items-center justify-between text-[11px]">
-                                <span className="text-white/35 uppercase tracking-widest">Sources</span>
-                                <span className="text-white/80 font-bold">Reddit, Forums, Web</span>
+                                <span className="text-white/35 uppercase tracking-widest">Sources observées</span>
+                                <span className="text-white/80 font-bold">{(data.sourceBuckets || []).map((bucket) => bucket.source).filter(Boolean).slice(0, 4).join(', ') || 'n.d.'}</span>
                             </div>
                             <div className="flex items-center justify-between text-[11px]">
-                                <span className="text-white/35 uppercase tracking-widest">Période</span>
-                                <span className="text-white/80 font-bold">Derniers 30 jours</span>
+                                <span className="text-white/35 uppercase tracking-widest">Dernière collecte</span>
+                                <span className="text-white/80 font-bold">{formatDateTime(lastRun?.started_at)}</span>
                             </div>
                         </div>
                     </div>

@@ -55,22 +55,6 @@ const SPARKLINE_COLORS = {
     slate: { stroke: '#cbd5e1', fill: 'rgba(203, 213, 225, 0.12)' },
 };
 
-export function SeoSourceNotice({ status, errors = [] }) {
-    if (status !== 'partial' && status !== 'unavailable') return null;
-
-    return (
-        <div role="status" className="rounded-[18px] border border-amber-300/25 bg-amber-400/[0.08] px-4 py-3 text-[12px] text-amber-100/90">
-            <p className="font-semibold">{status === 'partial' ? 'Données SEO partielles' : 'Sources SEO indisponibles'}</p>
-            <p className="mt-1">Certains indicateurs ne sont pas disponibles. Les valeurs connues restent affichées.</p>
-            {errors.length > 0 ? (
-                <ul className="mt-2 space-y-1">
-                    {errors.map((error) => <li key={error.source}>{error.message}</li>)}
-                </ul>
-            ) : null}
-        </div>
-    );
-}
-
 export function formatNumber(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) return 'n.d.';
     return Number(value).toLocaleString('fr-FR');

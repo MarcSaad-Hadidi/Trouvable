@@ -10,6 +10,7 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/cont
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 
 function buildPageModels(blocks) {
     const pages = new Map();
@@ -112,6 +113,7 @@ export default function SeoOnPagePage() {
             <CommandPageShell
                 header={<CommandHeader eyebrow="SEO Ops" title="Optimisation on-page" subtitle={`Inspecteur éditorial pour ${client?.client_name || 'ce mandat'}.`} actions={<Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.primary}>Opportunités SEO</Link>} />}
             >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState title={data?.emptyState?.title || 'Aucune page inspectable'} description={data?.emptyState?.description || 'Le dernier audit ne fournit pas encore de blocs on-page exploitables par page.'} />
             </CommandPageShell>
         );
@@ -133,6 +135,7 @@ export default function SeoOnPagePage() {
                 />
             }
         >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {(data.summaryCards || []).map((card) => (
                     <div key={card.id} className={cn(COMMAND_PANEL, 'p-4')}>

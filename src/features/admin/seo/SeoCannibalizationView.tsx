@@ -9,6 +9,7 @@ import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/cont
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 
 const severityOrder = { high: 0, medium: 1, low: 2 };
 
@@ -162,6 +163,7 @@ export default function SeoCannibalizationPage() {
                 />
             }
         >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {metricCards.map((card) => (
                     <CommandMetricCard key={card.id} label={card.label} value={card.value} detail={card.detail} tone={card.tone} />
@@ -379,4 +381,3 @@ export default function SeoCannibalizationPage() {
         </CommandPageShell>
     );
 }
-

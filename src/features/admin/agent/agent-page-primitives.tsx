@@ -55,6 +55,7 @@ export function AgentPageFrame({
     emptyState = null,
     loadingMessage = 'Chargement des données du mandat...',
     errorAction = null,
+    notice = null,
     children,
 }: {
     eyebrow: React.ReactNode;
@@ -66,10 +67,12 @@ export function AgentPageFrame({
     emptyState?: { title?: string; description?: string } | null;
     loadingMessage?: string;
     errorAction?: React.ReactNode;
+    notice?: React.ReactNode;
     children?: React.ReactNode;
 }) {
     return (
         <CommandPageShell header={<CommandHeader eyebrow={eyebrow} title={title} subtitle={subtitle} actions={actions} />}>
+            {!loading && !error ? notice : null}
             {loading ? (
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/88">Chargement</div>
@@ -221,4 +224,3 @@ export function GenericListPanel({
         </CommandChartCard>
     );
 }
-

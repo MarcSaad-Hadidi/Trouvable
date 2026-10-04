@@ -1,5 +1,6 @@
 'use client';
 
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import {
     KeyValuePanel,
@@ -38,6 +39,7 @@ export default function AgentActionabilityPage() {
             loading={loading}
             error={error}
             emptyState={emptyState}
+            notice={<SourceStatusNotice domain="AGENT" status={data?.status} errors={data?.errors} />}
             loadingMessage="Calcul des dimensions d’actionnabilité et des actions prioritaires."
         >
             <MetricGrid
@@ -110,4 +112,3 @@ export default function AgentActionabilityPage() {
         </AgentPageFrame>
     );
 }
-

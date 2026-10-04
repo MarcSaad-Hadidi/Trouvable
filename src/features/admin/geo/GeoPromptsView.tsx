@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -85,6 +86,7 @@ function promptLifecycleLabel(prompt) {
     if (!prompt.is_active) return { text: 'INACTIF', cls: 'text-white/20' };
     if (prompt.quality_status === 'weak') return { text: 'À RENFORCER', cls: 'text-rose-400' };
     if (prompt.quality_status === 'review') return { text: 'À REVOIR', cls: 'text-amber-400' };
+    if (prompt.quality_status == null || prompt.lifecycle?.has_run === null) return { text: 'INDISPONIBLE', cls: 'text-white/30' };
     if (!prompt.last_run) return { text: 'PRÊT', cls: 'text-[#7c6aef]' };
     if (prompt.last_run.target_found) return { text: 'PERFORMANT', cls: 'text-emerald-400' };
     return { text: 'ACTIF', cls: 'text-white/40' };
@@ -594,11 +596,12 @@ export default function GeoPromptsView() {
 
     return (
         <CommandPageShell header={header}>
+            <SourceStatusNotice domain="GEO" status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <CommandMetricCard label="Inventaire" value={data.summary?.total || 0} detail="Total prompts" tone="info" />
-                <CommandMetricCard label="Performance" value={`${data.summary?.mentionRatePercent || 0}%`} detail="Taux cible" tone="ok" />
-                <CommandMetricCard label="Critique" value={data.summary?.weakPromptCount || 0} detail="À renforcer" tone="critical" />
-                <CommandMetricCard label="Inactifs" value={prompts.filter(p => !p.is_active).length} detail="En pause" tone="neutral" />
+                <CommandMetricCard label="Inventaire" value={data.summary?.total ?? 'n.d.'} detail="Total prompts" tone="info" />
+                <CommandMetricCard label="Performance" value={data.summary?.mentionRatePercent == null ? 'n.d.' : `${data.summary.mentionRatePercent}%`} detail="Taux cible" tone={data.summary?.mentionRatePercent == null ? 'neutral' : 'ok'} />
+                <CommandMetricCard label="Critique" value={data.summary?.weakPromptCount ?? 'n.d.'} detail="À renforcer" tone="critical" />
+                <CommandMetricCard label="Inactifs" value={data.summary?.inactive ?? 'n.d.'} detail="En pause" tone="neutral" />
             </div>
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12">

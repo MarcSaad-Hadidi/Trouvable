@@ -11,7 +11,7 @@ import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/cont
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
-import { SeoSourceNotice } from './SeoOpsPrimitives';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 
 const TIME_RANGES = ['7d', '30d', '90d', '12m'];
 const SEGMENT_LABELS = {
@@ -226,7 +226,7 @@ export default function SeoVisibilityPage() {
                     />
                 )}
             >
-                <SeoSourceNotice status={data?.status} errors={data?.errors} />
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState title={data?.emptyState?.title || 'Visibilité SEO indisponible'} description={data?.emptyState?.description || 'Aucune donnée organique exploitable n a été trouvée pour cette période.'} />
             </CommandPageShell>
         );
@@ -265,7 +265,7 @@ export default function SeoVisibilityPage() {
                 />
             )}
         >
-            <SeoSourceNotice status={data.status} errors={data.errors} />
+            <SourceStatusNotice status={data.status} errors={data.errors} />
             {gscSource?.mode !== 'live' && (
                 <div className="rounded-[18px] border border-amber-300/25 bg-amber-400/[0.08] px-4 py-3 text-[12px] text-amber-100/90">
                     Données Search Console brutes indisponibles pour cette vue. {gscSource?.reason || 'Aucune raison détaillée fournie.'}

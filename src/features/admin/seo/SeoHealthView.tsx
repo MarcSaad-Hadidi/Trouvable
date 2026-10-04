@@ -13,6 +13,7 @@ import { CommandTable } from '@/features/admin/shared/components/command/Command
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 
 function formatDateTime(value) {
     if (!value) return 'n.d.';
@@ -271,6 +272,7 @@ export default function SeoHealthPage() {
                     />
                 }
             >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState
                     title={data?.emptyState?.title || 'Aucune lecture technique disponible'}
                     description={data?.emptyState?.description || 'Le dernier audit ne remonte pas encore de signaux techniques exploitables.'}
@@ -295,6 +297,7 @@ export default function SeoHealthPage() {
                 />
             }
         >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
             {scanError ? (
                 <div className="rounded-[20px] border border-rose-300/18 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-100">
                     {scanError}

@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import Link from 'next/link';
 
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
@@ -267,6 +268,7 @@ export default function SeoOpportunitiesView() {
     if (data?.emptyState) {
         return (
             <SeoPageShell>
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <SeoPageHeader
                     eyebrow="SEO Ops"
                     title="Opportunités SEO"
@@ -286,6 +288,7 @@ export default function SeoOpportunitiesView() {
 
     return (
         <SeoPageShell>
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <SeoPageHeader
                 eyebrow="SEO Ops"
                 title="Opportunités SEO"

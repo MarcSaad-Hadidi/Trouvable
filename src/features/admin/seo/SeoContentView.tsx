@@ -9,6 +9,7 @@ import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/cont
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 
 function normalizeText(value) {
@@ -189,6 +190,7 @@ export default function SeoContentPage() {
                     />
                 }
             >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState title={data?.emptyState?.title || 'Aucune lecture éditoriale disponible'} description={data?.emptyState?.description || 'Le dossier ne remonte pas encore de structure contenu exploitable.'} />
             </CommandPageShell>
         );
@@ -205,6 +207,7 @@ export default function SeoContentPage() {
                 />
             }
         >
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {summaryCards.map((card) => (
                     <CommandMetricCard
@@ -398,4 +401,3 @@ export default function SeoContentPage() {
         </CommandPageShell>
     );
 }
-
