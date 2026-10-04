@@ -2,7 +2,7 @@ import 'server-only';
 
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, weightedPosition, normalizeUrl, aggregatePageRows, normalizePathname, getLatestObservedDate, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
+import { getSinceDate, filterRowsSince, createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, normalizeUrl, aggregatePageRows, normalizePathname, getLatestObservedDate, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
@@ -353,51 +353,17 @@ function makePairKey(leftKey, rightKey) {
 }
 
 function initMetricBucket(url) {
-    return {
-        url,
-        clicks: 0,
-        impressions: 0,
-        weightedPositionSum: 0,
-        fallbackPositionSum: 0,
-        fallbackCount: 0,
-        sharedQueryCount: 0,
-        nonBrandSharedQueryCount: 0,
-    };
+    return { url, ...createSearchMetricBucket(), sharedQueryCount: 0, nonBrandSharedQueryCount: 0 };
 }
 
 function addRowMetrics(bucket, rowMetrics, isBrandLike) {
-    const clicks = toNumber(rowMetrics?.clicks);
-    const impressions = toNumber(rowMetrics?.impressions);
-    const position = toNumber(rowMetrics?.position);
-
-    bucket.clicks += clicks;
-    bucket.impressions += impressions;
-    bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
-
-    if (position > 0) {
-        bucket.fallbackPositionSum += position;
-        bucket.fallbackCount += 1;
-    }
-
+    accumulateSearchMetrics(bucket, rowMetrics);
     bucket.sharedQueryCount += 1;
     if (!isBrandLike) bucket.nonBrandSharedQueryCount += 1;
 }
 
 function finalizeMetricBucket(bucket) {
-    return {
-        url: bucket.url,
-        clicks: bucket.clicks,
-        impressions: bucket.impressions,
-        ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-        position: weightedPosition(
-            bucket.impressions,
-            bucket.weightedPositionSum,
-            bucket.fallbackPositionSum,
-            bucket.fallbackCount,
-        ),
-        sharedQueryCount: bucket.sharedQueryCount,
-        nonBrandSharedQueryCount: bucket.nonBrandSharedQueryCount,
-    };
+    return { url: bucket.url, ...readSearchMetrics(bucket), sharedQueryCount: bucket.sharedQueryCount, nonBrandSharedQueryCount: bucket.nonBrandSharedQueryCount };
 }
 
 function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {

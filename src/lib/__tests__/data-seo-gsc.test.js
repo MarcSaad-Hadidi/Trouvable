@@ -4,7 +4,7 @@ vi.mock('server-only', () => ({}));
 
 import {
     aggregatePageRows, filterRowsSince, getLatestObservedDate, getObservedAgeDays,
-    getSinceDate, normalizeUrl, resolveConnectorStatus, weightedPosition,
+    getSinceDate, normalizeUrl, resolveConnectorStatus, createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics,
 } from '../operator-intelligence/seo-gsc';
 
 afterEach(() => vi.useRealTimers());
@@ -42,8 +42,10 @@ describe('persisted GSC page projections', () => {
             { page: '/page', impressions: 0, position: 0 },
         ]);
         expect(pages.get('/page')).toMatchObject({ position: 6, ctr: null });
-        expect(weightedPosition(10, 0, 12, 2)).toBe(0);
-        expect(weightedPosition(0, 0, 0, 0)).toBeNull();
+        const bucket = createSearchMetricBucket();
+        accumulateSearchMetrics(bucket, { impressions: 10, position: 0 });
+        expect(readSearchMetrics(bucket).position).toBe(0);
+        expect(readSearchMetrics(createSearchMetricBucket()).position).toBeNull();
     });
 
     it('retains historical URL identity including relative paths and origin', () => {

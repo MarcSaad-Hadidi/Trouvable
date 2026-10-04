@@ -20,6 +20,32 @@ export function weightedPosition(impressions, weightedPositionSum, fallbackPosit
     return null;
 }
 
+export function createSearchMetricBucket() {
+    return { clicks: 0, impressions: 0, weightedPositionSum: 0, fallbackPositionSum: 0, fallbackCount: 0 };
+}
+
+export function accumulateSearchMetrics(bucket, row) {
+    const clicks = toNumber(row?.clicks);
+    const impressions = toNumber(row?.impressions);
+    const position = toNumber(row?.position);
+    bucket.clicks += clicks;
+    bucket.impressions += impressions;
+    bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
+    if (position > 0) {
+        bucket.fallbackPositionSum += position;
+        bucket.fallbackCount += 1;
+    }
+}
+
+export function readSearchMetrics(bucket) {
+    return {
+        clicks: bucket.clicks,
+        impressions: bucket.impressions,
+        ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
+        position: weightedPosition(bucket.impressions, bucket.weightedPositionSum, bucket.fallbackPositionSum, bucket.fallbackCount),
+    };
+}
+
 export function normalizePathname(pathname) {
     if (!pathname) return null;
     const normalized = pathname.replace(/\/+/g, '/').replace(/\/$/, '');
@@ -49,27 +75,11 @@ export function aggregatePageRows(rows) {
         if (!aggregated.has(key)) {
             aggregated.set(key, {
                 url: compactString(row?.page) || key,
-                clicks: 0,
-                impressions: 0,
-                weightedPositionSum: 0,
-                fallbackPositionSum: 0,
-                fallbackCount: 0,
+                ...createSearchMetricBucket(),
             });
         }
 
-        const bucket = aggregated.get(key);
-        const clicks = toNumber(row?.clicks);
-        const impressions = toNumber(row?.impressions);
-        const position = toNumber(row?.position);
-
-        bucket.clicks += clicks;
-        bucket.impressions += impressions;
-        bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
-
-        if (position > 0) {
-            bucket.fallbackPositionSum += position;
-            bucket.fallbackCount += 1;
-        }
+        accumulateSearchMetrics(aggregated.get(key), row);
     }
 
     return new Map(
@@ -77,15 +87,7 @@ export function aggregatePageRows(rows) {
             key,
             {
                 url: bucket.url,
-                clicks: bucket.clicks,
-                impressions: bucket.impressions,
-                ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-                position: weightedPosition(
-                    bucket.impressions,
-                    bucket.weightedPositionSum,
-                    bucket.fallbackPositionSum,
-                    bucket.fallbackCount,
-                ),
+                ...readSearchMetrics(bucket),
             },
         ])),
     );

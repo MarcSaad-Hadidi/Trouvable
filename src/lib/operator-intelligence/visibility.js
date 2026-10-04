@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, weightedPosition, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
+
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import { hasGscServiceAccountCredentials, queryGscSearchAnalyticsRaw } from '@/lib/connectors/providers/gsc';
@@ -141,27 +143,6 @@ function getLatestObservedDate(rows) {
         .sort((left, right) => right.localeCompare(left))[0] || null;
 }
 
-function getObservedAgeDays(dateString) {
-    if (!dateString) return null;
-
-    const timestamp = new Date(`${dateString}T00:00:00Z`).getTime();
-    if (Number.isNaN(timestamp)) return null;
-
-    return Math.floor((Date.now() - timestamp) / (24 * 60 * 60 * 1000));
-}
-
-function resolveConnectorStatus(rows, provider) {
-    const row = (rows || []).find((r) => r.provider === provider) || null;
-    if (!row || row.status === 'not_connected') {
-        return { status: 'not_connected', lastSyncedAt: null, lastError: null };
-    }
-    return {
-        status: row.status,
-        lastSyncedAt: row.last_synced_at || null,
-        lastError: row.last_error || null,
-    };
-}
-
 function buildFreshness(sourceLabel, connector, rows, { unavailableDetail = null } = {}) {
     const lastObservedDate = getLatestObservedDate(rows);
     const ageDays = getObservedAgeDays(lastObservedDate);
@@ -197,57 +178,20 @@ function buildFreshness(sourceLabel, connector, rows, { unavailableDetail = null
     };
 }
 
-function weightedPosition(impressions, weightedPositionSum, fallbackPositionSum, fallbackCount) {
-    if (impressions > 0) return weightedPositionSum / impressions;
-    if (fallbackCount > 0) return fallbackPositionSum / fallbackCount;
-    return null;
+function aggregateRawSearchRows(rows, getKey) {
+    const aggregated = new Map();
+    for (const row of rows || []) {
+        const key = getKey(row);
+        if (!key) continue;
+        if (!aggregated.has(key)) aggregated.set(key, createSearchMetricBucket());
+        accumulateSearchMetrics(aggregated.get(key), row);
+    }
+    return Array.from(aggregated, ([key, bucket]) => ({ key, ...readSearchMetrics(bucket) }));
 }
 
 function aggregateRowsByDimension(rows, dimension) {
-    const aggregated = new Map();
-
-    for (const row of rows || []) {
-        const key = String(row?.dimensions?.[dimension] || '').trim();
-        if (!key) continue;
-
-        if (!aggregated.has(key)) {
-            aggregated.set(key, {
-                key,
-                clicks: 0,
-                impressions: 0,
-                weightedPositionSum: 0,
-                fallbackPositionSum: 0,
-                fallbackCount: 0,
-            });
-        }
-
-        const bucket = aggregated.get(key);
-        const clicks = toNumber(row.clicks);
-        const impressions = toNumber(row.impressions);
-        const position = toNumber(row.position);
-
-        bucket.clicks += clicks;
-        bucket.impressions += impressions;
-        bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
-        if (position > 0) {
-            bucket.fallbackPositionSum += position;
-            bucket.fallbackCount += 1;
-        }
-    }
-
-    return Array.from(aggregated.values())
-        .map((bucket) => ({
-            [dimension]: bucket.key,
-            clicks: bucket.clicks,
-            impressions: bucket.impressions,
-            ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-            position: weightedPosition(
-                bucket.impressions,
-                bucket.weightedPositionSum,
-                bucket.fallbackPositionSum,
-                bucket.fallbackCount,
-            ),
-        }))
+    return aggregateRawSearchRows(rows, row => String(row?.dimensions?.[dimension] || '').trim())
+        .map(({ key, ...metrics }) => ({ [dimension]: key, ...metrics }))
         .sort((left, right) => {
             const clicksDelta = right.clicks - left.clicks;
             if (clicksDelta !== 0) return clicksDelta;
@@ -256,50 +200,8 @@ function aggregateRowsByDimension(rows, dimension) {
 }
 
 function aggregateDailySearchRows(rows) {
-    const aggregated = new Map();
-
-    for (const row of rows || []) {
-        const date = rowDate(row);
-        if (!date) continue;
-
-        if (!aggregated.has(date)) {
-            aggregated.set(date, {
-                date,
-                clicks: 0,
-                impressions: 0,
-                weightedPositionSum: 0,
-                fallbackPositionSum: 0,
-                fallbackCount: 0,
-            });
-        }
-
-        const bucket = aggregated.get(date);
-        const clicks = toNumber(row.clicks);
-        const impressions = toNumber(row.impressions);
-        const position = toNumber(row.position);
-
-        bucket.clicks += clicks;
-        bucket.impressions += impressions;
-        bucket.weightedPositionSum += impressions > 0 ? position * impressions : 0;
-        if (position > 0) {
-            bucket.fallbackPositionSum += position;
-            bucket.fallbackCount += 1;
-        }
-    }
-
-    return Array.from(aggregated.values())
-        .map((bucket) => ({
-            date: bucket.date,
-            clicks: bucket.clicks,
-            impressions: bucket.impressions,
-            ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-            position: weightedPosition(
-                bucket.impressions,
-                bucket.weightedPositionSum,
-                bucket.fallbackPositionSum,
-                bucket.fallbackCount,
-            ),
-        }))
+    return aggregateRawSearchRows(rows, rowDate)
+        .map(({ key, ...metrics }) => ({ date: key, ...metrics }))
         .sort((left, right) => left.date.localeCompare(right.date));
 }
 
