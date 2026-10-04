@@ -2,18 +2,27 @@ import 'server-only';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
+import { loadIndependentSources, getSourceStatus } from '@/lib/operator-intelligence/source-availability';
 
 import { buildProtocolsReport } from './protocols';
 
 export async function getAgentProtocolsSlice(clientId) {
-    const latestAudit = await dbGetLatestAudit(clientId).catch((error) => {
-        console.error(`[agent-protocols-slice] audit ${clientId}`, error);
-        return null;
+    const { values, dataSources, errors } = await loadIndependentSources({
+        latestAudit: () => dbGetLatestAudit(clientId),
     });
-
+    const latestAudit = values.latestAudit;
     const report = buildProtocolsReport({ audit: latestAudit });
+    if (dataSources.latestAudit === 'unavailable') {
+        report.emptyState = {
+            title: 'Protocoles AGENT indisponibles',
+            description: 'Les données d’audit sont temporairement indisponibles. Réessayez ultérieurement.',
+        };
+    }
 
     return {
+        status: getSourceStatus(dataSources),
+        dataSources,
+        errors,
         provenance: {
             observed: getProvenanceMeta('observed'),
             derived: getProvenanceMeta('derived'),

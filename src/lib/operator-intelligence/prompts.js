@@ -17,6 +17,7 @@ import {
     normalizeDiscoveryMode,
 } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
+import { loadIndependentSources, getSourceStatus } from '@/lib/operator-intelligence/source-availability';
 import { isRunFailureStatus, isRunSuccessStatus, normalizeRunParseStatus } from '@/lib/operator-intelligence/run-lifecycle';
 import {
     buildPromptMetadata,
@@ -429,13 +430,17 @@ function emptyMentionCounts() {
 
 export async function getPromptSlice(clientId) {
     const supabase = getAdminSupabase();
-    const [client, latestAudit, trackedQueries, lastRunMap, runs] = await Promise.all([
-        dbGetClientById(clientId).catch(() => null),
-        dbGetLatestAudit(clientId).catch(() => null),
-        dbGetTrackedQueriesAll(clientId),
-        dbGetLastRunPerTrackedQuery(clientId),
-        dbGetQueryRunsHistory(clientId, 400).catch(() => []),
-    ]);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        client: () => dbGetClientById(clientId),
+        latestAudit: () => dbGetLatestAudit(clientId),
+        trackedQueries: () => dbGetTrackedQueriesAll(clientId),
+        lastRunMap: () => dbGetLastRunPerTrackedQuery(clientId),
+        runHistory: () => dbGetQueryRunsHistory(clientId, 400),
+    });
+    const { client, latestAudit, trackedQueries, runHistory: runs } = values;
+    const lastRunMap = values.lastRunMap || new Map();
+    const clientUnavailable = dataSources.client === 'unavailable' || client == null;
+    const contextUnavailable = clientUnavailable || dataSources.latestAudit === 'unavailable';
 
     const historyByPrompt = new Map();
     for (const run of runs || []) {
@@ -461,14 +466,19 @@ export async function getPromptSlice(clientId) {
     const mentionCountsByRunId = new Map();
 
     if (latestRunIds.length > 0) {
-        const { data: mentionRows, error: mentionError } = await supabase
+        const mentions = await loadIndependentSources({
+            mentions: async () => {
+                const { data, error } = await supabase
             .from('query_mentions')
             .select('query_run_id, entity_type, is_target')
             .in('query_run_id', latestRunIds);
-
-        if (mentionError) {
-            throw new Error(`[OperatorIntelligence/prompts] mentions: ${mentionError.message}`);
-        }
+                if (error) throw error;
+                return data;
+            },
+        });
+        Object.assign(dataSources, mentions.dataSources);
+        errors.push(...mentions.errors);
+        const mentionRows = mentions.values.mentions;
 
         for (const mention of mentionRows || []) {
             if (!mentionCountsByRunId.has(mention.query_run_id)) {
@@ -503,8 +513,14 @@ export async function getPromptSlice(clientId) {
             const categoryMeta = getTrackedQueryCategoryMeta(query.category || query.query_type, query.query_text);
             const lastRun = lastRunMap.get(query.id) || null;
             const resolvedParseStatus = lastRun ? normalizeRunParseStatus(lastRun) : null;
-            const history = historyByPrompt.get(query.id) || { total: 0, completed: 0, failed: 0, running: 0, pending: 0 };
-            const mentionCounts = lastRun
+            const history =
+                dataSources.runHistory === 'unavailable' || runs == null
+                    ? null
+                    : historyByPrompt.get(query.id) || { total: 0, completed: 0, failed: 0, running: 0, pending: 0 };
+            const mentionCounts =
+                dataSources.mentions === 'unavailable'
+                    ? null
+                    : lastRun
                 ? (mentionCountsByRunId.get(lastRun.id) || emptyMentionCounts())
                 : emptyMentionCounts();
             const responseText = String(lastRun?.response_text || '').trim();
@@ -514,16 +530,29 @@ export async function getPromptSlice(clientId) {
             const normalizedDiscoveryMode = normalizeDiscoveryMode(rawDiscoveryMode);
             const resolvedDiscoveryMode = rawDiscoveryMode
                 ? normalizedDiscoveryMode
-                : inferDiscoveryMode({
+                : clientUnavailable
+                  ? null
+                  : inferDiscoveryMode({
                     category: categoryMeta.key,
                     intentFamily: query.intent_family,
                     queryText: query.query_text,
                     clientName: client?.client_name || '',
                 });
-            const promptVisibilityEligible = isVisibilityEligible(resolvedDiscoveryMode);
-            const discoveryModeMeta = getDiscoveryModeMeta(resolvedDiscoveryMode);
+            const storedVisibilityEligible = query.visibility_eligible ?? query.prompt_metadata?.visibility_eligible;
+            const promptVisibilityEligible = resolvedDiscoveryMode
+                ? isVisibilityEligible(resolvedDiscoveryMode)
+                : typeof storedVisibilityEligible === 'boolean'
+                  ? storedVisibilityEligible
+                  : null;
+            const discoveryModeMeta = resolvedDiscoveryMode ? getDiscoveryModeMeta(resolvedDiscoveryMode) : null;
 
-            const computedMetadata = buildPromptMetadata({
+            const computedMetadata = clientUnavailable
+                ? {
+                      quality_status: null,
+                      quality_score: null,
+                      validation_status: null,
+                  }
+                : buildPromptMetadata({
                 queryText: query.query_text,
                 clientName: client?.client_name || '',
                 city,
@@ -556,12 +585,12 @@ export async function getPromptSlice(clientId) {
                 category_label: categoryMeta.label,
                 category_description: categoryMeta.description,
                 discovery_mode: resolvedDiscoveryMode,
-                discovery_mode_label: discoveryModeMeta.label,
-                bias_risk: discoveryModeMeta.bias_risk,
-                evidence_level: discoveryModeMeta.evidence_level,
-                answer_type: discoveryModeMeta.answer_type,
-                context_injected: discoveryModeMeta.bias_risk === 'context_injected',
-                source_grounded: discoveryModeMeta.bias_risk === 'source_grounded',
+                discovery_mode_label: discoveryModeMeta?.label ?? null,
+                bias_risk: discoveryModeMeta?.bias_risk ?? null,
+                evidence_level: discoveryModeMeta?.evidence_level ?? null,
+                answer_type: discoveryModeMeta?.answer_type ?? null,
+                context_injected: discoveryModeMeta ? discoveryModeMeta.bias_risk === 'context_injected' : null,
+                source_grounded: discoveryModeMeta ? discoveryModeMeta.bias_risk === 'source_grounded' : null,
                 visibility_eligible: promptVisibilityEligible,
                 created_at: query.created_at,
                 updated_at: query.updated_at,
@@ -584,42 +613,51 @@ export async function getPromptSlice(clientId) {
                 quality_status: contract.quality_status,
                 quality_score: contract.quality_score,
                 quality_reasons: contract.quality_reasons,
-                activation_blocked: shouldSoftBlockPromptActivation({ quality_status: contract.quality_status }),
+                activation_blocked: contract.quality_status
+                    ? shouldSoftBlockPromptActivation({ quality_status: contract.quality_status })
+                    : null,
                 last_run: lastRun
                     ? {
-                        id: lastRun.id,
-                        created_at: lastRun.created_at,
-                        status: lastRun.status,
-                        parse_status: resolvedParseStatus,
-                        parse_confidence: lastRun.parse_confidence ?? null,
-                        target_found: lastRun.target_found === true,
-                        provider: lastRun.provider,
-                        model: lastRun.model,
-                        target_position: lastRun.target_position ?? lastRun.parsed_response?.target_position ?? null,
-                        total_mentioned: Number(lastRun.total_mentioned || 0),
-                        run_signal_tier: lastRun.parsed_response?.run_signal_tier || null,
-                        discovery_mode: lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode,
-                        answer_generation_mode: lastRun.parsed_response?.answer_generation_mode || lastRun.prompt_payload?.answer_generation_mode || null,
-                        context_injected: lastRun.parsed_response?.context_injected === true || lastRun.prompt_payload?.context_injected === true,
-                        source_grounded: lastRun.parsed_response?.source_grounded === true || lastRun.prompt_payload?.source_grounded === true,
-                        bias_risk: lastRun.parsed_response?.bias_risk || lastRun.prompt_payload?.bias_risk || null,
-                        evidence_level: lastRun.parsed_response?.evidence_level || lastRun.prompt_payload?.evidence_level || null,
-                        prompt_version: lastRun.parsed_response?.prompt_version || lastRun.prompt_payload?.prompt_version || null,
-                        visibility_eligible: isVisibilityEligible(lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode),
-                        measurement_outcome: lastRun.parsed_response?.measurement_outcome || null,
-                        mention_counts: mentionCounts,
-                        response_excerpt: responseText ? responseText.slice(0, 220) : '',
-                        has_more_response: responseText.length > 220,
-                    }
+                          id: lastRun.id,
+                          created_at: lastRun.created_at,
+                          status: lastRun.status,
+                          parse_status: resolvedParseStatus,
+                          parse_confidence: lastRun.parse_confidence ?? null,
+                          target_found: lastRun.target_found === true,
+                          provider: lastRun.provider,
+                          model: lastRun.model,
+                          target_position: lastRun.target_position ?? lastRun.parsed_response?.target_position ?? null,
+                          total_mentioned: Number(lastRun.total_mentioned || 0),
+                          run_signal_tier: lastRun.parsed_response?.run_signal_tier || null,
+                          discovery_mode: lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode,
+                          answer_generation_mode: lastRun.parsed_response?.answer_generation_mode || lastRun.prompt_payload?.answer_generation_mode || null,
+                          context_injected: lastRun.parsed_response?.context_injected === true || lastRun.prompt_payload?.context_injected === true,
+                          source_grounded: lastRun.parsed_response?.source_grounded === true || lastRun.prompt_payload?.source_grounded === true,
+                          bias_risk: lastRun.parsed_response?.bias_risk || lastRun.prompt_payload?.bias_risk || null,
+                          evidence_level: lastRun.parsed_response?.evidence_level || lastRun.prompt_payload?.evidence_level || null,
+                          prompt_version: lastRun.parsed_response?.prompt_version || lastRun.prompt_payload?.prompt_version || null,
+                          visibility_eligible:
+                              lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode
+                                  ? isVisibilityEligible(lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode)
+                                  : null,
+                          measurement_outcome: lastRun.parsed_response?.measurement_outcome || null,
+                          mention_counts: mentionCounts,
+                          response_excerpt: responseText ? responseText.slice(0, 220) : '',
+                          has_more_response: responseText.length > 220,
+                      }
                     : null,
                 lifecycle: {
-                    latest_status: lastRun?.status || 'no_run',
-                    has_run: Boolean(lastRun),
+                    latest_status: dataSources.lastRunMap === 'unavailable' ? null : lastRun?.status || 'no_run',
+                    has_run: dataSources.lastRunMap === 'unavailable' ? null : Boolean(lastRun),
                 },
                 run_history: history,
             };
         })
         .sort(sortPrompts);
+
+    const trackedUnavailable = dataSources.trackedQueries === 'unavailable';
+    const latestRunsUnavailable = trackedUnavailable || dataSources.lastRunMap === 'unavailable';
+    const modesUnavailable = trackedUnavailable || prompts.some((prompt) => prompt.discovery_mode == null);
 
     const withTargetFound = prompts.filter((prompt) => prompt.last_run?.target_found === true).length;
     const withRunNoTarget = prompts.filter((prompt) => prompt.last_run && prompt.last_run.target_found === false).length;
@@ -637,15 +675,21 @@ export async function getPromptSlice(clientId) {
 
     const categories = getTrackedQueryCategoryOptions().map((option) => ({
         ...option,
-        count: prompts.filter((prompt) => normalizeTrackedQueryCategory(prompt.category, prompt.query_text) === option.key).length,
-        active_count: prompts.filter((prompt) => prompt.category === option.key && prompt.is_active).length,
+        count: trackedUnavailable
+            ? null
+            : prompts.filter((prompt) => normalizeTrackedQueryCategory(prompt.category, prompt.query_text) === option.key).length,
+        active_count: trackedUnavailable
+            ? null
+            : prompts.filter((prompt) => prompt.category === option.key && prompt.is_active).length,
     }));
 
-    const siteType = inferSiteType(latestAudit);
-    const siteTypeLabel = inferSiteTypeLabel(latestAudit);
+    const siteType = dataSources.latestAudit === 'unavailable' ? null : inferSiteType(latestAudit);
+    const siteTypeLabel = dataSources.latestAudit === 'unavailable' ? null : inferSiteTypeLabel(latestAudit);
     const siteClassification = latestAudit?.geo_breakdown?.site_classification || latestAudit?.seo_breakdown?.site_classification || {};
     const locale = 'fr-CA';
-    const canonicalDetection = buildCanonicalBusinessDetection({
+    const canonicalDetection = contextUnavailable
+        ? null
+        : buildCanonicalBusinessDetection({
         clientName: client?.client_name || '',
         rawBusinessType: String(client?.business_type || '').trim(),
         siteClassification,
@@ -657,7 +701,17 @@ export async function getPromptSlice(clientId) {
         localSignals: latestAudit?.extracted_data?.local_signals || {},
         pageSummaries: latestAudit?.extracted_data?.page_summaries || [],
     });
-    const starterPack = buildStarterPromptPack({
+    const starterPack =
+        contextUnavailable || dataSources.trackedQueries === 'unavailable'
+            ? {
+                  title: 'Suggestions de prompts indisponibles',
+                  description: 'Le contexte nécessaire aux suggestions est temporairement indisponible.',
+                  prompts: [],
+                  weakPromptCount: null,
+                  supportedIntentFamilies: getPromptIntentFamilies(),
+                  status: 'unavailable',
+              }
+            : buildStarterPromptPack({
         client,
         siteType,
         siteClassification,
@@ -668,7 +722,7 @@ export async function getPromptSlice(clientId) {
     // --- Mode-split visibility metrics ---
     // Uses measurement_outcome taxonomy as source of truth, NOT raw target_found.
     const blindPrompts = prompts.filter((p) => p.discovery_mode === 'blind_discovery');
-    const assistedPrompts = prompts.filter((p) => p.discovery_mode !== 'blind_discovery');
+    const assistedPrompts = prompts.filter((p) => p.discovery_mode && p.discovery_mode !== 'blind_discovery');
     const contextInjectedPrompts = prompts.filter((p) => p.context_injected === true || p.discovery_mode === 'brand_aware' || p.discovery_mode === 'controlled_context_answer');
 
     const blindWithRun = blindPrompts.filter((p) => p.last_run);
@@ -678,8 +732,8 @@ export async function getPromptSlice(clientId) {
         const withRun = modePrompts.filter((p) => p.last_run);
         acc[mode.key] = {
             label: mode.label,
-            total_prompts: modePrompts.length,
-            with_run: withRun.length,
+            total_prompts: modesUnavailable ? null : modePrompts.length,
+            with_run: modesUnavailable || latestRunsUnavailable ? null : withRun.length,
             context_injected: mode.bias_risk === 'context_injected',
             visibility_eligible: mode.visibility_eligible === true,
         };
@@ -695,24 +749,33 @@ export async function getPromptSlice(clientId) {
 
     const visibilityByMode = {
         blind_discovery: {
-            total_prompts: blindPrompts.length,
-            with_run: spontaneousTotal,
-            visibility_count: spontaneousVisibilityCount,
-            visibility_rate_percent: spontaneousTotal > 0 ? Math.round((spontaneousVisibilityCount / spontaneousTotal) * 100) : null,
+            total_prompts: modesUnavailable ? null : blindPrompts.length,
+            with_run: modesUnavailable || latestRunsUnavailable ? null : spontaneousTotal,
+            visibility_count: modesUnavailable || latestRunsUnavailable ? null : spontaneousVisibilityCount,
+            visibility_rate_percent:
+                !modesUnavailable && !latestRunsUnavailable && spontaneousTotal > 0
+                    ? Math.round((spontaneousVisibilityCount / spontaneousTotal) * 100)
+                    : null,
             label: 'Visibilite spontanee',
         },
         assisted_or_named: {
-            total_prompts: assistedPrompts.length,
-            with_run: assistedTotal,
-            assisted_mention_count: assistedTargetFound,
-            assisted_mention_rate_percent: assistedTotal > 0 ? Math.round((assistedTargetFound / assistedTotal) * 100) : null,
-            context_injected_prompts: contextInjectedPrompts.length,
+            total_prompts: modesUnavailable ? null : assistedPrompts.length,
+            with_run: modesUnavailable || latestRunsUnavailable ? null : assistedTotal,
+            assisted_mention_count: modesUnavailable || latestRunsUnavailable ? null : assistedTargetFound,
+            assisted_mention_rate_percent:
+                !modesUnavailable && !latestRunsUnavailable && assistedTotal > 0
+                    ? Math.round((assistedTargetFound / assistedTotal) * 100)
+                    : null,
+            context_injected_prompts: modesUnavailable ? null : contextInjectedPrompts.length,
             label: 'Runs non spontanes',
         },
         by_mode: modeBreakdown,
     };
 
     return {
+        status: getSourceStatus(dataSources),
+        dataSources,
+        errors,
         provenance: {
             observed: getProvenanceMeta('observed'),
             derived: getProvenanceMeta('derived'),
@@ -725,25 +788,33 @@ export async function getPromptSlice(clientId) {
             siteTypeLabel,
             businessType: client?.business_type || null,
             primaryCity: client?.address?.city || client?.target_region || null,
-            resolved_business: canonicalDetection.resolved_business,
+            resolved_business: canonicalDetection?.resolved_business ?? null,
             canonical_detection: canonicalDetection,
         },
         starterPack,
         summary: {
-            total,
-            active: prompts.filter((prompt) => prompt.is_active).length,
-            inactive: prompts.filter((prompt) => !prompt.is_active).length,
-            withTargetFound,
-            withRunNoTarget,
-            noRunYet,
-            weakPromptCount,
-            latestStatusCounts,
-            mentionRatePercent: total > 0 ? Math.round((withTargetFound / total) * 100) : null,
+            total: trackedUnavailable ? null : total,
+            active: trackedUnavailable ? null : prompts.filter((prompt) => prompt.is_active).length,
+            inactive: trackedUnavailable ? null : prompts.filter((prompt) => !prompt.is_active).length,
+            withTargetFound: latestRunsUnavailable ? null : withTargetFound,
+            withRunNoTarget: latestRunsUnavailable ? null : withRunNoTarget,
+            noRunYet: latestRunsUnavailable ? null : noRunYet,
+            weakPromptCount:
+                prompts.some((prompt) => prompt.quality_status == null) || trackedUnavailable ? null : weakPromptCount,
+            latestStatusCounts: latestRunsUnavailable ? null : latestStatusCounts,
+            mentionRatePercent:
+                !latestRunsUnavailable && total > 0 ? Math.round((withTargetFound / total) * 100) : null,
             visibilityByMode,
         },
         categories,
         prompts,
-        emptyState: {
+        emptyState:
+            dataSources.trackedQueries === 'unavailable'
+                ? {
+                      title: 'Prompts suivis indisponibles',
+                      description: 'Les données des prompts suivis sont temporairement indisponibles.',
+                  }
+                : {
             title: 'Aucun prompt suivi pour le moment',
             description: 'Ajoutez des prompts suivis pour alimenter les exécutions, citations et signaux concurrents.',
         },

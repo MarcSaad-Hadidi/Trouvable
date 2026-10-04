@@ -2,6 +2,7 @@
 
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
+import { loadIndependentSources, getSourceStatus } from '@/lib/operator-intelligence/source-availability';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import {
     getLatestCollectionRun,
@@ -88,12 +89,22 @@ function formatOpportunities(opportunities, type, { maxItems = 8 } = {}) {
         }));
 }
 
-function resolveConnectionStatus(connectorRow, latestRun, stats) {
+function resolveConnectionStatus(connectorRow, latestRun, stats, dataSources) {
+    if (dataSources.connectorRows === 'unavailable') {
+        return {
+            status: 'unavailable',
+            connector: 'agent_reach',
+            message: 'État du connecteur temporairement indisponible.',
+        };
+    }
     if (!connectorRow || connectorRow.status === 'not_connected') {
         return {
             status: 'not_connected',
             connector: 'agent_reach',
-            message: 'Intelligence communautaire non connectée, aucune collecte externe n\'a été exécutée.',
+            message:
+                latestRun || dataSources.latestRun === 'unavailable' || stats?.documents > 0
+                    ? 'Intelligence communautaire non connectée actuellement.'
+                    : 'Intelligence communautaire non connectée, aucune collecte externe n\'a été exécutée.',
             requirement: 'Lancez une collecte manuelle ou attendez le prochain cycle du moteur continu.',
         };
     }
@@ -112,6 +123,14 @@ function resolveConnectionStatus(connectorRow, latestRun, stats) {
             status: 'syncing',
             connector: 'agent_reach',
             message: 'Collecte en cours…',
+        };
+    }
+
+    if (stats?.documents == null) {
+        return {
+            status: 'unavailable',
+            connector: 'agent_reach',
+            message: 'Données communautaires temporairement indisponibles.',
         };
     }
 
@@ -136,9 +155,10 @@ function resolveConnectionStatus(connectorRow, latestRun, stats) {
 // Not-connected empty slice (preserves shape)
 // ──────────────────────────────────────────────────────────────
 
-function buildNotConnectedSlice(client) {
+function buildNotConnectedSlice(client, availability) {
     const siteContext = buildSiteContext(client);
     return {
+        ...availability,
         provenance: {
             observation: getProvenanceMeta('observed'),
             inferred: getProvenanceMeta('inferred'),
@@ -189,29 +209,28 @@ function buildNotConnectedSlice(client) {
 // ──────────────────────────────────────────────────────────────
 
 export async function getSocialSlice(clientId) {
-    const client = await dbGetClientById(clientId).catch(() => null);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        client: () => dbGetClientById(clientId),
+        connectorRows: () => getClientConnectorRows(clientId),
+        stats: () => getCommunityStats(clientId),
+        clusters: () => listClusters(clientId),
+        opportunities: () => listOpportunities(clientId, { status: null }),
+        latestRun: () => getLatestCollectionRun(clientId),
+    });
+    const { client, stats, latestRun } = values;
+    const clusters = values.clusters || [];
+    const opportunities = values.opportunities || [];
+    const connectorRow = (values.connectorRows || []).find((row) => row.provider === 'agent_reach') || null;
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
+    const connection = resolveConnectionStatus(connectorRow, latestRun, stats, dataSources);
 
-    // Resolve connector status
-    let connectorRow = null;
-    try {
-        const rows = await getClientConnectorRows(clientId);
-        connectorRow = (rows || []).find((r) => r.provider === 'agent_reach') || null;
-    } catch {
-        connectorRow = null;
-    }
-
-    // Fetch persisted data in parallel
-    const [stats, clusters, opportunities, latestRun] = await Promise.all([
-        getCommunityStats(clientId).catch(() => ({ documents: 0, clusters: 0, opportunities: 0, mentions: 0 })),
-        listClusters(clientId).catch(() => []),
-        listOpportunities(clientId, { status: null }).catch(() => []),
-        getLatestCollectionRun(clientId).catch(() => null),
-    ]);
-
-    const connection = resolveConnectionStatus(connectorRow, latestRun, stats);
-
-    if (connection.status === 'not_connected' && stats.documents === 0) {
-        return buildNotConnectedSlice(client);
+    if (
+        availability.status === 'available' &&
+        connection.status === 'not_connected' &&
+        stats?.documents === 0 &&
+        !latestRun
+    ) {
+        return buildNotConnectedSlice(client, availability);
     }
 
     const topComplaints = formatClusterItems(clusters, 'complaint');
@@ -236,6 +255,7 @@ export async function getSocialSlice(clientId) {
     const isConnected = connection.status === 'connected' || connection.status === 'connected_empty' || connection.status === 'syncing';
 
     return {
+        ...availability,
         provenance: {
             observation: getProvenanceMeta('observed'),
             inferred: getProvenanceMeta('inferred'),
@@ -244,13 +264,13 @@ export async function getSocialSlice(clientId) {
         connection,
         summary: {
             generated_at: new Date().toISOString(),
-            total_discussions: stats.documents,
-            unique_sources: sourceBuckets.length,
-            documents_count: stats.documents,
-            clusters_count: stats.clusters,
-            opportunities_count: stats.opportunities,
-            mentions_count: stats.mentions,
-            site_context: buildSiteContext(client),
+            total_discussions: stats?.documents ?? null,
+            unique_sources: values.clusters == null ? null : sourceBuckets.length,
+            documents_count: stats?.documents ?? null,
+            clusters_count: stats?.clusters ?? null,
+            opportunities_count: stats?.opportunities ?? null,
+            mentions_count: stats?.mentions ?? null,
+            site_context: dataSources.client === 'unavailable' ? null : buildSiteContext(client),
             query_seeds: latestRun?.seed_queries || [],
             last_run: latestRun ? {
                 id: latestRun.id,
@@ -278,7 +298,14 @@ export async function getSocialSlice(clientId) {
         responseOpportunities,
         aiMentionOpportunities,
         contentAngleOpportunities,
-        emptyState: !isConnected || stats.documents === 0 ? {
+        emptyState:
+            availability.status !== 'available' || stats == null
+                ? {
+                      title: 'Données communautaires indisponibles',
+                      description:
+                          'Certaines données communautaires sont temporairement indisponibles. Les données connues sont conservées.',
+                  }
+                : !isConnected || stats.documents === 0 ? {
             title: latestRun && stats.documents === 0
                 ? 'Aucun document pertinent collecté pour le moment'
                 : 'Aucune donnée communautaire collectée',
