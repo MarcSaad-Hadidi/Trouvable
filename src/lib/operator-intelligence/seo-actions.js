@@ -2,6 +2,8 @@ import 'server-only';
 
 import { listRemediationSuggestionsForClient } from '@/lib/db/remediation';
 import { filterSeoRelevant } from './seo-categories';
+import { getLatestAudit } from '@/lib/db/audits';
+import { getSourceStatus, loadIndependentSources } from './source-availability';
 
 // ──────────────────────────────────────────────────────────────
 // SEO Actions slice — actionable backlog from remediation
@@ -23,15 +25,14 @@ const SEO_RELEVANT_PROBLEM_TYPES = new Set([
  * - remediation_suggestions table (filtered to SEO-relevant types)
  * - audit issues from latest audit (SEO categories)
  */
-export async function getSeoActionsSlice(clientId, { audit } = {}) {
-    // Fetch remediation suggestions
-    let suggestions = [];
-    try {
-        const allSuggestions = await listRemediationSuggestionsForClient(clientId);
-        suggestions = allSuggestions.filter((s) => SEO_RELEVANT_PROBLEM_TYPES.has(s.problem_type));
-    } catch {
-        // Table may not exist yet or be empty — graceful degradation
-    }
+export async function getSeoActionsSlice(clientId, { audit: providedAudit } = {}) {
+    const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => (providedAudit === undefined ? getLatestAudit(clientId) : providedAudit),
+        remediation: () => listRemediationSuggestionsForClient(clientId),
+    });
+    const audit = values.audit;
+    const suggestions = (values.remediation || []).filter((item) => SEO_RELEVANT_PROBLEM_TYPES.has(item.problem_type));
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     // Extract SEO-relevant audit issues
     const allIssues = Array.isArray(audit?.issues) ? audit.issues : [];
@@ -40,13 +41,17 @@ export async function getSeoActionsSlice(clientId, { audit } = {}) {
     const hasData = suggestions.length > 0 || auditIssues.length > 0;
 
     return {
+        ...availability,
         available: hasData,
         emptyState: hasData
             ? null
             : {
-                  title: 'Aucune action SEO identifiée',
+                  title:
+                      errors.length > 0 ? 'Actions SEO temporairement indisponibles' : 'Aucune action SEO identifiée',
                   description:
-                      "Aucune suggestion de remédiation SEO et aucun problème d'audit détecté. Lancez un audit ou attendez le suivi continu.",
+                      errors.length > 0
+                          ? 'Données temporairement indisponibles pour cette lecture SEO.'
+                          : "Aucune suggestion de remédiation SEO et aucun problème d'audit détecté. Lancez un audit ou attendez le suivi continu.",
               },
         suggestions: suggestions.map((s) => ({
             id: s.id,
@@ -59,10 +64,16 @@ export async function getSeoActionsSlice(clientId, { audit } = {}) {
         })),
         auditIssues: auditIssues.slice(0, 25),
         counts: {
-            totalSuggestions: suggestions.length,
-            draftSuggestions: suggestions.filter((s) => s.status === 'draft').length,
-            approvedSuggestions: suggestions.filter((s) => s.status === 'approved').length,
-            totalAuditIssues: auditIssues.length,
+            totalSuggestions: dataSources.remediation === 'unavailable' ? null : suggestions.length,
+            draftSuggestions:
+                dataSources.remediation === 'unavailable'
+                    ? null
+                    : suggestions.filter((s) => s.status === 'draft').length,
+            approvedSuggestions:
+                dataSources.remediation === 'unavailable'
+                    ? null
+                    : suggestions.filter((s) => s.status === 'approved').length,
+            totalAuditIssues: Array.isArray(audit?.issues) ? auditIssues.length : null,
         },
     };
 }

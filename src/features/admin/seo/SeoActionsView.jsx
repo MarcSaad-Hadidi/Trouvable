@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { GeoEmptyPanel, GeoSectionTitle, GeoKpiCard, GeoPremiumCard } from '@/features/admin/geo/components/GeoPremium';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -86,6 +87,7 @@ export default function SeoActionsView() {
                     title="Actions SEO"
                     subtitle={`Backlog d'actions SEO pour ${client?.client_name || 'ce client'}.`}
                 />
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <GeoEmptyPanel
                     title={data?.emptyState?.title || 'Aucune action'}
                     description={data?.emptyState?.description || 'Aucune action SEO identifiée.'}
@@ -109,6 +111,8 @@ export default function SeoActionsView() {
                     subtitle={`Remédiations et problèmes techniques pour ${client?.client_name || 'ce client'}.`}
                 />
             </motion.div>
+
+            <SourceStatusNotice status={data.status} errors={data.errors} />
 
             {/* Counts */}
             <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3">

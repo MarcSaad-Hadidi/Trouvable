@@ -15,38 +15,15 @@ import { getVisibilitySlice } from '@/lib/operator-intelligence/visibility';
 // Own namespace, separate from GEO.
 // ──────────────────────────────────────────────────────────────
 
-async function loadShellAudit(clientId) {
-    // Reuse existing shell loader to get latest audit
-    const { getOperatorWorkspaceShell } = await import('@/lib/operator-intelligence/base');
-    try {
-        const shell = await getOperatorWorkspaceShell(clientId);
-        return shell?.audit || null;
-    } catch {
-        return null;
-    }
-}
-
 const LOADERS = {
     overview: (clientId) => getSeoOverviewSlice(clientId),
     visibility: (clientId, options = {}) => getVisibilitySlice(clientId, options),
-    health: async (clientId) => {
-        const audit = await loadShellAudit(clientId);
-        return getSeoHealthSlice(clientId, { audit });
-    },
+    health: (clientId) => getSeoHealthSlice(clientId),
     content: (clientId) => getSeoContentSlice(clientId),
     cannibalization: (clientId) => getSeoCannibalizationSlice(clientId),
-    local: async (clientId) => {
-        const audit = await loadShellAudit(clientId);
-        return getSeoLocalSlice(clientId, { audit });
-    },
-    actions: async (clientId) => {
-        const audit = await loadShellAudit(clientId);
-        return getSeoActionsSlice(clientId, { audit });
-    },
-    opportunities: async (clientId) => {
-        const audit = await loadShellAudit(clientId);
-        return getSeoOpportunitiesSlice(clientId, { audit });
-    },
+    local: (clientId) => getSeoLocalSlice(clientId),
+    actions: (clientId) => getSeoActionsSlice(clientId),
+    opportunities: (clientId) => getSeoOpportunitiesSlice(clientId),
 };
 
 export const dynamic = 'force-dynamic';

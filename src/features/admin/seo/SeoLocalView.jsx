@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import ScoreRing from '@/components/shared/metrics/ScoreRing';
+import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
 import { GeoEmptyPanel, GeoSectionTitle, GeoPremiumCard } from '@/features/admin/geo/components/GeoPremium';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -67,6 +68,7 @@ export default function SeoLocalView() {
                     title="Préparation locale"
                     subtitle={`Indicateurs de préparation locale pour ${client?.client_name || 'ce client'}.`}
                 />
+                <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <GeoEmptyPanel
                     title={data?.emptyState?.title || 'Non disponible'}
                     description={data?.emptyState?.description || 'Données de préparation locale non disponibles.'}
@@ -88,6 +90,8 @@ export default function SeoLocalView() {
                     subtitle={`Audit de préparation locale et IA pour ${client?.client_name || 'ce client'}, daté du ${formatDate(data.auditDate)}.`}
                 />
             </motion.div>
+
+            <SourceStatusNotice status={data.status} errors={data.errors} />
 
             {/* Local score header */}
             <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -127,8 +131,10 @@ export default function SeoLocalView() {
                     <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.08em] mb-2">
                         Problèmes locaux
                     </div>
-                    <div className="text-[28px] font-bold text-amber-300/90 tabular-nums">{data.localIssueCount}</div>
-                    <div className="text-[10px] text-white/30 mt-1">sur {data.totalIssueCount} total</div>
+                    <div className="text-[28px] font-bold text-amber-300/90 tabular-nums">
+                        {data.localIssueCount ?? 'n.d.'}
+                    </div>
+                    <div className="text-[10px] text-white/30 mt-1">sur {data.totalIssueCount ?? 'n.d.'} total</div>
                 </div>
             </motion.div>
 

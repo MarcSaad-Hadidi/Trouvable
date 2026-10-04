@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { filterLocalRelevant } from './seo-categories';
+import { getLatestAudit } from '@/lib/db/audits';
+import { getSourceStatus, loadIndependentSources } from './source-availability';
 
 // ──────────────────────────────────────────────────────────────
 // SEO Local slice — local readiness from audit geo_score
@@ -16,14 +18,24 @@ import { filterLocalRelevant } from './seo-categories';
  * Provenance: data from latest client_site_audits row,
  * specifically geo_score and geo_breakdown columns.
  */
-export async function getSeoLocalSlice(clientId, { audit } = {}) {
+export async function getSeoLocalSlice(clientId, { audit: providedAudit } = {}) {
+    const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => (providedAudit === undefined ? getLatestAudit(clientId) : providedAudit),
+    });
+    const audit = values.audit;
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
     if (!audit || audit.scan_status === 'failed') {
         return {
+            ...availability,
             available: false,
             emptyState: {
                 title: 'Données de préparation locale non disponibles',
                 description:
-                    "Aucun audit n'a encore été réalisé pour ce client. Lancez un audit depuis le dossier pour voir les indicateurs locaux.",
+                    dataSources.audit === 'unavailable'
+                        ? 'Données audit temporairement indisponibles.'
+                        : audit?.scan_status === 'failed'
+                          ? 'Le dernier audit a échoué. Relancez un audit depuis le dossier pour voir les indicateurs locaux.'
+                          : "Aucun audit n'a encore été réalisé pour ce client. Lancez un audit depuis le dossier pour voir les indicateurs locaux.",
             },
         };
     }
@@ -39,6 +51,7 @@ export async function getSeoLocalSlice(clientId, { audit } = {}) {
     const aiAnalysis = geoBreakdown.ai_analysis || null;
 
     return {
+        ...availability,
         available: true,
         localScore: audit.geo_score ?? null,
         localScoreLabel: 'Aptitude locale',
@@ -50,8 +63,8 @@ export async function getSeoLocalSlice(clientId, { audit } = {}) {
         answerabilitySummary: aiAnalysis?.answerability_summary || null,
         businessSummary: aiAnalysis?.business_summary || null,
         localIssues: localIssues.slice(0, 20),
-        localIssueCount: localIssues.length,
-        totalIssueCount: issues.length,
+        localIssueCount: Array.isArray(audit.issues) ? localIssues.length : null,
+        totalIssueCount: Array.isArray(audit.issues) ? issues.length : null,
         auditDate: audit.created_at || null,
     };
 }

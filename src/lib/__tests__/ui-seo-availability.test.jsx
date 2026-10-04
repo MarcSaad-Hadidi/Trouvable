@@ -15,8 +15,56 @@ vi.mock('next/navigation', () => ({
 
 import SeoOverviewView from '@/features/admin/seo/SeoOverviewView';
 import SeoVisibilityView from '@/features/admin/seo/SeoVisibilityView';
+import SeoLocalView from '@/features/admin/seo/SeoLocalView';
+import SeoActionsView from '@/features/admin/seo/SeoActionsView';
 
 describe('SEO source availability', () => {
+    it.each([SeoLocalView, SeoActionsView])(
+        'keeps unavailable source notices visible in %s empty state',
+        (Component) => {
+            fixture.data = {
+                available: false,
+                status: 'unavailable',
+                errors: [{ source: 'audit', message: 'Lecture de l’audit indisponible.' }],
+                emptyState: { title: 'Données temporairement indisponibles' },
+            };
+            const html = renderToStaticMarkup(createElement(Component));
+            expect(html).toContain('Sources SEO indisponibles');
+            expect(html).toContain('Lecture de l’audit indisponible.');
+            expect(html).not.toContain('Aucun audit');
+        },
+    );
+
+    it.each([SeoLocalView, SeoActionsView])(
+        'keeps independent known data beside a partial notice in %s',
+        (Component) => {
+            fixture.data = {
+                available: true,
+                status: 'partial',
+                errors: [{ source: 'audit', message: 'Lecture de l’audit indisponible.' }],
+                localScore: 0,
+                localIssueCount: null,
+                totalIssueCount: null,
+                counts: { totalSuggestions: 17, draftSuggestions: 0, approvedSuggestions: 0, totalAuditIssues: null },
+            };
+            const html = renderToStaticMarkup(createElement(Component));
+            expect(html).toContain('Données SEO partielles');
+            expect(html).toContain('Lecture de l’audit indisponible.');
+            expect(html).not.toContain('Aucune action SEO identifiée');
+            if (Component === SeoActionsView) expect(html).toContain('17');
+        },
+    );
+
+    it.each([
+        [null, 'n.d.'],
+        [0, '0'],
+    ])('local issue count %s remains %s', (value, displayed) => {
+        fixture.data = { available: true, localIssueCount: value, totalIssueCount: value };
+        const html = renderToStaticMarkup(createElement(SeoLocalView));
+        expect(html.match(/>Problèmes locaux<\/div><div[^>]*>(.*?)<\/div>/)?.[1]).toBe(displayed);
+        expect(html).toContain(`sur ${displayed} total`);
+    });
+
     it.each([
         [null, 'n.d.'],
         [0, '0'],
