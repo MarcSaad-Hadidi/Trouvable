@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { GET as initiateGoogleOAuth } from '../../app/api/connectors/google/auth/route.js';
+import { GET as completeGoogleOAuth } from '../../app/api/connectors/google/callback/route.js';
+import { createGoogleOAuthState, verifyGoogleOAuthState } from '../connectors/google-oauth-state.js';
 
 const doubles = vi.hoisted(() => ({
     auth: vi.fn(), currentUser: vi.fn(), devAdmin: vi.fn(),
@@ -57,15 +60,12 @@ function installMembershipDatabase() {
 }
 
 async function initiation(clientId = CLIENT_B, returnTo = '/portal/client-b') {
-    const route = await import('../../app/api/connectors/google/auth/route.js');
-    return route.GET(new Request(`https://trouvable.test/api/connectors/google/auth?clientId=${clientId}&returnTo=${encodeURIComponent(returnTo)}`));
+    return initiateGoogleOAuth(new Request(`https://trouvable.test/api/connectors/google/auth?clientId=${clientId}&returnTo=${encodeURIComponent(returnTo)}`));
 }
 async function callback(clientId = CLIENT_B, extra = 'code=test-code') {
-    const { createGoogleOAuthState } = await import('../connectors/google-oauth-state.js');
     const state = await createGoogleOAuthState({ clientId, returnTo: '/portal/client-b', origin: 'https://trouvable.test' });
     doubles.signState.mockClear();
-    const route = await import('../../app/api/connectors/google/callback/route.js');
-    return route.GET(new Request(`https://trouvable.test/api/connectors/google/callback?${extra}&state=${encodeURIComponent(state)}`));
+    return completeGoogleOAuth(new Request(`https://trouvable.test/api/connectors/google/callback?${extra}&state=${encodeURIComponent(state)}`));
 }
 function expectNoExternalWork() {
     expect(doubles.signState).not.toHaveBeenCalled();
@@ -159,7 +159,6 @@ describe('Google OAuth server authorization', () => {
         const response = await initiation();
         expect(response.status).toBe(307);
         expect(doubles.generateAuthUrl).toHaveBeenCalledTimes(1);
-        const { verifyGoogleOAuthState } = await import('../connectors/google-oauth-state.js');
         const state = await verifyGoogleOAuthState(doubles.generateAuthUrl.mock.calls[0][0].state);
         expect(state.payload.clientId).toBe(CLIENT_B);
         expect(doubles.supabase.from).not.toHaveBeenCalled();
@@ -198,8 +197,7 @@ describe('Google OAuth server authorization', () => {
         expectNoExternalWork();
     });
     it('rejects tampered callback state without using caller-provided client IDs', async () => {
-        const route = await import('../../app/api/connectors/google/callback/route.js');
-        const response = await route.GET(new Request('https://trouvable.test/api/connectors/google/callback?code=abc&state=client-b'));
+        const response = await completeGoogleOAuth(new Request('https://trouvable.test/api/connectors/google/callback?code=abc&state=client-b'));
         expect(response.status).toBe(400);
         expect(await response.json()).toMatchObject({ error: 'invalid_google_oauth_state', detail: 'malformed_state' });
         expectNoExternalWork();
