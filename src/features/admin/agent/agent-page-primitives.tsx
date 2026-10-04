@@ -242,12 +242,12 @@ export function GenericTablePanel({
     return (
         <CommandChartCard title={title} subtitle={subtitle}>
             <CommandTable
-                headers={resolvedColumns.map((column) => column.label)}
-                rows={rows.map((row) =>
-                    resolvedColumns.map((column) =>
-                        column.render ? column.render(row) : formatValue(row[column.key]),
-                    ),
-                )}
+                columns={resolvedColumns.map((column) => ({
+                    id: column.key,
+                    label: column.label,
+                    render: (row) => (column.render ? column.render(row) : formatValue(row[column.key])),
+                }))}
+                rows={rows}
             />
         </CommandChartCard>
     );
