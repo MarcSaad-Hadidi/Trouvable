@@ -23,7 +23,6 @@ import {
     releaseJobLock as releaseJobLockInDb,
     completeRun,
     requeueRun,
-    listRecentRunsForEngineStats,
 } from '@/lib/db/jobs';
 import {
     addMinutes,
@@ -541,19 +540,6 @@ const MAX_PARALLEL_RUNS = 4;
 const MAX_RUNS_PER_TICK_HARD_LIMIT = 24;
 const RUN_EXECUTION_TIMEOUT_MS = 8 * 60 * 1000;
 
-let lastJobEngineStats = {
-    lastTickAt: null,
-    lastTickDurationMs: 0,
-    lastTickProcessed: 0,
-    errorsByJobType: {},
-    recentErrorRatePercent: 0,
-};
-
-function incrementMapCounter(map, key) {
-    const normalized = String(key || 'unknown');
-    map[normalized] = Number(map[normalized] || 0) + 1;
-}
-
 async function withRunTimeout(runId, promise, timeoutMs = RUN_EXECUTION_TIMEOUT_MS) {
     let timeoutHandle = null;
     const timeoutPromise = new Promise((_, reject) => {
@@ -658,7 +644,6 @@ async function processSingleWorkerRun(runnable) {
 export async function processContinuousWorkerTick(rawOptions = {}) {
     const options = cronWorkerOptionsSchema.parse(rawOptions);
     const tickStartMs = Date.now();
-    const errorsByJobType = {};
     const summary = {
         startedAt: nowIso(),
         source: options.source,
@@ -704,7 +689,6 @@ export async function processContinuousWorkerTick(rawOptions = {}) {
             if (outcome.status === 'failed') {
                 summary.processed += 1;
                 summary.failed += 1;
-                incrementMapCounter(errorsByJobType, outcome.jobType);
                 continue;
             }
             if (outcome.status === 'skipped_overlap') {
@@ -719,26 +703,5 @@ export async function processContinuousWorkerTick(rawOptions = {}) {
     summary.finishedAt = nowIso();
     summary.durationMs = Date.now() - tickStartMs;
 
-    const recentRuns = await listRecentRunsForEngineStats(80);
-    const totalRecent = recentRuns.length;
-    const failedRecent = recentRuns.filter((row) => row.status === 'failed').length;
-    const recentErrorRatePercent = totalRecent > 0 ? Number(((failedRecent / totalRecent) * 100).toFixed(2)) : 0;
-
-    lastJobEngineStats = {
-        lastTickAt: summary.finishedAt,
-        lastTickDurationMs: summary.durationMs,
-        lastTickProcessed: summary.processed,
-        errorsByJobType,
-        recentErrorRatePercent,
-    };
-
     return summary;
-}
-
-export async function getJobEngineStats() {
-    const recentRuns = await listRecentRunsForEngineStats(40);
-    return {
-        ...lastJobEngineStats,
-        recentRuns,
-    };
 }

@@ -306,16 +306,3 @@ export async function requeueRun(runId, { scheduledFor, errorMessage, summary = 
 
     if (error) throw new Error(`[DB/jobs] requeueRun ${runId}: ${error.message}`);
 }
-
-export async function listRecentRunsForEngineStats(limit = 80) {
-    const { data, error } = await db()
-        .from('recurring_job_runs')
-        .select(
-            'id, client_id, job_type, status, created_at, started_at, finished_at, attempt_count, max_attempts, error_message',
-        )
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-    if (error) throw new Error(`[DB/jobs] listRecentRunsForEngineStats: ${error.message}`);
-    return data || [];
-}

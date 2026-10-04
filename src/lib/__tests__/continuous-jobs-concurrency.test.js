@@ -46,7 +46,6 @@ const mocks = vi.hoisted(() => ({
     releaseJobLock: vi.fn(async () => {}),
     completeRun: vi.fn(async () => {}),
     requeueRun: vi.fn(async () => {}),
-    listRecentRunsForEngineStats: vi.fn(async () => []),
     upsertVisibilityMetricSnapshot: vi.fn(async () => ({})),
     listVisibilityMetricSnapshots: vi.fn(async () => []),
     flattenSnapshotToLegacy: vi.fn(() => ({
@@ -129,7 +128,6 @@ vi.mock('@/lib/db/jobs', () => ({
     releaseJobLock: mocks.releaseJobLock,
     completeRun: mocks.completeRun,
     requeueRun: mocks.requeueRun,
-    listRecentRunsForEngineStats: mocks.listRecentRunsForEngineStats,
 }));
 
 vi.mock('@/lib/db/snapshots', () => ({

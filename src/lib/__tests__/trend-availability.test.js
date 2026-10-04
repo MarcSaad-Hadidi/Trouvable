@@ -11,7 +11,6 @@ vi.mock('@/lib/db/jobs', async (importOriginal) => ({
     ...(await importOriginal()),
     listRecurringJobsForClient: async () => [],
     listRecentRecurringJobRunsForClient: async () => [],
-    listRecentRunsForEngineStats: async () => [],
     upsertRecurringJobs: async () => {},
 }));
 vi.mock('@/lib/connectors', () => ({
