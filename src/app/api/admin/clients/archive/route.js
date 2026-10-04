@@ -1,51 +1,17 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { clientIdSchema } from '@/lib/admin-schemas';
-import { archiveClient as dbArchiveClient } from '@/lib/db/clients';
-import { logAction as dbLogAction } from '@/lib/db/actions';
-import { validateTransition } from '@/lib/lifecycle';
-import { getAdminSupabase } from '@/lib/supabase-admin';
+import { changeClientLifecycle, parseClientLifecycleRequest } from '@/lib/client-lifecycle';
 
 export async function POST(request) {
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-    let body;
-    try {
-        body = await request.json();
-    } catch {
-        return NextResponse.json({ error: 'JSON invalide' }, { status: 400 });
-    }
-
-    const v = clientIdSchema.safeParse(body);
-    if (!v.success) {
-        return NextResponse.json({ error: 'Validation', details: v.error.issues }, { status: 400 });
-    }
+    const input = await parseClientLifecycleRequest(request);
+    if (input.body) return NextResponse.json(input.body, { status: input.status });
 
     try {
-        const supabase = getAdminSupabase();
-        const { data: current, error: fetchErr } = await supabase
-            .from('client_geo_profiles')
-            .select('lifecycle_status')
-            .eq('id', v.data.clientId)
-            .single();
-        if (fetchErr || !current) {
-            return NextResponse.json({ error: 'Client introuvable.' }, { status: 404 });
-        }
-        const fromState = current.lifecycle_status || 'prospect';
-        try {
-            validateTransition(fromState, 'archived');
-        } catch (transitionErr) {
-            return NextResponse.json({ error: transitionErr.message }, { status: 422 });
-        }
-        const client = await dbArchiveClient(v.data.clientId);
-        await dbLogAction({
-            client_id: v.data.clientId,
-            action_type: 'client_archived',
-            details: { from: fromState, to: 'archived' },
-            performed_by: admin.email,
-        });
-        return NextResponse.json({ success: true, client });
+        const result = await changeClientLifecycle(input.clientId, 'archived', admin.email);
+        return NextResponse.json(result.body, { status: result.status });
     } catch (err) {
         console.error('[clients/archive]', err);
         return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });
