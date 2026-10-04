@@ -1,11 +1,28 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { getFileInfo } from 'prettier';
 import { checkRepository } from '../check-repository.mjs';
 
 const fixtures = [];
+
+test('formats public product code while leaving root public assets alone', async () => {
+    const root = fileURLToPath(new URL('../../', import.meta.url));
+    const options = { ignorePath: path.join(root, '.prettierignore') };
+    const codePath = path.join(root, 'src/features/public/home/TrouvablePremiumPreview.jsx');
+    const assetPath = path.join(root, 'public/logos/trouvable_logo_noir.png');
+    assert.ok(existsSync(codePath));
+    assert.ok(existsSync(assetPath));
+    const code = await getFileInfo(codePath, options);
+    const asset = await getFileInfo(assetPath, options);
+    assert.equal(code.ignored, false);
+    assert.ok(code.inferredParser);
+    assert.equal(asset.ignored, true);
+});
+
 function fixture(contents) {
     const root = mkdtempSync(path.join(tmpdir(), 'trouvable-repository-'));
     fixtures.push(root);
