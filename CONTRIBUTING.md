@@ -37,7 +37,7 @@ Elle s'arrête au premier échec et exécute **en série** : formatage, lint, ty
 | `npm run lint` | ESLint sur JS/JSX/TS/TSX, seuil de zéro avertissement. `lint:fix` applique les corrections automatiques. |
 | `npm run typecheck` | Types de routes Next générés avec webpack, puis programme TypeScript configuré ; ne type pas intégralement le JavaScript. |
 | `npm test` | Tests Vitest JS/JSX/TS/TSX, fixtures et mocks locaux. Exemple ciblé : `npm test -- src/lib/__tests__/portal-access.test.js`. |
-| `npm run test:tooling` | Tests Node du graphe de dépôt et de la vérification en série. |
+| `npm run test:tooling` | Tests Node du graphe de dépôt, de la vérification en série et de l’isolation QA navigateur. |
 | `npm run test:hibernation` | Tests Node des protections dans `scripts/__tests__/hibernation.test.mjs`. |
 | `npm run build` | Compilation et routes de l'application dormante avec webpack ; aucun déploiement. |
 | `npm run check:hibernation` | Contrat fermé du parking, configuration Vercel et workflows dormants. |
@@ -52,6 +52,20 @@ Le parking se vérifie aussi sans installation npm, avec `node scripts/validate-
 Pour la documentation, vérifier liens, ancres, chemins, commandes et `git diff --check`. Pour un changement métier, reproduire le défaut et ajouter un test de comportement pertinent. Pour l'UI, vérifier chargement/vide/erreur/données, clavier, mobile et scroll sur les routes concernées. Les fixtures de navigateur et les accès anonymes d'un build de production constituent des preuves distinctes ; un rendu avec bypass local ne valide pas une session réelle.
 
 Les tests d'autorisation doivent distinguer anonyme/interdit/client A/client B. Les IO simulées ne valident ni les politiques d'une base distante, ni les sessions Clerk, ni les connecteurs ou réponses IA réels. Documenter commandes, résultats et limites dans la PR, sans collection de rapports permanents. Ne pas créer de bypass d'auth pour obtenir une capture.
+
+## QA navigateur locale
+
+Après un build sans secrets, le [runner Playwright/CDP](scripts/qa/browser.mjs) vérifie le site public, les accès anonymes puis les familles opérateur modifiées sur desktop et mobile :
+
+```powershell
+npm run qa:browser -- --mode all --artifacts "C:\temp\trouvable-qa" --executable "C:\Program Files\Google\Chrome\Application\chrome.exe"
+```
+
+Adapter ces deux chemins absolus au poste ; le dossier de preuves doit rester hors du dépôt. Le navigateur doit être déjà installé. Le runner ne lance ni installation ni build. Il refuse les fichiers d’environnement que Next chargerait et retire les secrets et hooks hérités du processus. Il démarre ses propres serveurs sur des ports libres et arrête uniquement leurs processus.
+
+Le mode `production` utilise `next start`, sans bypass ni clés simulées. Le mode `fixture` utilise des données Supabase synthétiques en lecture seule, le garde d’accès de développement localhost existant et une UI Clerk anonyme simulée. Les requêtes externes et les mutations sont bloquées ; `--allow-fonts` autorise uniquement Google Fonts HTTPS pour la compilation de développement. Ces fixtures ne valident pas une session Clerk, un membership ou la RLS distante.
+
+Les codes de sortie distinguent succès (0), régression ou préparation manquante (1), et couverture bloquée par configuration absente (2). Les captures, traces, console et relevés Network/Performance restent dans le dossier de preuves ; lire les blocages et avertissements au lieu d’assimiler toutes les captures à une validation.
 
 ## Git et review
 

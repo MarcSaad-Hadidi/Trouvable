@@ -139,7 +139,7 @@ function assertCiWorkflow(yaml, packageRaw) {
       lint: 'eslint . --max-warnings 0',
       typecheck: 'next typegen --webpack && tsc --noEmit',
       test: 'vitest run',
-      'test:tooling': 'node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs',
+      'test:tooling': 'node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs scripts/__tests__/browser-qa.test.mjs',
       'test:hibernation': 'node --test scripts/__tests__/hibernation.test.mjs',
       build: 'next build --webpack',
       'check:hibernation': 'node scripts/validate-hibernation.mjs',

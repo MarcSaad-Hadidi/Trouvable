@@ -17,7 +17,8 @@
     "check:hibernation": "node scripts/validate-hibernation.mjs",
     "check:repository": "node scripts/check-repository.mjs",
     "verify": "node scripts/verify.mjs",
-    "test:tooling": "node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs"
+    "test:tooling": "node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs scripts/__tests__/browser-qa.test.mjs",
+    "qa:browser": "node scripts/qa/browser.mjs"
   },
   "browserslist": {
     "production": [
