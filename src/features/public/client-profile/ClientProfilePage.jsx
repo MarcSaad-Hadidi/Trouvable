@@ -1,4 +1,5 @@
-﻿import React from 'react';
+﻿import Link from 'next/link';
+import React from 'react';
 import { notFound } from 'next/navigation';
 import GeoSeoInjector from '@/features/public/shared/GeoSeoInjector';
 import { getClientProfile } from '@/lib/supabase/server';
@@ -63,9 +64,9 @@ export default async function ClientPage({ params }) {
                 <GeoSeoInjector clientProfile={profile} />
 
                 <nav className="max-w-3xl mx-auto mb-8" aria-label="Fil d'Ariane">
-                    <a href="/" className="text-[#7b8fff] hover:text-white font-medium text-sm flex items-center gap-2 transition-colors">
+                    <Link href="/" className="text-[#7b8fff] hover:text-white font-medium text-sm flex items-center gap-2 transition-colors">
                         ← Retour à Trouvable
-                    </a>
+                    </Link>
                 </nav>
 
                 <article className="max-w-3xl mx-auto bg-[#0f0f0f] rounded-2xl p-8 md:p-12 border border-white/10">

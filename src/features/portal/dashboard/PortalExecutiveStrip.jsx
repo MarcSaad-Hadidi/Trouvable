@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import PremiumSparkline from '@/components/shared/metrics/PremiumSparkline';
 
-function deriveOverallState(visibility, completeness) {
+function deriveOverallState(visibility) {
     const seo = visibility.seo_score;
     const geo = visibility.geo_score;
     const avg = seo != null && geo != null ? Math.round((seo + geo) / 2) : (seo ?? geo ?? null);
@@ -60,11 +60,11 @@ const TILES = [
 
 const ease = [0.16, 1, 0.3, 1];
 
-export default function PortalExecutiveStrip({ visibility, completeness, recentWorkItems, trendSummary, dataSources = {} }) {
+export default function PortalExecutiveStrip({ visibility, recentWorkItems, trendSummary, dataSources = {} }) {
     const sparklines = trendSummary?.sparklines || {};
     const unavailable = { label: 'Indisponible', sub: 'La source de données ne répond pas.', accent: 'text-white/50', bar: 0 };
     const states = {
-        state: dataSources.workspace === 'unavailable' ? unavailable : deriveOverallState(visibility, completeness),
+        state: dataSources.workspace === 'unavailable' ? unavailable : deriveOverallState(visibility),
         work: dataSources.actions === 'unavailable' ? unavailable : deriveWorkState(recentWorkItems),
         trend: dataSources.history === 'unavailable' ? unavailable : deriveTrendState(trendSummary),
     };

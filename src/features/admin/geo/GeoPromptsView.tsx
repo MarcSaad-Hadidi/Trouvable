@@ -98,7 +98,7 @@ async function parseJsonResponse(response) {
 
 /* --- Components --- */
 
-function PromptCreationSurface({ form, setForm, categoryOptions, discoveryModeOptions = [], submitting, onSubmit, client, actionNotice, actionError }) {
+function PromptCreationSurface({ form, setForm, categoryOptions, discoveryModeOptions = [], submitting, onSubmit, client }) {
     const [aiRefining, setAiRefining] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState(null);
 
@@ -215,7 +215,7 @@ async function createPromptDirectly({ clientId, queryText, category, promptMode,
     return parseJsonResponse(response);
 }
 
-function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOptions, discoveryModeOptions = [], submitting: parentSubmitting }) {
+function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOptions, discoveryModeOptions = [] }) {
     const [open, setOpen] = useState(false);
     const [guidance, setGuidance] = useState('');
     const [category, setCategory] = useState('');
@@ -447,8 +447,8 @@ function AiPromptListSurface({ client, clientId, invalidateWorkspace, categoryOp
 
 
 function TrackedPromptRow({
-    prompt, categoryOptions, isEditing, editingForm, setEditingForm, setEditingId,
-    submitting, isRunning, onSave, onToggle, onDelete, onRun, onImprove,
+    prompt, isEditing, editingForm, setEditingForm, setEditingId,
+    isRunning, onSave, onToggle, onDelete, onRun, onImprove,
     isImproving, improvedText, onUseImproved, onClearImprovement
 }) {
     const lifecycle = promptLifecycleLabel(prompt);

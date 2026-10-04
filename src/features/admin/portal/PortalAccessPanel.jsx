@@ -14,7 +14,7 @@ function statusLabel(status) {
 const PORTAL_READY_STATES = new Set(['active', 'paused']);
 const EMPTY_MEMBERS = [];
 
-export default function PortalAccessPanel({ clientId, clientName, clientSlug, lifecycleStatus, initialMembers = EMPTY_MEMBERS }) {
+export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatus, initialMembers = EMPTY_MEMBERS }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [members, setMembers] = useState(initialMembers);

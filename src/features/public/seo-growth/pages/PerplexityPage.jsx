@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, Search, Globe, Plus, Monitor, Grid, SlidersHorizontal, Clock, Share, MoreHorizontal, ImageIcon, Mic, ChevronDown, Pin } from 'lucide-react';
@@ -51,7 +52,7 @@ export default function PerplexityPage({ page, trustBrief }) {
                     {/* Sidebar */}
                     <div className="w-[240px] bg-[#191a1a] border-r border-white/5 flex-col hidden md:flex shrink-0">
                         <div className="px-4 py-3 flex items-center justify-between">
-                            <img src="/logos/perplexity.webp" alt="Perplexity" className="w-8 h-8 object-contain" />
+                            <Image src="/logos/perplexity.webp" alt="Perplexity" className="w-8 h-8 object-contain" width={32} height={32} unoptimized loading="eager" />
                             <div className="w-6 h-6 border border-white/10 rounded-md flex items-center justify-center cursor-pointer hover:bg-white/5">
                                 <span className="w-3 h-[1px] bg-white/70 block"></span>
                             </div>
@@ -95,7 +96,7 @@ export default function PerplexityPage({ page, trustBrief }) {
                         <div className="p-3 mt-auto border-t border-white/5">
                             <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
                                 <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                                    <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                    <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-[13px] font-medium text-white truncate">Trouvable</div>
@@ -113,7 +114,7 @@ export default function PerplexityPage({ page, trustBrief }) {
                             <div className="w-20"></div> {/* spacer */}
                             <div className="flex items-center gap-6">
                                 <div className="flex items-center gap-2 text-[14px] font-medium text-white border-b-2 border-white pb-4 mt-4 cursor-pointer">
-                                    <img src="/logos/perplexity.webp" alt="Perplexity" className="w-4 h-4 object-contain opacity-80" /> Answer
+                                    <Image src="/logos/perplexity.webp" alt="Perplexity" className="w-4 h-4 object-contain opacity-80" width={16} height={16} unoptimized loading="eager" /> Answer
                                 </div>
                                 <div className="flex items-center gap-2 text-[14px] font-medium text-white/50 hover:text-white pb-4 mt-4 cursor-pointer">
                                     <Globe className="w-4 h-4" /> Links

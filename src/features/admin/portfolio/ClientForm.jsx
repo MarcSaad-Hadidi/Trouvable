@@ -44,7 +44,7 @@ export default function ClientForm({ initialData = null }) {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        let newValue = type === 'checkbox' ? checked : value;
+        const newValue = type === 'checkbox' ? checked : value;
         setFormData(prev => {
             const up = { ...prev, [name]: newValue };
             if (name === 'client_name' && (!isEditMode || !prev.client_slug)) {

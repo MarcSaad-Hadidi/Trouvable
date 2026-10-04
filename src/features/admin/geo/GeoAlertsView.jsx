@@ -100,11 +100,13 @@ function FreshnessItem({ label, state, hours }) {
 
 /* ── Main View ── */
 
+const EMPTY_ROWS = [];
+
 export default function GeoAlertsView() {
     const { data, loading, error } = useGeoWorkspaceSlice('alerts');
     const [sevFilter, setSevFilter] = useState({ critique: true, avertissement: true, info: true, ok: false });
 
-    const alerts = Array.isArray(data?.alerts) ? data.alerts : [];
+    const alerts = Array.isArray(data?.alerts) ? data.alerts : EMPTY_ROWS;
     const summary = data?.summary || {};
     const systemStatus = data?.systemStatus || {};
 

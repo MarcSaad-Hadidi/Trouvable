@@ -183,7 +183,7 @@ function ConnectorBus({ preview, emptyState, clientBase }) {
     );
 }
 
-function QuickDock({ shared = [], seo = [], geo = [], clientBase }) {
+function QuickDock({ shared = [], seo = [], geo = [] }) {
     const groups = [
         { label: 'Dossier', items: shared, accent: 'text-[#7c6aef]' },
         { label: 'SEO Search', items: seo, accent: 'text-emerald-400' },

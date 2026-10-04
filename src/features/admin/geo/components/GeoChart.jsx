@@ -13,7 +13,7 @@ function getDates(points) {
     return dates;
 }
 
-export default function GeoChart({ id, series, options = {} }) {
+export default function GeoChart({ series, options = {} }) {
     const canvasRef = useRef(null);
     const wrapRef = useRef(null);
     const [tooltip, setTooltip] = useState(null);

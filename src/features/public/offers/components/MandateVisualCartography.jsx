@@ -15,13 +15,12 @@ function ScrambledText({ text, delay }) {
   const chars = "!<>-_\\\\/[]{}—=+*^?#_";
   
   useEffect(() => {
-    let timeoutId;
     let intervalId;
     
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       let iteration = 0;
       intervalId = setInterval(() => {
-        setDisplayText((prev) => 
+        setDisplayText(
           text.split("").map((letter, index) => {
             if (index < iteration) {
               return text[index];
@@ -81,7 +80,7 @@ export default function MandateVisualCartography() {
         />
 
         {/* Data Points */}
-        {POINTS.map((p, i) => (
+        {POINTS.map((p) => (
           <motion.div
             key={p.label}
             initial={{ opacity: 0 }}

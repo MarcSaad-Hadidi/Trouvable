@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Plus, MessageSquare, Book, Sparkles, Settings, Share, MoreVertical, Mic, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
@@ -181,7 +182,7 @@ export default function GeminiPage({ page, trustBrief }) {
                                 <Share className="w-5 h-5 cursor-pointer text-[#e3e3e3]" title="Partager" />
                                 <MoreVertical className="w-5 h-5 cursor-pointer text-[#e3e3e3]" />
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center cursor-pointer overflow-hidden">
-                                    <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                    <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                                 </div>
                             </div>
                         </div>
@@ -204,7 +205,7 @@ export default function GeminiPage({ page, trustBrief }) {
                                     ) : (
                                         <div className="flex gap-4 max-w-full">
                                             <div className="w-8 h-8 shrink-0 mt-1 flex items-center justify-center">
-                                                <img src="/logos/gemini.png" alt="Gemini" className="w-6 h-6 object-contain" />
+                                                <Image src="/logos/gemini.png" alt="Gemini" className="w-6 h-6 object-contain" width={24} height={24} unoptimized loading="eager" />
                                             </div>
                                             <div className="text-[#e3e3e3] text-[15px] leading-[1.7] space-y-6 flex-1 max-w-[800px]">
                                                 {msg.isThinking ? (

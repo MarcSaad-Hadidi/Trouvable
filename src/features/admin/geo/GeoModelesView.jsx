@@ -10,7 +10,8 @@ import {
 } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE } from '@/lib/design/tokens';
 import { CumulativeModelVisibilityChart } from '@/features/admin/geo/components/GeoRealCharts';
-import { GeoEmptyPanel, GeoModelAvatar, GeoProvenancePill } from '@/features/admin/geo/components/GeoPremium';
+import { ProvenancePill } from '@/components/shared/metrics/ProvenancePill';
+import { GeoEmptyPanel, GeoModelAvatar } from '@/features/admin/geo/components/GeoPremium';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import { FlaskConicalIcon, LayersIcon, BarChart3Icon } from 'lucide-react';
 
@@ -37,6 +38,8 @@ function formatDisplayModelName(label, fallback) {
     return simplified || source;
 }
 
+const EMPTY_ROWS = [];
+
 export default function GeoModelesView() {
     const { clientId, invalidateWorkspace } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('models');
@@ -45,7 +48,7 @@ export default function GeoModelesView() {
     const [benchmarkError, setBenchmarkError] = useState(null);
     const [selectedVariants, setSelectedVariants] = useState(null);
 
-    const variantsCatalog = data?.benchmark?.variantsCatalog || [];
+    const variantsCatalog = data?.benchmark?.variantsCatalog || EMPTY_ROWS;
 
     const allModels = useMemo(() => {
         if (!data) return [];
@@ -194,7 +197,7 @@ export default function GeoModelesView() {
             subtitle="Analyse de performance multi-modèles et banc d'essai des variantes d'exécution."
             actions={(
                 <div className="flex gap-2">
-                    <GeoProvenancePill meta={data?.provenance?.observed} />
+                    <ProvenancePill meta={data?.provenance?.observed} />
                     <button 
                         onClick={runBenchmark}
                         disabled={benchmarkRunning}
@@ -237,7 +240,7 @@ export default function GeoModelesView() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {allModels.map((row, index) => (
+                        {allModels.map((row) => (
                             <div key={`${row.provider}-${row.model}`} className={cn(COMMAND_SURFACE, "p-6 flex flex-col bg-[#06070a] group hover:border-[#7c6aef]/30 transition-all")}>
                                 <div className="flex justify-between items-start mb-6">
                                     <GeoModelAvatar label={row.provider} />

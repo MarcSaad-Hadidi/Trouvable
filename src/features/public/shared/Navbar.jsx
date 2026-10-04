@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from "next/link";
 import ContactButton from "./ContactButton";
 import NavbarMobileMenu from "./NavbarMobileMenu";
@@ -10,11 +11,13 @@ export default function Navbar() {
                 data-agent-surface="primary-nav"
             >
                 <Link href="/" className="-ml-2 flex min-h-12 shrink-0 items-center gap-2 rounded-lg px-2 text-[15px] font-semibold tracking-[-0.025em] text-white outline-none transition hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]" data-agent-action="nav-home">
-                    <img
+                    <Image
                         src="/logos/trouvable_logo_blanc1.png"
                         alt="Logo Trouvable"
-                        width="22"
-                        height="22"
+                        width={22}
+                        height={22}
+                        unoptimized
+                        loading="eager"
                         className="h-[22px] w-[22px] object-contain"
                     />
                     Trouvable

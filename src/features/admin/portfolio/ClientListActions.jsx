@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { getAllowedNextStates, LIFECYCLE_META } from '@/lib/lifecycle';
 import { transitionLifecycleAction } from './actions';
 
-export default function ClientListActions({ client, showArchived }) {
+export default function ClientListActions({ client }) {
     const router = useRouter();
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState(null);

@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, Search, Mic, Paperclip, CheckCircle2, AlertTriangle, PackageOpen, PenSquare, Clock, MessageSquare, MoreHorizontal } from 'lucide-react';
@@ -65,7 +66,7 @@ export default function CopilotPage({ page, trustBrief }) {
                     <div className="w-[260px] bg-[#F7F7F8] border-r border-[#E5E5E5] flex-col hidden md:flex shrink-0">
                         <div className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <img src="/logos/copilot.png" alt="Copilot" className="w-6 h-6 object-contain" />
+                                <Image src="/logos/copilot.png" alt="Copilot" className="w-6 h-6 object-contain" width={24} height={24} unoptimized loading="eager" />
                                 <span className="text-[17px] font-semibold text-[#111111]">Copilot</span>
                             </div>
                             <div className="w-8 h-8 rounded hover:bg-[#EAEAEA] flex items-center justify-center cursor-pointer text-[#424242] transition-colors">
@@ -105,7 +106,7 @@ export default function CopilotPage({ page, trustBrief }) {
                         <div className="p-4 mt-auto border-t border-[#E5E5E5]">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                                    <img src="/logos/trouvable_logo_noir.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                    <Image src="/logos/trouvable_logo_noir.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                                 </div>
                                 <div className="text-[14px] font-medium text-[#111111]">Trouvable</div>
                             </div>
@@ -119,7 +120,7 @@ export default function CopilotPage({ page, trustBrief }) {
                         <div className="flex-1 overflow-y-auto relative flex flex-col clean-scroll-light">
                             {messages.length === 0 ? (
                                 <div className="flex-1 flex flex-col items-center justify-center p-8">
-                                    <img src="/logos/copilot.png" alt="Copilot" className="w-16 h-16 mb-6 drop-shadow-md object-contain" />
+                                    <Image src="/logos/copilot.png" alt="Copilot" className="w-16 h-16 mb-6 drop-shadow-md object-contain" width={64} height={64} unoptimized loading="eager" />
                                     <p className="text-[28px] font-semibold text-[#111111] mb-8 tracking-tight">
                                         Hi there, Trouvable. What should we dive into today?
                                     </p>
@@ -159,7 +160,7 @@ export default function CopilotPage({ page, trustBrief }) {
                                             ) : (
                                                 <div className="flex gap-4 max-w-full lg:max-w-[85%]">
                                                     <div className="w-8 h-8 rounded-full bg-white border border-[#E5E5E5] shadow-sm flex items-center justify-center shrink-0 mt-1 overflow-hidden p-1.5">
-                                                        <img src="/logos/copilot.png" alt="Copilot" className="w-full h-full object-contain" />
+                                                        <Image src="/logos/copilot.png" alt="Copilot" className="w-full h-full object-contain" width={32} height={32} unoptimized loading="eager" />
                                                     </div>
                                                     <div className="text-[#242424] text-[15px] leading-[1.7] space-y-6 pt-1.5 flex-1">
                                                         {msg.isThinking ? (

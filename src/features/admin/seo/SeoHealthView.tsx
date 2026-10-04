@@ -1,7 +1,7 @@
 ﻿// @ts-nocheck
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { RefreshCwIcon } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -99,6 +99,8 @@ function warningDeltaDetail(currentCount, history) {
     return `${delta > 0 ? '+' : ''}${delta} vs audit précédent`;
 }
 
+const EMPTY_ROWS = [];
+
 export default function SeoHealthPage() {
     const { client, clientId, refetch } = useGeoClient();
     const { data, loading, error, refetch: refetchHealth } = useSeoWorkspaceSlice('health');
@@ -107,10 +109,10 @@ export default function SeoHealthPage() {
     const [scanError, setScanError] = useState(null);
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
-    const issues = data?.issues || [];
-    const checks = data?.checks || [];
-    const indicators = data?.indicators || [];
-    const history = data?.history || [];
+    const issues = data?.issues || EMPTY_ROWS;
+    const checks = data?.checks || EMPTY_ROWS;
+    const indicators = data?.indicators || EMPTY_ROWS;
+    const history = data?.history || EMPTY_ROWS;
 
     const [previousWebsiteUrl, setPreviousWebsiteUrl] = useState(client?.website_url);
     if (previousWebsiteUrl !== client?.website_url) {

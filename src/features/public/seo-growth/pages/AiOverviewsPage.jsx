@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { TypewriterText, AiThinking, FaqSection, LinksSection, PlatformEditorialLead } from './shared-primitives';
 
@@ -58,7 +59,7 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                 <Grid className="w-5 h-5 text-[#e8eaed]" />
                             </div>
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center cursor-pointer overflow-hidden border border-white/10">
-                                <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-contain p-1" />
+                                <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-contain p-1" width={32} height={32} unoptimized loading="eager" />
                             </div>
                         </div>
                     </header>
@@ -244,7 +245,7 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                         <div className="flex items-center gap-3 mb-2">
                                             <Link href={res.url.replace('https://trouvable.ca', '')} className="flex items-center gap-3 group/header">
                                                 <div className="w-[28px] h-[28px] rounded-full bg-[#303134] border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    <img src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-5 h-5 object-contain" />
+                                                    <Image src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-5 h-5 object-contain" width={20} height={20} unoptimized loading="eager" />
                                                 </div>
                                                 <div>
                                                     <div className="text-[14px] text-[#e8eaed] leading-tight group-hover/header:text-white transition">Trouvable</div>
@@ -301,7 +302,7 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                     <div className="text-[12px] font-bold text-white mb-3">Sponsorisé</div>
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center overflow-hidden">
-                                            <img src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-full h-full object-cover invert" />
+                                            <Image src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-full h-full object-cover invert" width={28} height={28} unoptimized loading="eager" />
                                         </div>
                                         <div>
                                             <div className="text-[14px] text-[#e8eaed]">Trouvable</div>

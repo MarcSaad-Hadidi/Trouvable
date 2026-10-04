@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, MessageSquare, Folder, Code2, Settings, Download, MoreHorizontal, ChevronDown, AlignLeft } from 'lucide-react';
@@ -118,7 +119,7 @@ export default function ClaudePage({ page, trustBrief }) {
                             <div className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                                        <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                        <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="text-[14px] text-white/90">Trouvable</div>
@@ -161,7 +162,7 @@ export default function ClaudePage({ page, trustBrief }) {
                                     ) : (
                                         <div className="flex gap-5 max-w-[95%]">
                                             <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 mt-1 flex items-center justify-center bg-white p-1">
-                                                <img src="/logos/claude.png" alt="Claude" className="w-full h-full object-contain" />
+                                                <Image src="/logos/claude.png" alt="Claude" className="w-full h-full object-contain" width={32} height={32} unoptimized loading="eager" />
                                             </div>
                                             <div className="text-[#e3e3e3] text-[15px] leading-[1.75] space-y-6 pt-1 font-serif">
                                                 {msg.isThinking ? (

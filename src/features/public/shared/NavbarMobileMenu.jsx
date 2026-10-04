@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from 'next/image';
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ContactButton from "./ContactButton";
@@ -26,11 +27,13 @@ export default function NavbarMobileMenu() {
                 <div id="mobile-site-menu" className="fixed inset-0 z-[60] bg-[#080808]/98 backdrop-blur-xl lg:hidden">
                     <div className="flex h-[58px] items-center justify-between px-7">
                         <Link href="/" className="-ml-2 flex min-h-12 items-center gap-2 rounded-lg px-2 text-[15px] font-semibold tracking-[-0.025em] text-white outline-none transition hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]" data-agent-action="nav-home-mobile">
-                            <img
+                            <Image
                                 src="/logos/trouvable_logo_blanc1.png"
                                 alt="Logo Trouvable"
-                                width="22"
-                                height="22"
+                                width={22}
+                                height={22}
+                                unoptimized
+                                loading="eager"
                                 className="h-[22px] w-[22px] object-contain"
                             />
                             Trouvable

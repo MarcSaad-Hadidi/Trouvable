@@ -51,21 +51,21 @@ export default function StructurerSiteMoteursIaPage({ page, trustBrief }) {
                     <AnimatedBlock delay={0} className="mb-4">
                         <div className="rounded-2xl border-2 border-red-400/15 bg-[#0a0a0a] p-6">
                             <div className="mb-4 flex items-center gap-3"><AlertTriangle className="h-5 w-5 text-red-400" /><h3 className="text-[15px] font-bold">Couche 1 : Failles structurelles</h3><span className="ml-auto rounded-md bg-red-400/10 px-2 py-0.5 font-mono text-[9px] text-red-400">FONDATION</span></div>
-                            <div className="grid gap-2 sm:grid-cols-2">{page.problems.map((p, i) => <div key={p} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />{p}</div>)}</div>
+                            <div className="grid gap-2 sm:grid-cols-2">{page.problems.map((p) => <div key={p} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />{p}</div>)}</div>
                         </div>
                     </AnimatedBlock>
                     {/* Layer 2: Construction (corrections) */}
                     <AnimatedBlock delay={0.15} className="mb-4 ml-4 lg:ml-8">
                         <div className="rounded-2xl border-2 border-lime-400/15 bg-[#0a0a0a] p-6">
                             <div className="mb-4 flex items-center gap-3"><Wrench className="h-5 w-5 text-lime-400" /><h3 className="text-[15px] font-bold">Couche 2 : Construction</h3><span className="ml-auto rounded-md bg-lime-400/10 px-2 py-0.5 font-mono text-[9px] text-lime-400">STRUCTURE</span></div>
-                            <div className="grid gap-2 sm:grid-cols-2">{page.corrections.map((c, i) => <div key={c} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-lime-400" />{c}</div>)}</div>
+                            <div className="grid gap-2 sm:grid-cols-2">{page.corrections.map((c) => <div key={c} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-lime-400" />{c}</div>)}</div>
                         </div>
                     </AnimatedBlock>
                     {/* Layer 3: Output (deliverables) */}
                     <AnimatedBlock delay={0.3} className="ml-8 lg:ml-16">
                         <div className="rounded-2xl border-2 border-emerald-400/15 bg-[#0a0a0a] p-6">
                             <div className="mb-4 flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-emerald-400" /><h3 className="text-[15px] font-bold">Couche 3 : Livrables</h3><span className="ml-auto rounded-md bg-emerald-400/10 px-2 py-0.5 font-mono text-[9px] text-emerald-400">SORTIE</span></div>
-                            <div className="grid gap-2 sm:grid-cols-2">{page.deliverables.map((d, i) => <div key={d} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{d}</div>)}</div>
+                            <div className="grid gap-2 sm:grid-cols-2">{page.deliverables.map((d) => <div key={d} className="flex items-start gap-2.5 text-[13px] leading-[1.65] text-[#a8a8a8]"><div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{d}</div>)}</div>
                         </div>
                     </AnimatedBlock>
                 </div>

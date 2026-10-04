@@ -61,7 +61,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="fr" className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
+        <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
             <head>
                 {/* DNS prefetch for external origins used at runtime */}
                 <link rel="dns-prefetch" href="https://clerk-telemetry.com" />

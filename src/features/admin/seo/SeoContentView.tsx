@@ -118,13 +118,15 @@ function buildCalendar(referenceDate) {
     };
 }
 
+const EMPTY_ROWS = [];
+
 export default function SeoContentPage() {
     const { client, clientId } = useGeoClient();
     const { data, loading, error } = useSeoWorkspaceSlice('content');
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
-    const clusters = data?.clusters || [];
-    const pageRoles = data?.pageRoles || [];
+    const clusters = data?.clusters || EMPTY_ROWS;
+    const pageRoles = data?.pageRoles || EMPTY_ROWS;
     const contentDecay = data?.contentDecay?.items || [];
     const refreshItems = data?.refreshOpportunities?.items || [];
     const missingItems = data?.missingPages?.items || [];
@@ -145,8 +147,11 @@ export default function SeoContentPage() {
         [clusters, pageRoles],
     );
 
-    const referenceDate = data?.auditMeta?.createdAt ? new Date(data.auditMeta.createdAt) : new Date();
-    const calendar = useMemo(() => buildCalendar(referenceDate), [data?.auditMeta?.createdAt]);
+    const auditCreatedAt = data?.auditMeta?.createdAt;
+    const calendar = useMemo(() => {
+        const referenceDate = auditCreatedAt ? new Date(auditCreatedAt) : new Date();
+        return buildCalendar(referenceDate);
+    }, [auditCreatedAt]);
     const calendarLegend = {
         published: pageRoles.length,
         scheduled: refreshItems.length + contentDecay.length + mergeItems.length,

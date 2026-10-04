@@ -99,6 +99,8 @@ const EASE = [0.16, 1, 0.3, 1];
 
 /* ── Components ── */
 
+const EMPTY_ROWS = [];
+
 export default function GeoRunsPage() {
     const { clientId, invalidateWorkspace, refreshToken } = useGeoClient();
     const { data, loading, error } = useGeoWorkspaceSlice('runs');
@@ -113,7 +115,7 @@ export default function GeoRunsPage() {
     const [showAllCitations, setShowAllCitations] = useState(false);
 
     const geoBase = clientId ? `/admin/clients/${clientId}/geo` : '/admin/clients';
-    const history = data?.history || [];
+    const history = data?.history || EMPTY_ROWS;
     const statusCounts = data?.summary?.statusCounts || {};
     const totalRuns = data?.summary?.total || 0;
     const parsedSuccess = data?.summary?.parseCounts?.parsed_success;
@@ -253,7 +255,7 @@ export default function GeoRunsPage() {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex-1">
+                        <div className="min-h-0 min-w-0 flex-1">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={timelineData}>
                                     <Bar dataKey="duration" radius={[1, 1, 0, 0]}>

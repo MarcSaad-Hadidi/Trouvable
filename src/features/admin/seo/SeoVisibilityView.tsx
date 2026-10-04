@@ -81,6 +81,8 @@ function FilterToggle({ value, onChange }) {
     );
 }
 
+const EMPTY_ROWS = [];
+
 export default function SeoVisibilityPage() {
     const router = useRouter();
     const pathname = usePathname();
@@ -105,11 +107,11 @@ export default function SeoVisibilityPage() {
     const [query, setQuery] = useState('');
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
-    const topQueries = data?.topQueries || [];
+    const topQueries = data?.topQueries || EMPTY_ROWS;
     const deviceSplit = data?.deviceSplit || {};
     const intentBreakdown = data?.intentBreakdown || [];
     const movers = data?.movers || { winners: [], losers: [] };
-    const freshness = data?.freshness || {};
+    const freshness = data?.freshness;
     const gscSource = data?.gscSource || {};
     const trendLabel = range === '12m' ? '12m' : range;
     const gscFilterSummary = [

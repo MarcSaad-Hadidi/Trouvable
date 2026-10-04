@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Crosshair, LayoutList, PanelRight } from 'lucide-react';
@@ -23,7 +23,7 @@ export default function DossierActivityView() {
     const [focusId, setFocusId] = useState(null);
 
     const items = Array.isArray(data?.items) ? data.items : [];
-    const focused = useMemo(() => items.find((i) => i.id === focusId) || items[0] || null, [items, focusId]);
+    const focused = items.find((item) => item.id === focusId) || items[0] || null;
 
     if (loading) return <DossierLoadingState label="Chargement de l’activité du dossier…" />;
     if (error) return <DossierErrorState message={error} />;

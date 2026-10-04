@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, CheckCircle2, AlertTriangle, PackageOpen, Plus, Search, Compass, ChevronDown, PenSquare, LayoutGrid } from 'lucide-react';
@@ -110,7 +111,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                             <div className="flex items-center justify-between hover:bg-[#212121] p-2 rounded-lg cursor-pointer">
                                 <div className="flex items-center gap-2 text-white text-[14px] font-medium">
                                     <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center p-1.5 overflow-hidden">
-                                        <img src="/logos/chatgpt.png" alt="ChatGPT" className="w-full h-full object-contain" />
+                                        <Image src="/logos/chatgpt.png" alt="ChatGPT" className="w-full h-full object-contain" width={28} height={28} unoptimized loading="eager" />
                                     </div>
                                     Nouvelle discussion
                                 </div>
@@ -166,7 +167,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                         <div className="p-3 mt-auto">
                             <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-[#212121] cursor-pointer">
                                 <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                                    <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                    <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="text-white text-[14px] font-medium truncate">Trouvable</div>
@@ -184,7 +185,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                                 ChatGPT <ChevronDown className="w-4 h-4" />
                             </div>
                             <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-sm">
-                                <img src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" />
+                                <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-cover" width={32} height={32} unoptimized loading="eager" />
                             </div>
                         </div>
 
@@ -230,7 +231,7 @@ export default function ChatgptPage({ page, trustBrief }) {
                                                         ) : (
                                                             <div className="flex gap-4 max-w-full lg:max-w-[85%]">
                                                                 <div className="w-8 h-8 rounded-full border border-white/10 bg-white flex items-center justify-center shrink-0 mt-1 overflow-hidden p-1.5">
-                                                                    <img src="/logos/chatgpt.png" alt="ChatGPT" className="w-full h-full object-contain" />
+                                                                    <Image src="/logos/chatgpt.png" alt="ChatGPT" className="w-full h-full object-contain" width={32} height={32} unoptimized loading="eager" />
                                                                 </div>
                                                                 <div className="text-[#ececec] text-[15px] leading-[1.7] space-y-6 pt-1.5 flex-1">
                                                                     {msg.isThinking ? (
