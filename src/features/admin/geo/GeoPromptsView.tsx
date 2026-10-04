@@ -724,8 +724,9 @@ function TrackedPromptRow({
                     <button
                         onClick={() => {
                             setEditingId(prompt.id);
-                            setEditingForm({ ...prompt, prompt_mode: mode });
+                            setEditingForm({ query_text: prompt.query_text, prompt_mode: mode });
                         }}
+                        title="Modifier le prompt"
                         className="p-2.5 text-white/30 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
                     >
                         <Edit3Icon className="h-4 w-4" />
@@ -787,6 +788,7 @@ export default function GeoPromptsView() {
     const [runningBatch, setRunningBatch] = useState(false);
     const [improvingId, setImprovingId] = useState(null);
     const [improvements, setImprovements] = useState({});
+    const [saveError, setSaveError] = useState(null);
 
     const prompts = data?.prompts || [];
     const hasActivePrompt = prompts.some((p) => p.is_active);
@@ -843,6 +845,11 @@ export default function GeoPromptsView() {
     return (
         <CommandPageShell header={header}>
             <SourceStatusNotice domain="GEO" status={data?.status} errors={data?.errors} />
+            {saveError && (
+                <p role="alert" className="text-sm text-rose-300">
+                    {saveError}
+                </p>
+            )}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <CommandMetricCard
                     label="Inventaire"
@@ -967,20 +974,30 @@ export default function GeoPromptsView() {
                                     isEditing={editingId === p.id}
                                     editingForm={editingForm}
                                     setEditingForm={setEditingForm}
-                                    setEditingId={setEditingId}
+                                    setEditingId={(id) => {
+                                        setSaveError(null);
+                                        setEditingId(id);
+                                    }}
                                     submitting={submitting}
                                     isRunning={runningPromptId === p.id}
                                     onSave={async (id) => {
                                         setSubmitting(true);
+                                        setSaveError(null);
                                         try {
-                                            await fetch('/api/admin/queries/update', {
+                                            const response = await fetch('/api/admin/queries/update', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ id, ...editingForm }),
+                                                body: JSON.stringify({
+                                                    id,
+                                                    query_text: editingForm.query_text,
+                                                    prompt_mode: editingForm.prompt_mode,
+                                                }),
                                             });
+                                            await parseJsonResponse(response);
                                             setEditingId(null);
                                             invalidateWorkspace();
-                                        } catch {
+                                        } catch (error) {
+                                            setSaveError(error.message || 'Impossible d’enregistrer ce prompt.');
                                         } finally {
                                             setSubmitting(false);
                                         }
@@ -1058,19 +1075,22 @@ export default function GeoPromptsView() {
                                     improvedText={improvements[p.id]}
                                     onUseImproved={async (id, text) => {
                                         setSubmitting(true);
+                                        setSaveError(null);
                                         try {
-                                            await fetch('/api/admin/queries/update', {
+                                            const response = await fetch('/api/admin/queries/update', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({ id, query_text: text }),
                                             });
+                                            await parseJsonResponse(response);
                                             setImprovements((prev) => {
                                                 const next = { ...prev };
                                                 delete next[id];
                                                 return next;
                                             });
                                             invalidateWorkspace();
-                                        } catch {
+                                        } catch (error) {
+                                            setSaveError(error.message || 'Impossible d’enregistrer ce prompt.');
                                         } finally {
                                             setSubmitting(false);
                                         }
