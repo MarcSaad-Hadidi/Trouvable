@@ -18,6 +18,7 @@
  */
 
 import { finiteNumberOrNull } from '@/lib/numbers';
+import { clamp, toArray, hoursSince, deriveReliability } from './report-readings';
 
 export const PROTOCOL_DIMENSION_WEIGHTS = Object.freeze({
     llms_txt: 0.35,
@@ -32,34 +33,6 @@ const DIMENSION_LABELS = Object.freeze({
     schema_entity: 'Schéma d’entité',
     crawler_access: 'Accès crawler IA',
 });
-
-const FRESHNESS_CALCULATED_HOURS = 24 * 60; // ≤ 60j
-const FRESHNESS_STALE_HOURS = 24 * 180;    // ≤ 180j
-
-function clamp(value, min = 0, max = 100) {
-    if (!Number.isFinite(value)) return min;
-    return Math.max(min, Math.min(max, value));
-}
-
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
-function hoursSince(iso) {
-    if (!iso) return null;
-    const parsed = new Date(iso).getTime();
-    if (Number.isNaN(parsed)) return null;
-    return Math.floor((Date.now() - parsed) / 3600000);
-}
-
-function deriveReliability(audit) {
-    if (!audit || !audit.created_at) return 'unavailable';
-    const hours = hoursSince(audit.created_at);
-    if (hours === null) return 'unavailable';
-    if (hours <= FRESHNESS_CALCULATED_HOURS) return 'calculated';
-    if (hours <= FRESHNESS_STALE_HOURS) return 'stale';
-    return 'low';
-}
 
 function deriveDimensionStatus(score) {
     if (!Number.isFinite(score)) return 'absent';

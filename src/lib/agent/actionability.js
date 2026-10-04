@@ -18,6 +18,8 @@
  * declared-but-unverified profile fields).
  */
 
+import { clamp, toArray, hoursSince, deriveReliability } from './report-readings';
+
 export const ACTIONABILITY_DIMENSION_WEIGHTS = Object.freeze({
     offer_clarity: 0.30,
     contact_booking: 0.25,
@@ -34,36 +36,8 @@ const DIMENSION_LABELS = Object.freeze({
     content_actionability: 'Contenu actionnable',
 });
 
-const FRESHNESS_CALCULATED_HOURS = 24 * 60; // ≤ 60j
-const FRESHNESS_STALE_HOURS = 24 * 180;    // ≤ 180j
-
-function clamp(value, min = 0, max = 100) {
-    if (!Number.isFinite(value)) return min;
-    return Math.max(min, Math.min(max, value));
-}
-
-function toArray(value) {
-    return Array.isArray(value) ? value : [];
-}
-
 function nonEmptyString(value, minLen = 1) {
     return typeof value === 'string' && value.trim().length >= minLen;
-}
-
-function hoursSince(iso) {
-    if (!iso) return null;
-    const parsed = new Date(iso).getTime();
-    if (Number.isNaN(parsed)) return null;
-    return Math.floor((Date.now() - parsed) / 3600000);
-}
-
-function deriveReliability(audit) {
-    if (!audit || !audit.created_at) return 'unavailable';
-    const hours = hoursSince(audit.created_at);
-    if (hours === null) return 'unavailable';
-    if (hours <= FRESHNESS_CALCULATED_HOURS) return 'calculated';
-    if (hours <= FRESHNESS_STALE_HOURS) return 'stale';
-    return 'low';
 }
 
 function deriveDimensionStatus(score, hasObserved) {
