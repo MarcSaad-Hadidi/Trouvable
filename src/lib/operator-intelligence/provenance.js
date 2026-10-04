@@ -9,3 +9,7 @@ export function mapOpportunitySourceToProvenance(source) {
     if (source === 'recommended') return PROVENANCE_META.derived;
     return PROVENANCE_META.derived;
 }
+
+export function getNotConnectedMeta() {
+    return PROVENANCE_META.not_connected;
+}
