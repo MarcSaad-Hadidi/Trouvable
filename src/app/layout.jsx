@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
         <html
             lang="fr"
             data-scroll-behavior="smooth"
-            className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} scroll-smooth`}
+            className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} relative scroll-smooth`}
             suppressHydrationWarning
         >
             <head>
