@@ -1,29 +1,32 @@
 ---
-applyTo: "supabase/**,sql/**,lib/db.js,lib/db/**,lib/supabase-admin.js,lib/supabase/**,lib/queries/**,lib/actions/**,lib/data/**"
+applyTo: 'supabase/**,sql/**,src/lib/db/**,src/lib/supabase-admin.js,src/lib/supabase/**,src/lib/queries/**,src/lib/actions/**,src/lib/data/**,src/features/portal/server/**'
 ---
 
 # Supabase safety workflow
 
-Every schema, policy, auth, or query change MUST follow this workflow.
+Services are dormant. These instructions do not authorize remote SQL, backfills or revival. Validate schema changes on a disposable local database; never remove historical setup scripts without proving the reconstruction path.
+
+Every schema, policy, auth, or query change follows the relevant steps below. A query refactor that changes no schema does not need invented SQL. Remote inspection and mutations are separate authorized operations; migrations, fixtures and local mocks are the sources available during hibernation.
 
 ## 1. Understand the current state
 
-- Read `supabase/schema.sql` for the canonical DDL.
+- Read ordered `supabase/migrations/` and affected schema code. `schema.sql` and `setup_*.sql` are retained historical references, not proof of the current remote catalogue.
 - Check `supabase/setup_*.sql` for incremental migration scripts.
-- Inspect `lib/db.js` (anon facade) and `lib/supabase-admin.js` (service-role client) for current access patterns.
+- Inspect targeted `src/lib/db/*`, `src/lib/supabase-admin.js` (service role), and `src/lib/supabase/server.js` (public SSR reads). There is no global db.js facade.
 - Identify which tables, columns, and policies are affected.
 
 ## 2. Assess impact
 
 Before proposing SQL:
+
 - **RLS impact** — Does this change weaken, remove, or bypass existing row-level security?
 - **Data loss risk** — Does this DROP, TRUNCATE, or ALTER columns with existing data?
 - **Auth boundary** — Does this affect which users/roles can read or write?
-- **Downstream consumers** — Which `lib/` modules, server actions, or API routes query this table?
+- **Downstream consumers** — Which `src/lib/` modules, server actions, or API routes query this table?
 
 ## 3. Propose SQL explicitly
 
-- Write the exact SQL statements to execute.
+- If a schema, policy or data change is necessary, write the exact SQL statements proposed; do not execute them remotely during hibernation.
 - Use `IF NOT EXISTS` / `IF EXISTS` guards where appropriate.
 - Prefer `ALTER TABLE ... ADD COLUMN` over recreating tables.
 - For destructive operations: explain why, show rollback SQL, and flag for human review.
@@ -35,11 +38,11 @@ Before proposing SQL:
 - Service-role writes bypass RLS — this is intentional for admin/server operations.
 - Anon/public read access: only via explicit `FOR SELECT TO anon USING (...)` policies.
 - Do not create `FOR ALL` policies — always specify the operation (SELECT, INSERT, UPDATE, DELETE).
-- When adding a policy, always `DROP POLICY IF EXISTS` first to ensure idempotency.
+- Keep policy changes idempotent, but do not drop a working policy mechanically. Replacement requires inspection of the existing operation/roles/predicate, explicit justification, a rollback and backup plan, and preservation of access protections.
 
 ## 5. Migration patterns
 
-- New tables → add DDL to `supabase/schema.sql` AND create a `supabase/setup_<feature>.sql` migration script.
+- New schema changes → add an ordered migration in `supabase/migrations/`; do not create a second setup history. Preserve historical scripts until reconstruction equivalence is proved locally.
 - Column additions → prefer `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
 - Data backfills → use `UPDATE ... SET ... WHERE <column> IS NULL` with explicit WHERE clauses.
 - Index creation → `CREATE INDEX IF NOT EXISTS` with meaningful names: `idx_<table>_<column>`.
@@ -47,13 +50,12 @@ Before proposing SQL:
 ## 6. Client usage patterns
 
 ```javascript
-// Anon client (lib/db.js) — for public-facing reads
-import supabase from '@/lib/db';
-const { data, error } = await supabase.from('table').select('*').eq('published', true);
+// Public SSR reads: use the existing server-only profile loader with RLS/public filters.
+import { getClientProfile } from '@/lib/supabase/server';
 
-// Service-role client (lib/supabase-admin.js) — for admin writes, bypasses RLS
-import { supabaseAdmin } from '@/lib/supabase-admin';
-const { data, error } = await supabaseAdmin.from('table').insert({ ... });
+// Service role: server only, after explicit authorization; prefer targeted domain modules.
+import { getAdminSupabase } from '@/lib/supabase-admin';
+const { data, error } = await getAdminSupabase().from('table').select('id');
 ```
 
 - Always handle `error` — never silently ignore Supabase errors.
@@ -64,9 +66,10 @@ const { data, error } = await supabaseAdmin.from('table').insert({ ... });
 ## 7. Validation checklist
 
 After any Supabase change:
-- [ ] SQL is idempotent (can run multiple times safely)
+
+- [ ] Proposed SQL is idempotent when applicable; a query-only change requires no migration
 - [ ] RLS is not weakened without explicit justification
-- [ ] `schema.sql` is updated if structural change
-- [ ] Migration script created if needed
-- [ ] Downstream `lib/` consumers verified
+- [ ] Ordered migration represents the structural change; historical reconstruction sources preserved
+- [ ] Migration created and checked on a disposable local database when schema/policies/data change; report any unverified reconstruction or RLS behavior
+- [ ] Downstream `src/lib/` consumers verified
 - [ ] Error handling present in client code

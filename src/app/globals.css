@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-inter), sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #000000;
+    color: #f0f0f0;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 0;
+}
+
+button:not(:disabled) {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+}
+
+:focus-visible {
+    outline: 2px solid rgba(91, 115, 255, 0.55);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Light mode overrides if needed */
+.light ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}

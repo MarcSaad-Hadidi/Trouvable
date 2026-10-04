@@ -1,8 +1,13 @@
 ---
-applyTo: "app/**,components/**,lib/**,middleware.ts,server/**,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json"
+applyTo: 'src/app/**,src/features/**,src/components/**,src/lib/**,src/proxy.js,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json'
 ---
 
 # Trouvable engineering instructions
+
+## Hibernation
+
+- Preserve the static parking, disabled deployments and dormant services. Local validation does not authorize remote calls, migrations, email or service revival.
+- Read AGENTS.md and the relevant installed Next guide before framework changes.
 
 ## App Router architecture
 
@@ -14,11 +19,12 @@ applyTo: "app/**,components/**,lib/**,middleware.ts,server/**,scripts/**,supabas
 ## Supabase safety
 
 For any schema, policy, auth, or query change — follow the workflow in `supabase.instructions.md`.
-When touching Supabase from `lib/` code: inspect current schema, explain RLS impact, propose SQL explicitly.
+When touching Supabase from `src/lib/` code: inspect affected migrations and query/auth contracts, explain RLS impact, and propose SQL explicitly only if schema, policies or stored data must change. During hibernation, validate with local fixtures or a disposable local database; no remote mutation or service revival is authorized.
 
 ## SEO/GEO truthfulness
 
 When touching metadata, JSON-LD, citations, GEO pages, local business info, expertises, or entity descriptions:
+
 - Only use data that is actually present, verified, or explicitly provided.
 - Do not add placeholder values disguised as real content.
 
@@ -54,6 +60,7 @@ When touching metadata, JSON-LD, citations, GEO pages, local business info, expe
 ## Testing expectations
 
 Use effort proportional to the change:
+
 - Small fix → targeted validation
 - Moderate feature → targeted test coverage + flow check
 - Risky refactor → broader regression suggestions
@@ -63,6 +70,7 @@ Prefer tests that validate actual behavior, not superficial implementation detai
 ## Anti-patterns
 
 Do NOT:
+
 - Make large rewrites for small problems
 - Propose destructive SQL casually
 - Weaken RLS or auth without explicit justification

@@ -22,6 +22,7 @@ description: Verify AI benchmark results, performance metrics, and comparative c
 ### 1. Identify the claim
 
 For every benchmark or metric displayed:
+
 - What is the exact claim? (e.g., "SEO score: 87/100", "45% improvement")
 - Where does it appear? (Admin dashboard, portal, audit report, GEO page)
 - What component renders it? (React component path)
@@ -41,17 +42,18 @@ Data source → Query/API → Server component/action → UI component
 
 ### 3. Classification
 
-| Data type | Display rules |
-|---|---|
-| Measured data (from actual audits) | Display as fact with date |
-| AI assessment | Label as "AI assessment" or "estimated" |
-| Comparative data | Show methodology and date range |
-| Projected/estimated | Must include "estimated" qualifier |
-| Missing data | Show "Data not available" — never fill with fake numbers |
+| Data type                          | Display rules                                            |
+| ---------------------------------- | -------------------------------------------------------- |
+| Measured data (from actual audits) | Display as fact with date                                |
+| AI assessment                      | Label as "AI assessment" or "estimated"                  |
+| Comparative data                   | Show methodology and date range                          |
+| Projected/estimated                | Must include "estimated" qualifier                       |
+| Missing data                       | Show "Data not available" — never fill with fake numbers |
 
 ### 4. LLM comparison specifics
 
-For multi-LLM comparison features (`lib/llm-comparison/`):
+For multi-LLM comparison features (`src/lib/llm-comparison/`):
+
 - Each provider result must come from an actual API call
 - Response times must be measured, not estimated
 - Quality scores must use consistent evaluation criteria
@@ -60,7 +62,8 @@ For multi-LLM comparison features (`lib/llm-comparison/`):
 
 ### 5. Audit score verification
 
-For audit scores (`lib/audit/`):
+For audit scores (`src/lib/audit/`):
+
 - Score must be calculated from actual page analysis
 - Individual factor scores must sum/weight correctly to total
 - Historical comparisons must use same methodology
@@ -72,12 +75,14 @@ For audit scores (`lib/audit/`):
 ## Benchmark Verification: [Feature/Report]
 
 ### Claims Found: N
-| # | Claim | Source | Verified | Issue |
-|---|---|---|---|---|
-| 1 | "SEO score: 87" | Supabase query | ✅ | - |
-| 2 | "45% improvement" | AI-generated | ❌ | No baseline data |
+
+| #   | Claim             | Source         | Verified | Issue            |
+| --- | ----------------- | -------------- | -------- | ---------------- |
+| 1   | "SEO score: 87"   | Supabase query | ✅       | -                |
+| 2   | "45% improvement" | AI-generated   | ❌       | No baseline data |
 
 ### Data Pipeline:
+
 - Source: [Supabase/AI/API/hardcoded]
 - Query: [verified/unverified]
 - Rendering: [correct/incorrect]
@@ -87,9 +92,9 @@ For audit scores (`lib/audit/`):
 
 ## References
 
-- `lib/audit/` — audit score calculation
-- `lib/llm-comparison/` — LLM provider comparisons
-- `lib/continuous/` — continuous visibility metrics
-- `lib/ai/` — AI response handling
-- `app/admin/` — admin dashboards displaying metrics
-- `app/portal/` — client portal displaying results
+- `src/lib/audit/` — audit score calculation
+- `src/lib/llm-comparison/` — LLM provider comparisons
+- `src/lib/continuous/` — continuous visibility metrics
+- `src/lib/ai/` — AI response handling
+- `src/app/admin/` — admin dashboards displaying metrics
+- `src/app/portal/` — client portal displaying results

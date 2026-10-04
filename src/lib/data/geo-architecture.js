@@ -1,0 +1,684 @@
+export const VILLES = [
+    {
+        slug: 'montreal',
+        name: 'Montréal',
+        description:
+            "Montréal concentre un écosystème d'affaires ultra-compétitif. Nous optimisons votre présence pour que ChatGPT, Gemini et Claude vous recommandent en priorité aux consommateurs locaux.",
+        problems: [
+            'Les commerces du Plateau et de Griffintown sont souvent noyés dans la masse des résultats locaux traditionnels.',
+            'Les restaurants et boutiques montréalais perdent des clients au profit de chaînes mieux référencées sur les moteurs IA.',
+            "Les professionnels indépendants (avocats, dentistes) de Montréal n'apparaissent pas dans les réponses conversationnelles de ChatGPT.",
+            "Le bilinguisme crée une fragmentation des données en ligne qui confond les algorithmes d'IA générative.",
+        ],
+        methodology: [
+            'Audit complet de votre empreinte numérique montréalaise : Google Business, répertoires locaux, avis clients.',
+            'Structuration de vos données (Schema.org LocalBusiness) avec géolocalisation précise par arrondissement.',
+            'Création de contenu optimisé GEO en français et en anglais pour couvrir les deux segments linguistiques.',
+            'Soumission et validation de vos informations sur les sources de données utilisées par les LLMs (Wikipedia, Wikidata, annuaires sectoriels).',
+        ],
+        signals: [
+            'Balisage JSON-LD LocalBusiness avec coordonnées GPS exactes de votre établissement.',
+            "Uniformisation NAP (Nom, Adresse, Téléphone) sur l'ensemble des annuaires québécois et canadiens.",
+            'Enrichissement de votre fiche Google Business Profile avec des attributs structurés (horaires, services, accessibilité).',
+            'Création de pages FAQ locales répondant aux questions fréquentes des Montréalais sur votre secteur.',
+        ],
+        faqs: [
+            {
+                question: 'Est-il encore temps de se positionner en GEO à Montréal ?',
+                answer: "Absolument. L'optimisation pour les IA n'est pas encore un standard dans la majorité des secteurs. C'est une fenêtre d'opportunité majeure pour distancer des concurrents locaux.",
+            },
+            {
+                question: 'Le bilinguisme de Montréal affecte-t-il le référencement IA ?',
+                answer: "Oui. Les LLMs traitent le français et l'anglais séparément. Nous structurons vos données dans les deux langues pour maximiser votre couverture auprès de tous les Montréalais.",
+            },
+            {
+                question: 'Quels arrondissements de Montréal couvrez-vous ?',
+                answer: 'Nous couvrons tous les arrondissements : Plateau-Mont-Royal, Rosemont, Ville-Marie, Côte-des-Neiges, Ahuntsic, Verdun, et tous les autres.',
+            },
+            {
+                question: 'En combien de temps un commerce montréalais voit-il des résultats ?',
+                answer: "L'intégration de vos données structurées par les outils de recherche IA se fait selon leurs propres cycles de crawl. Les premiers ajustements sont généralement perceptibles au cours des semaines ou mois qui suivent le déploiement.",
+            },
+        ],
+        composition: {
+            marketProfile: 'competitive-fortress',
+            heroAngle: "L'épicentre de la compétition numérique",
+            heroTagline: 'Être la réponse prioritaire dans le marché le plus disputé du Québec.',
+            marketContext:
+                'Plus grand marché du Québec, Montréal concentre la plus forte densité de commerces en concurrence pour la visibilité IA. Le bilinguisme français-anglais double les surfaces de requêtes et exige une couverture dans les deux langues.',
+            metaDescription:
+                'Trouvable aide les entreprises de Montréal à devenir les réponses prioritaires de ChatGPT et Gemini. Audit GEO, structuration sémantique, couverture bilingue sur tous les arrondissements.',
+            signalItems: [
+                { value: 'Marché N°1', label: 'du Québec par densité' },
+                { value: 'FR + EN', label: 'double surface de requêtes' },
+                { value: 'Compétition max', label: 'la plus intense de la province' },
+            ],
+            expertiseContext: {
+                restaurants: 'Secteur ultra-concurrentiel en recommandation IA',
+                immobilier: 'Marché locatif et condos à fort volume de requêtes',
+                'avocats-notaires': 'Plus forte densité de cabinets du Québec',
+            },
+        },
+        linkedExpertises: ['restaurants', 'immobilier', 'avocats-notaires'],
+    },
+    {
+        slug: 'laval',
+        name: 'Laval',
+        description:
+            'Troisième ville du Québec, Laval compte de très nombreux commerces de proximité. Nous aidons ces établissements structurés à devenir les réponses naturelles des assistants IA pour la Rive-Nord.',
+        problems: [
+            'Les commerces lavallois sont souvent confondus avec ceux de Montréal par les algorithmes IA, perdant leur spécificité locale.',
+            'Les centres commerciaux (Carrefour Laval, Centropolis) monopolisent la visibilité en ligne au détriment des commerces indépendants.',
+            'Les résidents de Laval qui interrogent ChatGPT reçoivent souvent des recommandations montréalaises plutôt que lavalloises.',
+            'Le développement rapide de nouveaux quartiers résidentiels crée des zones blanches non couvertes par les données IA.',
+        ],
+        methodology: [
+            'Cartographie de votre présence numérique spécifique à Laval et différenciation explicite par rapport à Montréal.',
+            'Optimisation de vos fiches sur les répertoires régionaux de la Rive-Nord et de la Chambre de commerce de Laval.',
+            'Création de contenu géolocalisé mentionnant les quartiers lavallois (Chomedey, Sainte-Rose, Vimont, Duvernay).',
+            'Intégration de signaux locaux forts : partenariats communautaires, événements locaux, associations de commerçants.',
+        ],
+        signals: [
+            'Balisage Schema.org avec areaServed spécifique à Laval et ses quartiers.',
+            'Optimisation des avis Google avec mentions géographiques lavalloises.',
+            'Création de pages de contenu répondant aux recherches "près de chez moi" formulées depuis Laval.',
+            'Inscription sur les annuaires spécifiques de la Rive-Nord (Tourisme Laval, répertoires municipaux).',
+        ],
+        faqs: [
+            {
+                question: 'Pourquoi un commerce lavallois apparaît-il rarement sur ChatGPT ?',
+                answer: 'Les LLMs privilégient les données les plus structurées. Les commerces lavallois manquent souvent de balisage spécifique et sont noyés dans les résultats de la grande région de Montréal.',
+            },
+            {
+                question: 'Est-ce que le GEO fonctionne pour les commerces du Centropolis ?',
+                answer: "Absolument. Les commerces situés dans les zones commerciales de Laval bénéficient d'un avantage : leur adresse est déjà bien indexée. Nous renforçons leur différenciation par rapport aux chaînes.",
+            },
+            {
+                question: 'Couvrez-vous tous les quartiers de Laval ?',
+                answer: 'Oui. Chomedey, Sainte-Dorothée, Fabreville, Vimont, Auteuil, Pont-Viau, Sainte-Rose, Duvernay et Laval-des-Rapides.',
+            },
+            {
+                question: 'Combien de temps avant que Laval soit clairement distinguée de Montréal dans les IA ?',
+                answer: 'La désambiguïsation géographique dépend du volume de signaux correctifs déployés. Avec une couverture structurée des annuaires, des signaux géolocalisés et du contenu ciblé Rive-Nord, les LLMs ajustent progressivement leurs associations, généralement en quelques semaines à quelques mois selon les plateformes.',
+            },
+        ],
+        composition: {
+            marketProfile: 'satellite-differentiation',
+            satelliteOf: 'Montréal',
+            heroAngle: 'Une identité à affirmer face à la métropole',
+            heroTagline: 'Affirmer une présence locale distincte sur la Rive-Nord.',
+            marketContext:
+                'Troisième ville du Québec, Laval est systématiquement confondue avec Montréal par les algorithmes IA. Les commerces lavallois doivent se différencier explicitement pour que les assistants virtuels les recommandent aux résidents de la Rive-Nord.',
+            metaDescription:
+                'Les commerces lavallois disparaissent dans les réponses IA au profit de Montréal. Trouvable structure votre identité numérique pour que les assistants vous recommandent aux résidents de la Rive-Nord.',
+            signalItems: [
+                { value: '3e ville', label: 'du Québec par population' },
+                { value: 'Rive-Nord', label: 'identité distincte à affirmer' },
+                { value: 'Anti-confusion', label: 'défi algorithmique central' },
+            ],
+            expertiseContext: {
+                'services-residentiels': 'Forte demande dans les zones résidentielles nouvelles',
+                'sante-cliniques': 'Accès aux soins : forte recherche locale sur les IA',
+                restaurants: 'Alternance résidentielle et commercial de proximité',
+            },
+        },
+        linkedExpertises: ['services-residentiels', 'sante-cliniques', 'restaurants'],
+    },
+    {
+        slug: 'quebec',
+        name: 'Québec',
+        description:
+            'Capitale nationale et pôle touristique majeur, Québec attire des millions de visiteurs. Nous assurons que les IA recommandent vos services aux touristes et résidents.',
+        problems: [
+            'Le secteur touristique du Vieux-Québec est ultra-concurrentiel : les assistants IA ne recommandent que les établissements les mieux documentés.',
+            'Les professionnels de Québec (notaires, cliniques) sont sous-représentés dans les bases de connaissances utilisées par les LLMs.',
+            'La saisonnalité touristique crée des fluctuations dans la visibilité IA si les données ne sont pas maintenues à jour.',
+            'Les commerces de Sainte-Foy et Beauport ont une visibilité IA quasi nulle comparée à ceux du centre-ville.',
+        ],
+        methodology: [
+            'Audit de votre présence sur les plateformes touristiques (Québec Original, TripAdvisor, Google Maps) utilisées comme sources par les LLMs.',
+            'Création de contenu bilingue (français/anglais) pour capter le trafic touristique international via les assistants IA.',
+            "Structuration de données saisonnières pour que vos services restent pertinents toute l'année dans les réponses IA.",
+            'Renforcement de votre autorité locale via des citations sur les sites institutionnels (Ville de Québec, Destination Québec cité).',
+        ],
+        signals: [
+            'Balisage TouristAttraction et LocalBusiness combiné pour les établissements du Vieux-Québec.',
+            'Pages FAQ bilingues ciblant les intentions touristiques : "best restaurants in Quebec City", "meilleur brunch à Québec".',
+            "Données structurées d'événements locaux (Carnaval, Festival d'été) liées à vos services.",
+            'Profil Wikidata enrichi pour les établissements historiques ou patrimoniaux.',
+        ],
+        faqs: [
+            {
+                question: 'Le GEO aide-t-il les commerces touristiques de Québec ?',
+                answer: "C'est l'un des cas d'usage les plus puissants. Les touristes utilisent massivement ChatGPT et Google Gemini pour planifier leur séjour. Être recommandé par ces outils équivaut à une publicité gratuite et ciblée.",
+            },
+            {
+                question: 'Les commerces hors du Vieux-Québec peuvent-ils bénéficier du GEO ?',
+                answer: 'Oui. Les assistants IA répondent aussi aux recherches de quartier. Un commerce à Sainte-Foy ou Beauport peut très bien dominer les réponses pour son secteur géographique.',
+            },
+            {
+                question: 'Faut-il du contenu en anglais pour un commerce de Québec ?',
+                answer: "C'est fortement recommandé si vous ciblez les touristes. Les requêtes en anglais sur ChatGPT génèrent un volume significatif de recommandations locales.",
+            },
+            {
+                question: 'À quelle fréquence faut-il mettre à jour ses données GEO ?',
+                answer: "Nous recommandons une révision trimestrielle, avec des mises à jour ponctuelles lors de changements d'horaires, de menus saisonniers ou d'événements spéciaux.",
+            },
+        ],
+        composition: {
+            marketProfile: 'tourist-capture',
+            heroAngle: 'Le flux touristique à convertir',
+            heroTagline: "Capter les visiteurs avant qu'ils choisissent un concurrent.",
+            marketContext:
+                "Capitale nationale et destination touristique majeure, Québec génère un volume considérable de requêtes IA en provenance de visiteurs internationaux. La saisonnalité et le bilinguisme créent des fenêtres d'opportunité uniques.",
+            metaDescription:
+                "À Québec, les touristes planifient via ChatGPT. Trouvable structure vos données pour que les IA vous recommandent aux visiteurs francophones et anglophones toute l'année.",
+            signalItems: [
+                { value: 'Capitale', label: 'nationale et touristique' },
+                { value: 'FR + EN', label: 'flux touristique international' },
+                { value: 'Saisonnalité', label: 'fenêtre à exploiter' },
+            ],
+            expertiseContext: {
+                restaurants: 'Principal moteur touristique sectoriel du Vieux-Québec',
+                immobilier: 'Marché locatif étudiant, touristique et patrimonial',
+                'sante-cliniques': 'Base institutionnelle forte : CHU, CHUL, CIUSSS',
+            },
+        },
+        linkedExpertises: ['restaurants', 'immobilier', 'sante-cliniques'],
+    },
+    {
+        slug: 'longueuil',
+        name: 'Longueuil',
+        description:
+            'Cœur économique de la Rive-Sud, Longueuil et ses arrondissements regroupent des commerces dynamiques. Nous les faisons émerger dans les réponses IA locales.',
+        problems: [
+            'Les commerces de Longueuil sont systématiquement éclipsés par Montréal dans les résultats des assistants IA.',
+            'Le manque de données structurées spécifiques à la Rive-Sud rend les commerces locaux invisibles pour les LLMs.',
+            'Les résidents qui demandent "un bon plombier près de chez moi" à ChatGPT reçoivent des suggestions montréalaises.',
+            'Les arrondissements (Saint-Hubert, Greenfield Park, Vieux-Longueuil) ne sont pas différenciés dans les bases de données IA.',
+        ],
+        methodology: [
+            "Création d'une identité numérique Rive-Sud distincte avec balisage géographique précis par arrondissement.",
+            'Inscription et optimisation sur les répertoires de la Chambre de commerce de la Rive-Sud.',
+            'Production de contenu ciblant les intentions de recherche locales : "meilleur [service] Rive-Sud", "à Longueuil".',
+            'Stratégie de backlinks locaux via les médias communautaires de la Rive-Sud.',
+        ],
+        signals: [
+            'Schema.org avec areaServed incluant explicitement Longueuil, Saint-Hubert, Greenfield Park et Le Vieux-Longueuil.',
+            'Données NAP cohérentes sur tous les annuaires avec le code postal J4 spécifique.',
+            'Contenu FAQ répondant aux recherches conversationnelles Rive-Sud.',
+            'Citations sur les plateformes communautaires locales (Journal de Saint-Hubert, Longueuil Citoyen).',
+        ],
+        faqs: [
+            {
+                question: 'Pourquoi ChatGPT recommande-t-il Montréal quand je cherche un service à Longueuil ?',
+                answer: "Les LLMs s'appuient sur la densité de données. Montréal a beaucoup plus de contenu structuré. Nous corrigeons ce déséquilibre en enrichissant spécifiquement vos signaux Rive-Sud.",
+            },
+            {
+                question: 'Le GEO fonctionne-t-il pour les services résidentiels de la Rive-Sud ?',
+                answer: 'Oui, c\'est même l\'un des secteurs où le GEO est le plus efficace. Les recherches du type "plombier urgence Longueuil" sur les assistants IA sont en forte croissance.',
+            },
+            {
+                question: 'Couvrez-vous aussi Boucherville et Saint-Bruno ?',
+                answer: 'Oui, notre couverture Rive-Sud inclut Longueuil, Boucherville, Saint-Bruno-de-Montarville, Sainte-Julie et Saint-Lambert.',
+            },
+        ],
+        composition: {
+            marketProfile: 'satellite-differentiation',
+            satelliteOf: 'Montréal',
+            heroAngle: 'La Rive-Sud mérite sa propre voix',
+            heroTagline: 'Exister dans les IA sans être confondu avec la métropole.',
+            marketContext:
+                'Cœur de la Rive-Sud, Longueuil et ses arrondissements font face au même défi que Laval : une identité numérique constamment éclipsée par Montréal dans les réponses des assistants IA.',
+            metaDescription:
+                'ChatGPT recommande Montréal quand vos clients cherchent un service à Longueuil. Trouvable installe votre identité Rive-Sud dans les LLMs pour corriger ce déséquilibre structurel.',
+            signalItems: [
+                { value: 'Rive-Sud', label: 'cœur économique distinct' },
+                { value: 'Invisibilité IA', label: 'éclipsé par Montréal' },
+                { value: '4 arrondissements', label: 'à ancrer dans les LLMs' },
+            ],
+            expertiseContext: {
+                'services-residentiels': 'Parc résidentiel mature à forte demande IA sur la Rive-Sud',
+                'sante-cliniques': 'Accès aux soins : requêtes IA en croissance sur la Rive-Sud',
+                'avocats-notaires': 'Volume notarial fort lié au marché immobilier Rive-Sud',
+            },
+        },
+        linkedExpertises: ['services-residentiels', 'sante-cliniques', 'avocats-notaires'],
+    },
+    {
+        slug: 'brossard',
+        name: 'Brossard',
+        description:
+            "Ville en plein essor grâce au REM et au Quartier DIX30, Brossard attire une nouvelle clientèle. Nous nous assurons que l'IA la dirige vers vos commerces.",
+        problems: [
+            'Le boom immobilier autour du REM attire de nouveaux résidents qui découvrent les commerces locaux via les assistants IA.',
+            "Le DIX30 capte l'essentiel de la visibilité en ligne, rendant les commerces indépendants de Brossard invisibles.",
+            'La diversité culturelle de Brossard génère des recherches multilingues (français, anglais, mandarin) mal couvertes.',
+            'Les nouveaux quartiers résidentiels (Solar Uniquartier) ne sont pas encore indexés dans les bases de connaissances des LLMs.',
+        ],
+        methodology: [
+            'Optimisation multilingue adaptée à la démographie cosmopolite de Brossard.',
+            'Référencement spécifique aux nouveaux développements urbains (REM, Solar Uniquartier) pour capter les résidents entrants.',
+            'Création de contenu GEO ciblant les recherches liées au DIX30 et aux quartiers résidentiels en développement.',
+            "Partenariats avec les organismes communautaires de Brossard pour renforcer l'autorité locale.",
+        ],
+        signals: [
+            'Balisage géographique incluant les points de repère locaux : REM Brossard, DIX30, Panama.',
+            'Données structurées en français et en anglais pour refléter le bilinguisme local.',
+            'Inscription sur les répertoires commerciaux spécifiques à Brossard et au corridor de la route 10.',
+            'Contenu FAQ ciblant les questions des nouveaux résidents : "où manger à Brossard", "meilleur dentiste Brossard".',
+        ],
+        faqs: [
+            {
+                question: 'Le REM change-t-il la donne pour la visibilité IA à Brossard ?',
+                answer: "Absolument. L'arrivée du REM augmente les recherches locales. Les nouveaux résidents découvrent les commerces via les assistants IA. Être positionné maintenant est un avantage stratégique.",
+            },
+            {
+                question: 'Peut-on cibler les clients du DIX30 spécifiquement ?',
+                answer: 'Oui. Nous structurons vos données pour que les assistants IA vous recommandent lorsque les utilisateurs cherchent des services "près du DIX30" ou "à Brossard".',
+            },
+            {
+                question: 'Le multilinguisme de Brossard est-il un atout pour le GEO ?',
+                answer: "C'est un atout majeur. En structurant vos données en plusieurs langues, vous captez un bassin de clientèle beaucoup plus large que vos concurrents unilingues.",
+            },
+        ],
+        composition: {
+            marketProfile: 'emerging-opportunity',
+            heroAngle: 'Un marché en pleine redéfinition',
+            heroTagline: "S'installer dans les réponses IA avant que le marché se densifie.",
+            marketContext:
+                "L'arrivée du REM et le développement rapide de nouveaux quartiers résidentiels transforment Brossard en un marché émergent. Les nouveaux résidents découvrent les commerces locaux via les assistants IA.",
+            metaDescription:
+                "L'arrivée du REM transforme Brossard. Les nouveaux résidents découvrent leurs commerces via les IA. Trouvable vous positionne maintenant, avant que vos concurrents ne suivent.",
+            signalItems: [
+                { value: 'REM actif', label: 'nouveaux résidents entrants' },
+                { value: 'DIX30', label: 'pression sur les indépendants' },
+                { value: 'Fenêtre ouverte', label: 'marché pas encore saturé' },
+            ],
+            expertiseContext: {
+                restaurants: 'Bassin de clientèle DIX30 et nouveaux résidents REM',
+                immobilier: 'Marché condos en forte expansion autour du REM',
+                'services-residentiels': 'Quartiers neufs à très forte demande de services locaux',
+            },
+        },
+        linkedExpertises: ['restaurants', 'immobilier', 'services-residentiels'],
+    },
+];
+
+export const EXPERTISES = [
+    {
+        slug: 'restaurants',
+        name: 'Restaurants & Gastronomie',
+        description:
+            'Les assistants IA reçoivent des millions de requêtes du type "où manger ce soir". Nous faisons de votre restaurant la réponse automatique de ChatGPT et Gemini.',
+        heroHeadline: 'Votre restaurant, recommandé par l\u2019IA',
+        heroSubheadline:
+            'Les consommateurs demandent « où manger ce soir » à ChatGPT, Gemini et Perplexity des millions de fois par jour. Nous structurons votre établissement pour qu\u2019il devienne la réponse.',
+        sectorNarrative:
+            'La recherche de restaurants est le cas d\u2019usage le plus massif des assistants IA en mode local. Chaque jour, des millions de requêtes conversationnelles du type « meilleur brunch », « restaurant italien pas cher » ou « où manger sans gluten » sont formulées, et les IA génèrent des recommandations basées exclusivement sur les données structurées qu\u2019elles peuvent lire. Un menu en PDF, un site sans balisage, un profil Google mal rempli : autant de signaux invisibles. Les établissements qui structurent leur offre pour les algorithmes captent cette demande avant leurs concurrents.',
+        trustDynamics: [
+            { value: 'Volume massif', label: 'Les requêtes « où manger » dominent les recherches locales IA' },
+            { value: 'Recommandation instantanée', label: 'Les IA génèrent des listes en moins de 3 secondes' },
+            { value: 'Données décisives', label: 'Menu, allergènes, prix, avis : chaque signal compte' },
+        ],
+        searchIntents: [
+            'Quel est le meilleur restaurant italien près de chez moi ?',
+            'Recommande-moi un brunch à Montréal',
+            'Où manger sans gluten à Laval ?',
+            'Restaurant romantique pour anniversaire à Québec',
+            'Meilleur rapport qualité-prix sushi Rive-Sud',
+        ],
+        contentAngles: [
+            'Menu structuré en données lisibles par l\u2019IA : type de cuisine, fourchette de prix, options alimentaires spécifiques.',
+            'Profil d\u2019établissement complet : ambiance, capacité, terrasse, stationnement, accessibilité.',
+            'Contenu FAQ répondant aux questions fréquentes des clients : allergènes, réservations, groupes, options végétariennes.',
+            'Avis clients intégrés et structurés pour renforcer le score de confiance algorithmique.',
+        ],
+        useCases: [
+            'Page de menu optimisée où chaque plat devient une entité compréhensible par les assistants IA, pas un PDF invisible.',
+            'Page « À propos » racontant l\u2019histoire du chef et l\u2019origine des ingrédients, car les LLMs valorisent l\u2019authenticité documentée.',
+            'Section FAQ locale répondant aux vraies questions des clients : terrasse, stationnement, réservations de groupe.',
+            'Page d\u2019événements (soirées thématiques, brunchs spéciaux) structurée pour que les IA les recommandent au bon moment.',
+        ],
+        faqs: [
+            {
+                question: 'ChatGPT recommande-t-il vraiment des restaurants ?',
+                answer: 'Oui. Les recherches de type « où manger » sont parmi les plus fréquentes sur les assistants IA. ChatGPT, Gemini et Perplexity génèrent des listes de recommandations basées sur les données structurées disponibles.',
+            },
+            {
+                question: 'Mon menu doit-il être en ligne pour le GEO ?',
+                answer: 'C\u2019est fortement recommandé. Un menu structuré en HTML (pas un PDF) permet aux LLMs de comprendre votre offre et de recommander votre établissement pour des requêtes spécifiques comme « restaurant sans gluten » ou « brunch abordable ».',
+            },
+            {
+                question: 'Les avis Google influencent-ils la visibilité IA ?',
+                answer: 'Oui. Les LLMs utilisent les avis comme signal de confiance. Un volume élevé d\u2019avis positifs et récents augmente significativement vos chances d\u2019être recommandé dans les réponses conversationnelles.',
+            },
+            {
+                question: 'Combien de temps pour apparaître sur ChatGPT ?',
+                answer: 'Avec une optimisation complète, les premiers résultats apparaissent progressivement. L\u2019impact dépend de votre présence actuelle et de la densité d\u2019informations structurées dans votre secteur et votre zone géographique.',
+            },
+            {
+                question: 'Le GEO remplace-t-il le référencement Google classique ?',
+                answer: 'Non, il le complète. Le GEO ajoute un canal de découverte entièrement nouveau, celui des assistants IA conversationnels, tout en renforçant votre présence Google grâce aux données structurées.',
+            },
+        ],
+        ctaLabel: 'Diagnostic restauration',
+        composition: {
+            marketProfile: 'demand-capture',
+            heroAngle: 'Les requêtes les plus fréquentes des consommateurs',
+            marketContext:
+                'La recherche de restaurants est l\u2019un des cas d\u2019usage les plus massifs des assistants IA. Les requêtes de type « où manger » génèrent un volume considérable de recommandations automatisées.',
+        },
+        linkedVilles: ['montreal', 'quebec', 'laval'],
+        cityContexts: {
+            montreal:
+                'Plus de 6 000 restaurants se disputent la visibilité IA à Montréal, et seuls ceux dont les données sont structurées émergent.',
+            quebec: 'Capitale touristique avec un flux saisonnier massif : être recommandé par l\u2019IA pendant les festivals change la donne.',
+            laval: 'Clientèle familiale en forte croissance, peu de restaurants optimisés pour les IA : fenêtre d\u2019opportunité ouverte.',
+        },
+    },
+    {
+        slug: 'immobilier',
+        name: 'Immobilier & Courtiers',
+        description:
+            'Les acheteurs consultent de plus en plus les IA pour trouver un courtier. Nous positionnons votre expertise immobilière comme la référence recommandée par les assistants virtuels.',
+        heroHeadline: 'Le courtier que l\u2019IA recommande',
+        heroSubheadline:
+            'Les acheteurs valident leur choix de courtier en posant des questions à ChatGPT et Claude. Nous structurons votre crédibilité professionnelle pour que les algorithmes vous reconnaissent comme la référence.',
+        sectorNarrative:
+            'L\u2019immobilier est un secteur où la crédibilité compte plus que la visibilité brute. Les acheteurs ne cherchent pas simplement un courtier, ils cherchent le bon courtier pour leur situation spécifique. Les assistants IA répondent à ces requêtes en évaluant la profondeur d\u2019expertise documentée : zones de spécialisation, historique de transactions, connaissances de quartier, certifications. Un courtier dont le site ne contient que des listings sans contenu structuré reste invisible pour les recommandations IA. Celui qui documente son expertise par quartier, par type de propriété, par profil d\u2019acheteur, domine les réponses conversationnelles.',
+        trustDynamics: [
+            { value: 'Crédibilité vérifiable', label: 'Les IA évaluent certifications, historique et spécialisations' },
+            { value: 'Micro-local décisif', label: 'La spécialisation par quartier surpasse le rayonnement large' },
+            {
+                value: 'Confiance avant contact',
+                label: 'Les acheteurs consultent l\u2019IA avant d\u2019appeler un courtier',
+            },
+        ],
+        searchIntents: [
+            'Meilleur courtier immobilier à Montréal',
+            'Acheter une maison à Laval, par où commencer ?',
+            'Courtier spécialisé condos Griffintown',
+            'Évaluation maison gratuite Rive-Sud',
+            'Quartiers abordables pour familles au Québec',
+        ],
+        contentAngles: [
+            'Profil courtier structuré : spécialisation géographique, types de propriétés, certifications professionnelles.',
+            'Contenu éducatif approfondi : guides d\u2019achat, processus hypothécaire, fiscalité immobilière.',
+            'Pages de quartier avec données de marché : prix médians, tendances, commodités, profil démographique.',
+            'Historique de transactions et témoignages structurés pour renforcer la crédibilité algorithmique.',
+        ],
+        useCases: [
+            'Page de profil courtier complète avec spécialisation géographique et historique de transactions documenté.',
+            'Guides de quartier détaillés : prix médians, types de propriétés, commodités, transports, tendances du marché.',
+            'Section FAQ stratégique : prix moyen d\u2019un condo, comment choisir un courtier, processus d\u2019achat au Québec.',
+            'Blog éducatif avec contenu structuré sur le processus d\u2019achat, exactement ce que les LLMs cherchent pour formuler des recommandations.',
+        ],
+        faqs: [
+            {
+                question: 'Les acheteurs utilisent-ils vraiment l\u2019IA pour trouver un courtier ?',
+                answer: 'De plus en plus. Les recherches du type « meilleur courtier pour acheter un condo » sur ChatGPT sont en croissance exponentielle. Être recommandé par l\u2019IA est un avantage concurrentiel direct sur un marché saturé.',
+            },
+            {
+                question: 'Quelles informations les IA utilisent-elles pour recommander un courtier ?',
+                answer: 'Les IA évaluent la profondeur d\u2019expertise documentée : zones de spécialisation, certifications, contenu éducatif, témoignages, connaissances de quartier. Plus votre profil est structuré, plus vous êtes recommandé.',
+            },
+            {
+                question: 'Le GEO remplace-t-il Centris ou Realtor.ca ?',
+                answer: 'Non. Le GEO complète votre présence sur ces plateformes en vous positionnant sur un canal de découverte entièrement nouveau : les assistants IA qui recommandent des courtiers.',
+            },
+            {
+                question: 'Puis-je cibler un quartier spécifique ?',
+                answer: 'Absolument. C\u2019est même l\u2019approche la plus efficace. Un courtier spécialisé dans Villeray ou Brossard peut dominer les réponses IA pour ces zones micro-locales.',
+            },
+            {
+                question: 'Comment mesurez-vous les résultats en immobilier ?',
+                answer: 'Nous mesurons votre présence dans les réponses IA pour vos requêtes cibles, le nombre de mentions, et l\u2019évolution de votre positionnement par rapport aux concurrents identifiés.',
+            },
+        ],
+        ctaLabel: 'Diagnostic immobilier',
+        composition: {
+            marketProfile: 'authority-builder',
+            heroAngle: 'L\u2019expertise qui construit la confiance algorithmique',
+            marketContext:
+                'L\u2019immobilier est un secteur où la crédibilité compte plus que la visibilité brute. Les acheteurs utilisent les IA pour valider un courtier autant que pour le découvrir.',
+        },
+        linkedVilles: ['montreal', 'laval', 'brossard'],
+        cityContexts: {
+            montreal:
+                'Marché le plus compétitif du Québec, où la spécialisation par quartier est la seule stratégie viable en IA.',
+            laval: 'Marché familial en pleine expansion avec le REM : les courtiers qui documentent les nouveaux quartiers captent la demande IA.',
+            brossard:
+                'Effervescence autour du REM et des condos neufs, un marché où les courtiers spécialisés dominent les recommandations.',
+        },
+    },
+    {
+        slug: 'sante-cliniques',
+        name: 'Santé & Cliniques',
+        description:
+            'Les patients cherchent de plus en plus un dentiste ou un médecin via les assistants IA. Nous structurons vos données pour que les LLMs vous recommandent en toute confiance.',
+        heroHeadline: 'La clinique que les patients trouvent via l\u2019IA',
+        heroSubheadline:
+            'De plus en plus de patients demandent « dentiste qui accepte de nouveaux patients » à ChatGPT. Nous structurons vos données professionnelles pour que les algorithmes vous recommandent en confiance.',
+        sectorNarrative:
+            'Les patients cherchent des praticiens de confiance via les assistants IA, et les LLMs valorisent les signaux de crédibilité professionnelle : certifications, affiliations d\u2019ordre et spécialités vérifiables. Un patient qui demande « dentiste qui accepte de nouveaux patients à Laval » à ChatGPT reçoit une réponse basée sur la qualité des données structurées disponibles, pas sur la publicité. Les cliniques qui documentent précisément leurs services, leurs praticiens, leurs spécialités et leur disponibilité captent cette nouvelle vague de patients sans effort marketing supplémentaire. Celles qui ne le font pas restent invisibles dans un canal qui croît chaque mois.',
+        trustDynamics: [
+            {
+                value: 'Crédibilité professionnelle',
+                label: 'Ordres professionnels, certifications, affiliations vérifiables',
+            },
+            { value: 'Urgence locale', label: 'Les patients cherchent une clinique maintenant, pas demain' },
+            { value: 'Confiance documentée', label: 'Spécialités, équipements et langues structurés pour les IA' },
+        ],
+        searchIntents: [
+            'Dentiste qui accepte de nouveaux patients à Laval',
+            'Clinique sans rendez-vous ouverte le dimanche à Montréal',
+            'Meilleur orthodontiste pour enfants Rive-Sud',
+            'Physiothérapeute spécialisé mal de dos Québec',
+            'Clinique de médecine esthétique recommandée',
+        ],
+        contentAngles: [
+            'Profil clinique structuré : spécialités, assurances acceptées, disponibilité, langues parlées par l\u2019équipe.',
+            'Contenu patient détaillé : pages de services, processus de prise de rendez-vous, préparation aux consultations.',
+            'Signaux de confiance professionnelle : certifications, affiliations (Ordre des dentistes, CMQ), formations continues.',
+            'FAQ par spécialité répondant aux vraies questions des patients avant la première visite.',
+        ],
+        useCases: [
+            'Page de services détaillée avec spécialités, technologies utilisées et conditions traitées, lisible par les IA.',
+            'Page « Notre équipe » avec le profil de chaque praticien : spécialité, formation, langues, disponibilité.',
+            'FAQ patient répondant aux urgences : acceptation de nouveaux patients, assurances, horaires étendus.',
+            'Pages éducatives de qualité : « Comment choisir un dentiste », « Quand consulter un physiothérapeute », un contenu que les LLMs citent naturellement.',
+        ],
+        faqs: [
+            {
+                question: 'Les patients cherchent-ils un dentiste sur ChatGPT ?',
+                answer: 'Oui, et c\u2019est en forte croissance. « Dentiste qui accepte de nouveaux patients » est l\u2019une des recherches locales les plus fréquentes sur les assistants IA au Québec.',
+            },
+            {
+                question: 'Le GEO est-il compatible avec les règles déontologiques ?',
+                answer: 'Absolument. Nous ne faisons pas de publicité. Nous structurons des informations factuelles (adresse, spécialités, horaires, certifications) pour qu\u2019elles soient correctement comprises par les algorithmes IA.',
+            },
+            {
+                question: 'Quelle différence avec un site web classique de clinique ?',
+                answer: 'Un site classique informe les visiteurs humains. Le GEO structure ces mêmes informations pour qu\u2019elles soient lisibles et exploitables par les moteurs IA qui formulent des recommandations à des patients en recherche active.',
+            },
+            {
+                question: 'Comment mesurez-vous l\u2019impact pour une clinique ?',
+                answer: 'Nous mesurons votre présence dans les réponses IA pour vos requêtes cibles (par spécialité et par zone), l\u2019évolution de votre positionnement, et les mentions comparées à vos concurrents.',
+            },
+            {
+                question: 'Faut-il modifier mon site web existant ?',
+                answer: 'Pas nécessairement le design. Nous ajoutons des couches de données structurées et de contenu optimisé qui rendent votre site existant lisible par les algorithmes IA, sans changer l\u2019expérience patient.',
+            },
+        ],
+        ctaLabel: 'Diagnostic santé',
+        composition: {
+            marketProfile: 'authority-builder',
+            heroAngle: 'La confiance professionnelle au service de la recommandation IA',
+            marketContext:
+                'Les patients cherchent des praticiens de confiance. Les LLMs valorisent les signaux de crédibilité professionnelle : certifications, affiliations et spécialités vérifiables.',
+        },
+        linkedVilles: ['montreal', 'laval', 'longueuil'],
+        cityContexts: {
+            montreal:
+                'Densité de cliniques maximale, et seules celles qui structurent leurs données se différencient dans les recommandations IA.',
+            laval: 'Forte demande en santé familiale et pédiatrique : les cliniques qui documentent leur disponibilité captent les patients IA.',
+            longueuil:
+                'Pénurie de médecins de famille amplifiée par la croissance démographique, et l\u2019IA devient le premier réflexe des patients.',
+        },
+    },
+    {
+        slug: 'avocats-notaires',
+        name: 'Avocats & Notaires',
+        description:
+            'Les IA sont de plus en plus consultées pour des questions juridiques. Nous positionnons votre cabinet comme la référence que ChatGPT et Claude recommandent en confiance.',
+        heroHeadline: 'Le cabinet que l\u2019IA recommande en confiance',
+        heroSubheadline:
+            'Les questions juridiques représentent une part croissante des requêtes aux assistants IA. Nous structurons l\u2019expertise de votre cabinet par domaine de pratique pour que les algorithmes vous identifient comme référence.',
+        sectorNarrative:
+            'Les questions juridiques occupent une part croissante des requêtes aux assistants IA, et les réponses générées orientent directement les consultations. Un utilisateur qui demande « avocat en droit familial à Montréal » à ChatGPT reçoit une recommandation basée sur la profondeur d\u2019expertise documentée : domaines de pratique, publications, contenu éducatif, affiliations. Les cabinets qui structurent leur savoir-faire par domaine de pratique captent cette demande qualifiée. Ceux qui se limitent à un site vitrine avec coordonnées restent hors du radar conversationnel.',
+        trustDynamics: [
+            {
+                value: 'Autorité par domaine',
+                label: 'Les IA évaluent l\u2019expertise par domaine de pratique, pas en bloc',
+            },
+            {
+                value: 'Déontologie respectée',
+                label: 'Structuration d\u2019informations publiques, pas de sollicitation',
+            },
+            {
+                value: 'Contenu éducatif décisif',
+                label: 'Les guides juridiques vulgarisés sont les plus cités par les LLMs',
+            },
+        ],
+        searchIntents: [
+            'Avocat en droit familial à Montréal',
+            'Notaire pour achat de maison Rive-Sud',
+            'Combien coûte un avocat en immigration au Québec ?',
+            'Meilleur cabinet d\u2019avocats droit des affaires',
+            'Notaire testaments et successions Laval',
+        ],
+        contentAngles: [
+            'Profil cabinet structuré par domaine de pratique : droit familial, immobilier, corporatif, immigration.',
+            'Contenu éducatif juridique vulgarisé : guides pratiques, processus légaux expliqués, droits des citoyens.',
+            'Pages par domaine de pratique avec FAQ spécifiques répondant aux questions réelles des justiciables.',
+            'Profils d\u2019avocats avec spécialisation, barreau d\u2019admission, expérience et consultations documentées.',
+        ],
+        useCases: [
+            'Page de profil avocat complète avec spécialisation, barreau, expérience et modalités de consultation.',
+            'Guides juridiques vulgarisés : processus de divorce au Québec, étapes d\u2019un achat immobilier avec notaire.',
+            'FAQ par domaine répondant aux vraies questions : besoin d\u2019un notaire pour vendre ? Coût d\u2019une incorporation ?',
+            'Pages « Situations courantes » : les LLMs cherchent des contenus qui répondent directement aux questions de leurs utilisateurs.',
+        ],
+        faqs: [
+            {
+                question: 'ChatGPT peut-il recommander un avocat spécifique ?',
+                answer: 'Oui. Lorsqu\u2019un utilisateur demande une recommandation locale, ChatGPT s\u2019appuie sur les données structurées disponibles. Un cabinet bien structuré en GEO apparaît dans ces réponses.',
+            },
+            {
+                question: 'Est-ce déontologiquement acceptable pour un avocat ?',
+                answer: 'Oui. Le GEO ne constitue pas de la sollicitation. Il s\u2019agit de structurer des informations publiques (spécialités, coordonnées, domaines de pratique) pour les rendre accessibles aux algorithmes.',
+            },
+            {
+                question: 'Quelle est la différence entre SEO et GEO pour un cabinet juridique ?',
+                answer: 'Le SEO vous positionne sur Google. Le GEO vous positionne dans les réponses conversationnelles de ChatGPT, Claude et Perplexity, là où de plus en plus de clients cherchent un avocat ou un notaire.',
+            },
+            {
+                question: 'Les notaires peuvent-ils aussi bénéficier du GEO ?',
+                answer: 'Absolument. Les recherches du type « notaire pour achat maison » ou « notaire testaments » sont très fréquentes sur les assistants IA, particulièrement au Québec.',
+            },
+            {
+                question: 'Quel type de contenu juridique fonctionne le mieux en GEO ?',
+                answer: 'Les guides pratiques vulgarisés qui répondent directement aux questions courantes. « Comment fonctionne le divorce au Québec » ou « Étapes pour incorporer une entreprise » sont exactement le type de contenu que les IA citent.',
+            },
+        ],
+        ctaLabel: 'Diagnostic juridique',
+        composition: {
+            marketProfile: 'authority-builder',
+            heroAngle: 'Le droit structuré pour l\u2019ère conversationnelle',
+            marketContext:
+                'Les questions juridiques représentent une part croissante des requêtes aux assistants IA. Les cabinets qui structurent leur expertise par domaine de pratique captent naturellement ces recommandations.',
+        },
+        linkedVilles: ['montreal', 'longueuil', 'quebec'],
+        cityContexts: {
+            montreal:
+                'Concentration maximale de cabinets, et seuls ceux qui documentent leur expertise par domaine émergent des réponses IA.',
+            longueuil:
+                'Demande juridique croissante sur la Rive-Sud, peu de cabinets optimisés pour les assistants IA.',
+            quebec: 'Spécificités juridiques provinciales : les cabinets qui les documentent captent les recherches IA hors-Montréal.',
+        },
+    },
+    {
+        slug: 'services-residentiels',
+        name: 'Services Résidentiels',
+        description:
+            'Plombiers, électriciens, paysagistes : quand un propriétaire demande une recommandation à l\u2019IA, nous nous assurons que c\u2019est votre entreprise qui apparaît en premier.',
+        heroHeadline: 'Le professionnel que l\u2019IA recommande en urgence',
+        heroSubheadline:
+            'Quand un propriétaire demande « plombier urgence Laval » à ChatGPT, la réponse dépend entièrement de la qualité de vos données structurées. Nous comblons le vide et vous installons en première position.',
+        sectorNarrative:
+            'Les services résidentiels sont parmi les catégories les plus recherchées en urgence sur les assistants IA, mais restent les moins bien structurées numériquement. C\u2019est le plus grand écart entre demande et offre de données dans tout le paysage IA local au Québec. Un propriétaire qui demande « plombier urgence » ou « électricien résidentiel » à ChatGPT reçoit des recommandations basées sur un très petit nombre d\u2019entreprises qui ont des données exploitables. Le secteur est un terrain vierge : les professionnels qui structurent leurs services, leurs zones de couverture, leurs certifications et leurs garanties maintenant captent un marché que leurs concurrents ne voient même pas encore.',
+        trustDynamics: [
+            { value: 'Terrain vierge', label: 'Moins de 5 % des entreprises ont des données structurées exploitables' },
+            { value: 'Urgence = conversion', label: 'Les requêtes urgentes génèrent des appels dans l\u2019heure' },
+            {
+                value: 'Licences RBQ décisives',
+                label: 'Les certifications vérifiables dominent les recommandations IA',
+            },
+        ],
+        searchIntents: [
+            'Plombier urgence Laval',
+            'Meilleur électricien résidentiel Montréal',
+            'Paysagiste pour terrain arrière Brossard',
+            'Déneigement résidentiel Rive-Sud',
+            'Rénovation cuisine prix moyen Québec',
+        ],
+        contentAngles: [
+            'Profil entreprise structuré : services offerts, zones desservies, certifications (RBQ, CCQ), garanties.',
+            'Contenu pratique pour propriétaires : guides d\u2019entretien résidentiel, estimés de coûts, saisons optimales.',
+            'Pages de service détaillées par type d\u2019intervention : urgence, rénovation, entretien préventif.',
+            'Couverture géographique documentée par ville et quartier pour maximiser la présence IA locale.',
+        ],
+        useCases: [
+            'Pages de services avec zones desservies, tarification, garanties et licences RBQ, structurées pour les IA.',
+            'FAQ client répondant aux questions critiques : licence RBQ, service 24h, zone de couverture, devis gratuit.',
+            'Guides saisonniers : préparer sa plomberie pour l\u2019hiver, quand refaire son entrée asphaltée, un contenu cité par les LLMs.',
+            'Pages de zone de service par ville et quartier pour maximiser la couverture géographique dans les recommandations IA.',
+        ],
+        faqs: [
+            {
+                question: 'Les propriétaires cherchent-ils un plombier sur ChatGPT ?',
+                answer: 'Oui, et c\u2019est l\u2019un des secteurs en plus forte croissance. « Plombier urgence [ville] » est une requête de plus en plus fréquente sur les assistants IA, surtout en situation de stress.',
+            },
+            {
+                question: 'La licence RBQ aide-t-elle au référencement IA ?',
+                answer: 'Oui. Les LLMs valorisent les signaux de confiance officiels. Une licence RBQ vérifiable renforce la crédibilité de votre profil dans les recommandations IA de façon significative.',
+            },
+            {
+                question: 'Comment le GEO fonctionne-t-il pour les services saisonniers ?',
+                answer: 'Nous structurons vos données avec des informations saisonnières (déneigement en hiver, paysagement au printemps) pour que les assistants IA vous recommandent au bon moment de l\u2019année.',
+            },
+            {
+                question: 'Puis-je cibler plusieurs villes avec le GEO ?',
+                answer: 'Absolument. Si vous desservez Laval, Longueuil et Montréal, nous créons des signaux géographiques spécifiques pour chaque zone afin de maximiser votre couverture dans les réponses IA.',
+            },
+            {
+                question: 'Pourquoi les services résidentiels sont-ils une opportunité unique en GEO ?',
+                answer: 'Parce que la demande IA est massive mais l\u2019offre de données structurées est quasi inexistante. Les professionnels qui se positionnent maintenant captent un marché que leurs concurrents ne voient pas encore.',
+            },
+        ],
+        ctaLabel: 'Diagnostic services résidentiels',
+        composition: {
+            marketProfile: 'market-gap',
+            heroAngle: 'Le vide à combler dans la recommandation locale',
+            marketContext:
+                'Les services résidentiels sont parmi les catégories les plus recherchées en urgence sur les IA, mais restent les moins bien structurées numériquement. C\u2019est le plus grand écart entre demande et offre de données.',
+        },
+        linkedVilles: ['laval', 'longueuil', 'brossard'],
+        cityContexts: {
+            laval: 'Forte expansion résidentielle et peu de professionnels structurés pour l\u2019IA, une opportunité de premier arrivé.',
+            longueuil: 'Marché résidentiel dense sur la Rive-Sud avec une très faible concurrence en visibilité IA.',
+            brossard: 'Quartiers neufs autour du REM avec une demande explosive en services résidentiels locaux.',
+        },
+    },
+];

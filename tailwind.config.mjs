@@ -1,37 +1,24 @@
-import animate from 'tailwindcss-animate'
+import animate from 'tailwindcss-animate';
 
 /**
  * Trouvable Tailwind theme.
  *
  * Design tokens reference CSS variables defined in
- * `features/admin/dashboard/shared/admin-shell.css`. This keeps a
+ * `src/features/admin/shared/admin-shell.css`. This keeps a
  * single runtime palette swappable per `data-discipline`.
  *
  * preflight remains disabled — the project ships its own reset
- * via `app/globals.css` and the marketing site relies on it.
+ * via `src/app/globals.css` and the marketing site relies on it.
  */
 /** @type {import('tailwindcss').Config} */
-export default {
-    content: [
-        './app/**/*.{js,ts,jsx,tsx,mdx}',
-        './components/**/*.{js,ts,jsx,tsx,mdx}',
-        './features/**/*.{js,ts,jsx,tsx,mdx}',
-        './lib/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/**/*.{js,ts,jsx,tsx,mdx}',
-    ],
+const tailwindConfig = {
+    content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     theme: {
         extend: {
             fontFamily: {
                 sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                 display: ['var(--font-plus-jakarta-sans)', 'var(--font-inter)', 'sans-serif'],
-                mono: [
-                    'var(--font-jetbrains-mono)',
-                    'ui-monospace',
-                    'SFMono-Regular',
-                    'Menlo',
-                    'Monaco',
-                    'monospace',
-                ],
+                mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],
             },
             colors: {
                 /* Neutral ink scale — single source of truth */
@@ -194,4 +181,6 @@ export default {
         preflight: false,
     },
     plugins: [animate],
-}
+};
+
+export default tailwindConfig;

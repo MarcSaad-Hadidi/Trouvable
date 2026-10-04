@@ -1,0 +1,1680 @@
+import { SITE_LAST_MODIFIED_ISO, SITE_URL } from '@/lib/site-config';
+import { buildPublicMetadata, fitMetaDescription } from '@/lib/seo/metadata';
+
+const REQUIRED_INTERNAL_LINKS = [
+    {
+        href: '/offres',
+        label: 'Voir les mandats Trouvable',
+        description: 'Comprendre les niveaux d’engagement : cartographie, implantation et pilotage.',
+    },
+    {
+        href: '/methodologie',
+        label: 'Voir la méthodologie',
+        description: 'Lire comment le mandat est exécuté, contrôlé et documenté.',
+    },
+    {
+        href: '/notre-mesure',
+        label: 'Comprendre la mesure',
+        description: 'Distinguer les signaux, la présence et les indicateurs d’affaires.',
+    },
+    {
+        href: '/villes/montreal',
+        label: 'Marché de Montréal',
+        description: 'Relier la stratégie aux recherches locales et bilingues.',
+    },
+    { href: '/contact', label: 'Planifier un appel', description: 'Démarrer par un cadrage court et concret.' },
+];
+
+export const SEO_GROWTH_REFERENCES = [
+    {
+        name: 'Google Search Central — données structurées',
+        url: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data',
+    },
+    {
+        name: 'Schema.org — Article',
+        url: 'https://schema.org/Article',
+    },
+    {
+        name: 'WebMCP Draft Community Group Report',
+        url: 'https://webmachinelearning.github.io/webmcp/',
+    },
+];
+
+function withRequiredLinks(extraLinks = []) {
+    const seen = new Set();
+    return [...extraLinks, ...REQUIRED_INTERNAL_LINKS].filter((link) => {
+        if (!link?.href || seen.has(link.href)) return false;
+        seen.add(link.href);
+        return true;
+    });
+}
+
+export const SEO_GROWTH_PAGES = [
+    {
+        slug: 'agence-geo-montreal',
+        path: '/agence-geo-montreal',
+        parent: { label: 'Accueil', href: '/' },
+        variant: 'constellation',
+        type: 'service',
+        priority: 'P1',
+        shortTitle: 'Agence GEO Montréal',
+        title: 'Agence GEO Montréal | Visibilité ChatGPT, Perplexity et Google | Trouvable',
+        description:
+            'Trouvable aide les entreprises de Montréal à améliorer leur visibilité sur Google, ChatGPT, Perplexity et les réponses IA. Audit, structuration, contenu et mesure.',
+        h1: 'Agence GEO à Montréal pour Google, ChatGPT et Perplexity',
+        eyebrow: 'Agence GEO Montréal',
+        keyword: 'agence GEO Montréal',
+        secondaryKeywords: [
+            'firme GEO Montréal',
+            'consultant GEO Montréal',
+            'agence visibilité IA Montréal',
+            'agence SEO IA Montréal',
+        ],
+        ctaLabel: 'Demander une cartographie',
+        secondaryCta: { label: 'Voir les mandats', href: '/offres' },
+        summary:
+            'Trouvable agit comme firme de visibilité Google et réponses IA pour les entreprises qui veulent être plus faciles à trouver, à comprendre et à citer dans les recherches locales et génératives.',
+        definition:
+            'Le GEO, ou optimisation pour moteurs génératifs, consiste à structurer les pages, les entités, les preuves et les données publiques d’une entreprise afin que Google et les moteurs IA puissent mieux la comprendre et la recommander dans leurs réponses.',
+        clientProblem:
+            'Un client potentiel ne cherche pas toujours votre marque. Il demande une recommandation, une firme locale, une solution ou un expert. Si vos pages, vos preuves et vos données publiques sont floues, les moteurs choisissent une autre source.',
+        problems: [
+            'Votre entreprise est présente sur Google, mais absente des réponses ChatGPT ou Perplexity.',
+            'Votre offre est claire pour vous, mais trop abstraite pour un moteur qui compare plusieurs sources.',
+            'Vos pages locales, vos preuves et vos entités ne sont pas reliées de manière explicite.',
+            'Votre marché montréalais est bilingue, mais votre présence organique ne couvre pas correctement les deux surfaces de recherche.',
+        ],
+        corrections: [
+            'Cartographier les intentions réelles : agence, audit, accompagnement, plateforme, local et secteur.',
+            'Clarifier les pages de services avec des définitions, des FAQ et des blocs de réponse réutilisables.',
+            'Structurer les entités Trouvable, Montréal, Québec, Google, ChatGPT, Perplexity, Gemini, Copilot et AI Overviews.',
+            'Relier les pages à forte intention aux pages de méthode, mesure, ville, secteur et preuve.',
+        ],
+        deliverables: [
+            'Diagnostic des signaux publics et des pages qui freinent la compréhension.',
+            'Plan d’action priorisé pour les pages, données structurées, FAQ et liens internes.',
+            'Implantation ou recommandations documentées selon le mandat retenu.',
+            'Suivi des scénarios de recherche Google et IA convenus.',
+        ],
+        proofNote:
+            'Aucun rang ou volume n’est garanti. Les preuves de mandat, lorsqu’elles sont disponibles, sont présentées de façon anonymisée ou sur appel de cadrage.',
+        montrealForHeading: 'Pour quelles entreprises montréalaises ?',
+        montrealForSegments: [
+            'PME et équipes marketing locales qui vendent sur tout ou partie du Grand Montréal.',
+            'Filiales ou sièges qui veulent un signal français et anglais cohérent sur Google et dans les réponses IA.',
+            'Services professionnels et entreprises B2B où la décision passe souvent par une recherche ou une question à un assistant.',
+        ],
+        whatGeoAgencyDoesHeading: 'Ce que fait concrètement une agence GEO',
+        whatGeoAgencyDoesBullets: [
+            'Cartographier intentions locales et génératrices : audits, accompagnements, plateformes, quartiers et secteurs.',
+            'Clarifier les pages sources : définitions courtes, preuves, FAQ exploitables et données structurées alignées.',
+            'Renforcer le maillage interne entre services, ville, plateformes IA et pages de méthode pour éviter les silos.',
+            'Documenter ce qui est observé lors des tests de prompts sans extrapoler sur des résultats garantis.',
+        ],
+        localQueryExamplesHeading: 'Exemples de requêtes locales analysées',
+        localQueryExamples: [
+            '« Firme visibilité IA pour PME à Montréal »',
+            '« Audit GEO Montreal bilingual »',
+            '« Comment être cité par ChatGPT dans mon secteur à Montréal ? »',
+        ],
+        seoGeoConsultantHeading: 'Agence SEO, agence GEO et consultant IA : les écarts utiles',
+        seoGeoConsultantBullets: [
+            'Agence SEO : rend les pages trouvables et pertinentes dans Google (technique, contenus, autorité).',
+            'Agence GEO : rend ces pages compréhensibles et réutilisables comme sources dans les réponses IA.',
+            'Consultant IA : peut désigner la mise en œuvre d’outils internes ; sans pages sources nettes, la visibilité publique reste fragile.',
+        ],
+        mandateTrouvableHeading: 'Ce que vous recevez dans un mandat Trouvable',
+        mandateTrouvableBullets: [
+            'Priorisation par intentions réelles de contact (audit, implémentation, pilotage).',
+            'Feuille de route claire sur les pages à corriger ou créer, avec FAQ et schémas cohérents.',
+            'Protocoles de tests prompts reliés aux changements publiés, décrits dans /notre-mesure.',
+        ],
+        montrealSignalsHeading: 'Signaux locaux à renforcer à Montréal',
+        montrealSignalsBullets: [
+            'Alignement des adresses et zones desservies sur le site, la fiche Google Business Profile et les annuaires crédibles.',
+            'Pages bilingues ou stratégie linguistique explicite lorsque vous touchez les deux marchés.',
+            'Liens entre votre pilier Montréal, vos pages plateformes et vos études de cas vérifiables.',
+            'FAQ locales précises (parking, livraison, zones desservies) lorsque c’est pertinent au métier.',
+        ],
+        faqs: [
+            {
+                question: 'Trouvable est-elle une agence GEO à Montréal ?',
+                answer: 'Trouvable est une firme québécoise de visibilité Google et réponses IA. Le mandat couvre les enjeux GEO, SEO local, structuration sémantique, données publiques et contenu citable pour les entreprises à Montréal et au Québec.',
+            },
+            {
+                question: 'Le GEO remplace-t-il le SEO ?',
+                answer: 'Non. Le GEO complète le SEO. Le SEO aide les pages à être trouvées dans Google; le GEO aide les moteurs génératifs à comprendre, comparer et citer une entreprise dans des réponses synthétiques.',
+            },
+            {
+                question: 'Peut-on garantir une présence dans ChatGPT ou Perplexity ?',
+                answer: 'Non. Aucun moteur génératif ne permet de garantir une citation. Le travail consiste à améliorer les signaux contrôlables : clarté des pages, preuves, entités, données structurées, cohérence locale et contenu utilisable comme source.',
+            },
+            {
+                question: 'Pourquoi cibler Montréal dans une page GEO ?',
+                answer: 'Montréal est un marché local dense et bilingue. Une page dédiée aide à relier Trouvable aux intentions de recherche locales, aux services GEO et aux moteurs IA qui utilisent des signaux géographiques.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit de visibilité IA',
+                description: 'Commencer par vérifier ce qui bloque la présence dans les réponses IA.',
+            },
+            {
+                href: '/plateformes/chatgpt',
+                label: 'Apparaître dans ChatGPT',
+                description: 'Comprendre les contenus et signaux qui aident ChatGPT à citer une entreprise.',
+            },
+            {
+                href: '/ressources/geo-vs-seo',
+                label: 'GEO vs SEO',
+                description: 'Clarifier le rôle du GEO par rapport au SEO classique et local.',
+            },
+        ]),
+    },
+    {
+        slug: 'audit-visibilite-ia',
+        path: '/services/audit-visibilite-ia',
+        parent: { label: 'Services', href: '/offres' },
+        variant: 'command-center',
+        type: 'service',
+        priority: 'P1',
+        shortTitle: 'Audit visibilité IA',
+        title: 'Audit visibilité IA | Diagnostic ChatGPT, Perplexity et Google | Trouvable',
+        description:
+            'Audit de visibilité IA pour comprendre pourquoi une entreprise n’apparaît pas dans ChatGPT, Perplexity, Gemini, Copilot ou Google AI Overviews.',
+        h1: 'Audit de visibilité IA pour savoir où votre entreprise disparaît',
+        eyebrow: 'Audit visibilité IA',
+        keyword: 'audit visibilité IA',
+        secondaryKeywords: ['audit GEO Montréal', 'diagnostic ChatGPT', 'audit Perplexity', 'audit découvrabilité IA'],
+        ctaLabel: 'Obtenir un diagnostic',
+        secondaryCta: { label: 'Voir le cadre de mesure', href: '/notre-mesure' },
+        summary:
+            'L’audit de visibilité IA identifie les écarts entre ce que votre entreprise veut être, ce que ses pages disent vraiment et ce que les moteurs de recherche ou assistants génératifs peuvent reprendre.',
+        definition:
+            'Un audit de visibilité IA analyse les signaux contrôlables d’une entreprise : pages indexables, entités, cohérence locale, données structurées, FAQ, preuves et capacité du contenu à être utilisé comme source par les moteurs génératifs.',
+        clientProblem:
+            'Le problème n’est pas seulement de ne pas être premier. Il est souvent plus simple : les moteurs ne disposent pas d’une version claire, stable et vérifiable de votre entreprise.',
+        problems: [
+            'Votre entreprise n’apparaît pas quand un prospect demande une recommandation à ChatGPT.',
+            'Perplexity cite des concurrents ou des annuaires, mais pas vos pages.',
+            'Google comprend mal vos services, vos zones ou vos preuves.',
+            'Vos contenus répondent aux humains, mais ne donnent pas de blocs courts et réutilisables aux moteurs IA.',
+        ],
+        corrections: [
+            'Lister les prompts et requêtes qui représentent une vraie intention de contact.',
+            'Vérifier les pages, schémas, FAQ, maillage, crawlabilité et signaux locaux.',
+            'Identifier les pages sources manquantes : service, ville, plateforme, secteur, preuve.',
+            'Prioriser les corrections selon le potentiel commercial probable et la facilité d’exécution.',
+        ],
+        deliverables: [
+            'Synthèse direction avec les blocages les plus importants.',
+            'Carte des pages à créer, fusionner ou renforcer.',
+            'Liste des corrections techniques et sémantiques prioritaires.',
+            'Prompts de suivi pour vérifier la présence dans les réponses IA.',
+        ],
+        proofNote:
+            'Les constats doivent être rattachés à des pages, signaux ou prompts observables. Si une donnée manque, elle reste marquée comme [donnée à documenter].',
+        howTo: {
+            name: 'Comment Trouvable audite la visibilité IA',
+            description: 'Séquence courte pour diagnostiquer les blocages de visibilité IA.',
+            steps: [
+                'Définir les requêtes d’achat et les plateformes à tester.',
+                'Lire les pages, les données structurées, les entités et le maillage interne.',
+                'Comparer ce qui est visible pour Google avec ce qui est réutilisable par les moteurs IA.',
+                'Prioriser les corrections selon la proximité avec une prise de contact.',
+            ],
+        },
+        faqs: [
+            {
+                question: 'Que vérifie un audit de visibilité IA ?',
+                answer: 'Il vérifie la clarté des services, l’indexabilité des pages, les données structurées, les entités, la cohérence locale, les FAQ, les preuves et la capacité des pages à répondre directement aux questions des prospects.',
+            },
+            {
+                question: 'Est-ce un audit SEO classique ?',
+                answer: 'Non. L’audit couvre le SEO technique et local quand c’est utile, mais il ajoute une lecture GEO : compréhension par les moteurs génératifs, citabilité, structure question-réponse et connectivité entre les pages sources.',
+            },
+            {
+                question: 'Faut-il déjà avoir beaucoup de contenu ?',
+                answer: 'Non. L’audit sert justement à savoir quelles pages sont nécessaires. Pour une PME, quelques pages mieux structurées valent souvent mieux qu’un grand volume de contenu flou.',
+            },
+            {
+                question: 'Quel est le meilleur point de départ ?',
+                answer: 'Le meilleur point de départ est une cartographie courte des requêtes qui pourraient générer un contact : agence, audit, problème, plateforme, ville et secteur.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier l’audit au mandat transactionnel principal.',
+            },
+            {
+                href: '/plateformes/perplexity',
+                label: 'Visibilité Perplexity',
+                description: 'Voir comment les citations et sources changent l’approche.',
+            },
+            {
+                href: '/services/visibilite-google-reponses-ia',
+                label: 'Visibilité Google et IA',
+                description: 'Passer du diagnostic au mandat de visibilité complet.',
+            },
+        ]),
+    },
+    {
+        slug: 'visibilite-google-reponses-ia',
+        path: '/services/visibilite-google-reponses-ia',
+        parent: { label: 'Services', href: '/offres' },
+        variant: 'blueprint',
+        type: 'service',
+        priority: 'P1',
+        shortTitle: 'Visibilité Google et IA',
+        title: 'Visibilité Google et réponses IA | Service SEO + GEO | Trouvable',
+        description:
+            'Service de visibilité Google et réponses IA pour clarifier vos pages, vos preuves, vos entités et votre présence locale au Québec.',
+        h1: 'Visibilité Google et réponses IA pour entreprises québécoises',
+        eyebrow: 'Service SEO + GEO',
+        keyword: 'visibilité Google et IA',
+        secondaryKeywords: [
+            'service visibilité Google et IA Montréal',
+            'expert visibilité IA Québec',
+            'présence réponses IA',
+        ],
+        ctaLabel: 'Parler à un expert',
+        secondaryCta: { label: 'Comprendre la méthode', href: '/methodologie' },
+        summary:
+            'Cette offre relie le SEO local, la clarté des services, les preuves publiques et la lisibilité machine pour aider une entreprise à être plus compréhensible sur Google et dans les réponses IA.',
+        definition:
+            'La visibilité Google et réponses IA combine les fondamentaux SEO avec une structure de contenu conçue pour les moteurs génératifs : définitions nettes, FAQ, preuves, données structurées, entités et maillage interne.',
+        clientProblem:
+            'Un dirigeant ne veut pas seulement plus de trafic. Il veut que les bons prospects comprennent vite ce que l’entreprise fait, où elle intervient, pourquoi elle est crédible et comment entrer en contact.',
+        problems: [
+            'Les pages de services ne disent pas assez clairement pour qui l’offre est faite.',
+            'Les preuves sont dispersées ou absentes des pages qui devraient convertir.',
+            'Les moteurs ne relient pas correctement l’entreprise à Montréal, au Québec, aux plateformes IA et aux secteurs servis.',
+            'Les CTA existent, mais ne correspondent pas toujours à l’étape du prospect.',
+        ],
+        corrections: [
+            'Reformuler les pages clés en langage client, SEO et lisible par les moteurs.',
+            'Ajouter des blocs de preuve sans inventer de résultats.',
+            'Renforcer les données structurées et les fils d’Ariane.',
+            'Créer un maillage entre services, villes, plateformes, ressources et pages de confiance.',
+        ],
+        deliverables: [
+            'Architecture de pages priorisée.',
+            'Optimisations on-page pour titres, H1, H2, FAQ et CTA.',
+            'Recommandations ou déploiement de schémas et de maillage.',
+            'Cadre de suivi pour distinguer signaux, présence et impact commercial.',
+        ],
+        proofNote:
+            'Les résultats dépendent des cycles d’indexation, des sources externes et de la concurrence. Trouvable documente ce qui est corrigé et ce qui reste à vérifier.',
+        faqs: [
+            {
+                question: 'Pourquoi parler de Google et de réponses IA ensemble ?',
+                answer: 'Parce que les prospects passent entre Google, AI Overviews, ChatGPT, Perplexity, Gemini et Copilot. Les mêmes pages doivent donc être utiles aux humains, indexables par Google et assez structurées pour les moteurs génératifs.',
+            },
+            {
+                question: 'Quelles pages sont prioritaires ?',
+                answer: 'Les pages prioritaires sont celles qui correspondent à une intention de contact : agence GEO, audit IA, service SEO IA, pages plateformes, page locale Montréal et pages sectorielles rentables.',
+            },
+            {
+                question: 'Que veut dire être mieux compris par les IA ?',
+                answer: 'Cela veut dire que vos services, zones, preuves, équipe, méthode et réponses aux questions fréquentes sont explicites, cohérents et faciles à reprendre comme source.',
+            },
+            {
+                question: 'Est-ce adapté aux PME ?',
+                answer: 'Oui. Les PME gagnent souvent à clarifier un petit nombre de pages à forte intention avant de produire de grands volumes de contenu.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier ce service au pilier transactionnel pour les équipes locales.',
+            },
+            {
+                href: '/services/seo-ia-referencement-generatif',
+                label: 'SEO IA et référencement génératif',
+                description: 'Approfondir le volet référencement IA.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Commencer par un diagnostic avant l’exécution.',
+            },
+            {
+                href: '/plateformes/ai-overviews',
+                label: 'AI Overviews',
+                description: 'Comprendre l’enjeu Google AI Overviews.',
+            },
+        ]),
+    },
+    {
+        slug: 'seo-ia-referencement-generatif',
+        path: '/services/seo-ia-referencement-generatif',
+        parent: { label: 'Services', href: '/offres' },
+        variant: 'laboratory',
+        type: 'service',
+        priority: 'P1',
+        shortTitle: 'SEO IA',
+        title: 'SEO IA et référencement génératif | GEO pour entreprises | Trouvable',
+        description:
+            'Service SEO IA et référencement génératif pour structurer vos contenus, entités, FAQ et preuves afin d’être mieux compris par Google et les moteurs IA.',
+        h1: 'SEO IA et référencement génératif, exécutés proprement',
+        eyebrow: 'Référencement IA',
+        keyword: 'SEO IA',
+        secondaryKeywords: [
+            'référencement IA',
+            'référencement génératif',
+            'SEO pour IA Montréal',
+            'agence SEO IA Montréal',
+        ],
+        ctaLabel: 'Évaluer mon site',
+        secondaryCta: { label: 'Comparer GEO et SEO', href: '/ressources/geo-vs-seo' },
+        summary:
+            'Le SEO IA transforme les pages commerciales en sources plus claires pour les moteurs de recherche classiques et génératifs, sans abandonner les fondamentaux techniques du SEO.',
+        definition:
+            'Le SEO IA est l’adaptation du référencement aux moteurs qui génèrent des réponses. Il combine SEO technique, SEO local, structure sémantique, données structurées, réponses directes, entités et preuves vérifiables.',
+        clientProblem:
+            'Une page peut être belle et pourtant peu utile pour un moteur IA. Si elle ne définit pas clairement l’offre, les situations traitées, les preuves et les zones desservies, elle devient difficile à recommander.',
+        problems: [
+            'Les titres visent des slogans plutôt que des intentions de recherche.',
+            'Les pages ne contiennent pas assez de réponses courtes aux questions d’achat.',
+            'Les entités importantes ne sont pas nommées ou reliées.',
+            'Les contenus éducatifs ne conduisent pas vers une page de conversion claire.',
+        ],
+        corrections: [
+            'Revoir les titles, descriptions, H1/H2 et blocs FAQ.',
+            'Ajouter des définitions courtes et des passages autonomes qui peuvent être cités.',
+            'Structurer les données Service, FAQ, fil d’Ariane et Article lorsque pertinent.',
+            'Relier les guides aux pages transactionnelles avec des ancres naturelles.',
+        ],
+        deliverables: [
+            'Backlog SEO IA priorisé.',
+            'Recommandations de structure et de wording par page.',
+            'Maillage interne entre pages services, plateformes et ressources.',
+            'Contrôle de cohérence entre contenu visible et schéma.',
+        ],
+        proofNote:
+            'Le SEO IA ne consiste pas à manipuler les moteurs. Il consiste à fournir des informations claires, utiles, vérifiables et reliées de manière cohérente.',
+        faqs: [
+            {
+                question: 'Le SEO IA est-il différent du GEO ?',
+                answer: 'Les deux termes se recoupent. Le SEO IA est souvent le langage client; le GEO décrit plus précisément l’optimisation pour les moteurs génératifs. Trouvable utilise les deux selon l’intention de recherche.',
+            },
+            {
+                question: 'Quelles optimisations sont les plus importantes ?',
+                answer: 'Les plus importantes sont la clarté de l’offre, les pages à forte intention, les FAQ réelles, les preuves, les données structurées et les liens internes entre pages sources.',
+            },
+            {
+                question: 'Faut-il publier beaucoup d’articles ?',
+                answer: 'Pas au départ. Il faut d’abord renforcer les pages de services, les pages locales et les pages plateformes qui correspondent aux recherches proches du contact.',
+            },
+            {
+                question: 'Peut-on faire du SEO IA sans refaire le site ?',
+                answer: 'Souvent oui. Les premiers gains de clarté viennent de la structure, du contenu, du schéma, du maillage et des pages manquantes, pas nécessairement d’une refonte visuelle.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO Montréal',
+                description: 'Relier le SEO IA au mandat GEO principal.',
+            },
+            {
+                href: '/plateformes/chatgpt',
+                label: 'SEO pour ChatGPT',
+                description: 'Comprendre les enjeux de réponse conversationnelle.',
+            },
+            {
+                href: '/plateformes/ai-overviews',
+                label: 'Optimisation AI Overviews',
+                description: 'Relier SEO IA et Google Search.',
+            },
+        ]),
+    },
+    {
+        slug: 'chatgpt',
+        path: '/plateformes/chatgpt',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'observatory',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'ChatGPT',
+        title: 'Comment apparaître dans ChatGPT | Visibilité IA | Trouvable',
+        description:
+            'Guide pour comprendre comment rendre une entreprise plus claire, crédible et citable dans ChatGPT sans promettre de citation garantie.',
+        h1: 'Comment apparaître et être cité dans ChatGPT',
+        eyebrow: 'Plateforme ChatGPT',
+        keyword: 'apparaître dans ChatGPT',
+        secondaryKeywords: ['être cité dans ChatGPT', 'SEO ChatGPT', 'visibilité ChatGPT Montréal'],
+        ctaLabel: 'Tester ma visibilité ChatGPT',
+        secondaryCta: { label: 'Demander un audit IA', href: '/services/audit-visibilite-ia' },
+        summary:
+            'ChatGPT peut répondre à des questions de découverte, de comparaison ou de recommandation. Pour être une source plausible, une entreprise doit offrir des pages claires, cohérentes, vérifiables et faciles à relier à son marché.',
+        definition:
+            'Apparaître dans ChatGPT signifie que l’entreprise, ses services ou ses contenus peuvent être mentionnés dans une réponse générée lorsque l’utilisateur cherche une solution. Cette présence dépend des sources accessibles, de la clarté des informations et du contexte de la requête.',
+        clientProblem:
+            'Le dirigeant ne se demande pas comment fonctionne un modèle. Il se demande pourquoi ChatGPT recommande d’autres entreprises ou ne mentionne pas la sienne quand un prospect pose une question concrète.',
+        problems: [
+            'La marque n’a pas de page source assez claire pour expliquer son offre.',
+            'Les contenus ne répondent pas directement aux questions que posent les prospects.',
+            'Les preuves, zones desservies et services ne sont pas explicites.',
+            'Les mentions externes et signaux de confiance sont faibles ou incohérents.',
+        ],
+        corrections: [
+            'Créer des pages qui répondent aux questions d’achat en langage simple.',
+            'Nommer explicitement les services, villes, secteurs et plateformes couverts.',
+            'Ajouter FAQ, définitions, schéma et liens vers les pages de preuve.',
+            'Vérifier les prompts prioritaires de façon répétable, sans conclure sur un seul test.',
+        ],
+        deliverables: [
+            'Liste de prompts ChatGPT à suivre.',
+            'Recommandations de pages sources et FAQ.',
+            'Corrections de clarté sémantique et de maillage.',
+            'Lecture des citations observées lorsque des tests sont réalisés.',
+        ],
+        proofNote:
+            'ChatGPT ne fournit pas une position fixe comparable à un classement SEO traditionnel. Les tests doivent être répétés et documentés.',
+        howTo: {
+            name: 'Comment préparer une entreprise pour ChatGPT',
+            description: 'Étapes de base pour rendre une entreprise plus facile à comprendre dans ChatGPT.',
+            steps: [
+                'Identifier les questions que les prospects posent à ChatGPT.',
+                'Créer ou renforcer les pages qui répondent directement à ces questions.',
+                'Structurer les entités, preuves, FAQ et liens internes.',
+                'Tester les prompts de manière régulière et comparer les réponses.',
+            ],
+        },
+        faqs: [
+            {
+                question: 'Peut-on forcer ChatGPT à citer une entreprise ?',
+                answer: 'Non. On peut seulement améliorer les informations contrôlables : pages claires, preuves, entités, sources accessibles, contenu utile et cohérence externe.',
+            },
+            {
+                question: 'Quelles pages aident le plus ChatGPT ?',
+                answer: 'Les pages de services, pages locales, pages FAQ, pages méthode, pages preuve et guides comparatifs aident parce qu’elles donnent un contexte explicite et réutilisable.',
+            },
+            {
+                question: 'Pourquoi ChatGPT ne mentionne-t-il pas mon entreprise ?',
+                answer: 'Les causes fréquentes sont une offre floue, peu de preuves visibles, des pages minces, des données contradictoires, peu de mentions externes ou une absence de contenu répondant aux questions réelles.',
+            },
+            {
+                question: 'Faut-il une page spécifique ChatGPT ?',
+                answer: 'Oui si la requête est importante pour votre marché. Une page plateforme permet de capter les questions “comment apparaître dans ChatGPT” et de les relier à un audit ou mandat.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Structurer la présence locale lorsque ChatGPT complète la recherche Google.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit ChatGPT et visibilité IA',
+                description: 'Diagnostiquer pourquoi l’entreprise n’apparaît pas.',
+            },
+            {
+                href: '/plateformes/perplexity',
+                label: 'Comparer avec Perplexity',
+                description: 'Comprendre la logique des sources et citations.',
+            },
+            {
+                href: '/services/seo-ia-referencement-generatif',
+                label: 'SEO IA',
+                description: 'Passer de la plateforme à l’optimisation globale.',
+            },
+        ]),
+    },
+    {
+        slug: 'perplexity',
+        path: '/plateformes/perplexity',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'observatory',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'Perplexity',
+        title: 'Comment être cité dans Perplexity | Visibilité IA | Trouvable',
+        description:
+            'Guide Perplexity pour aider une entreprise à produire des pages plus faciles à citer et plus cohérentes dans les réponses IA.',
+        h1: 'Comment être cité dans Perplexity',
+        eyebrow: 'Plateforme Perplexity',
+        keyword: 'apparaître dans Perplexity',
+        secondaryKeywords: ['être cité par Perplexity', 'optimisation Perplexity', 'SEO Perplexity'],
+        ctaLabel: 'Vérifier mes citations',
+        secondaryCta: { label: 'Demander un audit IA', href: '/services/audit-visibilite-ia' },
+        summary:
+            'Perplexity met fortement en avant les sources. Une stratégie GEO pour Perplexity doit donc produire des pages qui répondent clairement, citent les entités importantes et donnent des informations vérifiables.',
+        definition:
+            'Être cité dans Perplexity signifie qu’une page ou une source associée à votre entreprise est reprise comme référence dans une réponse. La qualité de la source, sa clarté et son accessibilité comptent autant que le positionnement SEO classique.',
+        clientProblem:
+            'Quand Perplexity cite seulement des annuaires, médias ou concurrents, le prospect construit son opinion sans passer par votre site.',
+        problems: [
+            'Les pages importantes ne contiennent pas de réponses autonomes et faciles à citer.',
+            'Les sources externes ne confirment pas assez clairement l’activité ou la zone de l’entreprise.',
+            'Les titres et H2 ne correspondent pas aux questions de recherche.',
+            'Le site manque de pages sources pour méthode, services, preuves et FAQ.',
+        ],
+        corrections: [
+            'Renforcer les pages qui peuvent servir de référence directe.',
+            'Ajouter des blocs courts, factuels et non promotionnels.',
+            'Relier les pages service aux pages locales, plateformes et ressources.',
+            'Vérifier les citations observées et les sources concurrentes.',
+        ],
+        deliverables: [
+            'Analyse des sources citées sur les requêtes prioritaires.',
+            'Liste des pages à rendre plus faciles à citer.',
+            'Plan de maillage et de preuves externes à renforcer.',
+            'FAQ et définitions concises pour les questions les plus probables.',
+        ],
+        proofNote:
+            'Les citations Perplexity varient selon la requête, le moment et les sources accessibles. Le mandat vise à rendre les pages plus utiles et plus citables, pas à garantir une citation.',
+        faqs: [
+            {
+                question: 'Perplexity fonctionne-t-il comme Google ?',
+                answer: 'Non. Perplexity génère une réponse et montre souvent des sources. Une page claire, factuelle et bien reliée peut donc jouer un rôle direct dans la confiance de la réponse.',
+            },
+            {
+                question: 'Qu’est-ce qu’une page facile à citer ?',
+                answer: 'C’est une page qui répond clairement à une question, nomme les entités pertinentes, évite les slogans vagues et contient des informations assez précises pour être reprise comme source.',
+            },
+            {
+                question: 'Pourquoi mes concurrents sont-ils cités ?',
+                answer: 'Ils disposent peut-être de pages plus claires, de mentions externes plus fortes, d’annuaires mieux renseignés ou de contenus qui répondent mieux à la question posée.',
+            },
+            {
+                question: 'Comment Trouvable aborde Perplexity ?',
+                answer: 'Trouvable identifie les requêtes, observe les sources citées, renforce les pages contrôlables et propose des signaux externes à clarifier lorsque les données manquent.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/plateformes/chatgpt',
+                label: 'Visibilité ChatGPT',
+                description: 'Comparer deux moteurs génératifs importants.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit des citations IA',
+                description: 'Vérifier où l’entreprise est citée ou absente.',
+            },
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO Montréal',
+                description: 'Relier Perplexity à la stratégie globale.',
+            },
+        ]),
+    },
+    {
+        slug: 'ai-overviews',
+        path: '/plateformes/ai-overviews',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'constellation',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'AI Overviews',
+        title: 'Google AI Overviews | Optimisation SEO et GEO des pages | Trouvable',
+        description:
+            'Renforcer titres, FAQ, passages directs et données structurées pour des pages utiles dans Google Search et AI Overviews, sans promesse d’inclusion.',
+        h1: 'Optimiser vos pages pour Google AI Overviews',
+        eyebrow: 'Google AI Overviews',
+        keyword: 'optimiser AI Overviews',
+        secondaryKeywords: [
+            'apparaître dans AI Overviews',
+            'Google AI Overviews SEO',
+            'AI Overview optimization Montreal',
+        ],
+        ctaLabel: 'Auditer mes pages Google',
+        secondaryCta: { label: 'Voir la mesure', href: '/notre-mesure' },
+        summary:
+            'AI Overviews renforce l’importance d’un contenu clair, utile, indexable et bien structuré. Les pages doivent toujours servir les humains, tout en donnant aux moteurs des réponses explicites et des entités faciles à comprendre.',
+        definition:
+            'Google AI Overviews est une expérience de recherche qui peut générer un résumé avec des liens. L’optimisation consiste à renforcer les fondamentaux SEO, la clarté des réponses, la structure de page et les signaux de confiance.',
+        clientProblem:
+            'Si Google résume la page de résultats avant le clic, votre entreprise doit être comprise plus tôt dans le parcours, pas seulement après une visite sur votre site.',
+        problems: [
+            'Les pages répondent trop tard aux questions importantes.',
+            'Les titres et sections n’alignent pas clairement intention, service et localisation.',
+            'Les données structurées ne représentent pas assez le contenu visible.',
+            'Les contenus de preuve et FAQ sont trop minces.',
+        ],
+        corrections: [
+            'Renforcer les introductions avec une réponse directe.',
+            'Structurer les sections autour des intentions de recherche.',
+            'Ajouter FAQ, fil d’Ariane, Service ou Article selon la page.',
+            'Relier les pages AI Overviews aux pages SEO IA, audit et mesure.',
+        ],
+        deliverables: [
+            'Audit des pages Google prioritaires.',
+            'Recommandations titles, metas, H1/H2, FAQ et schéma.',
+            'Plan de consolidation pour les pages faibles ou cannibales.',
+            'Suivi des impressions, clics et requêtes via les outils disponibles.',
+        ],
+        proofNote:
+            'AI Overviews dépend de Google et de la requête. Trouvable optimise les pages contrôlables et mesure les signaux observables, sans promettre une inclusion.',
+        faqs: [
+            {
+                question: 'Peut-on optimiser directement pour AI Overviews ?',
+                answer: 'On optimise surtout les fondamentaux : contenu utile, structure claire, pages indexables, données structurées cohérentes, autorité et réponses directes. Google décide ensuite ce qui apparaît.',
+            },
+            {
+                question: 'Les données structurées garantissent-elles une présence ?',
+                answer: 'Non. Les données structurées aident à clarifier le contenu, mais elles ne garantissent pas une apparition dans AI Overviews.',
+            },
+            {
+                question: 'Quelle différence avec ChatGPT ?',
+                answer: 'AI Overviews reste dans l’écosystème Google Search. ChatGPT est une expérience conversationnelle différente. Les deux profitent de pages claires, vérifiables et bien reliées.',
+            },
+            {
+                question: 'Quelles pages auditer en premier ?',
+                answer: 'Les pages qui captent déjà des impressions, les pages de services, les pages locales et les guides qui répondent à des questions proches d’une décision d’achat.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier les surfaces Google à un mandat local.',
+            },
+            {
+                href: '/services/seo-ia-referencement-generatif',
+                label: 'SEO IA',
+                description: 'Relier AI Overviews au référencement génératif.',
+            },
+            {
+                href: '/services/visibilite-google-reponses-ia',
+                label: 'Visibilité Google et IA',
+                description: 'Voir l’offre globale.',
+            },
+            {
+                href: '/ressources/geo-vs-seo',
+                label: 'GEO vs SEO',
+                description: 'Comprendre la différence entre les approches.',
+            },
+        ]),
+    },
+    {
+        slug: 'geo-vs-seo',
+        path: '/ressources/geo-vs-seo',
+        parent: { label: 'Ressources', href: '/recherche' },
+        variant: 'constellation',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'GEO vs SEO',
+        title: 'GEO vs SEO | Différence SEO, SEO local et référencement IA | Trouvable',
+        description:
+            'Comprendre la différence entre GEO, SEO, SEO local et référencement IA pour choisir le bon mandat de visibilité.',
+        h1: 'GEO vs SEO : quelle différence pour une entreprise locale ?',
+        eyebrow: 'Comparatif GEO vs SEO',
+        keyword: 'GEO vs SEO',
+        secondaryKeywords: ['différence SEO GEO', 'SEO local vs GEO', 'référencement IA vs SEO'],
+        ctaLabel: 'Voir le mandat adapté',
+        secondaryCta: { label: 'Demander une cartographie', href: '/services/audit-visibilite-ia' },
+        summary:
+            'Le SEO, le SEO local et le GEO ne s’opposent pas. Ils couvrent des surfaces différentes du même parcours : être trouvé dans Google, être crédible localement, puis être compris et cité dans les réponses IA.',
+        definition:
+            'Le SEO optimise la visibilité dans les moteurs de recherche. Le SEO local renforce la présence géographique. Le GEO optimise la clarté et la citabilité d’une entreprise dans les moteurs génératifs comme ChatGPT, Perplexity, Gemini, Copilot et AI Overviews.',
+        clientProblem:
+            'Un dirigeant ne veut pas choisir un acronyme. Il veut savoir quel travail fera venir de meilleurs prospects et dans quel ordre investir.',
+        problems: [
+            'Le SEO est parfois réduit à des mots-clés, alors que la clarté commerciale manque.',
+            'Le GEO est parfois vendu comme une garantie IA, ce qui n’est pas crédible.',
+            'Le SEO local et les réponses IA sont souvent traités en silos.',
+            'Les contenus éducatifs ne renvoient pas vers un mandat concret.',
+        ],
+        corrections: [
+            'Partir des intentions de recherche proches du contact.',
+            'Utiliser le SEO pour indexer et positionner les pages.',
+            'Utiliser le SEO local pour clarifier la zone, les preuves et les informations publiques.',
+            'Utiliser le GEO pour rendre les pages plus compréhensibles, citables et reliées.',
+        ],
+        deliverables: [
+            'Comparaison simple des surfaces SEO, SEO local et GEO.',
+            'Recommandation du meilleur point de départ selon le problème observé.',
+            'Lien vers l’audit lorsque les signaux réels doivent être vérifiés.',
+            'FAQ pour traiter les objections avant un appel.',
+        ],
+        proofNote:
+            'Le comparatif doit rester pédagogique. Il ne doit pas prétendre que le GEO remplace le SEO ni que les moteurs IA peuvent être contrôlés.',
+        faqs: [
+            {
+                question: 'Le GEO remplace-t-il le SEO ?',
+                answer: 'Non. Le GEO complète le SEO. Une page doit d’abord être utile, accessible et indexable; le GEO renforce ensuite la compréhension, les entités, les réponses directes et la citabilité.',
+            },
+            {
+                question: 'Quelle est la différence entre SEO local et GEO ?',
+                answer: 'Le SEO local vise la visibilité géographique dans Google et les profils locaux. Le GEO vise la façon dont les moteurs génératifs comprennent et recommandent une entreprise dans des réponses.',
+            },
+            {
+                question: 'Faut-il commencer par le SEO ou le GEO ?',
+                answer: 'Pour la plupart des PME, il faut commencer par une cartographie : vérifier les pages, la fiche locale, les données structurées, les FAQ, les preuves et les requêtes IA prioritaires.',
+            },
+            {
+                question: 'Pourquoi cette comparaison aide la conversion ?',
+                answer: 'Elle aide un prospect à choisir le bon mandat : audit s’il ne comprend pas le problème, implantation si les corrections sont connues, pilotage si le marché est concurrentiel.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO Montréal',
+                description: 'Passer du comparatif à la page transactionnelle.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Vérifier les signaux avant de choisir.',
+            },
+            {
+                href: '/services/seo-ia-referencement-generatif',
+                label: 'SEO IA',
+                description: 'Approfondir le référencement génératif.',
+            },
+        ]),
+    },
+    {
+        slug: 'agence-geo-quebec',
+        path: '/agence-geo-quebec',
+        parent: { label: 'Accueil', href: '/' },
+        variant: 'constellation',
+        type: 'service',
+        priority: 'P2',
+        shortTitle: 'Agence GEO Québec',
+        title: 'Agence GEO Québec | Visibilité Google et réponses IA | Trouvable',
+        description:
+            'Trouvable accompagne les entreprises au Québec qui veulent être mieux comprises, trouvées et citées dans Google, ChatGPT, Perplexity, Gemini, Copilot et AI Overviews.',
+        h1: 'Agence GEO au Québec pour améliorer votre visibilité Google et IA',
+        eyebrow: 'Agence GEO Québec',
+        keyword: 'agence GEO Québec',
+        secondaryKeywords: [
+            'firme GEO Québec',
+            'service GEO Québec',
+            'consultant GEO Québec',
+            'référencement IA Québec',
+        ],
+        ctaLabel: 'Demander une cartographie',
+        secondaryCta: { label: 'Voir Montréal', href: '/agence-geo-montreal' },
+        summary:
+            'Trouvable aide les entreprises québécoises à clarifier leurs pages, leurs preuves, leurs entités et leurs zones de service pour être mieux comprises dans les recherches Google et les réponses IA.',
+        definition:
+            'Une agence GEO au Québec travaille les signaux qui permettent aux moteurs génératifs de comprendre une entreprise : offre, localisation, preuves, contenu source, données structurées et cohérence entre les pages publiques.',
+        clientProblem:
+            'Un prospect peut chercher une solution au Québec sans connaître votre marque. Si vos pages ne disent pas clairement qui vous servez, où vous intervenez et pourquoi vous êtes crédible, les moteurs ont peu de raisons de vous recommander.',
+        problems: [
+            'Votre présence est concentrée sur quelques pages qui ne couvrent pas assez les intentions régionales.',
+            'Les signaux locaux sont présents, mais mal reliés aux services et aux plateformes IA.',
+            'Les moteurs comprennent mal la différence entre votre marché, vos zones et vos expertises.',
+            'Les contenus existants ne donnent pas de réponses assez nettes aux questions des prospects québécois.',
+        ],
+        corrections: [
+            'Relier les pages Québec, Montréal, services et plateformes avec des ancres naturelles.',
+            'Clarifier les zones servies, les types d’entreprises accompagnées et les limites du mandat.',
+            'Ajouter des réponses courtes, FAQ et définitions qui peuvent être reprises comme source.',
+            'Documenter les preuves disponibles sans inventer de client, de résultat ou de métrique.',
+        ],
+        deliverables: [
+            'Cartographie des intentions Québec et Montréal.',
+            'Recommandations de pages locales, services et ressources à renforcer.',
+            'Maillage interne entre pages à forte intention et pages de confiance.',
+            'Plan de suivi des recherches Google et IA prioritaires.',
+        ],
+        proofNote:
+            'Le mandat ne garantit pas une citation dans un moteur IA. Il renforce les informations contrôlables et documente les éléments qui restent à valider.',
+        faqs: [
+            {
+                question: 'Pourquoi créer une page GEO Québec en plus de Montréal ?',
+                answer: 'La recherche locale québécoise ne se limite pas à Montréal. Une page Québec permet de couvrir les intentions régionales, les entreprises hors Grand Montréal et les requêtes qui cherchent une firme québécoise plutôt qu’un fournisseur strictement montréalais.',
+            },
+            {
+                question: 'Cette page remplace-t-elle les pages de ville ?',
+                answer: 'Non. Elle sert de page transactionnelle régionale. Les pages de ville détaillent ensuite les marchés locaux et renforcent le maillage géographique.',
+            },
+            {
+                question: 'Quels signaux sont prioritaires au Québec ?',
+                answer: 'Les signaux prioritaires sont la clarté de l’offre, la cohérence des coordonnées publiques, les pages de services, les preuves, les FAQ et les liens entre les pages locales et les plateformes IA.',
+            },
+            {
+                question: 'Est-ce pertinent pour une entreprise bilingue ?',
+                answer: 'Oui. Le Québec comprend des marchés francophones et bilingues. La structure doit aider Google et les moteurs IA à comprendre les deux contextes lorsque l’entreprise sert les deux publics.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO Montréal',
+                description: 'Comparer le marché Montréal avec l’approche Québec.',
+            },
+            {
+                href: '/villes/quebec',
+                label: 'Visibilité IA à Québec',
+                description: 'Relier la page régionale au marché de Québec.',
+            },
+            {
+                href: '/services/accompagnement-geo',
+                label: 'Accompagnement GEO',
+                description: 'Passer de l’intention régionale au mandat d’accompagnement.',
+            },
+        ]),
+    },
+    {
+        slug: 'accompagnement-geo',
+        path: '/services/accompagnement-geo',
+        parent: { label: 'Services', href: '/offres' },
+        variant: 'blueprint',
+        type: 'service',
+        priority: 'P2',
+        shortTitle: 'Accompagnement GEO',
+        title: 'Accompagnement GEO | Mandat visibilité IA et Google | Trouvable',
+        description:
+            'Accompagnement GEO pour structurer les pages, les preuves, le maillage et les réponses utiles aux moteurs génératifs sans promesse de citation garantie.',
+        h1: 'Accompagnement GEO pour rendre votre entreprise plus facile à recommander',
+        eyebrow: 'Accompagnement GEO',
+        keyword: 'accompagnement GEO',
+        secondaryKeywords: [
+            'mandat GEO Montréal',
+            'accompagnement référencement IA',
+            'partenaire SEO GEO Montréal',
+            'service clé en main GEO',
+        ],
+        ctaLabel: 'Cadrer l’accompagnement',
+        secondaryCta: { label: 'Commencer par un audit', href: '/services/audit-visibilite-ia' },
+        summary:
+            'L’accompagnement GEO transforme une cartographie en actions concrètes : pages à créer, contenus à clarifier, schémas à renforcer, liens internes à corriger et preuves à rendre plus visibles.',
+        definition:
+            'Un accompagnement GEO est un mandat de structuration continue qui aide une entreprise à devenir plus compréhensible, crédible et citable dans Google et les moteurs IA.',
+        clientProblem:
+            'Le problème n’est pas toujours de savoir quoi faire. Il est souvent de prioriser, écrire, relier, publier et mesurer sans disperser les efforts.',
+        problems: [
+            'Les recommandations d’audit restent dans un document et ne sont pas mises en œuvre.',
+            'Les équipes hésitent entre SEO, contenu, local, technique et réponses IA.',
+            'Les pages sont publiées sans maillage interne clair vers les offres et les preuves.',
+            'Les corrections sont faites au cas par cas, sans logique de système.',
+        ],
+        corrections: [
+            'Transformer les constats en backlog priorisé par intention de contact.',
+            'Écrire ou encadrer les pages nécessaires en langage client et moteur.',
+            'Relier services, villes, plateformes, ressources et pages de confiance.',
+            'Mesurer les signaux observables sans inventer d’impact.',
+        ],
+        deliverables: [
+            'Feuille de route mensuelle ou sprint de corrections.',
+            'Pages, briefs ou recommandations prêtes à publier.',
+            'Maillage interne et données structurées alignés sur le contenu visible.',
+            'Suivi des requêtes et prompts convenus.',
+        ],
+        proofNote:
+            'L’accompagnement reste cadré par des livrables vérifiables : pages, corrections, maillage, balisage, suivi et documentation.',
+        faqs: [
+            {
+                question: 'À qui s’adresse l’accompagnement GEO ?',
+                answer: 'Aux entreprises qui veulent passer d’un audit à une exécution concrète : clarifier les pages, prioriser les contenus, renforcer les preuves et suivre les recherches Google ou IA importantes.',
+            },
+            {
+                question: 'Est-ce un mandat ponctuel ou continu ?',
+                answer: 'Les deux sont possibles. Un sprint corrige les enjeux les plus proches du contact; un accompagnement continu permet de renforcer l’autorité thématique et les signaux de confiance dans le temps.',
+            },
+            {
+                question: 'Trouvable écrit-elle les contenus ?',
+                answer: 'Selon le mandat, Trouvable peut produire les structures, les textes, les briefs ou les recommandations. Les preuves et informations factuelles doivent venir de l’entreprise ou être documentées.',
+            },
+            {
+                question: 'Comment éviter de produire du contenu inutile ?',
+                answer: 'On part des intentions réelles : agence, audit, problème, plateforme, ville, secteur et comparaison. Une page est priorisée seulement si elle soutient la découverte, la compréhension ou la conversion.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Identifier les blocages avant d’exécuter.',
+            },
+            {
+                href: '/services/strategie-visibilite-ia',
+                label: 'Stratégie visibilité IA',
+                description: 'Prioriser les chantiers avant le déploiement.',
+            },
+            {
+                href: '/ressources/mesurer-visibilite-ia',
+                label: 'Mesurer la visibilité IA',
+                description: 'Comprendre comment suivre les signaux.',
+            },
+        ]),
+    },
+    {
+        slug: 'strategie-visibilite-ia',
+        path: '/services/strategie-visibilite-ia',
+        parent: { label: 'Services', href: '/offres' },
+        variant: 'blueprint',
+        type: 'service',
+        priority: 'P2',
+        shortTitle: 'Stratégie visibilité IA',
+        title: 'Stratégie visibilité IA | Google, ChatGPT et Perplexity | Trouvable',
+        description:
+            'Stratégie de visibilité IA pour prioriser les pages, plateformes, preuves, données structurées et liens internes qui comptent vraiment pour une entreprise.',
+        h1: 'Stratégie de visibilité IA pour prioriser les bons chantiers',
+        eyebrow: 'Stratégie IA',
+        keyword: 'stratégie visibilité IA',
+        secondaryKeywords: [
+            'stratégie GEO Montréal',
+            'stratégie référencement IA',
+            'stratégie Google et IA',
+            'plan visibilité IA',
+        ],
+        ctaLabel: 'Prioriser mes chantiers',
+        secondaryCta: { label: 'Voir l’accompagnement', href: '/services/accompagnement-geo' },
+        summary:
+            'Une stratégie de visibilité IA aide à décider quoi créer, quoi corriger et quoi mesurer lorsque les prospects cherchent sur Google, ChatGPT, Perplexity, Gemini, Copilot ou AI Overviews.',
+        definition:
+            'La stratégie de visibilité IA relie les intentions de recherche, les plateformes, les pages sources, les entités et les preuves pour donner un ordre d’exécution clair.',
+        clientProblem:
+            'Sans stratégie, les équipes publient des articles, ajoutent des FAQ ou installent du schéma sans savoir si ces actions rapprochent vraiment l’entreprise d’une prise de contact.',
+        problems: [
+            'Les priorités changent selon les outils, les tendances ou les derniers rapports.',
+            'Les pages transactionnelles et les contenus éducatifs ne se répondent pas.',
+            'Les décisions SEO et GEO sont prises sans cartographie des intentions.',
+            'Les signaux de confiance ne sont pas intégrés aux pages qui convertissent.',
+        ],
+        corrections: [
+            'Classer les requêtes par proximité avec une demande de contact.',
+            'Définir les pages piliers, services, plateformes, locales et ressources.',
+            'Attribuer un rôle à chaque page : convertir, expliquer, comparer ou rassurer.',
+            'Relier chaque action à une mesure observable.',
+        ],
+        deliverables: [
+            'Plan de pages P1/P2/P3.',
+            'Priorisation des plateformes et des intentions à traiter.',
+            'Recommandations de wording, CTA et maillage interne.',
+            'Plan de mesure pour Google, IA et conversion.',
+        ],
+        proofNote:
+            'La stratégie ne remplace pas l’exécution. Elle sert à éviter les efforts dispersés et à documenter les choix avant de publier.',
+        faqs: [
+            {
+                question: 'Quelle est la différence entre stratégie et audit ?',
+                answer: 'L’audit établit les blocages observables. La stratégie transforme ces constats en architecture, priorités, pages, maillage et séquence d’exécution.',
+            },
+            {
+                question: 'Faut-il une stratégie avant de créer des pages ?',
+                answer: 'Oui lorsque plusieurs intentions sont en jeu. Une stratégie évite la cannibalisation et aide à choisir quelle page doit porter quelle requête.',
+            },
+            {
+                question: 'Quels livrables sortent d’une stratégie visibilité IA ?',
+                answer: 'Les livrables peuvent inclure une cartographie de requêtes, une architecture de pages, des recommandations de contenu, un plan de maillage et une liste de corrections techniques ou sémantiques.',
+            },
+            {
+                question: 'Est-ce utile pour une PME ?',
+                answer: 'Oui. Une PME gagne à concentrer ses efforts sur les pages qui expliquent clairement l’offre, la zone servie, les preuves et le meilleur point de contact.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Relier la stratégie aux constats observables.',
+            },
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO Montréal',
+                description: 'Revenir à la page pilier transactionnelle.',
+            },
+            {
+                href: '/ressources/structurer-site-moteurs-ia',
+                label: 'Structurer un site pour l’IA',
+                description: 'Voir comment traduire la stratégie dans les pages.',
+            },
+        ]),
+    },
+    {
+        slug: 'claude',
+        path: '/plateformes/claude',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'observatory',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'Claude',
+        title: 'Comment être visible dans Claude | Visibilité IA | Trouvable',
+        description:
+            'Guide pour comprendre comment rendre une entreprise plus claire et plus fiable dans les recherches et réponses propulsées par Claude (Anthropic).',
+        h1: 'Comment être visible dans Claude',
+        eyebrow: 'Plateforme Claude',
+        keyword: 'apparaître dans Claude',
+        secondaryKeywords: [
+            'être visible dans Claude',
+            'SEO pour Claude',
+            'visibilité Claude Anthropic',
+            'optimiser son site pour Claude',
+        ],
+        ctaLabel: 'Vérifier ma présence Claude',
+        secondaryCta: { label: 'Comparer avec ChatGPT', href: '/plateformes/chatgpt' },
+        summary:
+            "Claude (Anthropic) se distingue par ses capacités d'analyse approfondie et sa recherche de sources fiables. Une entreprise doit donc travailler la profondeur de son contenu, ses preuves et la structure de ses informations.",
+        definition:
+            'Être visible dans Claude signifie que les informations de votre entreprise sont structurées de manière logique, sourcées et suffisamment détaillées pour être utilisées dans des synthèses ou des analyses comparatives complexes.',
+        clientProblem:
+            'Un prospect peut utiliser Claude pour analyser en profondeur les offres de plusieurs fournisseurs. Si vos informations sont superficielles ou mal structurées, Claude ne pourra pas vous inclure dans son analyse détaillée.',
+        problems: [
+            'Le contenu du site est trop superficiel ou axé uniquement sur des mots-clés.',
+            'Les pages manquent de données structurées et de preuves tangibles.',
+            'Les informations techniques ou de tarification sont cachées dans des PDF inaccessibles.',
+            "La structure du site ne permet pas à une IA d'extraire facilement les relations entre services, cas clients et expertises.",
+        ],
+        corrections: [
+            "Développer des contenus longs et approfondis qui répondent aux critères d'analyse de Claude.",
+            'Structurer clairement les pages avec des titres sémantiques (H1, H2, H3).',
+            'Rendre les données techniques, les tableaux comparatifs et les FAQ facilement lisibles par les machines.',
+            'Connecter les affirmations commerciales à des preuves vérifiables (études de cas, témoignages).',
+        ],
+        deliverables: [
+            'Audit des contenus longs et de leur lisibilité pour les IA.',
+            'Recommandations de structuration sémantique avancée.',
+            'Plan de création de contenus "deep dive" pour nourrir les LLMs.',
+            'Mise en place de données structurées spécifiques aux analyses comparatives.',
+        ],
+        proofNote:
+            "Comme pour les autres LLMs, la visibilité dans Claude dépend des données d'entraînement et de la recherche en temps réel. L'objectif est de fournir la meilleure matière possible.",
+        howTo: {
+            name: 'Comment optimiser pour Claude',
+            description: "Étapes pour structurer vos informations pour les capacités d'analyse de Claude.",
+            steps: [
+                'Identifier les critères de décision complexes de vos prospects.',
+                'Créer des contenus détaillés qui couvrent ces critères en profondeur.',
+                'Utiliser une structure sémantique irréprochable et des données claires.',
+                'Mesurer les citations et mentions dans les réponses générées.',
+            ],
+        },
+        faqs: [
+            {
+                question: "En quoi l'optimisation pour Claude diffère-t-elle de ChatGPT ?",
+                answer: "Claude a tendance à privilégier les contenus plus profonds, bien structurés et logiques. L'optimisation pour Claude nécessite souvent un niveau de détail et de rigueur sémantique plus élevé.",
+            },
+            {
+                question: 'Est-ce que Claude a accès à internet ?',
+                answer: "Oui, les versions récentes de Claude peuvent effectuer des recherches en temps réel, ce qui rend l'optimisation de votre site web cruciale pour apparaître dans ses réponses.",
+            },
+            {
+                question: 'Dois-je créer des pages spécifiques pour Claude ?',
+                answer: 'Non, mais vous devez vous assurer que vos pages existantes (services, méthode, ressources) sont suffisamment détaillées et bien structurées pour répondre à une analyse approfondie.',
+            },
+            {
+                question: 'Comment mesurer ma visibilité dans Claude ?',
+                answer: "Il faut définir des prompts d'analyse comparative liés à votre secteur et tester régulièrement les réponses de Claude en notant si et comment votre entreprise est mentionnée et évaluée.",
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier Claude aux priorités locales lorsque le prospect compare des firmes.',
+            },
+            {
+                href: '/plateformes/chatgpt',
+                label: 'ChatGPT',
+                description: "Comparer l'approche d'optimisation avec ChatGPT.",
+            },
+            {
+                href: '/plateformes/perplexity',
+                label: 'Perplexity',
+                description: "Comprendre l'importance des sources et citations.",
+            },
+            {
+                href: '/ressources/structurer-site-moteurs-ia',
+                label: "Structurer un site pour l'IA",
+                description: 'Découvrir comment la structure sémantique aide les LLMs.',
+            },
+        ]),
+    },
+    {
+        slug: 'gemini',
+        path: '/plateformes/gemini',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'observatory',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'Gemini',
+        title: 'Visibilité dans Gemini | Google, AI Overviews et réponses IA | Trouvable',
+        description:
+            'Rendre votre entreprise plus claire dans Gemini : SEO, pages sources, FAQ et signaux Google alignés avec les réponses IA.',
+        h1: 'Comment être visible dans Gemini',
+        eyebrow: 'Plateforme Gemini',
+        keyword: 'apparaître dans Gemini',
+        secondaryKeywords: [
+            'être visible dans Gemini',
+            'SEO pour Gemini',
+            'visibilité Gemini Montréal',
+            'optimiser son site pour Gemini',
+        ],
+        ctaLabel: 'Évaluer ma visibilité Gemini',
+        secondaryCta: { label: 'Comparer avec ChatGPT', href: '/plateformes/chatgpt' },
+        summary:
+            'Gemini s’inscrit dans l’écosystème Google et dans des usages conversationnels. Une entreprise doit donc travailler à la fois ses fondamentaux SEO, ses pages sources et la clarté de ses réponses.',
+        definition:
+            'Être visible dans Gemini signifie que les informations publiques d’une entreprise sont assez claires, cohérentes et accessibles pour être comprises dans des réponses ou parcours de recherche assistés par IA.',
+        clientProblem:
+            'Un prospect peut utiliser Gemini pour résumer, comparer ou préparer une décision. Si vos pages ne donnent pas de réponses nettes, l’assistant risque de s’appuyer sur d’autres sources.',
+        problems: [
+            'Les pages importantes ne répondent pas clairement aux questions de comparaison.',
+            'Les preuves et zones servies ne sont pas visibles dans les pages de décision.',
+            'Le site ne relie pas assez Google Search, AI Overviews et les réponses IA.',
+            'Les contenus sont utiles aux humains, mais peu structurés pour être compris rapidement.',
+        ],
+        corrections: [
+            'Renforcer les pages qui répondent aux questions d’achat et de comparaison.',
+            'Clarifier les entités, les services, les villes et les preuves disponibles.',
+            'Relier Gemini aux pages Google, AI Overviews, SEO IA et audit.',
+            'Ajouter des FAQ courtes avec réponses directes et vérifiables.',
+        ],
+        deliverables: [
+            'Liste de questions Gemini à tester.',
+            'Recommandations de pages sources et passages citables.',
+            'Maillage vers les pages Google, IA et mesure.',
+            'Priorités de correction selon les intentions commerciales.',
+        ],
+        proofNote:
+            'Gemini ne fournit pas un classement stable à contrôler. Trouvable travaille les informations publiques qui peuvent améliorer la compréhension.',
+        howTo: {
+            name: 'Comment préparer une entreprise pour Gemini',
+            description: 'Étapes simples pour rendre une entreprise plus compréhensible dans Gemini.',
+            steps: [
+                'Identifier les questions que les prospects pourraient poser à Gemini.',
+                'Renforcer les pages qui donnent une réponse claire et vérifiable.',
+                'Relier les contenus Gemini aux pages Google, services et preuves.',
+                'Répéter les tests et documenter les changements observables.',
+            ],
+        },
+        faqs: [
+            {
+                question: 'Gemini fonctionne-t-il comme Google ?',
+                answer: 'Gemini est relié à l’écosystème Google, mais l’expérience utilisateur est différente. Les pages doivent rester indexables et utiles, tout en donnant des réponses plus explicites aux questions des prospects.',
+            },
+            {
+                question: 'Faut-il une page dédiée à Gemini ?',
+                answer: 'Oui si vos prospects utilisent les assistants IA pour comparer des fournisseurs. Une page dédiée permet de capter l’intention et de la relier à un audit ou un mandat.',
+            },
+            {
+                question: 'Quels contenus aident Gemini ?',
+                answer: 'Les contenus les plus utiles sont les pages de services claires, les FAQ, les pages de méthode, les preuves documentées et les guides qui répondent directement aux questions de décision.',
+            },
+            {
+                question: 'Peut-on garantir une mention dans Gemini ?',
+                answer: 'Non. On peut seulement améliorer les signaux contrôlables : clarté, cohérence, accessibilité, maillage et preuves.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier Gemini et Google à un mandat local lorsque le prospect compare des firmes.',
+            },
+            {
+                href: '/plateformes/ai-overviews',
+                label: 'AI Overviews',
+                description: 'Relier Gemini à l’écosystème Google Search.',
+            },
+            {
+                href: '/services/seo-ia-referencement-generatif',
+                label: 'SEO IA',
+                description: 'Approfondir l’optimisation des pages pour réponses IA.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Tester les questions prioritaires.',
+            },
+        ]),
+    },
+    {
+        slug: 'copilot',
+        path: '/plateformes/copilot',
+        parent: { label: 'Plateformes', href: '/agence-geo-montreal' },
+        variant: 'observatory',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'Copilot',
+        title: 'Visibilité dans Microsoft Copilot | Pages publiques et GEO | Trouvable',
+        description:
+            'Préparer site, entités et preuves pour être mieux compris dans Copilot : cohérence des sources publiques, FAQ et maillage SEO IA.',
+        h1: 'Comment être visible dans Copilot',
+        eyebrow: 'Plateforme Copilot',
+        keyword: 'apparaître dans Copilot',
+        secondaryKeywords: [
+            'être visible dans Copilot',
+            'SEO pour Copilot',
+            'visibilité Copilot Montréal',
+            'optimiser son site pour Copilot',
+        ],
+        ctaLabel: 'Vérifier ma présence Copilot',
+        secondaryCta: { label: 'Voir le SEO IA', href: '/services/seo-ia-referencement-generatif' },
+        summary:
+            'Copilot peut intervenir dans des recherches, synthèses et parcours assistés. Pour être une source plausible, une entreprise doit travailler la clarté de ses pages et la cohérence de ses informations publiques.',
+        definition:
+            'Être visible dans Copilot signifie que les pages, services, preuves et informations publiques d’une entreprise peuvent être compris et mobilisés dans des réponses assistées par IA.',
+        clientProblem:
+            'Un prospect peut demander à Copilot de l’aider à comparer des fournisseurs. Si votre entreprise n’est pas bien structurée publiquement, elle risque d’être absente de cette première shortlist.',
+        problems: [
+            'Les informations publiques ne sont pas assez cohérentes entre site, profils et sources externes.',
+            'Les pages ne donnent pas assez de contexte sur l’offre, la zone et les preuves.',
+            'Les FAQ et réponses directes sont trop minces pour soutenir une recommandation.',
+            'Le site ne relie pas assez les intentions Bing, Google et IA.',
+        ],
+        corrections: [
+            'Clarifier les pages de services et les pages locales.',
+            'Ajouter des réponses courtes aux questions de décision.',
+            'Relier Copilot aux pages SEO IA, audit, mesure et confiance.',
+            'Vérifier les sources publiques que les assistants peuvent consulter.',
+        ],
+        deliverables: [
+            'Prompts Copilot à tester.',
+            'Liste de pages et profils publics à clarifier.',
+            'Recommandations de maillage et de balisage.',
+            'Synthèse des absences ou incohérences observées.',
+        ],
+        proofNote:
+            'Copilot et les moteurs associés peuvent changer leurs sources et réponses. Le mandat vise la clarté contrôlable, pas une présence garantie.',
+        faqs: [
+            {
+                question: 'Pourquoi optimiser pour Copilot ?',
+                answer: 'Parce que certains prospects utilisent déjà des assistants intégrés à leurs outils de travail. Une entreprise bien structurée peut être plus facile à comprendre dans ces parcours.',
+            },
+            {
+                question: 'Copilot est-il différent de ChatGPT ?',
+                answer: 'Oui, l’expérience et les sources peuvent différer. Les deux profitent toutefois de pages claires, cohérentes, indexables et reliées à des preuves.',
+            },
+            {
+                question: 'Quelles pages prioriser pour Copilot ?',
+                answer: 'Les pages de services, pages locales, FAQ, méthode, preuves et guides comparatifs sont les plus utiles lorsqu’un prospect cherche une recommandation ou une comparaison.',
+            },
+            {
+                question: 'Peut-on mesurer Copilot comme Google Search Console ?',
+                answer: 'Pas exactement. Il faut suivre des prompts, réponses observées, citations éventuelles et signaux indirects, tout en séparant visibilité, présence et conversion.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Relier les assistants Microsoft à un mandat GEO local lorsque le marché le commande.',
+            },
+            {
+                href: '/plateformes/chatgpt',
+                label: 'ChatGPT',
+                description: 'Comparer Copilot avec une autre expérience conversationnelle.',
+            },
+            {
+                href: '/ressources/mesurer-visibilite-ia',
+                label: 'Mesurer la visibilité IA',
+                description: 'Comprendre les limites de la mesure.',
+            },
+            {
+                href: '/services/visibilite-google-reponses-ia',
+                label: 'Visibilité Google et IA',
+                description: 'Relier Copilot à l’offre globale.',
+            },
+        ]),
+    },
+    {
+        slug: 'mesurer-visibilite-ia',
+        path: '/ressources/mesurer-visibilite-ia',
+        parent: { label: 'Ressources', href: '/recherche' },
+        variant: 'command-center',
+        type: 'article',
+        priority: 'P1',
+        shortTitle: 'Mesurer visibilité IA',
+        title: 'Mesurer la visibilité IA | ChatGPT, Perplexity, Google | Trouvable',
+        description:
+            'Cadre pour suivre prompts, réponses, citations et signaux Google sans confondre présence IA, trafic et conversion ; tableau et méthode Trouvable.',
+        h1: 'Comment mesurer la visibilité dans les moteurs IA',
+        eyebrow: 'Mesure GEO',
+        keyword: 'mesurer visibilité IA',
+        secondaryKeywords: [
+            'suivre visibilité ChatGPT',
+            'suivre visibilité Perplexity',
+            'mesure GEO',
+            'comment savoir si mon entreprise apparaît dans ChatGPT',
+        ],
+        ctaLabel: 'Mettre en place la mesure',
+        secondaryCta: { label: 'Voir notre cadre', href: '/notre-mesure' },
+        summary:
+            'La visibilité IA ne se mesure pas comme une position SEO classique. Il faut suivre des prompts, des réponses observées, des citations, des sources, des impressions Google et des demandes de contact.',
+        definition:
+            'Mesurer la visibilité IA consiste à documenter ce qu’un moteur répond pour des questions importantes, quelles sources il utilise, quelles pages il peut comprendre et quels signaux changent après les corrections.',
+        clientProblem:
+            'Un dirigeant veut savoir si les efforts produisent quelque chose. Mais un seul test ChatGPT ou Perplexity ne suffit pas à conclure.',
+        problems: [
+            'Les réponses IA varient selon le moment, le compte, le contexte et la formulation.',
+            'Les équipes confondent présence dans une réponse, citation, trafic et contact.',
+            'Les prompts testés ne correspondent pas toujours à de vraies intentions d’achat.',
+            'Les changements de contenu ne sont pas reliés à des indicateurs observables.',
+        ],
+        corrections: [
+            'Définir une liste courte de prompts commerciaux à suivre.',
+            'Séparer visibilité, citations, sources, impressions Google et conversions.',
+            'Documenter les réponses avec date, plateforme et formulation exacte.',
+            'Relier les changements publiés aux signaux observés.',
+        ],
+        deliverables: [
+            'Tableau de prompts prioritaires.',
+            'Cadre de lecture des réponses IA.',
+            'Indicateurs à suivre dans Google Search Console et analytics.',
+            'Notes de suivi pour décisions éditoriales et techniques.',
+        ],
+        proofNote:
+            'La mesure doit rester honnête. Une présence observée n’est pas une garantie durable, et une absence ponctuelle ne prouve pas que tout le mandat échoue.',
+        measurementIndicatorsHeading: 'Indicateurs à séparer',
+        measurementIndicators: [
+            'Présence dans une réponse : la marque ou l’entreprise est nommée dans le texte généré.',
+            'Citation avec source : un lien, une URL ou un extrait identifiable renvoie vers une page que vous contrôlez ou influencez.',
+            'Signaux Google : impressions, clics et requêtes dans Search Console — utiles, mais ce ne sont pas des équivalents directs des réponses IA.',
+            'Demandes entrantes : appels, formulaires, conversations commerciales — la conversion réelle, distincte de la simple mention.',
+        ],
+        measurementPromptExamplesHeading: 'Exemples de prompts à consigner',
+        measurementPromptExamples: [
+            '« Quelle firme d’audit GEO ou visibilité IA recommander à une PME à Montréal ? »',
+            '« Compare trois approches pour être cité dans Perplexity dans mon secteur. »',
+            '« Quelles pages dois-je corriger en premier pour être mieux compris par ChatGPT ? »',
+        ],
+        measurementTableHeading: 'Tableau de suivi (cadre)',
+        measurementTableColumns: ['Prompt testé', 'Plateforme', 'Observation', 'Sources visibles', 'Action page'],
+        measurementTableRows: [
+            [
+                'Agence GEO pour PME Montréal',
+                'ChatGPT',
+                'Réponse générique sans votre marque',
+                'Annuaires / médias tiers',
+                'Renforcer page pilier services + preuves',
+            ],
+            [
+                'Audit visibilité IA Québec',
+                'Perplexity',
+                'Citation d’un concurrent',
+                'Site concurrent + annuaire',
+                'Clarifier différenciation et FAQ comparatives',
+            ],
+            [
+                'Service SEO IA entreprise',
+                'Gemini',
+                'Résumé correct mais sans lien site',
+                'Pages agrégatrices',
+                'Réponses directes en intro + données structurées',
+            ],
+        ],
+        competitorComparisonHeading: 'Comparer aux concurrents sans biais',
+        competitorComparisonBullets: [
+            'Utiliser les mêmes formulations et la même liste de plateformes pour votre marque et deux alternatives réelles du marché.',
+            'Noter les sources citées (site propriétaire, annuaire, média) plutôt que de juger la réponse au feeling.',
+            'Ne pas conclure sur une seule session : documenter date, compte si pertinent, et variation entre deux passages.',
+        ],
+        trouvableMethodHeading: 'Méthode Trouvable pour la mesure',
+        trouvableMethodBullets: [
+            'Prioriser une dizaine à une vingtaine de prompts alignés sur les intentions de contact réelles.',
+            'Protocole daté : plateforme, formulation exacte, notes ou captures structurées (sans partager de données sensibles).',
+            'Relier chaque vague de mesure aux changements publiés pour distinguer effet plausible et fluctuation normale.',
+        ],
+        howTo: {
+            name: 'Comment suivre la visibilité IA',
+            description: 'Séquence de mesure simple pour Google et moteurs IA.',
+            steps: [
+                'Choisir les requêtes proches d’une prise de contact.',
+                'Tester les mêmes questions sur les plateformes prioritaires.',
+                'Noter les réponses, sources, citations et concurrents visibles.',
+                'Relier les observations aux pages et corrections publiées.',
+            ],
+        },
+        faqs: [
+            {
+                question: 'Peut-on suivre la visibilité IA avec un seul outil ?',
+                answer: 'Pas complètement. Il faut combiner tests de prompts, observation des sources, données Google Search Console, analytics et suivi des demandes de contact.',
+            },
+            {
+                question: 'Combien de prompts faut-il suivre ?',
+                answer: 'Pour commencer, une PME peut suivre 10 à 25 prompts proches du contact : agence, audit, problème, plateforme, ville, secteur et comparaison.',
+            },
+            {
+                question: 'Une citation IA vaut-elle une conversion ?',
+                answer: 'Non. Une citation indique une présence potentielle dans le parcours. Il faut ensuite relier cette présence aux clics, demandes, appels ou conversations commerciales.',
+            },
+            {
+                question: 'À quelle fréquence faut-il mesurer ?',
+                answer: 'Une fréquence mensuelle suffit souvent au départ. Les tests doivent être assez réguliers pour voir les tendances, sans surinterpréter chaque variation.',
+            },
+            {
+                question: 'À quoi sert un tableau de mesure ?',
+                answer: 'Il force la discipline : même formulation de prompt, même liste de plateformes, colonnes pour l’observation et la page à corriger. Il évite de décider sur une capture isolée.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Agence GEO à Montréal',
+                description: 'Passer de la mesure au cadre de mandat et aux priorités locales.',
+            },
+            {
+                href: '/notre-mesure',
+                label: 'Cadre de mesure Trouvable',
+                description: 'Voir comment Trouvable sépare signaux, présence et impact.',
+            },
+            {
+                href: '/services/audit-visibilite-ia',
+                label: 'Audit visibilité IA',
+                description: 'Lancer la mesure à partir d’un diagnostic.',
+            },
+            {
+                href: '/plateformes/perplexity',
+                label: 'Perplexity',
+                description: 'Comprendre la logique des citations et des sources.',
+            },
+        ]),
+    },
+    {
+        slug: 'structurer-site-moteurs-ia',
+        path: '/ressources/structurer-site-moteurs-ia',
+        parent: { label: 'Ressources', href: '/recherche' },
+        variant: 'laboratory',
+        type: 'article',
+        priority: 'P2',
+        shortTitle: 'Structurer site IA',
+        title: 'Comment structurer un site pour les moteurs IA | Trouvable',
+        description:
+            'Guide pour structurer les pages, FAQ, entités, preuves, liens internes et données structurées afin d’être mieux compris par Google et les moteurs IA.',
+        h1: 'Comment structurer un site pour Google et les moteurs IA',
+        eyebrow: 'Architecture GEO',
+        keyword: 'structurer site moteurs IA',
+        secondaryKeywords: [
+            'optimiser un site pour ChatGPT',
+            'structurer pages IA',
+            'pages GEO à créer',
+            'site prêt pour IA',
+        ],
+        ctaLabel: 'Auditer ma structure',
+        secondaryCta: { label: 'Voir l’audit IA', href: '/services/audit-visibilite-ia' },
+        summary:
+            'Un site mieux structuré aide les humains à comprendre l’offre et aide les moteurs à relier les services, zones, preuves, FAQ et pages sources.',
+        definition:
+            'Structurer un site pour les moteurs IA signifie organiser les pages autour d’intentions claires, de réponses directes, d’entités explicites, de preuves documentées et de liens internes cohérents.',
+        clientProblem:
+            'Un site peut contenir de bonnes informations, mais les disperser dans des pages qui ne se répondent pas. Les prospects et les moteurs comprennent alors moins vite ce que l’entreprise fait.',
+        problems: [
+            'Les pages de services, villes, ressources et preuves ne sont pas reliées.',
+            'Les H1/H2 ne reflètent pas les questions que les prospects posent réellement.',
+            'Les FAQ sont absentes ou trop génériques.',
+            'Les données structurées ne représentent pas assez le contenu visible.',
+        ],
+        corrections: [
+            'Créer une page pilier claire pour l’intention principale.',
+            'Ajouter des pages services, plateformes, locales et comparatives selon la demande réelle.',
+            'Utiliser des sections question-réponse et des définitions courtes.',
+            'Relier chaque page à une prochaine étape crédible : audit, mandat, méthode ou contact.',
+        ],
+        deliverables: [
+            'Architecture de pages à créer ou consolider.',
+            'Plan H1/H2/H3 et FAQ pour les pages prioritaires.',
+            'Recommandations de maillage interne et d’ancres.',
+            'Balisage Service, Article, FAQ et fil d’Ariane lorsque pertinent.',
+        ],
+        proofNote:
+            'La structure ne remplace pas la preuve. Elle rend les informations utiles plus faciles à lire, relier et vérifier.',
+        howTo: {
+            name: 'Comment structurer un site pour les moteurs IA',
+            description: 'Étapes de base pour rendre un site plus compréhensible.',
+            steps: [
+                'Choisir la page pilier qui porte l’intention commerciale principale.',
+                'Créer les pages services, locales, plateformes et ressources nécessaires.',
+                'Ajouter des définitions, FAQ, preuves et liens internes contextuels.',
+                'Vérifier que le contenu visible et les données structurées racontent la même chose.',
+            ],
+        },
+        faqs: [
+            {
+                question: 'Quelles pages créer en premier ?',
+                answer: 'Les pages proches du contact : page pilier, audit, service principal, plateformes importantes, page locale et comparatif GEO vs SEO.',
+            },
+            {
+                question: 'Les FAQ aident-elles les moteurs IA ?',
+                answer: 'Oui lorsqu’elles répondent à de vraies questions de prospects. Elles doivent être claires, spécifiques et reliées aux pages de conversion.',
+            },
+            {
+                question: 'Faut-il refaire le site complet ?',
+                answer: 'Pas nécessairement. On peut souvent améliorer la compréhension en restructurant les pages existantes, en ajoutant les pages manquantes et en corrigeant le maillage.',
+            },
+            {
+                question: 'Comment éviter la cannibalisation ?',
+                answer: 'Chaque page doit avoir un rôle : une page porte l’intention principale, les pages support expliquent un angle précis et renvoient vers la page de conversion.',
+            },
+        ],
+        internalLinks: withRequiredLinks([
+            {
+                href: '/agence-geo-montreal',
+                label: 'Page pilier GEO Montréal',
+                description: 'Voir l’exemple de page transactionnelle principale.',
+            },
+            {
+                href: '/services/strategie-visibilite-ia',
+                label: 'Stratégie visibilité IA',
+                description: 'Relier la structure à une priorisation.',
+            },
+            {
+                href: '/ressources/geo-vs-seo',
+                label: 'GEO vs SEO',
+                description: 'Comprendre le rôle des pages support.',
+            },
+        ]),
+    },
+];
+
+export const SEO_GROWTH_PAGE_PATHS = SEO_GROWTH_PAGES.map((page) => page.path);
+
+export function getSeoGrowthPage(slug) {
+    const page = SEO_GROWTH_PAGES.find((entry) => entry.slug === slug);
+    if (!page) {
+        throw new Error(`Unknown SEO growth page: ${slug}`);
+    }
+    return page;
+}
+
+export function getSeoGrowthPageByPath(path) {
+    return SEO_GROWTH_PAGES.find((entry) => entry.path === path) || null;
+}
+
+export function absoluteSeoGrowthUrl(page) {
+    return `${SITE_URL}${page.path}`;
+}
+
+export function buildSeoGrowthMetadata(page) {
+    const url = absoluteSeoGrowthUrl(page);
+    return buildPublicMetadata({
+        title: page.title,
+        description: fitMetaDescription(page.description),
+        canonical: url,
+        openGraph: {
+            title: page.title,
+            description: fitMetaDescription(page.description),
+            url,
+            siteName: 'Trouvable',
+            type: 'website',
+            images: [
+                {
+                    url: `${SITE_URL}/opengraph-image`,
+                    width: 1200,
+                    height: 630,
+                    alt: page.h1,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: page.title,
+            description: fitMetaDescription(page.description),
+            images: [`${SITE_URL}/twitter-image`],
+        },
+        robots: { index: true, follow: true },
+    });
+}
+
+export function buildSeoGrowthArticleSchema(page) {
+    return {
+        url: absoluteSeoGrowthUrl(page),
+        headline: page.h1,
+        description: fitMetaDescription(page.description),
+        datePublished: SITE_LAST_MODIFIED_ISO,
+        dateModified: SITE_LAST_MODIFIED_ISO,
+        about: [page.keyword, ...page.secondaryKeywords],
+        mentions: page.internalLinks.map((link) => `${SITE_URL}${link.href}`),
+        references: getSeoGrowthReferences(page),
+    };
+}
+
+export function buildSeoGrowthServiceSchema(page) {
+    return {
+        name: page.h1,
+        slug: page.slug,
+        url: absoluteSeoGrowthUrl(page),
+        description: page.description,
+        serviceType: page.keyword,
+        about: [page.keyword, ...page.secondaryKeywords],
+    };
+}
+
+export function buildSeoGrowthHowToSchema(page) {
+    if (!page.howTo?.steps?.length) return null;
+    return {
+        url: absoluteSeoGrowthUrl(page),
+        name: page.howTo.name,
+        description: page.howTo.description,
+        steps: page.howTo.steps,
+        dateModified: SITE_LAST_MODIFIED_ISO,
+    };
+}
+
+export function buildSeoGrowthItemListSchema(page) {
+    const items = [
+        ...(page.corrections || []),
+        ...(page.deliverables || []),
+        ...(page.internalLinks || []).map((link) => ({
+            name: link.label,
+            url: `${SITE_URL}${link.href}`,
+        })),
+    ];
+
+    return {
+        id: `${absoluteSeoGrowthUrl(page)}#key-items`,
+        name: `Points structurants — ${page.shortTitle}`,
+        pageUrl: absoluteSeoGrowthUrl(page),
+        items: items.slice(0, 12),
+    };
+}
+
+export function getSeoGrowthKeyTakeaways(page) {
+    if (Array.isArray(page.keyTakeaways) && page.keyTakeaways.length > 0) {
+        return page.keyTakeaways;
+    }
+
+    return [page.summary, page.definition, page.proofNote].filter(Boolean).slice(0, 3);
+}
+
+export function getSeoGrowthReferences(page) {
+    if (Array.isArray(page.references) && page.references.length > 0) {
+        return page.references;
+    }
+
+    return SEO_GROWTH_REFERENCES;
+}

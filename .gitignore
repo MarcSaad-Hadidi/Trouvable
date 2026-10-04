@@ -19,7 +19,7 @@ build/
 TrustPilot.txt
 
 # Test-generated scanner copy
-lib/audit/scanner-temp.js
+src/lib/audit/scanner-temp.js
 
 # Screenshot artifacts (root directory only)
 /*.png

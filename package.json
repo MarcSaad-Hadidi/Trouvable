@@ -6,10 +6,19 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "next typegen --webpack && tsc --noEmit",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test:hibernation": "node --test scripts/__tests__/hibernation.test.mjs",
+    "check:hibernation": "node scripts/validate-hibernation.mjs",
+    "check:repository": "node scripts/check-repository.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test:tooling": "node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs scripts/__tests__/browser-qa.test.mjs",
+    "qa:browser": "node scripts/qa/browser.mjs"
   },
   "browserslist": {
     "production": [
@@ -46,7 +55,7 @@
     "googleapis": "^171.4.0",
     "jose": "^6.2.0",
     "lucide-react": "^1.7.0",
-    "next": "^16.2.4",
+    "next": "^16.3.8",
     "playwright-core": "^1.56.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -64,8 +73,13 @@
     "eslint-config-next": "^16.1.6",
     "playwright": "^1.56.1",
     "postcss": "^8.5.11",
+    "prettier": "3.9.9",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vitest": "^4.1.1"
+  },
+  "packageManager": "npm@11.6.2",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
   }
 }

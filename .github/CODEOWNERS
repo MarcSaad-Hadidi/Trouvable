@@ -8,10 +8,10 @@
 /.github/CODEOWNERS @MarcSaad-Hadidi
 
 # Application surfaces
-/app/ @MarcSaad-Hadidi
-/components/ @MarcSaad-Hadidi
-/lib/ @MarcSaad-Hadidi
-/features/ @MarcSaad-Hadidi
+/src/app/ @MarcSaad-Hadidi
+/src/components/ @MarcSaad-Hadidi
+/src/lib/ @MarcSaad-Hadidi
+/src/features/ @MarcSaad-Hadidi
 
 # Data / migrations
 /supabase/ @MarcSaad-Hadidi
@@ -19,7 +19,7 @@
 # Deployment / runtime config
 /next.config.mjs @MarcSaad-Hadidi
 /vercel.json @MarcSaad-Hadidi
-/proxy.js @MarcSaad-Hadidi
+/src/proxy.js @MarcSaad-Hadidi
 /package.json @MarcSaad-Hadidi
 /package-lock.json @MarcSaad-Hadidi
 /.env.example @MarcSaad-Hadidi

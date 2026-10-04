@@ -21,17 +21,40 @@ jobs:
     name: Validate static hibernation deployment
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           persist-credentials: false
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20"
-
+          node-version: "24"
       - name: Validate hibernation contract
         run: node scripts/validate-hibernation.mjs
+      - name: Test hibernation guards
+        run: node --test scripts/__tests__/hibernation.test.mjs
+
+  application-validation:
+    name: Validate dormant application manually
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: application-validation-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify dormant application without service secrets
+        run: npm run verify

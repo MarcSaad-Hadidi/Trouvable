@@ -7,7 +7,7 @@ description: Verify SEO/GEO content truthfulness — metadata, JSON-LD, citation
 
 ## When to use
 
-- When creating or modifying GEO pages (`app/villes/`, `app/expertises/`)
+- When creating or modifying GEO pages (`src/app/villes/`, `src/app/expertises/`)
 - When adding or changing JSON-LD structured data
 - When touching metadata, citations, or entity descriptions
 - When adding local business information (addresses, phone numbers, ratings)
@@ -22,13 +22,14 @@ description: Verify SEO/GEO content truthfulness — metadata, JSON-LD, citation
 ### 1. Content source verification
 
 - Identify the data source for every factual claim
-- Verify data exists in database (`supabase/schema.sql`, `client_geo_profiles`, etc.)
-- Cross-reference with `lib/seo/` utilities for data retrieval patterns
+- Trace factual data to its actual source (`client_geo_profiles`, verified provided content, etc.); historical `supabase/schema.sql` describes structure and does not prove current records.
+- Cross-reference with `src/lib/seo/` utilities for data retrieval patterns
 - Flag any content that appears to be placeholder or template data
 
 ### 2. JSON-LD validation
 
 For every structured data block:
+
 - Schema type is appropriate (LocalBusiness, Service, FAQPage, BreadcrumbList, etc.)
 - `@context` is `"https://schema.org"`
 - Required fields are present and truthful
@@ -39,6 +40,7 @@ For every structured data block:
 ### 3. GEO page checklist
 
 For city/expertise pages:
+
 - [ ] City name and region are correct
 - [ ] No invented statistics about market presence
 - [ ] Service descriptions match actual offerings
@@ -67,14 +69,17 @@ For city/expertise pages:
 ## Truthfulness Report: [Page/Feature]
 
 ### Data Sources: ✅/⚠️/❌
+
 - Source: [database/API/hardcoded/unknown]
 - Verified: [yes/no/partially]
 
 ### JSON-LD: ✅/⚠️/❌
+
 - Schema type: ...
 - Fabricated fields: [none/list]
 
 ### Citations: ✅/⚠️/❌
+
 - Total: N
 - Verified: N
 - Flagged: N
@@ -84,8 +89,8 @@ For city/expertise pages:
 
 ## References
 
-- `app/villes/` — GEO city pages
-- `app/expertises/` — GEO expertise pages
-- `lib/seo/` — SEO utilities
-- `supabase/schema.sql` — Data source of truth
+- `src/app/villes/` — GEO city pages
+- `src/app/expertises/` — GEO expertise pages
+- `src/lib/seo/` — SEO utilities
+- `supabase/migrations/` and `supabase/schema.sql` — schema references, not evidence of factual records
 - `.github/agents/trouvable-seo-geo.agent.md` — SEO/GEO specialist agent

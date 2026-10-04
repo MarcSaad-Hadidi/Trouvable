@@ -33,7 +33,10 @@ function routeToBuildHtmlFile(routePath) {
 }
 
 function stripTags(s) {
-    return s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return s
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function parseJsonLdBlocks(html) {
@@ -77,7 +80,7 @@ function collectInternalHrefs(html) {
 /** Rough route existence: prerendered HTML or app segment with page.jsx */
 function loadKnownRoutesFromDisk() {
     const known = new Set(['/']);
-    const appDir = path.join(ROOT, 'app');
+    const appDir = path.join(ROOT, 'src', 'app');
 
     function walk(dir, segments) {
         if (!fs.existsSync(dir)) return;
@@ -120,13 +123,13 @@ function analyzeHtml(html, pathLabel, sourceLabel) {
     const title = titleM ? stripTags(titleM[1]) : '';
 
     const descM =
-        html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)
-        || html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i);
+        html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i);
     const description = descM ? descM[1].trim() : '';
 
     const canonM =
-        html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)
-        || html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i);
+        html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i) ||
+        html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i);
     const canonical = canonM ? canonM[1].trim() : '';
 
     const h1Regex = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
@@ -215,12 +218,7 @@ async function main() {
     const linkIssues = [];
     const skipPrefixes = ['/api/', '/admin/', '/portal/', '/_next'];
     /** Clerk sign-in lives under /espace/* ; HTML often links to /espace */
-    const skipExact = new Set([
-        '/.well-known/webmcp',
-        '/favicon.ico',
-        '/espace',
-        '/markdown',
-    ]);
+    const skipExact = new Set(['/.well-known/webmcp', '/favicon.ico', '/espace', '/markdown']);
     const hasExtension = (p) => /\.[a-z0-9]{2,5}$/i.test(p.split('/').pop());
 
     for (const href of allInternal) {
@@ -234,9 +232,9 @@ async function main() {
         let ok = knownRoutes.has(normalized);
         if (!ok && !normalized.endsWith(']]')) {
             ok =
-                knownRoutes.has(`${normalized}/`)
-                || fs.existsSync(path.join(ROOT, 'app', ...normalized.split('/').filter(Boolean), 'page.jsx'))
-                || fs.existsSync(path.join(ROOT, 'app', ...normalized.split('/').filter(Boolean), 'page.tsx'));
+                knownRoutes.has(`${normalized}/`) ||
+                fs.existsSync(path.join(ROOT, 'src', 'app', ...normalized.split('/').filter(Boolean), 'page.jsx')) ||
+                fs.existsSync(path.join(ROOT, 'src', 'app', ...normalized.split('/').filter(Boolean), 'page.tsx'));
         }
         if (!ok) linkIssues.push(`broken internal href (aggregate scan): ${href}`);
     }

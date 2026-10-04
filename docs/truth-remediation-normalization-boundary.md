@@ -12,7 +12,7 @@ Those are not the same concern, so they should not share a single status field.
 
 ## Truth-Contract Vocabulary
 
-Defined in `lib/truth/definitions.js`.
+Defined in `src/lib/truth/definitions.js`.
 
 - `truth_class`: `observed`, `derived`, `inferred`, `uncertain`, `recommended`
 - `review_status`: `auto_accepted`, `needs_review`, `reviewed_confirmed`, `reviewed_rejected`, `blocked`
@@ -21,7 +21,7 @@ This vocabulary is used to preserve provenance, evidence quality, and operator-r
 
 ## Remediation Vocabulary
 
-Defined in `lib/remediation/problem-types.js`.
+Defined in `src/lib/remediation/problem-types.js`.
 
 - `status`: `open`, `in_review`, `resolved`, `ignored`
 
@@ -29,7 +29,7 @@ This vocabulary is used for workflow state once a normalized problem enters reme
 
 ## Mapping Boundary
 
-The bridge lives in `lib/truth/operator-review.js`.
+The bridge lives in `src/lib/truth/operator-review.js`.
 
 - `mapOpportunitySourceToTruthClass`
 - `mapOpportunityStatusToReviewStatus`

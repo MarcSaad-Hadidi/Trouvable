@@ -1,76 +1,27 @@
-﻿# Continuous Visibility Engine - Data Model Notes
+# Continuous Visibility Engine — modèle de données
 
-Date: 2026-03-21
+Moteur implémenté dans l’application dormante. Aucun Cron Vercel actif ; ces contrats n’autorisent pas une exécution distante.
 
-## Why these tables exist
+- `recurring_jobs` : définition client/type, cadence, retry, verrou et prochain run.
+- `recurring_job_runs` : historique `pending/running/completed/failed/cancelled`, compteurs, erreur et résumé.
+- `visibility_metric_snapshots` : points quotidiens client/date et tendances 7j/30j/90j.
+- `client_data_connectors` : état par client/fournisseur. OAuth et synchronisations GA4/GSC sont implémentés, sans connexion distante attestée.
 
-- `recurring_jobs`:
-  - one row per `(client_id, job_type)` schedule definition
-  - stores cadence, retry policy, lock metadata, and next-run targeting
-- `recurring_job_runs`:
-  - immutable-ish execution history for each queued/attempted run
-  - tracks lifecycle status (`pending/running/completed/failed/cancelled`)
-  - stores retry counters, error text, and result summary
-- `visibility_metric_snapshots`:
-  - durable trend points for key visibility KPIs
-  - designed for 7d/30d/90d window queries
-  - one row per `(client_id, snapshot_date)` for practical daily rollups
-- `client_data_connectors`:
-  - connector readiness state machine per client/provider
-  - currently powers GA4/GSC stubs (`not_connected`, `configured`, `disabled`, `sample_mode`, `error`)
+## Exécution et concurrence
 
-## Data flow
+Dans un environnement explicitement réactivé, dispatch sélectionne les jobs dus, insère les runs avec clé de déduplication, puis claim les runs disponibles. La finalisation met à jour état et prochaine cadence ; le succès permet un snapshot, l’échec applique retry/backoff dans son budget. La route snapshot peut capturer indépendamment les clients éligibles.
 
-1. Vercel Cron triggers `/api/cron/continuous/dispatch`.
-2. Dispatch selects due `recurring_jobs` and queues `recurring_job_runs` (idempotent dedupe key).
-3. Runnable pending runs are claimed and moved to `running`.
-4. Job type execution:
-   - `audit_refresh` -> `runFullAudit(...)`
-   - `prompt_rerun` -> `runTrackedQueriesForClient(...)`
-5. Run finalization:
-   - success -> `completed`, schedule next run, snapshot capture
-   - failure with budget -> backoff + return to `pending`
-   - failure without budget -> `failed`, next cadence scheduled
-6. Daily cron `/api/cron/continuous/snapshot` captures baseline snapshots for all active clients.
+Sources : `src/lib/continuous/jobs.js` pour dispatch et worker, `src/lib/continuous/recurring-jobs.js` pour définitions/contrôles/santé, `src/lib/continuous/snapshots.js` pour les captures, et les routes Cron dispatch/snapshot. La route snapshot initialise les jobs avant la capture ; la capture seule ne les initialise pas.
 
-## Daily-first Hobby policy (Phase 3.1)
+- `dedupe_key` unique pour la queue.
+- Index partiel des runs `running` par client/type, avec contrôle avant claim.
+- Récupération des runs bloqués : requeue dans le budget, sinon échec finalisé.
+- `CONTINUOUS_DAILY_FIRST_MODE=1` conserve le plancher de 24h dans `src/lib/continuous/mode.js` et les mises à jour de jobs.
 
-- Deployment mode is daily-first by default (`CONTINUOUS_DAILY_FIRST_MODE=1`).
-- Cron cadence in `vercel.json` is intentionally daily-compatible on Hobby:
-  - dispatch: `0 3 * * *`
-  - snapshot: `17 4 * * *`
-- Runtime guardrail enforces a minimum cadence of 24h on recurring jobs when daily-first mode is on.
-- UI wording and health interpretation are aligned with daily freshness, not near-real-time assumptions.
+La cadence est une politique applicative, pas un schedule actif. La [procédure d’hibernation](operations/trouvable-hibernation.md) régit toute reprise.
 
-To switch later to Pro/per-minute assumptions:
+## Lecture et vérité
 
-1. set `CONTINUOUS_DAILY_FIRST_MODE=0`
-2. update cron frequency in `vercel.json`
-3. re-open infra-daily cadence controls in operator UX if needed
+Les tendances sont calculées serveur dans `src/lib/continuous/trends.js` depuis les snapshots et `metrics-core.js` : latest, previous, delta et fenêtres. Elles ne chargent pas le worker ni ses moteurs. L’historique conserve son ordre ascendant et sa limite de 120 points ; la santé garde les 40 derniers runs et son initialisation préalable des définitions. La lecture des tendances initialise aussi les lignes de connecteurs manquantes. Les SDK de synchronisation sont chargés lors de leur exécution, pas pour lire les observations stockées. L’admin conserve les détails ; le portail reçoit une synthèse sûre et scoped. Absence, erreur et vrai zéro restent distincts ; une observation partielle n’est pas une métrique complète.
 
-## Query model choices
-
-- Trend queries are server-side and built from `visibility_metric_snapshots`.
-- Metric summaries compute:
-  - latest
-  - previous
-  - delta
-  - windowed summaries (`7d`, `30d`, `90d`)
-- Operator views use full trend + job health context.
-- Portal uses a reduced, safe trend subset only.
-
-## Idempotency and overlap strategy
-
-- Queue dedupe: `dedupe_key` unique index in `recurring_job_runs`.
-- Overlap prevention:
-  - unique partial index for running `(client_id, job_type)`
-  - explicit pre-claim overlap check in service logic
-- Stale running recovery:
-  - long-running stale runs are re-queued (if retry budget remains) or failed.
-
-## Not implemented in this phase
-
-- Live OAuth/token exchange for GA4/GSC.
-- External queue worker platform beyond Vercel Cron + route handlers.
-- Multi-provider connector sync pipelines with background ingestion.
-
+`CONNECTOR_SAMPLE_MODE=1` expose `hasRealData: false` avec tableaux vides, sans résultats client fictifs. Une connexion configurée ne prouve ni consentement valide ni synchronisation réussie.

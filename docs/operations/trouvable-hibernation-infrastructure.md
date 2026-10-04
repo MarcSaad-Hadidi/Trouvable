@@ -1,34 +1,19 @@
-# Trouvable — Verrous d’infrastructure après rollout
+# Trouvable — Verrous d’infrastructure
 
 ## Déploiements Git Vercel
 
-Le site statique a été déployé en production avant l’activation de ce verrou. La configuration impose ensuite :
+`vercel.json` impose `git.deploymentEnabled: false`. Un push GitHub ne doit pas créer automatiquement un Preview ou un déploiement production. Le script `scripts/vercel-ignore-hibernation.mjs` reste une défense supplémentaire lorsqu’un déploiement évalue encore l’Ignored Build Step.
 
-```json
-{
-  "git": {
-    "deploymentEnabled": false
-  }
-}
-```
+Le parking a été déployé avant l’activation du verrou. Les métadonnées d’un déploiement existant renseignent cet ancien état ; elles ne prouvent pas que le code d’une PR récente a été construit ou exécuté. Vérifier les réglages distants accessibles en lecture seule et rapporter toute limite d’accès.
 
-Aucun push GitHub ne doit donc créer automatiquement un nouveau Preview ou un nouveau déploiement production. Une reprise exige de retirer ce verrou dans une branche de réactivation, puis d’effectuer un déploiement manuel contrôlé.
+Toute reprise exige une branche dédiée, une modification relue de ces verrous et une autorisation distincte avant déploiement ; voir la [procédure d’hibernation et reprise](trouvable-hibernation.md).
 
-Le script `scripts/vercel-ignore-hibernation.mjs` reste présent comme défense supplémentaire pour les déploiements qui évaluent encore l’Ignored Build Step.
+## Injection Cloudflare observée historiquement
 
-## Injection Cloudflare observée
+Lors de la validation initiale du parking, Cloudflare injectait à l’edge un script sous `/cdn-cgi/challenge-platform/` sur l’accueil. La source statique du dépôt ne contient aucun script. La CSP du parking conserve `default-src 'none'` et ne permet aucun script ; une telle injection est bloquée et peut produire une violation CSP dans la console.
 
-La source statique Trouvable ne contient aucun script. Lors de la validation du domaine de production, Cloudflare a néanmoins injecté à l’edge un script sous `/cdn-cgi/challenge-platform/` sur la page d’accueil.
-
-La CSP Trouvable conserve `default-src 'none'` et ne permet aucun `script-src`; le script injecté est donc bloqué par le navigateur. Cette injection :
-
-- ne vient pas du repo ;
-- ne dépend pas de Vercel Functions ;
-- ne contacte pas Supabase ;
-- peut produire une violation CSP visible dans la console selon les réglages Cloudflare actifs.
-
-Pour obtenir une réponse HTTP sans aucun octet JavaScript injecté, désactiver explicitement dans Cloudflare les fonctions JavaScript Detections/Bot concernées pour le domaine Trouvable, ou passer le record en DNS-only après validation DNS/TLS. Cette modification Cloudflare n’est pas automatisée par le repo et doit être vérifiée séparément.
+Cette observation historique ne constitue pas une vérification des réglages actuels de Cloudflare. Si elle se reproduit, distinguer le contenu du dépôt de la réponse edge. Désactiver les fonctions JavaScript Detections/Bot concernées, ou modifier le mode DNS après contrôle DNS/TLS, constitue une opération distante qui nécessite un mandat distinct. Ne pas affaiblir la CSP pour autoriser une injection.
 
 ## Supabase
 
-Le projet Supabase Trouvable ne doit être pausé qu’après la validation du site statique production. La restauration du projet est la première étape obligatoire avant toute réactivation de l’ancienne application.
+Le code conserve ses contrats, migrations et données historiques. La présence de variables d’environnement ou d’un connecteur implémenté ne prouve pas la disponibilité du projet distant. Pauser Supabase uniquement après validation du site statique de production ; restaurer le projet et vérifier son état avant toute promotion d’une application dynamique. Aucune consolidation locale ne modifie ces états distants.

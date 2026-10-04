@@ -1,0 +1,47 @@
+export const signInAppearance = {
+    variables: {
+        colorBackground: '#0a0a0a',
+        colorInput: '#141414',
+        colorInputForeground: '#fafafa',
+        colorForeground: '#fafafa',
+        colorNeutral: 'rgba(255, 255, 255, 0.14)',
+        colorPrimary: '#5b73ff',
+        colorPrimaryForeground: '#ffffff',
+        colorText: '#fafafa',
+        colorTextSecondary: '#d4d4d8',
+        colorTextOnPrimaryBackground: '#ffffff',
+        borderRadius: '0.75rem',
+    },
+    elements: {
+        rootBox: 'w-full max-w-full min-w-0',
+        cardBox: 'w-full max-w-full min-w-0 shadow-none border-0 bg-transparent',
+        card: '!shadow-none !border-0 !bg-transparent !rounded-none w-full max-w-full min-w-0 !p-0 !m-0 gap-0',
+        header: '!bg-transparent !border-0 !shadow-none !p-0 mb-5 text-center w-full max-w-full min-w-0 flex flex-col items-center',
+        headerTitle: 'text-white font-bold text-xl tracking-tight !text-center !mx-auto w-full max-w-full',
+        headerSubtitle: '!hidden',
+        main: '!bg-transparent !border-0 !shadow-none !rounded-none !p-0 m-0 w-full max-w-full min-w-0',
+        scrollBox: '!bg-transparent !shadow-none !rounded-none !border-0 w-full max-w-full min-w-0',
+        socialButtonsRoot: 'w-full max-w-full min-w-0',
+        socialButtons: 'w-full max-w-full min-w-0 !gap-3',
+        form: 'w-full max-w-full min-w-0',
+        formFieldRow: 'w-full max-w-full min-w-0',
+        formFieldLabel: 'text-zinc-400 font-medium',
+        formFieldInput:
+            'bg-[#141414] border-white/[0.1] text-white rounded-xl placeholder:!text-zinc-400 !text-[15px] focus:ring-[#5b73ff] focus:border-[#5b73ff]/50 w-full max-w-full min-w-0 box-border',
+        formButtonPrimary:
+            'bg-[#5b73ff] hover:bg-[#4a62ee] text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(91,115,255,0.25)] w-full max-w-full min-w-0 box-border min-h-[44px]',
+        footerActionLink: 'text-[#5b73ff] hover:text-[#7b93ff]',
+        identityPreviewEditButton: 'text-[#5b73ff]',
+        formFieldInputShowPasswordButton: 'text-zinc-400 hover:text-zinc-200',
+        dividerLine: 'bg-white/[0.08]',
+        dividerText: 'text-zinc-500 text-[12px]',
+        socialButtonsBlockButton:
+            '!flex !flex-col !items-stretch !justify-center !gap-2 !py-2.5 !px-3 border border-white/[0.12] bg-white/[0.06] hover:bg-white/[0.1] text-zinc-200 w-full max-w-full min-w-0 box-border min-h-0',
+        socialButtonsBlockButtonText: 'text-zinc-100 font-medium text-[15px]',
+        socialButtonsBlockButton__lastUsed:
+            '!relative !order-first !self-center !shrink-0 !m-0 !max-w-[calc(100%-0.5rem)] !text-center !whitespace-normal !leading-tight !bg-[#5b73ff] !text-white !border !border-[#5b73ff] !text-[9px] sm:!text-[10px] !font-semibold !uppercase !tracking-wide !px-2.5 !py-1 !rounded-md !shadow-[0_2px_10px_rgba(91,115,255,0.35)]',
+        tag: '!bg-[#5b73ff] !text-white !border !border-[#5b73ff] !text-[10px] !font-semibold',
+        badge: '!bg-[#5b73ff] !text-white !border !border-[#5b73ff] !text-[10px] !font-semibold',
+        footer: 'hidden',
+    },
+};
