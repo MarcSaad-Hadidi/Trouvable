@@ -15,6 +15,7 @@ import { buildPublicMetadata } from '@/lib/seo/metadata';
 
 export const metadata = buildPublicMetadata({
     title: 'Mandats de visibilité | Trouvable',
+    canonical: `${SITE_URL}/offres`,
     description:
         'Trois mandats Trouvable pour visibilité Google et réponses IA : cartographie stratégique, implantation encadrée et pilotage continu vérifiable.',
 });

@@ -1,4 +1,4 @@
-import { SITE_ABOUT_URL, SITE_AUTHOR_NAME, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site-config';
+import { SITE_ABOUT_URL, SITE_AUTHOR_NAME, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site-config';
 
 export const META_DESCRIPTION_MIN = 120;
 export const META_DESCRIPTION_MAX = 158;
@@ -51,13 +51,17 @@ export function buildPublicMetadata({ title, description, canonical, openGraph =
         alternates: canonical ? { canonical } : undefined,
         openGraph: {
             ...openGraph,
+            url: openGraph.url || canonical,
             title: openGraph.title || title,
             description: openGraph.description ? fitMetaDescription(openGraph.description) : normalizedDescription,
+            images: openGraph.images ?? [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: title }],
         },
         twitter: {
             ...twitter,
+            card: twitter.card ?? 'summary_large_image',
             title: twitter.title || title,
             description: twitter.description ? fitMetaDescription(twitter.description) : normalizedDescription,
+            images: twitter.images ?? [`${SITE_URL}/twitter-image`],
         },
         robots,
     });
