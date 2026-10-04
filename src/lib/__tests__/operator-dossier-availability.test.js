@@ -8,7 +8,7 @@ vi.mock('@/lib/operator-intelligence/activity', () => ({ getRecentSafeActivity: 
 vi.mock('@/lib/connectors/index', () => ({
     getConnectorOverviewForClient: async () => ({ connections: [], providers: {} }),
 }));
-vi.mock('@/lib/continuous/jobs', () => ({
+vi.mock('@/lib/continuous/recurring-jobs', () => ({
     getRecurringJobHealthSlice: async () => ({ jobs: [], runs: [], summary: {} }),
 }));
 vi.mock('@/lib/operator-intelligence/social', () => ({ getSocialSlice: async () => ({ summary: {} }) }));

@@ -4,7 +4,7 @@ export const maxDuration = 300;
 
 import { requireAdmin } from '@/lib/auth';
 import { queryRunPayloadSchema } from '@/lib/ai/schemas';
-import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/jobs';
+import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/snapshots';
 import { runTrackedQueriesForClient } from '@/lib/queries/run-tracked-queries';
 
 export async function POST(request) {

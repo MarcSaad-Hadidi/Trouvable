@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 export const maxDuration = 60;
 
 import { assertCronAuthorized } from '@/lib/continuous/cron-auth';
-import { captureDailySnapshotsForAllClients, ensureDefaultRecurringJobsForAllClients } from '@/lib/continuous/jobs';
+import { ensureDefaultRecurringJobsForAllClients } from '@/lib/continuous/recurring-jobs';
+import { captureDailySnapshotsForAllClients } from '@/lib/continuous/snapshots';
 
 export const dynamic = 'force-dynamic';
 

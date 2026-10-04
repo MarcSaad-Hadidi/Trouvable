@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { getConnectorOverviewForClient } from '@/lib/connectors';
-import { getTrendSlice } from '@/lib/continuous/jobs';
+import { getTrendSlice } from '@/lib/continuous/trends';
 import { getCrawlerSlice } from '@/lib/operator-intelligence/geo-crawlers';
 import { getConsistencySlice } from '@/lib/operator-intelligence/geo-consistency';
 import { getReadinessSlice } from '@/lib/operator-intelligence/geo-readiness';

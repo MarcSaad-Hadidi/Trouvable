@@ -11,7 +11,7 @@ vi.mock('@/lib/operator-intelligence/overview', () => ({
     getOverviewSlice: mocks.overview,
 }));
 
-vi.mock('@/lib/continuous/jobs', () => ({
+vi.mock('@/lib/continuous/trends', () => ({
     getTrendSlice: mocks.trend,
 }));
 

@@ -5,7 +5,7 @@ export const maxDuration = 300;
 import { requireAdmin } from '@/lib/auth';
 import { auditRunPayloadSchema } from '@/lib/ai/schemas';
 import { runFullAudit } from '@/lib/audit/run-audit';
-import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/jobs';
+import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/snapshots';
 import {
     getClientById as dbGetClientById,
     getClientBySlug as dbGetClientBySlug,

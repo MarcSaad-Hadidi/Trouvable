@@ -28,7 +28,7 @@ vi.mock('@/lib/seo/gsc-sync', () => ({ runGscSyncForClient: vi.fn() }));
 vi.mock('@/lib/seo/ga4-sync', () => ({ runGa4SyncForClient: vi.fn() }));
 vi.mock('@/lib/agent-reach/pipeline', () => ({ runCommunityPipeline: vi.fn() }));
 vi.mock('@/lib/ops/alerts', () => ({ sendSlackAlert: vi.fn() }));
-import { getTrendSlice } from '../continuous/jobs.js';
+import { getTrendSlice } from '../continuous/trends.js';
 
 describe('continuous trend current source availability', () => {
     beforeEach(() => {

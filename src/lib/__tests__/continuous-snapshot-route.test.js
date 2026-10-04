@@ -2,10 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const io = vi.hoisted(() => ({ authorize: vi.fn(), seed: vi.fn(), capture: vi.fn(), order: [] }));
 vi.mock('@/lib/continuous/cron-auth', () => ({ assertCronAuthorized: io.authorize }));
-vi.mock('@/lib/continuous/jobs', () => ({
-    ensureDefaultRecurringJobsForAllClients: io.seed,
-    captureDailySnapshotsForAllClients: io.capture,
-}));
+vi.mock('@/lib/continuous/recurring-jobs', () => ({ ensureDefaultRecurringJobsForAllClients: io.seed }));
+vi.mock('@/lib/continuous/snapshots', () => ({ captureDailySnapshotsForAllClients: io.capture }));
 import { GET, POST } from '../../app/api/cron/continuous/snapshot/route.js';
 
 beforeEach(() => {

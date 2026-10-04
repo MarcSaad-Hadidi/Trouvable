@@ -36,14 +36,16 @@ vi.mock('@/lib/queries/run-tracked-queries', () => ({
     reparseStoredQueryRun: io.reparse,
 }));
 vi.mock('@/lib/continuous/jobs', () => ({
-    getRecurringJobHealthSlice: io.health,
     processContinuousTick: io.tick,
     processContinuousWorkerTick: io.worker,
+}));
+vi.mock('@/lib/continuous/recurring-jobs', () => ({
+    getRecurringJobHealthSlice: io.health,
     queueRecurringRunNow: io.queue,
     setRecurringJobActive: io.setActive,
     updateRecurringJobCadence: io.cadence,
-    upsertVisibilitySnapshotForClient: io.snapshot,
 }));
+vi.mock('@/lib/continuous/snapshots', () => ({ upsertVisibilitySnapshotForClient: io.snapshot }));
 vi.mock('@/lib/connectors/repository', () => ({ updateConnectorState: io.updateConnector }));
 import { POST as opportunityPost } from '../../app/api/admin/geo/client/[clientId]/opportunities/[opportunityId]/route.js';
 import { POST as clearPost } from '../../app/api/admin/geo/client/[clientId]/runs/actions/route.js';

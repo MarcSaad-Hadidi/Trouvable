@@ -200,11 +200,8 @@ vi.mock('@/lib/continuous/schemas', () => ({
     },
 }));
 
-import {
-    processContinuousTick,
-    processContinuousWorkerTick,
-    upsertVisibilitySnapshotForClient,
-} from '@/lib/continuous/jobs';
+import { processContinuousTick, processContinuousWorkerTick } from '@/lib/continuous/jobs';
+import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/snapshots';
 
 function makeRun({ id, jobId, clientId, jobType, attemptCount = 0, maxAttempts = 3 }) {
     return {

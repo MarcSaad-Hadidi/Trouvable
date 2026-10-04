@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { getBusinessShortDescription } from '@/lib/client-profile';
-import { getTrendSlice } from '@/lib/continuous/jobs';
+import { getTrendSlice } from '@/lib/continuous/trends';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { getRecentQueryRuns as dbGetRecentQueryRuns } from '@/lib/db/query-runs';
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';

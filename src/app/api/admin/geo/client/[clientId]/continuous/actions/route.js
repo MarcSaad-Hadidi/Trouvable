@@ -3,15 +3,14 @@ import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth';
 import { logAction as dbLogAction } from '@/lib/db/actions';
+import { processContinuousTick, processContinuousWorkerTick } from '@/lib/continuous/jobs';
 import {
     getRecurringJobHealthSlice,
-    processContinuousTick,
-    processContinuousWorkerTick,
     queueRecurringRunNow,
     setRecurringJobActive,
     updateRecurringJobCadence,
-    upsertVisibilitySnapshotForClient,
-} from '@/lib/continuous/jobs';
+} from '@/lib/continuous/recurring-jobs';
+import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/snapshots';
 import { connectorProviderSchema, connectorStoredStateSchema } from '@/lib/continuous/schemas';
 import { updateConnectorState } from '@/lib/connectors/repository';
 

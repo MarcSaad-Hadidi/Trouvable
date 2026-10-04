@@ -7,7 +7,7 @@ import { getProfileCompletenessSummary, getPublicationStatus } from '@/lib/clien
 import { getConnectorOverviewForClient } from '@/lib/connectors/index';
 import { getOperatorWorkspaceShell } from '@/lib/operator-intelligence/base';
 import { getRecentSafeActivity } from '@/lib/operator-intelligence/activity';
-import { getRecurringJobHealthSlice } from '@/lib/continuous/jobs';
+import { getRecurringJobHealthSlice } from '@/lib/continuous/recurring-jobs';
 import { LIFECYCLE_META } from '@/lib/lifecycle';
 import { finiteNumberOrNull } from '@/lib/numbers';
 import { mapOpportunitySourceToReliability, mapProvenanceToReliability } from '@/lib/operator-intelligence/reliability';

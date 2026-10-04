@@ -16,7 +16,7 @@ vi.mock('@/lib/connectors/index', () => ({
         providers: { ga4: { hasRealData: true }, gsc: { hasRealData: true } },
     }),
 }));
-vi.mock('@/lib/continuous/jobs', () => ({
+vi.mock('@/lib/continuous/recurring-jobs', () => ({
     getRecurringJobHealthSlice: async () => ({ jobs: [], runs: [], summary: {} }),
 }));
 vi.mock('@/lib/operator-intelligence/social', () => ({ getSocialSlice: async () => ({ summary: {} }) }));

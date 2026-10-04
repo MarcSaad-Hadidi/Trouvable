@@ -1,17 +1,14 @@
 import 'server-only';
 
+import { getDbNowIso as nowIso } from '@/lib/db/core';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
-import { listActiveClientIds } from '@/lib/db/clients';
 import {
-    upsertRecurringJobs,
     listDueRecurringJobs,
     countQueuedOrRunningRunsForJob,
     insertRecurringJobRun,
     updateRecurringJob,
     listStaleRunningRuns,
     getRecurringJobsByIds,
-    listRecurringJobsForClient,
-    listRecentRecurringJobRunsForClient,
     requeueStaleRun,
     failRun,
     listRunnablePendingRuns as listRunnablePendingRunsFromDb,
@@ -28,14 +25,14 @@ import {
     requeueRun,
     listRecentRunsForEngineStats,
 } from '@/lib/db/jobs';
-import { upsertVisibilityMetricSnapshot, listVisibilityMetricSnapshots } from '@/lib/db/snapshots';
-import { DEFAULT_RECURRING_JOB_CONFIG } from '@/lib/continuous/constants';
-import { buildMetricTrendSummary, classifyFreshness, splitImprovingDeclining } from '@/lib/continuous/metrics-core';
-import { enforceDailyCadenceMinutes, getContinuousModeLabelFr, isDailyFirstMode } from '@/lib/continuous/mode';
+import {
+    addMinutes,
+    clamp,
+    getEffectiveCadenceMinutes,
+    ensureDefaultRecurringJobsForAllClients,
+} from '@/lib/continuous/recurring-jobs';
+import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/snapshots';
 import { cronDispatchOptionsSchema, cronWorkerOptionsSchema } from '@/lib/continuous/schemas';
-import { flattenSnapshotToLegacy } from '@/lib/operator-intelligence/kpi-core';
-import { getGeoWorkspaceSnapshot } from '@/lib/operator-intelligence/snapshot';
-import { getConnectorOverviewForClient } from '@/lib/connectors';
 import { runFullAudit } from '@/lib/audit/run-audit';
 import { runTrackedQueriesForClient } from '@/lib/queries/run-tracked-queries';
 import { runGscSyncForClient } from '@/lib/seo/gsc-sync';
@@ -43,112 +40,6 @@ import { runGa4SyncForClient } from '@/lib/seo/ga4-sync';
 import { runCommunityPipeline } from '@/lib/agent-reach/pipeline';
 import { sendSlackAlert } from '@/lib/ops/alerts';
 
-function nowIso() {
-    return new Date().toISOString();
-}
-
-function addMinutes(iso, minutes) {
-    const base = iso ? new Date(iso) : new Date();
-    return new Date(base.getTime() + minutes * 60 * 1000).toISOString();
-}
-
-function startOfTodayDateString() {
-    return new Date().toISOString().slice(0, 10);
-}
-
-function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-}
-
-function getEffectiveCadenceMinutes(rawCadenceMinutes) {
-    return clamp(enforceDailyCadenceMinutes(rawCadenceMinutes || 1440), 15, 10080);
-}
-
-function toMetricSnapshotPayload(metrics, { clientId, source = 'system', sourceJobRunId = null, metadata = {} }) {
-    return {
-        client_id: clientId,
-        source,
-        source_job_run_id: sourceJobRunId,
-        snapshot_date: startOfTodayDateString(),
-        captured_at: nowIso(),
-        seo_score: metrics?.seoScore ?? null,
-        geo_score: metrics?.geoScore ?? null,
-        visibility_proxy_percent: metrics?.visibilityProxyPercent ?? null,
-        mention_rate_percent: metrics?.trackedPromptStats?.mentionRatePercent ?? null,
-        citation_coverage_percent: metrics?.citationCoveragePercent ?? null,
-        competitor_visibility_count: metrics?.competitorMentions ?? null,
-        freshness_audit_at: metrics?.lastAuditAt ?? null,
-        freshness_run_at: metrics?.lastGeoRunAt ?? null,
-        metadata: { ...metadata, data_status: metrics?.status || 'available', data_sources: metrics?.sources || {} },
-    };
-}
-
-export async function ensureDefaultRecurringJobs(clientId) {
-    const rows = Object.entries(DEFAULT_RECURRING_JOB_CONFIG).map(([jobType, config], index) => ({
-        client_id: clientId,
-        job_type: jobType,
-        cadence_minutes: getEffectiveCadenceMinutes(config.cadence_minutes),
-        retry_limit: config.retry_limit,
-        retry_backoff_minutes: config.retry_backoff_minutes,
-        status: 'pending',
-        is_active: true,
-        next_run_at: addMinutes(nowIso(), 5 + index * 10),
-        metadata: {
-            seeded_by: 'continuous_visibility_engine',
-            default_seed: true,
-            mode: getContinuousModeLabelFr(),
-        },
-    }));
-
-    await upsertRecurringJobs(rows);
-}
-
-export async function ensureDefaultRecurringJobsForAllClients() {
-    const clientIds = await listActiveClientIds();
-    for (const clientId of clientIds) {
-        await ensureDefaultRecurringJobs(clientId);
-    }
-
-    return clientIds.length;
-}
-
-export async function upsertVisibilitySnapshotForClient({
-    clientId,
-    source = 'system',
-    sourceJobRunId = null,
-    metadata = {},
-}) {
-    const ws = await getGeoWorkspaceSnapshot(clientId);
-    const metrics = flattenSnapshotToLegacy(ws.snapshot, ws.latestAudit);
-    const payload = toMetricSnapshotPayload(metrics, {
-        clientId,
-        source,
-        sourceJobRunId,
-        metadata,
-    });
-
-    return upsertVisibilityMetricSnapshot(payload);
-}
-
-export async function captureDailySnapshotsForAllClients() {
-    const clientIds = await listActiveClientIds();
-
-    let captured = 0;
-    for (const clientId of clientIds) {
-        try {
-            await upsertVisibilitySnapshotForClient({
-                clientId,
-                source: 'cron',
-                metadata: { reason: 'daily_snapshot' },
-            });
-            captured += 1;
-        } catch (snapshotError) {
-            console.error(`[Continuous] snapshot failed for client ${clientId}:`, snapshotError.message);
-        }
-    }
-
-    return { captured, total: clientIds.length };
-}
 async function queueDueJobs({ maxJobsToQueue, source }) {
     const now = nowIso();
     const jobs = await listDueRecurringJobs({
@@ -613,268 +504,6 @@ async function finalizeRunFailure({ run, job, errorMessage, summary }) {
     });
 
     return { retried: false };
-}
-
-export async function queueRecurringRunNow(jobId, triggerSource = 'manual') {
-    const job = await getRecurringJobById(jobId);
-
-    if (job.is_active !== true) {
-        throw new Error('Job is inactive. Reactivate it before running now.');
-    }
-
-    const dedupeKey = `${job.id}:manual:${String(nowIso()).slice(0, 16)}`;
-    const payload = {
-        job_id: job.id,
-        client_id: job.client_id,
-        job_type: job.job_type,
-        trigger_source: triggerSource,
-        status: 'pending',
-        attempt_count: 0,
-        max_attempts: clamp((job.retry_limit ?? 2) + 1, 1, 20),
-        scheduled_for: nowIso(),
-        dedupe_key: dedupeKey,
-        run_context: {
-            queued_by: 'manual',
-        },
-        result_summary: {},
-    };
-
-    const data = await insertRecurringJobRun(payload);
-    await updateRecurringJob(job.id, {
-        status: 'pending',
-        next_run_at: nowIso(),
-    });
-
-    return data;
-}
-
-export async function setRecurringJobActive(jobId, isActive) {
-    await updateRecurringJob(jobId, {
-        is_active: isActive,
-        status: isActive ? 'pending' : 'cancelled',
-        next_run_at: isActive ? nowIso() : addMinutes(nowIso(), 525600),
-    });
-
-    return getRecurringJobById(jobId);
-}
-
-export async function updateRecurringJobCadence({ jobId, cadenceMinutes, retryLimit, retryBackoffMinutes }) {
-    const effectiveCadence = getEffectiveCadenceMinutes(cadenceMinutes);
-    const payload = {
-        cadence_minutes: effectiveCadence,
-        ...(retryLimit !== null && retryLimit !== undefined ? { retry_limit: clamp(Number(retryLimit), 0, 10) } : {}),
-        ...(retryBackoffMinutes !== null && retryBackoffMinutes !== undefined
-            ? { retry_backoff_minutes: clamp(Number(retryBackoffMinutes), 5, 1440) }
-            : {}),
-        next_run_at: nowIso(),
-        status: 'pending',
-    };
-
-    await updateRecurringJob(jobId, payload);
-    return getRecurringJobById(jobId);
-}
-
-export async function getRecurringJobHealthSlice(clientId) {
-    await ensureDefaultRecurringJobs(clientId);
-
-    const [jobs, runs] = await Promise.all([
-        listRecurringJobsForClient(clientId),
-        listRecentRecurringJobRunsForClient(clientId, 40),
-    ]);
-
-    const statusCounts = {
-        pending: 0,
-        running: 0,
-        completed: 0,
-        failed: 0,
-        cancelled: 0,
-    };
-
-    for (const row of runs || []) {
-        if (Object.prototype.hasOwnProperty.call(statusCounts, row.status)) {
-            statusCounts[row.status] += 1;
-        }
-    }
-
-    return {
-        jobs: jobs || [],
-        runs: runs || [],
-        summary: {
-            totalJobs: (jobs || []).length,
-            activeJobs: (jobs || []).filter((job) => job.is_active === true).length,
-            failedJobs: (jobs || []).filter((job) => job.status === 'failed').length,
-            statusCounts,
-        },
-    };
-}
-export async function getTrendSlice(clientId) {
-    const [ws, jobHealth, snapshots, connectors] = await Promise.all([
-        getGeoWorkspaceSnapshot(clientId),
-        getRecurringJobHealthSlice(clientId),
-        listVisibilityMetricSnapshots(clientId, 120),
-        getConnectorOverviewForClient(clientId),
-    ]);
-
-    const metricDefinitions = [
-        { key: 'seo_score', label: 'Score SEO' },
-        { key: 'geo_score', label: 'Score GEO' },
-        { key: 'visibility_proxy_percent', label: 'Visibilite IA' },
-        { key: 'mention_rate_percent', label: 'Taux de mention des prompts' },
-        { key: 'citation_coverage_percent', label: 'Couverture des citations' },
-        { key: 'competitor_visibility_count', label: 'Visibilite des concurrents' },
-    ];
-
-    const metricRows = metricDefinitions.map((metric) => {
-        const d7 = buildMetricTrendSummary({ snapshots, metricKey: metric.key, days: 7 });
-        const d30 = buildMetricTrendSummary({ snapshots, metricKey: metric.key, days: 30 });
-        const d90 = buildMetricTrendSummary({ snapshots, metricKey: metric.key, days: 90 });
-
-        return {
-            key: metric.key,
-            label: metric.label,
-            ...d30,
-            windows: {
-                d7,
-                d30,
-                d90,
-            },
-        };
-    });
-
-    const board = splitImprovingDeclining(metricRows);
-
-    const metrics = flattenSnapshotToLegacy(ws.snapshot, ws.latestAudit);
-    metrics.modelPerformance = ws.modelPerformance;
-
-    const dailyFirst = isDailyFirstMode();
-    const auditFreshness = classifyFreshness(metrics.lastAuditAt, dailyFirst ? 96 : 72);
-    const runFreshness = classifyFreshness(metrics.lastGeoRunAt, dailyFirst ? 72 : 48);
-
-    const actionCenter = [];
-
-    for (const metric of board.declining) {
-        if (metric.key === 'seo_score' || metric.key === 'geo_score') {
-            actionCenter.push({
-                id: `score_drop_${metric.key}`,
-                category: 'profile_fixes',
-                priority: 'high',
-                title: `${metric.label} en baisse (${metric.delta})`,
-                rationale:
-                    'La tendance recente signale un recul. Relancez un audit et priorisez les corrections en attente.',
-                evidence: 'derived_from_snapshots',
-            });
-        }
-
-        if (metric.key === 'citation_coverage_percent') {
-            actionCenter.push({
-                id: 'citation_gap',
-                category: 'citation_source_opportunities',
-                priority: 'high',
-                title: 'Couverture des citations en recul',
-                rationale:
-                    'La couverture des sources observées baisse. Renforcez les prompts qui generent des citations fiables.',
-                evidence: 'derived_from_snapshots',
-            });
-        }
-
-        if (metric.key === 'mention_rate_percent') {
-            actionCenter.push({
-                id: 'prompt_coverage_gap',
-                category: 'prompt_coverage_gaps',
-                priority: 'medium',
-                title: 'Taux de mention des prompts en baisse',
-                rationale:
-                    'La visibilite issue des prompts suivis faiblit. Revoyez le pack de prompts avant la prochaine actualisation quotidienne.',
-                evidence: 'derived_from_snapshots',
-            });
-        }
-    }
-
-    if ((metrics.trackedPromptStats?.noRunYet || 0) > 0) {
-        actionCenter.push({
-            id: 'missing_prompt_runs',
-            category: 'prompt_coverage_gaps',
-            priority: 'medium',
-            title: "Des prompts suivis n'ont pas encore d'exécution",
-            rationale: `${metrics.trackedPromptStats.noRunYet} prompt(s) n ont pas encore de premiere observation.`,
-            evidence: 'observed_prompt_state',
-        });
-    }
-
-    if (auditFreshness.state === 'stale') {
-        actionCenter.push({
-            id: 'stale_audit',
-            category: 'freshness_rerun_issues',
-            priority: 'high',
-            title: 'Audit quotidien en retard',
-            rationale: `Le dernier audit date de ${auditFreshness.hours}h. Lancez une actualisation quotidienne.`,
-            evidence: 'observed_timestamp',
-        });
-    }
-
-    if (runFreshness.state === 'stale') {
-        actionCenter.push({
-            id: 'stale_runs',
-            category: 'freshness_rerun_issues',
-            priority: 'high',
-            title: 'Exécutions quotidiennes en retard',
-            rationale: `La derniere execution date de ${runFreshness.hours}h. Lancez le cycle quotidien des prompts.`,
-            evidence: 'observed_timestamp',
-        });
-    }
-
-    if (
-        Number.isFinite(metrics.competitorMentions) &&
-        Number.isFinite(metrics.brandRecommendationRuns) &&
-        metrics.competitorMentions > Math.max(10, metrics.brandRecommendationRuns)
-    ) {
-        actionCenter.push({
-            id: 'competitor_pressure',
-            category: 'competitor_pressure_alerts',
-            priority: 'medium',
-            title: 'Pression concurrentielle elevee',
-            rationale: 'Les mentions concurrentes sont elevees par rapport aux recommandations de marque.',
-            evidence: 'derived_from_runs',
-        });
-    }
-
-    const dedupedActionCenter = [];
-    const seenActionIds = new Set();
-    for (const item of actionCenter) {
-        if (seenActionIds.has(item.id)) continue;
-        seenActionIds.add(item.id);
-        dedupedActionCenter.push(item);
-    }
-
-    return {
-        status: ws.snapshot.status || 'available',
-        dataSources: ws.snapshot.sources || {},
-        errors: ws.snapshot.errors || [],
-        metrics: metricRows,
-        improving: board.improving,
-        declining: board.declining,
-        snapshotCoverage: {
-            count: snapshots.length,
-            startDate: snapshots[0]?.snapshot_date || null,
-            endDate: snapshots[snapshots.length - 1]?.snapshot_date || null,
-        },
-        freshness: {
-            audit: auditFreshness,
-            runs: runFreshness,
-            latestAuditAt: metrics.lastAuditAt || null,
-            latestRunAt: metrics.lastGeoRunAt || null,
-            mode: getContinuousModeLabelFr(),
-        },
-        snapshots,
-        jobs: jobHealth,
-        connectors,
-        actionCenter: dedupedActionCenter.slice(0, 10),
-        dailyMode: {
-            enabled: dailyFirst,
-            cadenceFloorMinutes: 1440,
-            label: getContinuousModeLabelFr(),
-        },
-    };
 }
 
 export async function processContinuousTick(rawOptions = {}) {

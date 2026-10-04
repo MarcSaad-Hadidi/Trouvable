@@ -21,7 +21,7 @@ const LOADERS = {
     activity: async (clientId) =>
         (await import('@/lib/operator-intelligence/activity')).getRecentSafeActivity(clientId),
     models: async (clientId) => (await import('@/lib/operator-intelligence/models')).getModelsSlice(clientId),
-    continuous: async (clientId) => (await import('@/lib/continuous/jobs')).getTrendSlice(clientId),
+    continuous: async (clientId) => (await import('@/lib/continuous/trends')).getTrendSlice(clientId),
     crawlers: async (clientId) => (await import('@/lib/operator-intelligence/geo-crawlers')).getCrawlerSlice(clientId),
     readiness: async (clientId) =>
         (await import('@/lib/operator-intelligence/geo-readiness')).getReadinessSlice(clientId),
