@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { google } from 'googleapis';
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
 
 function formatDate(date) {
@@ -49,6 +48,7 @@ export async function fetchGa4TrafficDaily({ propertyId, startDate, endDate, goo
     }
 
     const window = resolveDateWindow({ startDate, endDate });
+    const { google } = await import('googleapis');
 
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_OAUTH_CLIENT_ID,
@@ -96,6 +96,7 @@ export async function fetchGa4TopPages({ propertyId, startDate, endDate, limit =
     }
 
     const window = resolveDateWindow({ startDate, endDate });
+    const { google } = await import('googleapis');
 
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_OAUTH_CLIENT_ID,
