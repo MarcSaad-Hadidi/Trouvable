@@ -1,4 +1,4 @@
-import { COMMAND_TEXT, cn } from './tokens';
+import { COMMAND_TEXT, cn } from '@/lib/design/tokens';
 
 export default function CommandHeader({
     brand = null,

@@ -1,4 +1,4 @@
-﻿import { COMMAND_SURFACE_SOFT, COMMAND_TEXT, cn } from './tokens';
+﻿import { COMMAND_SURFACE_SOFT, COMMAND_TEXT, cn } from '@/lib/design/tokens';
 
 export function CommandChartCard({
     eyebrow = 'Tendance',

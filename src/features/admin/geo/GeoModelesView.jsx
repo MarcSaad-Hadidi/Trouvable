@@ -8,7 +8,7 @@ import {
     CommandMetricCard,
     cn,
 } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE } from '@/lib/design/tokens';
 import { CumulativeModelVisibilityChart } from '@/features/admin/geo/components/GeoRealCharts';
 import { GeoEmptyPanel, GeoModelAvatar, GeoProvenancePill } from '@/features/admin/geo/components/GeoPremium';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';

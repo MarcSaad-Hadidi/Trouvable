@@ -10,7 +10,7 @@ import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } 
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 
 const TIME_RANGES = ['7d', '30d', '90d', '12m'];
 const SEGMENT_LABELS = {

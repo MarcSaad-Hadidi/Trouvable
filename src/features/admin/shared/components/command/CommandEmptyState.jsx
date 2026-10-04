@@ -1,10 +1,7 @@
-import { COMMAND_BUTTONS, cn, getToneMeta } from './tokens';
+import { cn, getToneMeta } from '@/lib/design/tokens';
 
 /**
  * CommandEmptyState — état vide unifié du centre de commande.
- *
- * Remplace progressivement GeoEmptyPanel (GeoPremium.jsx) et SeoEmptyState
- * (SeoOpsPrimitives.jsx). Peut aussi servir de loading light.
  *
  * Props:
  *   - icon       : élément optionnel (Lucide / SVG) affiché dans le médaillon
@@ -59,17 +56,5 @@ export default function CommandEmptyState({
                 </div>
             ) : null}
         </div>
-    );
-}
-
-/**
- * CommandEmptyStateAction — bouton primaire standardisé pour les empty states.
- * Utilise COMMAND_BUTTONS.primary (fond blanc, contraste fort).
- */
-export function CommandEmptyStateAction({ children, className = '', ...props }) {
-    return (
-        <button type="button" className={cn(COMMAND_BUTTONS.primary, className)} {...props}>
-            {children}
-        </button>
     );
 }

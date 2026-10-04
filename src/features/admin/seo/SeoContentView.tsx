@@ -8,7 +8,7 @@ import { PlusIcon, StarIcon } from 'lucide-react';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 
 function normalizeText(value) {

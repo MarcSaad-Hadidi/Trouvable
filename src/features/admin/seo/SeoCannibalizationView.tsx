@@ -8,7 +8,7 @@ import { ExternalLinkIcon, GitMergeIcon, GripHorizontalIcon, NetworkIcon, Shield
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 
 const severityOrder = { high: 0, medium: 1, low: 2 };
 

@@ -11,7 +11,7 @@ import { problemRefFromSearchParams } from '@/lib/correction-prompts/problem-ref
 import CorrectionPromptGenerator from '@/features/admin/seo/CorrectionPromptGenerator';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import Link from 'next/link';
 

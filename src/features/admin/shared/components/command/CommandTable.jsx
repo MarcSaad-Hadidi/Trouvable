@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 
-import { COMMAND_PANEL, COMMAND_SURFACE_SOFT, cn, getToneMeta } from './tokens';
+import { COMMAND_PANEL, COMMAND_SURFACE_SOFT, cn, getToneMeta } from '@/lib/design/tokens';
 
 /**
  * CommandTable — table standardisée pour listes d'opérations, files d'actions et portefeuille.

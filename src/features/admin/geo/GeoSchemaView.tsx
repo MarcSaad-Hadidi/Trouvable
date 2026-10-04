@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
-import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/design/tokens';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 

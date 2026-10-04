@@ -7,7 +7,7 @@ import { CommandPageShell, CommandHeader, CommandMetricCard } from '@/features/a
 import { CommandChartCard } from '@/features/admin/shared/components/command/CommandChartCard';
 import { CommandTable } from '@/features/admin/shared/components/command/CommandTable';
 import CommandEmptyState from '@/features/admin/shared/components/command/CommandEmptyState';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 
 function isPrimitive(value: unknown) {
     return value === null || value === undefined || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';

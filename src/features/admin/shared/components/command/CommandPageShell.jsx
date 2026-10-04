@@ -1,4 +1,4 @@
-import { cn } from './tokens';
+import { cn } from '@/lib/design/tokens';
 
 export default function CommandPageShell({ header = null, hero = null, children, drawer = null, className = '' }) {
     return (

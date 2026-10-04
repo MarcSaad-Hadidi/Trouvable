@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { COMMAND_PANEL, cn, getToneMeta } from './tokens';
+import { COMMAND_PANEL, cn, getToneMeta } from '@/lib/design/tokens';
 
 export default function CommandMetricCard({ label, value, detail = null, tone = 'neutral', href = null }) {
     const toneMeta = getToneMeta(tone);

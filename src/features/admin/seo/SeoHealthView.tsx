@@ -12,7 +12,7 @@ import { CommandChartCard } from '@/features/admin/shared/components/command/Com
 import { CommandTable } from '@/features/admin/shared/components/command/CommandTable';
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
-import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 
 function formatDateTime(value) {
     if (!value) return 'n.d.';
