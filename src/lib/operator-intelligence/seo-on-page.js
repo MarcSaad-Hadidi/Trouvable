@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
@@ -338,13 +340,15 @@ function buildSuggestions(blocks, aiSummary) {
 }
 
 export async function getSeoOnPageSlice(clientId) {
-    const audit = await dbGetLatestAudit(clientId).catch(() => null);
+    const { values: { audit }, dataSources, errors } = await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) });
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     if (!audit) {
         return {
+            ...availability,
             emptyState: {
                 title: 'Analyse on-page indisponible',
-                description: 'Aucun audit exploitable n’est disponible pour ouvrir une lecture on-page fiable.',
+                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles pour cette lecture on-page.' : 'Aucun audit exploitable n’est disponible pour ouvrir une lecture on-page fiable.',
             },
         };
     }
@@ -355,6 +359,7 @@ export async function getSeoOnPageSlice(clientId) {
 
     if (pages.length === 0) {
         return {
+            ...availability,
             emptyState: {
                 title: 'Analyse on-page indisponible',
                 description: 'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture on-page honnête.',
@@ -384,6 +389,7 @@ export async function getSeoOnPageSlice(clientId) {
     ];
 
     return {
+        ...availability,
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,

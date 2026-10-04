@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
 import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, normalizePathname, getLatestObservedDate, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
@@ -82,16 +84,27 @@ function overlapScore(left, right) {
     return overlap / Math.max(leftTokens.size, rightTokens.size);
 }
 
-function buildGscFreshness(connectorRows, rows) {
-    const gscStatus = resolveConnectorStatus(connectorRows, 'gsc');
+function buildGscFreshness(connectorRows, rows, dataSources) {
+    const gscStatus = dataSources.connectors === 'unavailable'
+        ? { status: 'unavailable', lastSyncedAt: null }
+        : resolveConnectorStatus(connectorRows, 'gsc');
     const lastObservedDate = getLatestObservedDate(rows);
     const ageDays = getObservedAgeDays(lastObservedDate);
+
+    if (dataSources.gscRows === 'unavailable' || (!lastObservedDate && gscStatus.status === 'unavailable')) {
+        return {
+            status: 'unavailable', reliability: 'unavailable', label: 'Search Console',
+            connectorStatus: gscStatus.status, lastObservedDate, lastSyncedAt: gscStatus.lastSyncedAt,
+            detail: 'Données Search Console temporairement indisponibles.',
+        };
+    }
 
     if (!lastObservedDate) {
         return {
             status: gscStatus.status === 'not_connected' ? 'unavailable' : 'warning',
-            reliability: gscStatus.status === 'not_connected' ? 'unavailable' : 'measured',
+            reliability: 'unavailable',
             label: 'Search Console',
+            connectorStatus: gscStatus.status,
             lastObservedDate: null,
             lastSyncedAt: gscStatus.lastSyncedAt,
             detail: gscStatus.status === 'not_connected'
@@ -104,6 +117,7 @@ function buildGscFreshness(connectorRows, rows) {
         status: ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical',
         reliability: 'measured',
         label: 'Search Console',
+        connectorStatus: gscStatus.status,
         lastObservedDate,
         lastSyncedAt: gscStatus.lastSyncedAt,
         detail: ageDays === null
@@ -893,18 +907,29 @@ function buildOperatorSummary({ pages, coverage, contentDecay, refreshOpportunit
 }
 
 export async function getSeoContentSlice(clientId) {
-    const [audit, latestOpportunities, connectorRows, gscRows] = await Promise.all([
-        dbGetLatestAudit(clientId).catch(() => null),
-        dbGetLatestOpportunities(clientId).catch(() => ({ active: [], stale: [], latestAuditId: null })),
-        getClientConnectorRows(clientId).catch(() => []),
-        getRecentGscRows(clientId, { days: COMPARISON_WINDOW_DAYS, limit: 1200 }).catch(() => []),
-    ]);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => dbGetLatestAudit(clientId),
+        opportunities: () => dbGetLatestOpportunities(clientId),
+        connectors: () => getClientConnectorRows(clientId),
+        gscRows: () => getRecentGscRows(clientId, { days: COMPARISON_WINDOW_DAYS, limit: 1200 }),
+    });
+    const { audit, opportunities: latestOpportunities, connectors: connectorRows, gscRows } = values;
+    if (dataSources.gscRows === 'empty') {
+        dataSources.gscRows = dataSources.connectors !== 'unavailable' && resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected' ? 'not_connected' : 'not_observed';
+    }
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
+    const gscFreshness = buildGscFreshness(connectorRows, gscRows, dataSources);
+    const contentOpportunityCount = dataSources.opportunities === 'unavailable' ? null : toArray(latestOpportunities?.active)
+        .filter((item) => item?.status === 'open' && item?.category === 'content').length;
 
     if (!audit) {
         return {
+            ...availability,
+            freshness: { gsc: gscFreshness },
+            contentOpportunityCount,
             emptyState: {
                 title: 'Contenu SEO indisponible',
-                description: 'Aucun audit exploitable n’est disponible pour ouvrir une surface contenu honnête. Relancez un audit avant de piloter cette lecture.',
+                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles pour cette lecture contenu.' : 'Aucun audit exploitable n’est disponible pour ouvrir une surface contenu honnête. Relancez un audit avant de piloter cette lecture.',
             },
         };
     }
@@ -915,6 +940,9 @@ export async function getSeoContentSlice(clientId) {
 
     if (pages.length === 0) {
         return {
+            ...availability,
+            freshness: { gsc: gscFreshness },
+            contentOpportunityCount,
             emptyState: {
                 title: 'Contenu SEO indisponible',
                 description: 'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture contenu fiable.',
@@ -922,18 +950,15 @@ export async function getSeoContentSlice(clientId) {
         };
     }
 
-    const gscFreshness = buildGscFreshness(connectorRows, gscRows);
     const pagePerformance = buildPagePerformance(gscRows);
     const coverage = buildCoverage(pages, audit);
     const clusters = buildProvisionalClusters(pages);
     const pageRoles = buildPageRoles(pages, clusters);
-    const contentDecay = buildContentDecay(pages, pagePerformance, gscFreshness);
+    const contentDecay = { ...buildContentDecay(pages, pagePerformance, gscFreshness), availability: dataSources.gscRows };
     const refreshOpportunities = buildRefreshOpportunities(pages, pagePerformance);
     const missingPages = buildMissingPages(audit, pages, clusters);
     const mergeOpportunities = buildMergeOpportunities(pages, clusters);
-    const contentOpportunityCount = toArray(latestOpportunities?.active)
-        .filter((item) => item?.status === 'open' && item?.category === 'content')
-        .length;
+
     const topOpportunities = buildTopOpportunities({
         contentOpportunityCount,
         contentDecay,
@@ -954,6 +979,8 @@ export async function getSeoContentSlice(clientId) {
     });
 
     return {
+        ...availability,
+        contentOpportunityCount,
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
@@ -987,7 +1014,7 @@ export async function getSeoContentSlice(clientId) {
             {
                 id: 'priority_count',
                 label: 'Priorités visibles',
-                value: topOpportunities.length,
+                value: topOpportunities.length === 0 && availability.status !== 'available' ? null : topOpportunities.length,
                 detail: 'Refresh, manques, merges ou décrochages réellement observés',
                 reliability: 'calculated',
                 accent: topOpportunities.length > 0 ? 'amber' : 'slate',

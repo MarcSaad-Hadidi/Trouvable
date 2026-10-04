@@ -1,8 +1,10 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows } from './seo-gsc';
+import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, getLatestObservedDate, getObservedAgeDays } from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getRecentGscRows } from '@/lib/db/gsc';
@@ -665,7 +667,7 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         },
     ];
 
-    if (gscFreshness?.reliability === 'unavailable') {
+    if (gscFreshness?.connectorStatus === 'not_connected') {
         hooks.push({
             id: 'connect-gsc',
             title: 'Connecter Search Console',
@@ -691,32 +693,60 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
 }
 
 export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit } = {}) {
-    const audit = providedAudit ?? await dbGetLatestAudit(clientId).catch(() => null);
-
-    const [visibility, content, onPage, cannibalization, gscRows] = await Promise.all([
-        getVisibilitySlice(clientId).catch(() => ({ emptyState: { title: 'Visibilité indisponible', description: 'Visibilité SEO non disponible.' }, freshness: { gsc: { reliability: 'unavailable', status: 'unavailable', label: 'Search Console', lastObservedDate: null, lastSyncedAt: null } } })),
-        getSeoContentSlice(clientId).catch(() => ({ emptyState: { title: 'Contenu SEO indisponible', description: 'Contenu SEO non disponible.' } })),
-        getSeoOnPageSlice(clientId).catch(() => ({ emptyState: { title: 'On-page indisponible', description: 'On-page non disponible.' } })),
-        getSeoCannibalizationSlice(clientId).catch(() => ({ emptyState: { title: 'Cannibalisation indisponible', description: 'Cannibalisation non disponible.' } })),
-        getRecentGscRows(clientId, { days: CURRENT_WINDOW_DAYS, limit: 1200 }).catch(() => []),
-    ]);
+    const auditRead = providedAudit == null
+        ? await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) })
+        : { values: { audit: providedAudit }, dataSources: { audit: 'available' }, errors: [] };
+    const audit = auditRead.values.audit;
+    const reads = await loadIndependentSources({
+        visibility: () => getVisibilitySlice(clientId),
+        content: () => getSeoContentSlice(clientId),
+        onPage: () => getSeoOnPageSlice(clientId),
+        cannibalization: () => getSeoCannibalizationSlice(clientId),
+        gscRows: () => getRecentGscRows(clientId, { days: CURRENT_WINDOW_DAYS, limit: 1200 }),
+    });
+    const dataSources = { ...auditRead.dataSources, ...reads.dataSources };
+    const errors = [...auditRead.errors, ...reads.errors];
+    for (const source of ['visibility', 'content', 'onPage', 'cannibalization']) {
+        const reading = reads.values[source];
+        if (!reading) continue;
+        if (reading.status === 'partial' || reading.status === 'unavailable') dataSources[source] = reading.status;
+        for (const [name, state] of Object.entries(reading.dataSources || {})) dataSources[source + '.' + name] = state;
+        for (const error of reading.errors || []) errors.push({ source: source + '.' + error.source, message: 'Données temporairement indisponibles.' });
+    }
+    const unavailableReading = { emptyState: { description: 'Données temporairement indisponibles.' } };
+    const visibility = reads.values.visibility;
+    const content = reads.values.content || unavailableReading;
+    const onPage = reads.values.onPage || unavailableReading;
+    const cannibalization = reads.values.cannibalization || unavailableReading;
+    const gscRows = reads.values.gscRows;
+    if (dataSources.gscRows === 'empty') {
+        dataSources.gscRows = visibility?.dataSources?.gscQueries === 'not_connected' ? 'not_connected' : 'not_observed';
+    }
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     const hasAudit = Boolean(audit);
     const currentGscRows = filterRowsSince(gscRows, getSinceDate(CURRENT_WINDOW_DAYS));
-    const gscFreshness = visibility?.freshness?.gsc || {
-        status: 'unavailable',
-        reliability: 'unavailable',
+    const lastObservedDate = getLatestObservedDate(gscRows);
+    const ageDays = getObservedAgeDays(lastObservedDate);
+    const gscFreshness = {
+        ...visibility?.freshness?.gsc,
         label: 'Search Console',
-        lastObservedDate: null,
-        lastSyncedAt: null,
-        detail: 'Search Console indisponible.',
+        connectorStatus: visibility?.connectors?.gsc?.status || visibility?.freshness?.gsc?.connectorStatus || null,
+        lastObservedDate,
+        lastLiveObservedDate: visibility?.freshness?.gsc?.lastObservedDate || null,
+        lastSyncedAt: visibility?.freshness?.gsc?.lastSyncedAt || null,
+        status: dataSources.gscRows === 'unavailable' ? 'unavailable' : currentGscRows.length > 0 ? ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical' : 'unavailable',
+        reliability: currentGscRows.length > 0 ? 'measured' : 'unavailable',
+        detail: dataSources.gscRows === 'unavailable' ? 'Données Search Console temporairement indisponibles.' : currentGscRows.length > 0 ? 'Données Search Console persistées utilisées pour cette file.' : 'Aucune donnée Search Console observée pour cette file.',
     };
 
     if (!hasAudit && currentGscRows.length === 0) {
         return {
+            ...availability,
+            freshness: { gsc: gscFreshness },
             emptyState: {
                 title: 'Opportunités SEO indisponibles',
-                description: 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Relancez un audit ou connectez Search Console avant d’ouvrir cette file SEO.',
+                description: errors.length > 0 ? 'Données temporairement indisponibles pour cette file SEO.' : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Relancez un audit ou connectez Search Console avant d’ouvrir cette file SEO.',
             },
         };
     }
@@ -731,7 +761,27 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
     const coverage = buildCoverageSection(clientId, content);
     const internalLinking = buildInternalLinkingSection(clientId, content);
     const consolidation = buildConsolidationSection(clientId, cannibalization);
+    positionBand.availability = dataSources.gscRows;
+    clickGap.availability = dataSources.gscRows;
+    metadata.availability = onPage.emptyState ? (dataSources.onPage === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus(onPage.dataSources || {});
+    refresh.availability = content.emptyState ? (dataSources.content === 'partial' || dataSources.content === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus({ audit: content.dataSources?.audit, gscRows: content.dataSources?.gscRows });
+    coverage.availability = content.emptyState ? refresh.availability : getSourceStatus({ audit: content.dataSources?.audit });
+    internalLinking.availability = coverage.availability;
+    consolidation.availability = cannibalization.emptyState ? (dataSources.cannibalization === 'partial' || dataSources.cannibalization === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus({ audit: cannibalization.dataSources?.audit, gscRows: cannibalization.dataSources?.gscRows, client: cannibalization.dataSources?.client });
+    for (const section of [refresh, consolidation]) {
+        if (section.availability === 'partial' && section.items.length === 0) {
+            section.status = 'unavailable';
+            section.reliability = 'unavailable';
+            section.description = 'Lecture incomplète : certaines données sont temporairement indisponibles.';
+        }
+    }
     const quickWins = buildQuickWinsSection(clickGap, metadata, refresh, coverage);
+    quickWins.availability = getSourceStatus({ clickGap: clickGap.availability, metadata: metadata.availability, refresh: refresh.availability, coverage: coverage.availability });
+    if (quickWins.availability === 'partial' && quickWins.items.length === 0) {
+        quickWins.status = 'unavailable';
+        quickWins.reliability = 'unavailable';
+        quickWins.description = 'Lecture incomplète : certaines données sont temporairement indisponibles.';
+    }
 
     const totalBacklogCount = dedupeItems([
         ...toArray(clickGap.items),
@@ -764,6 +814,7 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
     });
 
     return {
+        ...availability,
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
@@ -773,15 +824,15 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
             {
                 id: 'backlog_total',
                 label: 'Backlog SEO',
-                value: totalBacklogCount,
-                detail: totalBacklogCount > 0 ? 'Opportunités réellement ouvertes par la mesure ou par l’audit' : 'Aucune opportunité dominante',
+                value: totalBacklogCount === 0 && availability.status !== 'available' ? null : totalBacklogCount,
+                detail: totalBacklogCount > 0 ? 'Opportunités réellement ouvertes par la mesure ou par l’audit' : availability.status === 'available' ? 'Aucune opportunité dominante' : 'Lecture incomplète des opportunités',
                 reliability: 'calculated',
                 accent: totalBacklogCount > 0 ? 'amber' : 'slate',
             },
             {
                 id: 'quick_wins',
                 label: 'Actions rapides',
-                value: toArray(quickWins.items).length,
+                value: quickWins.items.length === 0 && quickWins.availability !== 'available' ? null : quickWins.items.length,
                 detail: 'Actions prioritaires à faible friction',
                 reliability: 'calculated',
                 accent: toArray(quickWins.items).length > 0 ? 'emerald' : 'slate',
@@ -789,7 +840,7 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
             {
                 id: 'pages_4_20',
                 label: 'Pages 4–20',
-                value: toArray(positionBand.items).length,
+                value: positionBand.availability !== 'available' ? null : positionBand.items.length,
                 detail: 'Pages déjà visibles hors top 3',
                 reliability: gscFreshness.reliability === 'unavailable' ? 'unavailable' : 'calculated',
                 accent: toArray(positionBand.items).length > 0 ? 'sky' : 'slate',
@@ -797,13 +848,13 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
             {
                 id: 'click_gap',
                 label: 'Écart de clic',
-                value: toArray(clickGap.items).length,
+                value: clickGap.availability !== 'available' ? null : clickGap.items.length,
                 detail: 'Pages visibles qui peuvent d’abord récupérer plus de clics',
                 reliability: gscFreshness.reliability === 'unavailable' ? 'unavailable' : 'calculated',
                 accent: toArray(clickGap.items).length > 0 ? 'emerald' : 'slate',
             },
         ],
-        operatorSummary,
+        operatorSummary: availability.status === 'available' ? operatorSummary : { ...operatorSummary, text: totalBacklogCount > 0 ? operatorSummary.text : 'Lecture incomplète : aucune conclusion complète sur les opportunités SEO ne peut être tirée des sources disponibles.' },
         freshness: {
             audit: {
                 status: audit?.created_at ? 'ok' : 'unavailable',
@@ -817,7 +868,7 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
                 status: totalBacklogCount > 0 ? 'ok' : 'unavailable',
                 reliability: 'calculated',
                 label: 'Backlog recalculé',
-                value: totalBacklogCount > 0 ? `${totalBacklogCount} opportunité(s)` : 'Aucune',
+                value: totalBacklogCount > 0 ? `${totalBacklogCount} opportunité(s)` : availability.status === 'available' ? 'Aucune' : 'Indisponible',
                 detail: 'Synthèse recalculée à partir des signaux disponibles au chargement.',
             },
         },

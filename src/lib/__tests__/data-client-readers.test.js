@@ -46,10 +46,14 @@ describe('client identity read boundary', () => {
         expect(JSON.stringify(data)).not.toContain('example.test');
     });
 
-    it('discards an errored client name before classifying overlap queries as brand queries', async () => {
+    it('keeps measured overlap while leaving brand classification unknown after an identity error', async () => {
         io.client.error = { message: 'private SQL failure' };
         const data = await getSeoCannibalizationSlice('client-current');
-        expect(data.groups[0].measured.nonBrandSharedQueryCount).toBe(1);
+        expect(data.groups[0].measured.nonBrandSharedQueryCount).toBeNull();
+        expect(data.groups[0].measured.sharedQueryCount).toBe(1);
+        expect(data.groups[0].measured.reliability).toBe('measured');
+        expect(data.groups[0].measured.querySamples[0].isBrandLike).toBeNull();
+        expect(data.dataSources.client).toBe('unavailable');
         expect(JSON.stringify(data)).not.toContain('private SQL failure');
     });
 

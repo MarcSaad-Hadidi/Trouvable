@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
 import { getLatestAudit as dbGetLatestAudit, getRecentAudits as dbGetRecentAudits } from '@/lib/db/audits';
@@ -75,23 +77,37 @@ function buildAuditHistory(audits) {
 }
 
 export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {}) {
-    const [audit, recentAudits] = await Promise.all([
-        providedAudit ?? dbGetLatestAudit(clientId).catch(() => null),
-        dbGetRecentAudits(clientId, 6).catch(() => []),
-    ]);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => providedAudit ?? dbGetLatestAudit(clientId),
+        recentAudits: () => dbGetRecentAudits(clientId, 6),
+    });
+    const { audit, recentAudits } = values;
+    if (audit?.scan_status === 'pending' || audit?.scan_status === 'running') dataSources.audit = 'not_observed';
+    else if (audit?.scan_status === 'partial_error') dataSources.audit = 'partial';
+    else if (audit?.scan_status === 'failed') {
+        dataSources.audit = 'unavailable';
+        errors.push({ source: 'audit', message: 'Données temporairement indisponibles.' });
+    }
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     if (!audit) {
         return {
+            ...availability,
+            seoScore: null,
+            history: buildAuditHistory(recentAudits),
             available: false,
             emptyState: {
                 title: 'Sante SEO indisponible',
-                description: "Aucun audit exploitable n'est disponible pour ce mandat. Relancez un audit avant d'ouvrir la lecture technique.",
+                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles.' : "Aucun audit exploitable n'est disponible pour ce mandat. Relancez un audit avant d'ouvrir la lecture technique.",
             },
         };
     }
 
     if (audit.scan_status === 'pending' || audit.scan_status === 'running') {
         return {
+            ...availability,
+            seoScore: null,
+            history: buildAuditHistory(recentAudits),
             available: false,
             emptyState: {
                 title: 'Audit SEO en cours',
@@ -102,10 +118,13 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
 
     if (audit.scan_status === 'failed') {
         return {
+            ...availability,
+            seoScore: null,
+            history: buildAuditHistory(recentAudits),
             available: false,
             emptyState: {
                 title: 'Dernier audit echoue',
-                description: audit.error_message || "L'audit n'a pas pu etre complete. Relancez-le depuis le dossier.",
+                description: "L'audit n'a pas pu etre complete. Relancez-le depuis le dossier.",
             },
         };
     }
@@ -130,6 +149,7 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
     const promptableIssueCount = normalizedIssues.filter((issue) => issue.promptAvailable !== false).length;
 
     return {
+        ...availability,
         available: true,
         seoScore: audit?.seo_score ?? null,
         issueCount: normalizedIssues.length,

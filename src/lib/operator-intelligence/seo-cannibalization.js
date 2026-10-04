@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
 import { getSinceDate, filterRowsSince, createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, normalizeUrl, aggregatePageRows, normalizePathname, getLatestObservedDate, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
@@ -127,16 +129,27 @@ function getPrimarySegment(value) {
     return pathname.split('/').filter(Boolean)[0] || null;
 }
 
-function buildGscFreshness(connectorRows, rows) {
-    const gscStatus = resolveConnectorStatus(connectorRows, 'gsc');
+function buildGscFreshness(connectorRows, rows, dataSources) {
+    const gscStatus = dataSources.connectors === 'unavailable'
+        ? { status: 'unavailable', lastSyncedAt: null }
+        : resolveConnectorStatus(connectorRows, 'gsc');
     const lastObservedDate = getLatestObservedDate(rows);
     const ageDays = getObservedAgeDays(lastObservedDate);
+
+    if (dataSources.gscRows === 'unavailable' || (!lastObservedDate && gscStatus.status === 'unavailable')) {
+        return {
+            status: 'unavailable', reliability: 'unavailable', label: 'Search Console',
+            connectorStatus: gscStatus.status, lastObservedDate, lastSyncedAt: gscStatus.lastSyncedAt,
+            detail: 'Données Search Console temporairement indisponibles.',
+        };
+    }
 
     if (!lastObservedDate) {
         return {
             status: gscStatus.status === 'not_connected' ? 'unavailable' : 'warning',
-            reliability: gscStatus.status === 'not_connected' ? 'unavailable' : 'measured',
+            reliability: 'unavailable',
             label: 'Search Console',
+            connectorStatus: gscStatus.status,
             lastObservedDate: null,
             lastSyncedAt: gscStatus.lastSyncedAt,
             detail: gscStatus.status === 'not_connected'
@@ -149,6 +162,7 @@ function buildGscFreshness(connectorRows, rows) {
         status: ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical',
         reliability: 'measured',
         label: 'Search Console',
+        connectorStatus: gscStatus.status,
         lastObservedDate,
         lastSyncedAt: gscStatus.lastSyncedAt,
         detail: ageDays === null
@@ -333,6 +347,7 @@ function extractBrandTokens(clientName) {
 }
 
 function isBrandLikeQuery(query, brandTokens) {
+    if (brandTokens === null) return null;
     if (!brandTokens.length) return false;
     const normalized = normalizeText(query);
     return brandTokens.some((token) => normalized.includes(token));
@@ -349,7 +364,8 @@ function initMetricBucket(url) {
 function addRowMetrics(bucket, rowMetrics, isBrandLike) {
     accumulateSearchMetrics(bucket, rowMetrics);
     bucket.sharedQueryCount += 1;
-    if (!isBrandLike) bucket.nonBrandSharedQueryCount += 1;
+    if (isBrandLike === null) bucket.nonBrandSharedQueryCount = null;
+    else if (isBrandLike === false) bucket.nonBrandSharedQueryCount += 1;
 }
 
 function finalizeMetricBucket(bucket) {
@@ -407,7 +423,7 @@ function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {
                         pageKeys: [left.pageKey, right.pageKey].sort(),
                         pageMetrics: new Map(),
                         sharedQueryCount: 0,
-                        nonBrandSharedQueryCount: 0,
+                        nonBrandSharedQueryCount: brandTokens === null ? null : 0,
                         sharedClicks: 0,
                         sharedImpressions: 0,
                         querySamples: [],
@@ -416,7 +432,7 @@ function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {
 
                 const pair = pairMap.get(pairKey);
                 pair.sharedQueryCount += 1;
-                if (!queryBucket.isBrandLike) pair.nonBrandSharedQueryCount += 1;
+                if (queryBucket.isBrandLike === false) pair.nonBrandSharedQueryCount += 1;
                 pair.sharedClicks += left.metrics.clicks + right.metrics.clicks;
                 pair.sharedImpressions += left.metrics.impressions + right.metrics.impressions;
                 pair.querySamples.push({
@@ -609,10 +625,10 @@ function buildMeasuredEvidence(measuredSignal) {
             text: 'Aucune requête partagée mesurée sur la fenêtre Search Console courante.',
             detail: 'Le repo ne peut pas prouver ici un conflit d’intention via GSC.',
             querySamples: [],
-            sharedClicks: 0,
-            sharedImpressions: 0,
-            sharedQueryCount: 0,
-            nonBrandSharedQueryCount: 0,
+            sharedClicks: null,
+            sharedImpressions: null,
+            sharedQueryCount: null,
+            nonBrandSharedQueryCount: null,
             pageMetrics: new Map(),
         };
     }
@@ -733,7 +749,6 @@ function buildActionRecommendation(group, winner) {
     const mixedRoles = uniqueTypes.size > 1;
     const dominantMeasured = measured.sharedImpressions >= 60 && measured.nonBrandSharedQueryCount >= 2;
     const structuralDuplication = calculated.score >= 0.65 && (calculated.signals.some((signal) => signal.includes('Même segment')) || calculated.signals.some((signal) => signal.includes('Même type')));
-    const isMostlyBrand = measured.sharedQueryCount > 0 && measured.nonBrandSharedQueryCount === 0;
 
     if (measured.reliability === 'measured' && dominantMeasured && sameRole && structuralDuplication) {
         return {
@@ -744,7 +759,7 @@ function buildActionRecommendation(group, winner) {
         };
     }
 
-    if (measured.reliability === 'measured' && !isMostlyBrand && winner?.page) {
+    if (measured.reliability === 'measured' && measured.nonBrandSharedQueryCount > 0 && winner?.page) {
         return {
             label: 'Repositionner',
             reliability: 'calculated',
@@ -799,7 +814,7 @@ function buildGroupTypeLabel(measured, calculated) {
 }
 
 function buildGroupTitle(index, measured, calculated, pages) {
-    const topMeasuredQuery = measured.querySamples.find((query) => !query.isBrandLike) || measured.querySamples[0];
+    const topMeasuredQuery = measured.querySamples.find((query) => query.isBrandLike === false) || measured.querySamples[0];
     if (topMeasuredQuery?.query) {
         return `Groupe ${index + 1} · Autour de « ${topMeasuredQuery.query.slice(0, 42)}${topMeasuredQuery.query.length > 42 ? '…' : ''} »`;
     }
@@ -954,7 +969,7 @@ function buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCoun
         },
     ];
 
-    if (gscFreshness.reliability === 'unavailable') {
+    if (gscFreshness.connectorStatus === 'not_connected') {
         hooks.push({
             id: 'connect-gsc',
             title: 'Connecter Search Console',
@@ -1047,13 +1062,19 @@ function mergeSignals(measuredSignals, calculatedSignals, pagePerformance, audit
 }
 
 export async function getSeoCannibalizationSlice(clientId) {
-    const [audit, latestOpportunities, connectorRows, gscRows, clientName] = await Promise.all([
-        dbGetLatestAudit(clientId).catch(() => null),
-        dbGetLatestOpportunities(clientId).catch(() => ({ active: [], stale: [], latestAuditId: null })),
-        getClientConnectorRows(clientId).catch(() => []),
-        getRecentGscRows(clientId, { days: COMPARISON_WINDOW_DAYS, limit: 1600 }).catch(() => []),
-        getClientSearchIdentity(clientId).then(identity => identity.clientName).catch(() => ''),
-    ]);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => dbGetLatestAudit(clientId),
+        opportunities: () => dbGetLatestOpportunities(clientId),
+        connectors: () => getClientConnectorRows(clientId),
+        gscRows: () => getRecentGscRows(clientId, { days: COMPARISON_WINDOW_DAYS, limit: 1600 }),
+        client: () => getClientSearchIdentity(clientId),
+    });
+    const { audit, opportunities: latestOpportunities, connectors: connectorRows, gscRows, client } = values;
+    const clientName = client?.clientName ?? null;
+    if (dataSources.gscRows === 'empty') {
+        dataSources.gscRows = dataSources.connectors !== 'unavailable' && resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected' ? 'not_connected' : 'not_observed';
+    }
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries))
         .slice()
@@ -1065,21 +1086,23 @@ export async function getSeoCannibalizationSlice(clientId) {
     );
 
     const currentGscRows = filterRowsSince(gscRows, getSinceDate(CURRENT_WINDOW_DAYS));
-    const brandTokens = extractBrandTokens(clientName);
-    const gscFreshness = buildGscFreshness(connectorRows, gscRows);
+    const brandTokens = dataSources.client === 'unavailable' ? null : extractBrandTokens(clientName);
+    const gscFreshness = buildGscFreshness(connectorRows, gscRows, dataSources);
     const pagePerformance = buildPagePerformance(gscRows);
     const measuredSignals = buildMeasuredPairSignals(currentGscRows, pageIndex, brandTokens);
     const calculatedSignals = buildCalculatedPairSignals(pages);
     const groups = mergeSignals(measuredSignals, calculatedSignals, pagePerformance, Boolean(audit));
-    const contentOpportunityCount = toArray(latestOpportunities?.active)
-        .filter((item) => item?.status === 'open' && item?.category === 'content')
-        .length;
+    const contentOpportunityCount = dataSources.opportunities === 'unavailable' ? null : toArray(latestOpportunities?.active)
+        .filter((item) => item?.status === 'open' && item?.category === 'content').length;
 
     if (!audit && currentGscRows.length === 0) {
         return {
+            ...availability,
+            clientName, contentOpportunityCount,
+            freshness: { gsc: gscFreshness },
             emptyState: {
                 title: 'Cannibalisation SEO indisponible',
-                description: 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Connectez GSC ou relancez un audit avant d’ouvrir cette lecture.',
+                description: errors.length > 0 ? 'Données temporairement indisponibles pour cette lecture de cannibalisation.' : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Connectez GSC ou relancez un audit avant d’ouvrir cette lecture.',
             },
         };
     }
@@ -1093,6 +1116,8 @@ export async function getSeoCannibalizationSlice(clientId) {
     const actionHooks = buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCount);
 
     return {
+        ...availability,
+        clientName, contentOpportunityCount,
         available: true,
         auditMeta: {
             createdAt: audit?.created_at || null,
@@ -1103,7 +1128,7 @@ export async function getSeoCannibalizationSlice(clientId) {
             {
                 id: 'group_count',
                 label: 'Groupes détectés',
-                value: groups.length,
+                value: groups.length === 0 && (dataSources.audit === 'unavailable' || dataSources.gscRows === 'unavailable') ? null : groups.length,
                 detail: 'Paires ou familles où un recouvrement ressort proprement',
                 reliability: 'calculated',
                 accent: groups.length > 0 ? 'sky' : 'slate',
@@ -1111,7 +1136,7 @@ export async function getSeoCannibalizationSlice(clientId) {
             {
                 id: 'measured_count',
                 label: 'Recouvrements mesurés',
-                value: measuredGroupCount,
+                value: ['unavailable', 'not_connected', 'not_observed'].includes(dataSources.gscRows) ? null : measuredGroupCount,
                 detail: 'Groupes appuyés par des requêtes Search Console partagées',
                 reliability: measuredGroupCount > 0 ? 'measured' : 'unavailable',
                 accent: measuredGroupCount > 0 ? 'emerald' : 'amber',
@@ -1133,7 +1158,7 @@ export async function getSeoCannibalizationSlice(clientId) {
                 accent: globalConfidence === 'Élevée' ? 'emerald' : globalConfidence === 'Moyenne' ? 'amber' : 'slate',
             },
         ],
-        operatorSummary,
+        operatorSummary: groups.length === 0 && availability.status !== 'available' ? { ...operatorSummary, text: 'Lecture incomplète : les sources disponibles ne permettent pas de conclure à une absence de recouvrement.' } : operatorSummary,
         freshness: {
             audit: auditFreshness,
             gsc: gscFreshness,
@@ -1142,7 +1167,7 @@ export async function getSeoCannibalizationSlice(clientId) {
                 reliability: measuredGroupCount > 0 ? 'measured' : 'unavailable',
                 label: 'Recouvrement mesuré',
                 value: measuredGroupCount > 0 ? `${measuredGroupCount} groupe(s)` : 'Indisponible',
-                detail: measuredGroupCount > 0
+                detail: dataSources.gscRows === 'unavailable' ? 'Mesure des recouvrements temporairement indisponible.' : measuredGroupCount > 0
                     ? 'Au moins un groupe est appuyé par des requêtes GSC partagées.'
                     : 'Aucune paire de pages ne se partage de requêtes mesurées sur la fenêtre courante.',
                 lastObservedDate: gscFreshness.lastObservedDate || null,
