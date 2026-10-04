@@ -164,7 +164,7 @@ function buildNAPConsistency(client, entities) {
     };
 }
 
-function buildServicesConsistency(client, entities, nodes, _pageSummaries) {
+function buildServicesConsistency(client, entities, nodes) {
     const canonicalServices = uniqueStrings(toArray(client?.business_details?.services));
     const { fromEntities, fromNodes } = extractServiceEntities(entities, nodes);
     
@@ -489,7 +489,7 @@ export async function getConsistencySlice(clientId) {
 
     const brand = buildBrandConsistency(client, entities);
     const nap = buildNAPConsistency(client, entities);
-    const services = buildServicesConsistency(client, entities, rawNodes, pageSummaries);
+    const services = buildServicesConsistency(client, entities, rawNodes);
     const zones = buildZonesConsistency(client, entities, rawNodes);
     const descriptions = buildDescriptionConsistency(client, entities, pageSummaries);
     const profiles = buildProfilesConsistency(client, entities, rawNodes);
