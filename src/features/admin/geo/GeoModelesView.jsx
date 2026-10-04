@@ -156,9 +156,9 @@ export default function GeoModelesView() {
         });
     }, [data]);
 
-    const mostTestedModel = allModels.find(
-        (row) => row.hasData && Number.isFinite(row.runs) && row.runs > 0 && Number.isFinite(row.targetRatePercent),
-    );
+    const mostTestedModel = allModels.find((row) => row.hasData && Number.isFinite(row.runs) && row.runs > 0);
+
+    const hasTargetRate = Number.isFinite(mostTestedModel?.targetRatePercent);
 
     const selected = useMemo(() => {
         const defaults = variantsCatalog.map((item) => item.id);
@@ -248,9 +248,9 @@ export default function GeoModelesView() {
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <CommandMetricCard
                     label="Taux de détection"
-                    value={mostTestedModel ? `${mostTestedModel.targetRatePercent}%` : 'n.d.'}
+                    value={hasTargetRate ? `${mostTestedModel.targetRatePercent}%` : 'n.d.'}
                     detail="Modèle le plus testé"
-                    tone={mostTestedModel ? 'ok' : 'neutral'}
+                    tone={hasTargetRate ? 'ok' : 'neutral'}
                 />
                 <CommandMetricCard
                     label="Plus testé"

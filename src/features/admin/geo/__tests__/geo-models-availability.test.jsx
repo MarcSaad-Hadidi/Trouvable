@@ -197,11 +197,25 @@ describe('model laboratory observed summary and page scroll', () => {
         const text = visibleText(
             renderFixture([{ provider: 'outside', model: 'unknown-target', runs: 2, targetFound: null, sources: 0 }]),
         );
-        expectNoSummaryObservation(text);
+        expect(text).toContain('Taux de détectionn.d.');
+        expect(text).toContain('Plus testéunknown-targetExécutions observées');
         expect(text).toContain('ROIn.d.');
         expect(text).toContain('Runs2');
     });
 
+    it('retains the most tested model even when its target rate is unknown', () => {
+        const text = visibleText(
+            renderFixture([
+                { provider: 'volume', model: 'most-tested-unknown', runs: 100, targetFound: null, sources: 0 },
+                { provider: 'rate', model: 'known-rate', runs: 2, targetFound: 2, sources: 0 },
+            ]),
+        );
+        expect(text).toContain('Plus testémost-tested-unknownExécutions observées');
+        expect(text).toContain('Taux de détectionn.d.Modèle le plus testé');
+        expect(text).toContain('ROIn.d.Runs100');
+        expect(text).toContain('ROI100%Runs2');
+        expect(text).not.toContain('Plus testéknown-rate');
+    });
     it('lets the shell own vertical scrolling rather than creating bounded page panes', () => {
         const markup = renderFixture();
         expect(markup).not.toContain('h-[calc(100vh-280px)]');
