@@ -2,6 +2,9 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 
+// NextURL normalizes loopback addresses to localhost; match the listener origin to prevent self-proxy rewrites.
+export const QA_APP_HOST = 'localhost';
+
 export const CLIENT_ID = '11111111-1111-4111-8111-111111111111';
 export const CLIENT = Object.freeze({
     id: CLIENT_ID,
@@ -27,7 +30,7 @@ export function safeEnvironment(source, { mode, port, fixturePort, artifacts, gu
         NODE_ENV: mode === 'fixture' ? 'development' : 'production',
         NEXT_TELEMETRY_DISABLED: '1',
         NEXT_PUBLIC_CLERK_KEYLESS_DISABLED: '1',
-        NEXT_PUBLIC_APP_URL: `http://localhost:${port}`,
+        NEXT_PUBLIC_APP_URL: `http://${QA_APP_HOST}:${port}`,
         NODE_OPTIONS: `--require ${JSON.stringify(guard)}`,
         TROUVABLE_QA_ARTIFACTS: artifacts,
         TROUVABLE_QA_PORTS: [port, fixturePort].filter(Boolean).join(','),
@@ -162,4 +165,73 @@ export function classifyAnonymous({ status, location, base, configurationMissing
     }
     if (status >= 500 && configurationMissing) return 'configuration-unavailable';
     return 'failed-unprotected-or-error';
+}
+
+export function checkUnpublishedProfile({ status, body, requests }) {
+    const profileVisible = [CLIENT.client_name, CLIENT_ID, CLIENT.website_url, CLIENT.notes].some((value) =>
+        body.includes(value),
+    );
+    const notFoundBoundary = body.includes('NEXT_HTTP_ERROR_FALLBACK;404');
+    const noindex = (body.match(/<meta\b[^>]*>/gi) || []).some(
+        (tag) => /\bname=["']robots["']/i.test(tag) && /\bcontent=["'][^"']*\bnoindex\b/i.test(tag),
+    );
+    const publishedLookups = requests.filter((request) => {
+        if (request.method !== 'GET' || request.path !== '/rest/v1/client_geo_profiles') return false;
+        const params = new URLSearchParams(request.query);
+        return params.get('client_slug') === `eq.${CLIENT.client_slug}` && params.get('is_published') === 'eq.true';
+    });
+    const rejectedLookup = publishedLookups.some((request) => request.status === 406);
+    const streamedNotFound = status === 200 && notFoundBoundary && noindex;
+    const valid = !profileVisible && rejectedLookup && (status === 404 || streamedNotFound);
+    return {
+        valid,
+        classification: valid ? (streamedNotFound ? 'streamed-not-found' : 'not-found') : 'failed-unpublished-profile',
+        notFoundBoundary,
+        noindex,
+        profileVisible,
+        publishedLookups,
+    };
+}
+
+// Anonymous browser fixture only; never used by production QA.
+export function mockClerk() {
+    const state = {
+        client: { sessions: [], signIn: null, signUp: null },
+        session: null,
+        user: null,
+        organization: null,
+    };
+    const mount = (element) => {
+        element.textContent = 'Clerk simulé pour QA locale : connexion réelle non validée.';
+        element.setAttribute('data-qa-auth-fixture', 'true');
+        element.setAttribute('data-component-status', 'ready');
+    };
+    window.Clerk = {
+        loaded: true,
+        isSignedIn: false,
+        __internal_lastEmittedResources: state,
+        status: 'ready',
+        ...state,
+        load: async () => {},
+        addListener: (listener, options) => {
+            if (!options?.skipInitialEmit) listener(state);
+            return () => {};
+        },
+        on: (_event, listener, options) => {
+            if (options?.notify) listener('ready');
+        },
+        off: () => {},
+        __unstable__updateProps: () => {},
+        __internal_setSdkMetadata: () => {},
+        __internal_queryClient: null,
+        __internal_queryClientStatus: 'ready',
+        telemetry: { record: () => {} },
+        signOut: async () => {},
+        mountSignIn: mount,
+        unmountSignIn: () => {},
+        mountSignUp: mount,
+        unmountSignUp: () => {},
+        mountUserButton: () => {},
+        unmountUserButton: () => {},
+    };
 }

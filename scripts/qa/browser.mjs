@@ -6,12 +6,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import {
     CLIENT_ID,
+    QA_APP_HOST,
     assertNoNextEnvFiles,
     classifyAnonymous,
+    checkUnpublishedProfile,
     missingClerkConfiguration,
     resolveArtifacts,
     safeEnvironment,
     startFixture,
+    mockClerk,
 } from './local-fixture.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -96,7 +99,7 @@ async function availablePort(requested) {
     const reservation = net.createServer();
     await new Promise((resolve, reject) => {
         reservation.once('error', reject);
-        reservation.listen(requested, '127.0.0.1', resolve);
+        reservation.listen(requested, QA_APP_HOST, resolve);
     });
     const port = reservation.address().port;
     await new Promise((resolve) => reservation.close(resolve));
@@ -162,44 +165,6 @@ async function ready(child, logFile, base) {
 }
 
 // This anonymous client is installed ONLY in the development fixture browser context.
-function mockClerk() {
-    const state = {
-        client: { sessions: [], signIn: null, signUp: null },
-        session: null,
-        user: null,
-        organization: null,
-    };
-    const mount = (element) => {
-        element.textContent = 'Clerk simulé pour QA locale : connexion réelle non validée.';
-        element.setAttribute('data-qa-auth-fixture', 'true');
-    };
-    window.Clerk = {
-        loaded: true,
-        status: 'ready',
-        ...state,
-        load: async () => {},
-        addListener: (listener) => {
-            listener(state);
-            return () => {};
-        },
-        on: (_event, listener, options) => {
-            if (options?.notify) listener('ready');
-        },
-        off: () => {},
-        __unstable__updateProps: () => {},
-        __internal_setSdkMetadata: () => {},
-        __internal_queryClient: null,
-        __internal_queryClientStatus: 'ready',
-        telemetry: { record: () => {} },
-        signOut: async () => {},
-        mountSignIn: mount,
-        unmountSignIn: () => {},
-        mountSignUp: mount,
-        unmountSignUp: () => {},
-        mountUserButton: () => {},
-        unmountUserButton: () => {},
-    };
-}
 function domSnapshot() {
     const rect = (element) => {
         const value = element.getBoundingClientRect();
@@ -228,7 +193,7 @@ function domSnapshot() {
             text: element.textContent,
             rect: rect(element),
         })),
-        shell: [...document.querySelectorAll('.geo-shell,.geo-main,.geo-content,.operator-shell')].map(shell),
+        shell: [...document.querySelectorAll('.geo-shell,.geo-main,.geo-content')].map(shell),
         charts: [...document.querySelectorAll('.recharts-responsive-container')].map((element) => ({
             container: rect(element),
             svg: element.querySelector('svg') ? rect(element.querySelector('svg')) : null,
@@ -249,8 +214,19 @@ async function checkScroll(page) {
         const content = document.querySelector('.geo-content');
         const shell = document.querySelector('.geo-shell');
         const main = document.querySelector('.geo-main');
-        const operator = document.querySelector('.operator-shell');
+        const pageRoot =
+            content && [...content.children].find((element) => !['STYLE', 'SCRIPT', 'LINK'].includes(element.tagName));
         const model = {
+            geometry: content ? content.getBoundingClientRect().toJSON() : null,
+            ancestors: content
+                ? [content.parentElement, content.parentElement?.parentElement].filter(Boolean).map((element) => ({
+                      className: element.className,
+                      overflowY: getComputedStyle(element).overflowY,
+                      minHeight: getComputedStyle(element).minHeight,
+                      clientHeight: element.clientHeight,
+                      scrollHeight: element.scrollHeight,
+                  }))
+                : [],
             count: document.querySelectorAll('.geo-content').length,
             page: scrollY,
             shell: shell?.scrollTop,
@@ -259,7 +235,8 @@ async function checkScroll(page) {
             shellOverflow: shell ? getComputedStyle(shell).overflowY : null,
             mainOverflow: main ? getComputedStyle(main).overflowY : null,
             contentOverflow: content ? getComputedStyle(content).overflowY : null,
-            operatorOverflow: operator ? getComputedStyle(operator).overflowY : null,
+            pageRootClass: pageRoot?.className || null,
+            pageRootOverflow: pageRoot ? getComputedStyle(pageRoot).overflowY : null,
         };
         model.valid =
             model.count === 1 &&
@@ -268,7 +245,8 @@ async function checkScroll(page) {
             model.shellOverflow === 'hidden' &&
             model.mainOverflow === 'hidden' &&
             model.contentOverflow === 'auto' &&
-            (!operator || model.operatorOverflow === 'visible') &&
+            Boolean(pageRoot) &&
+            model.pageRootOverflow === 'visible' &&
             (!model.requiresScroll || model.content > 0);
         return model;
     });
@@ -309,10 +287,24 @@ async function faqCheck(page) {
     const home = await import(pathToFileURL(path.join(ROOT, 'src/features/public/home/home-faqs.js')).href);
     const section = page.locator('#faq');
     await section.scrollIntoViewIfNeeded();
-    const text = await section.innerText();
+    const read = () =>
+        section.evaluate((element) => ({ innerText: element.innerText, textContent: element.textContent }));
+    const before = await read();
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const after = await read();
+    const normalize = (text) => text.replace(/\s+/g, ' ').trim();
+    const missing = (text) =>
+        home.HOME_FAQS.map(({ question, answer }) => ({
+            question,
+            questionMissing: !normalize(text).includes(normalize(question)),
+            answerMissing: !normalize(text).includes(normalize(answer)),
+        })).filter(({ questionMissing, answerMissing }) => questionMissing || answerMissing);
+    const afterInnerMissing = missing(after.innerText);
     return {
         count: home.HOME_FAQS.length,
-        valid: home.HOME_FAQS.every(({ question, answer }) => text.includes(question) && text.includes(answer)),
+        valid: afterInnerMissing.length === 0,
+        before: { ...before, innerMissing: missing(before.innerText), textMissing: missing(before.textContent) },
+        after: { ...after, innerMissing: afterInnerMissing, textMissing: missing(after.textContent) },
     };
 }
 function chartsStable(before, after) {
@@ -460,7 +452,7 @@ async function browserCase(context, test, base, out, mode, logFile) {
     await page.close();
     return result;
 }
-async function httpChecks(base, mode, logFile) {
+async function httpChecks(base, mode, logFile, fixture) {
     const results = [];
     const protectedRoutes = [
         '/admin',
@@ -535,7 +527,11 @@ async function httpChecks(base, mode, logFile) {
         results.push({
             route: '/clients/fixture-qa',
             status: response.status,
-            valid: response.status === 404,
+            ...checkUnpublishedProfile({
+                status: response.status,
+                body: await response.text(),
+                requests: fixture.requests,
+            }),
             contract: 'Synthetic unpublished client must not become publicly visible',
         });
     }
@@ -589,7 +585,7 @@ async function runMode(chromium, mode, opts, report) {
         assertNoNextEnvFiles(ROOT);
         const port = await availablePort(opts.port);
         if (port === fixture?.port) throw new Error('App and fixture ports must differ');
-        const base = `http://localhost:${port}`;
+        const base = `http://${QA_APP_HOST}:${port}`;
         entry.base = base;
         entry.fixturePort = fixture?.port;
         const logFile = path.join(out, 'next.log');
@@ -609,7 +605,7 @@ async function runMode(chromium, mode, opts, report) {
                 mode === 'fixture' ? 'dev' : 'start',
                 ...(mode === 'fixture' ? ['--webpack'] : []),
                 '--hostname',
-                '127.0.0.1',
+                QA_APP_HOST,
                 '--port',
                 String(port),
             ],
@@ -628,7 +624,7 @@ async function runMode(chromium, mode, opts, report) {
         await delay(100);
         if (spawnError) throw spawnError;
         await ready(child, logFile, base);
-        entry.http = await httpChecks(base, mode, logFile);
+        entry.http = await httpChecks(base, mode, logFile, fixture);
         save();
         browser = await chromium.launch({
             headless: true,
@@ -646,7 +642,7 @@ async function runMode(chromium, mode, opts, report) {
         });
         await context.routeWebSocket('**/*', (socket) => {
             const url = new URL(socket.url());
-            if (url.protocol === 'ws:' && url.hostname === 'localhost' && url.port === String(port))
+            if (url.protocol === 'ws:' && url.hostname === QA_APP_HOST && url.port === String(port))
                 socket.connectToServer();
             else socket.close({ code: 1008, reason: 'QA blocks external websocket destinations' });
         });
@@ -657,6 +653,7 @@ async function runMode(chromium, mode, opts, report) {
             ...(mode === 'fixture'
                 ? [
                       { route: '/admin' },
+                      { route: '/admin/clients', client: true },
                       ...ADMIN.map((route) => ({ route, client: true })),
                       ...ALIASES.map((alias) => ({ ...alias, client: true })),
                   ]

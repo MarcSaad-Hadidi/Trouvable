@@ -8,13 +8,16 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import {
     CLIENT_ID,
+    QA_APP_HOST,
     assertNoNextEnvFiles,
     classifyAnonymous,
+    checkUnpublishedProfile,
     fixtureResponse,
     missingClerkConfiguration,
     resolveArtifacts,
     safeEnvironment,
     startFixture,
+    mockClerk,
 } from '../qa/local-fixture.mjs';
 
 const guard = fileURLToPath(new URL('../qa/deny-network.cjs', import.meta.url));
@@ -254,5 +257,85 @@ test('preload permits only the declared local fixture port through fetch and HTT
     } finally {
         fixture.server.closeAllConnections();
         await new Promise((resolve) => fixture.server.close(resolve));
+    }
+});
+
+test('QA listener origin keeps normalized Clerk rewrites internal in Next', async () => {
+    const { NextURL } = await import('next/dist/server/web/next-url.js');
+    const { getRelativeURL } = await import('next/dist/shared/lib/router/utils/relativize-url.js');
+    for (const mode of ['production', 'fixture']) {
+        const env = environment(mode);
+        const pathname = '/ai/faq.json';
+        // Clerk decorates NextResponse.next with an absolute rewrite; NextURL canonicalizes loopback hosts.
+        const rewrite = new NextURL(new URL(pathname, env.NEXT_PUBLIC_APP_URL).href).toString();
+        const listenerRequest = `http://${QA_APP_HOST}:3417${pathname}`;
+        assert.equal(getRelativeURL(rewrite, listenerRequest), pathname);
+        assert.equal(env.NEXT_PUBLIC_APP_URL, `http://${QA_APP_HOST}:3417`);
+    }
+});
+
+test('an unpublished profile can only pass HTTP 200 with streamed not-found content and rejected published IO', () => {
+    const body = '<meta name="robots" content="noindex"/><h1>Page Introuvable</h1>NEXT_HTTP_ERROR_FALLBACK;404';
+    const requests = [
+        {
+            method: 'GET',
+            path: '/rest/v1/client_geo_profiles',
+            query: '?client_slug=eq.fixture-qa&is_published=eq.true',
+            status: 406,
+        },
+    ];
+    const streamed = checkUnpublishedProfile({ status: 200, body, requests });
+    assert.equal(streamed.valid, true);
+    assert.equal(streamed.classification, 'streamed-not-found');
+    assert.equal(streamed.profileVisible, false);
+    assert.deepEqual(streamed.publishedLookups, requests);
+    assert.equal(checkUnpublishedProfile({ status: 404, body, requests }).classification, 'not-found');
+    for (const input of [
+        { status: 200, body: body + 'Fixture locale QA', requests },
+        { status: 200, body: body + CLIENT_ID, requests },
+        { status: 200, body: '<meta name="robots" content="noindex"/>Ordinary page', requests },
+        { status: 200, body: 'NEXT_HTTP_ERROR_FALLBACK;404', requests },
+        { status: 200, body, requests: [] },
+        {
+            status: 200,
+            body,
+            requests: [{ ...requests[0], query: '?client_slug=eq.fixture-qa&is_published=eq.false' }],
+        },
+        { status: 200, body, requests: [{ ...requests[0], status: 200 }] },
+        { status: 500, body, requests },
+    ]) {
+        assert.equal(checkUnpublishedProfile(input).valid, false);
+        assert.equal(checkUnpublishedProfile(input).classification, 'failed-unpublished-profile');
+    }
+});
+
+test('the anonymous Clerk fixture satisfies the installed auth snapshot contract without signing in', async () => {
+    const { deriveState } = await import('@clerk/shared/deriveState');
+    const { resolveAuthState } = await import('@clerk/shared/authorization');
+    const previous = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    globalThis.window = {};
+    try {
+        mockClerk();
+        const clerk = window.Clerk;
+        const authObject = deriveState(true, clerk.__internal_lastEmittedResources || {});
+        const auth = resolveAuthState({ authObject, options: {} });
+        assert.equal(auth.isLoaded, true);
+        assert.equal(auth.isSignedIn, false);
+        assert.equal(auth.userId, null);
+        assert.equal(auth.sessionId, null);
+        assert.equal(auth.sessionClaims, null);
+        assert.deepEqual(clerk.client.sessions, []);
+        const attrs = {};
+        const element = {
+            setAttribute: (name, value) => {
+                attrs[name] = value;
+            },
+        };
+        clerk.mountSignIn(element);
+        assert.equal(attrs['data-qa-auth-fixture'], 'true');
+        assert.equal(attrs['data-component-status'], 'ready');
+    } finally {
+        if (previous) Object.defineProperty(globalThis, 'window', previous);
+        else delete globalThis.window;
     }
 });
