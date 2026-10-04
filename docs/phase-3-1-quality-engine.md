@@ -4,7 +4,7 @@ Contrats de l’application dormante. Aucune exécution fournisseur ou collecte 
 
 ## Qualification et capture
 
-Le [contrat prompt](prompt-contract-unification.md) contextualisé est commun à onboarding, create/update et projection opérateur. La taxonomie distingue intention, origine, scope, locale et qualité ; un prompt faible reste bloqué selon le contrat existant. Voir [les décisions de schéma](phase-3-1-schema-decisions.md).
+Le [contrat prompt](prompt-contract-unification.md) contextualisé est commun à onboarding, create/update et projection opérateur. La taxonomie distingue intention, origine, scope, locale et qualité ; un prompt faible reste bloqué selon le contrat existant.
 
 Les runs conservent prompt exact (`prompt_payload`), fournisseur/modèle/locale, réponse brute (`raw_response_full`), réponse normalisée, parse status/warnings/confidence, latence, usage, classe d’erreur, retry, version d’extraction, mode/variante et session benchmark éventuelle.
 
@@ -17,6 +17,20 @@ L’inspection utilise `/api/admin/geo/client/[id]/runs/[runId]`. Reparse travai
 URLs/domaines, alias concurrents, evidence spans et diagnostics gardent leur provenance. Une réponse terminée peut contenir peu de signal ; absence d’URL ne devient pas citation. Concurrents et mentions génériques restent distincts.
 
 Les variantes internes (`src/lib/queries/engine-variants.js`) et `/api/admin/queries/benchmark` ne prouvent pas la parité avec ChatGPT, Claude ou Perplexity natifs. Une variante sans configuration échoue explicitement ; aucun résultat simulé ne vaut un résultat client.
+
+## Schéma et décisions
+
+La [migration qualité](../supabase/migrations/20260322100000_phase31_quality_engine_v2.sql) étend les tables existantes plutôt que de créer une deuxième histoire d'exécution :
+
+| Table | Responsabilité |
+|---|---|
+| `tracked_queries` | Taxonomie, qualité, scopes et metadata du prompt. |
+| `query_runs` | Capture complète, parsing, usage, erreurs, variante et session benchmark. Source unique des exécutions. |
+| `query_mentions` | Mentions, URLs/domaines, evidence spans, confiance et niveau de vérification. |
+| `benchmark_sessions` | Regroupement léger de runs par client, variantes et contexte opérateur ; ne duplique pas les runs. |
+| `competitor_aliases` | Matching concurrent par client, locale et mode `exact/fuzzy_safe`, sans alias codés dans la logique métier. |
+
+Les contraintes défensives et index sur sessions, variantes, statuts de parsing et mentions sont définis dans la migration. Le DDL conserve le détail des colonnes et valeurs autorisées ; cette note explique leur rôle. Les migrations restent ordonnées et conservées, sans preuve de leur application à une base distante.
 
 ## Validation et portail
 

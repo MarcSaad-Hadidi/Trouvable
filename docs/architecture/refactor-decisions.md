@@ -1,6 +1,6 @@
 # Décisions techniques et invariants
 
-Ce document décrit les frontières conservées par la consolidation. Il remplace les plans de phases et diagnostics de structure devenus historiques ; leur détail reste dans Git. Aucun résultat distant, classement SEO ou succès de connecteur n’est déduit d’un plan ou d’un build.
+Ce document explique les frontières et invariants de l'application dormante. Les plans et diagnostics historiques restent dans Git. Aucun résultat distant, classement SEO ou succès de connecteur n'est déduit d'un plan ou d'un build.
 
 ## 1. Application dormante et parking
 
@@ -44,22 +44,20 @@ Le [contrat prompt](../prompt-contract-unification.md) maintient une seule quali
 
 Les comparaisons ponctuelles sont séparées des runs GEO standard et des variantes de benchmark. Leur [contrat d’usage](../geo-compare-usage.md) conserve succès partiel, timeouts, isolation de la cadence Mistral et sortie sans secrets. La [couche de tâches IA](../mistral-task-architecture.md) réutilise les fournisseurs existants et journalise l’exécution.
 
-## 6. Invariants UI opérateur préservés des brouillons
+## 6. Interface opérateur
 
-Le brouillon de redesign de racine proposait une palette sombre et plusieurs écrans futurs ; un ancien plan proposait un shell clair. Aucune nouvelle direction visuelle n’est imposée par le nettoyage. Les tokens et composants actuels constituent la référence du rendu. Les propositions de pages restent historiques, pas une liste de fonctionnalités à créer.
-
-Les principes durables du brouillon sont conservés :
+Les tokens dans `src/lib/design/tokens.js` et les composants actuels constituent la référence du rendu. Les anciens brouillons ne définissent pas une liste de fonctionnalités à créer.
 
 - L’admin est un espace opérateur ; le portail client garde une restitution simplifiée.
 - La navigation expose portefeuille et contexte client, avec des univers SEO, GEO et Agent distincts. La préparation locale reste dans SEO. Les sources/citations et la veille sociale gardent leurs questions métier.
 - Chaque page aide à comprendre la situation, son importance, l’action possible et sa preuve. Une métrique sans preuve affiche son indisponibilité ; pas de faux indicateur live, de graphique décoratif ou de données inventées.
 - Les compositions suivent leur rôle (cockpit, registre, inspecteur, file d’actions, atelier, dossier), sans imposer une grille de KPI uniforme.
 - Les couleurs viennent des tokens actuels ; les accents portent le contexte ou la sémantique, jamais une décoration dominante. Garder typographie lisible et hiérarchie claire.
-- Navigation accessible au clavier, labels/tooltips des icônes et command palette comme accélérateur ; elle ne remplace pas la navigation. Le contexte client reste visible et les panneaux s’adaptent au mobile.
+- Navigation accessible au clavier et labels/tooltips des icônes. Le contexte client reste visible et les panneaux s’adaptent au mobile.
 - Gérer chargement, vide, erreur récupérable et données. Les actions destructives gardent confirmation et feedback.
 - Les preuves restent consultables avec provenance, sortie brute adaptée, objets liés, action, historique et niveau de vérification ; aucun secret ni donnée client non autorisée.
 
-Le scroll principal reste `.geo-shell` (100vh, non scrollable) → `.geo-main` (flex, overflow hidden) → `.geo-content` (seul viewport principal scrollable). `OperatorPageShell` est un conteneur de layout sans overflow. Pas de `h-screen`, `max-h-screen`, `overflow-y-auto` ou `overflow-hidden` sur la racine d’une page. Les enfants flex qui rétrécissent utilisent `min-h-0`. Les drawers via portal possèdent leur scroll et `overscroll-behavior: contain`, sans copier ce modèle au niveau page.
+Le scroll principal reste `.geo-shell` (100vh, non scrollable) → `.geo-main` (flex, overflow hidden) → `.geo-content` (seul viewport principal scrollable). `OperatorPageShell` reste un conteneur de layout sans overflow ; [AGENTS.md](../../AGENTS.md#admin-shell-scroll-model-do-not-break) décrit les règles de composition et de drawers.
 
 ## 7. Contenu public et intégrité factuelle
 
@@ -75,8 +73,8 @@ Une mesure manuelle de marque, lorsqu’elle est explicitement autorisée, note 
 
 `AGENTS.md`, `.github/copilot-instructions.md`, les `.github/instructions/*.instructions.md` et les agents/skills/prompts ont des consommateurs par convention. Ils restent à leurs emplacements. Les scopes `applyTo` suivent `src` ; un lien documentaire n’est pas un mécanisme d’inclusion automatique. `.cursor/settings.json` et `.cursor/worktrees.json` sont des réglages réellement utilisables ; les plans terminés ne sont pas des instructions chargées automatiquement.
 
-## 9. Traçabilité de la consolidation
+## 9. Historique et preuves
 
-L’[annexe des fichiers](consolidation-files.csv) donne la disposition finale et les raisons de chaque fichier changé depuis `2c817e2479b66fdcc849f1e4da77660443366912`. Elle distingue déplacements, corrections, fusions et suppressions. L’exporteur Code Scanning est conservé sous `scripts/export-codeql-alerts.ps1`.
+L'[inventaire de la première consolidation](https://github.com/MarcSaad-Hadidi/Trouvable/blob/6c06ad4c11ac795ccf0fb485933721867c98a320/docs/architecture/consolidation-files.csv) reste consultable au commit indiqué. Aucun code ou outil ne le consomme ; il explique un chantier passé et ne décrit pas automatiquement l'état actuel. Les comparaisons avant/après, SHA et résultats de validation appartiennent aux preuves de la PR.
 
-Les mesures de la PR comptent les fichiers suivis et les lignes physiques, lignes vides comprises. Archives, lockfiles et généré ont des catégories séparées ; un déplacement conserve sa catégorie et ne constitue pas une suppression. La documentation inclut cette annexe. Les hashes et validations finales sont consignés dans la description de la PR.
+L'export manuel Code Scanning est décrit dans [CONTRIBUTING.md](../../CONTRIBUTING.md#export-manuel-des-alertes-code-scanning) ; ses sorties restent hors Git.
