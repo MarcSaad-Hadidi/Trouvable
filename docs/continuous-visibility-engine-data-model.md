@@ -11,7 +11,7 @@ Moteur implémenté dans l’application dormante. Aucun Cron Vercel actif ; ces
 
 Dans un environnement explicitement réactivé, dispatch sélectionne les jobs dus, insère les runs avec clé de déduplication, puis claim les runs disponibles. La finalisation met à jour état et prochaine cadence ; le succès permet un snapshot, l’échec applique retry/backoff dans son budget. La route snapshot peut capturer indépendamment les clients éligibles.
 
-Sources : `src/lib/continuous/jobs.js`, `src/lib/continuous/metrics.js`, `src/app/api/cron/continuous/dispatch/route.js` et `src/app/api/cron/continuous/snapshot/route.js`.
+Sources : `src/lib/continuous/jobs.js`, `src/lib/continuous/metrics-core.js`, `src/app/api/cron/continuous/dispatch/route.js` et `src/app/api/cron/continuous/snapshot/route.js`.
 
 - `dedupe_key` unique pour la queue.
 - Index partiel des runs `running` par client/type, avec contrôle avant claim.

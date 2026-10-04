@@ -181,7 +181,7 @@ vi.mock('@/lib/continuous/mode', () => ({
     isDailyFirstMode: () => true,
 }));
 
-vi.mock('@/lib/continuous/metrics', () => ({
+vi.mock('@/lib/continuous/metrics-core', () => ({
     buildMetricTrendSummary: () => ({ latest: null, previous: null, delta: null }),
     classifyFreshness: () => ({ state: 'fresh', hours: 1 }),
     splitImprovingDeclining: () => ({ improving: [], declining: [] }),

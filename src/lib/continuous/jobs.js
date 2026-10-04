@@ -31,7 +31,7 @@ import {
 } from '@/lib/db/jobs';
 import { upsertVisibilityMetricSnapshot, listVisibilityMetricSnapshots } from '@/lib/db/snapshots';
 import { DEFAULT_RECURRING_JOB_CONFIG } from '@/lib/continuous/constants';
-import { buildMetricTrendSummary, classifyFreshness, splitImprovingDeclining } from '@/lib/continuous/metrics';
+import { buildMetricTrendSummary, classifyFreshness, splitImprovingDeclining } from '@/lib/continuous/metrics-core';
 import { enforceDailyCadenceMinutes, getContinuousModeLabelFr, isDailyFirstMode } from '@/lib/continuous/mode';
 import { cronDispatchOptionsSchema, cronWorkerOptionsSchema } from '@/lib/continuous/schemas';
 import { flattenSnapshotToLegacy } from '@/lib/operator-intelligence/kpi-core';

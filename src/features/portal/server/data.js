@@ -8,7 +8,7 @@ import {
     getPublicContactEmail,
     normalizeClientProfileShape,
 } from '@/lib/client-profile';
-import { buildMetricTrendSummary } from '@/lib/continuous/metrics';
+import { buildMetricTrendSummary } from '@/lib/continuous/metrics-core';
 import { flattenSnapshotToLegacy } from '@/lib/operator-intelligence/kpi-core';
 import { getTrackedQueryCategoryMeta } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { getGeoWorkspaceSnapshot } from '@/lib/operator-intelligence/snapshot';
