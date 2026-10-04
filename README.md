@@ -24,7 +24,7 @@ Les métriques GEO décrivent les réponses effectivement suivies et stockées. 
 
 ## Démarrage et contrôles locaux
 
-Le dépôt utilise **npm** et `package-lock.json`. Le lockfile installe Next.js 16.3.0, React 19, Tailwind 3 et Clerk 7. Utiliser une version de Node compatible avec le paquet Next installé ; Node 24 a servi aux contrôles locaux de la consolidation.
+Le dépôt utilise **npm** et `package-lock.json`. Le lockfile installe Next.js 16.3.3, React 19, Tailwind 3 et Clerk 7. Utiliser une version de Node compatible avec le paquet Next installé ; Node 24 a servi aux contrôles locaux de la consolidation.
 
 Pour vérifier uniquement le parking, aucune installation n’est nécessaire :
 
