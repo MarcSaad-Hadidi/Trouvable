@@ -198,7 +198,7 @@ export function PipelinePreview() {
             return (
               <div
                 key={client.name}
-                className={`flex items-center gap-2 overflow-hidden px-4 text-xs transition-[opacity,transform,max-height,padding] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`flex items-center gap-2 overflow-hidden px-4 text-xs transition-[opacity,transform,max-height,padding] duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
                   revealed ? "max-h-14 py-2" : "pointer-events-none max-h-0 py-0 opacity-0"
                 } ${active ? "border-l-2 border-blue-400 bg-blue-500/8 pl-3 text-white" : revealed ? "text-white/55 hover:bg-white/[0.03] hover:text-white/80" : ""}`}
                 style={{ transform: revealed ? "translateX(0)" : "translateX(-10px)" }}
@@ -217,7 +217,7 @@ export function PipelinePreview() {
                 return (
                   <div
                     key={item}
-                    className={`overflow-hidden px-4 text-xs text-white/55 transition-[opacity,transform,max-height,padding] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    className={`overflow-hidden px-4 text-xs text-white/55 transition-[opacity,transform,max-height,padding] duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
                       show ? "max-h-12 py-2" : "pointer-events-none max-h-0 py-0 opacity-0"
                     }`}
                     style={{ transform: show ? "translateX(0)" : "translateX(-8px)" }}
@@ -248,7 +248,7 @@ export function PipelinePreview() {
               return (
                 <motion.div key={step.id} variants={previewItem}>
                   <div
-                    className="relative overflow-hidden rounded-[10px] border px-4 py-3 transition-[opacity,border-color,background-color] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="relative overflow-hidden rounded-[10px] border px-4 py-3 transition-[opacity,border-color,background-color] [transition-duration:900ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]"
                     style={{
                       opacity: status === "idle" ? 0.4 : 1,
                       borderColor: status === "running" ? "rgba(91,115,255,0.40)" : status === "done" ? "rgba(34,197,94,0.20)" : "rgba(255,255,255,0.07)",
@@ -263,7 +263,7 @@ export function PipelinePreview() {
                       </span>
                     </div>
                     <div
-                      className="mt-2 flex items-center gap-2 text-[11px] text-[#b7b7b7] transition-[opacity,transform] duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="mt-2 flex items-center gap-2 text-[11px] text-[#b7b7b7] transition-[opacity,transform] [transition-duration:850ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]"
                       style={{ opacity: status === "done" ? 1 : 0, transform: status === "done" ? "translateY(0)" : "translateY(4px)" }}
                     >
                       <span className="rounded bg-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#b8b8b8]">Résultat</span>
@@ -273,7 +273,7 @@ export function PipelinePreview() {
                   {idx < pipelineSteps.length - 1 && (
                     <div className="flex h-6 items-center justify-center">
                       <motion.div
-                        className="relative h-full w-px origin-top transition-colors duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        className="relative h-full w-px origin-top transition-colors [transition-duration:900ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]"
                         initial={{ scaleY: 0, opacity: 0 }}
                         whileInView={{ scaleY: 1, opacity: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
@@ -305,7 +305,7 @@ export function PipelinePreview() {
             {mergeRows.map((row, idx) => (
               <motion.div
                 key={row.label}
-                className={`mx-0 flex items-center gap-2 border-b border-white/8 px-4 py-2 text-[11.5px] transition-[opacity,transform] duration-[880ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${row.type === "auto" ? "text-emerald-300" : row.type === "suggest" ? "text-blue-300" : row.type === "review" ? "text-amber-300" : "text-[#b7b7b7]"}`}
+                className={`mx-0 flex items-center gap-2 border-b border-white/8 px-4 py-2 text-[11.5px] transition-[opacity,transform] [transition-duration:880ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${row.type === "auto" ? "text-emerald-300" : row.type === "suggest" ? "text-blue-300" : row.type === "review" ? "text-amber-300" : "text-[#b7b7b7]"}`}
                 style={{ opacity: phase >= idx + 7 ? 1 : 0, transform: phase >= idx + 7 ? "translateX(0)" : "translateX(8px)" }}
               >
                 <MergeRowIcon type={row.type} />
