@@ -121,3 +121,66 @@ export function resolveConnectorStatus(rows, provider) {
         lastError: row.last_error || null,
     };
 }
+
+export function getPathname(value) {
+    if (!value) return null;
+
+    try {
+        return normalizePathname(new URL(value).pathname || '/');
+    } catch {
+        return null;
+    }
+}
+
+export function getPrimarySegment(value) {
+    const pathname = getPathname(value);
+    if (!pathname || pathname === '/') return null;
+    return pathname.split('/').filter(Boolean)[0] || null;
+}
+
+/** GSC observation status; surface wording is supplied explicitly by each consumer. */
+export function buildGscFreshness(connectorRows, rows, dataSources, messages) {
+    const gscStatus = dataSources.connectors === 'unavailable'
+        ? { status: 'unavailable', lastSyncedAt: null }
+        : resolveConnectorStatus(connectorRows, 'gsc');
+    const lastObservedDate = getLatestObservedDate(rows);
+    const ageDays = getObservedAgeDays(lastObservedDate);
+
+    if (dataSources.gscRows === 'unavailable' || (!lastObservedDate && gscStatus.status === 'unavailable')) {
+        return {
+            status: 'unavailable', reliability: 'unavailable', label: 'Search Console',
+            connectorStatus: gscStatus.status, lastObservedDate, lastSyncedAt: gscStatus.lastSyncedAt,
+            detail: 'Données Search Console temporairement indisponibles.',
+        };
+    }
+
+    if (!lastObservedDate) {
+        return {
+            status: gscStatus.status === 'not_connected' ? 'unavailable' : 'warning',
+            reliability: 'unavailable',
+            label: 'Search Console',
+            connectorStatus: gscStatus.status,
+            lastObservedDate: null,
+            lastSyncedAt: gscStatus.lastSyncedAt,
+            detail: gscStatus.status === 'not_connected'
+                ? 'Search Console non connectée pour ce mandat.'
+                : messages.connectedEmpty,
+        };
+    }
+
+    return {
+        status: ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical',
+        reliability: 'measured',
+        label: 'Search Console',
+        connectorStatus: gscStatus.status,
+        lastObservedDate,
+        lastSyncedAt: gscStatus.lastSyncedAt,
+        detail: ageDays === null
+            ? 'Date observée non exploitable proprement.'
+            : ageDays <= 3
+                ? messages.fresh
+                : ageDays <= 7
+                    ? messages.aging
+                    : messages.stale,
+    };
+}

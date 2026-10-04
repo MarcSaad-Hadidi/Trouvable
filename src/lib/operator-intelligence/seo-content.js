@@ -1,10 +1,11 @@
 import 'server-only';
 
 import { getSourceStatus, loadIndependentSources } from './source-availability';
+import { createSeoQueryMatcher } from './seo-query-matching';
 
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, normalizePathname, getLatestObservedDate, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
+import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, getPathname, getPrimarySegment, buildGscFreshness, resolveConnectorStatus } from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
@@ -14,130 +15,18 @@ import { getClientConnectorRows } from '@/lib/connectors/repository';
 const CURRENT_WINDOW_DAYS = 28;
 const COMPARISON_WINDOW_DAYS = 56;
 
-const TOKEN_STOPWORDS = new Set([
-    'avec',
-    'dans',
-    'pour',
-    'sans',
-    'plus',
-    'entre',
-    'vous',
-    'votre',
-    'vos',
-    'sur',
-    'les',
-    'des',
-    'une',
-    'du',
-    'de',
-    'the',
-    'and',
-    'for',
-    'www',
-    'com',
-    'https',
-    'http',
-    'page',
-    'pages',
-    'service',
-    'services',
-    'site',
-    'home',
-]);
+const GSC_FRESHNESS_MESSAGES = {
+    connectedEmpty: 'Search Console connectée sans pages SEO observables sur la fenêtre disponible.',
+    fresh: 'Données fraîches sur la fenêtre SEO active.',
+    aging: 'Données utilisables, mais à surveiller.',
+    stale: 'Données trop anciennes pour qualifier un pilotage contenu fiable.',
+};
+
+const { sharedTokens, overlapScore } = createSeoQueryMatcher();
 
 function toNumber(value) {
     const normalized = Number(value);
     return Number.isFinite(normalized) ? normalized : 0;
-}
-
-function normalizeText(value) {
-    return String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
-}
-
-function tokenize(value) {
-    return normalizeText(value)
-        .split(/[^a-z0-9]+/)
-        .map((token) => token.trim())
-        .filter((token) => token.length >= 3 && !TOKEN_STOPWORDS.has(token));
-}
-
-function sharedTokens(left, right) {
-    const leftTokens = Array.from(new Set(tokenize(left)));
-    const rightTokenSet = new Set(tokenize(right));
-    return leftTokens.filter((token) => rightTokenSet.has(token));
-}
-
-function overlapScore(left, right) {
-    const leftTokens = new Set(tokenize(left));
-    const rightTokens = new Set(tokenize(right));
-
-    if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
-
-    let overlap = 0;
-    for (const token of leftTokens) {
-        if (rightTokens.has(token)) overlap += 1;
-    }
-
-    return overlap / Math.max(leftTokens.size, rightTokens.size);
-}
-
-function buildGscFreshness(connectorRows, rows, dataSources) {
-    const gscStatus = dataSources.connectors === 'unavailable'
-        ? { status: 'unavailable', lastSyncedAt: null }
-        : resolveConnectorStatus(connectorRows, 'gsc');
-    const lastObservedDate = getLatestObservedDate(rows);
-    const ageDays = getObservedAgeDays(lastObservedDate);
-
-    if (dataSources.gscRows === 'unavailable' || (!lastObservedDate && gscStatus.status === 'unavailable')) {
-        return {
-            status: 'unavailable', reliability: 'unavailable', label: 'Search Console',
-            connectorStatus: gscStatus.status, lastObservedDate, lastSyncedAt: gscStatus.lastSyncedAt,
-            detail: 'Données Search Console temporairement indisponibles.',
-        };
-    }
-
-    if (!lastObservedDate) {
-        return {
-            status: gscStatus.status === 'not_connected' ? 'unavailable' : 'warning',
-            reliability: 'unavailable',
-            label: 'Search Console',
-            connectorStatus: gscStatus.status,
-            lastObservedDate: null,
-            lastSyncedAt: gscStatus.lastSyncedAt,
-            detail: gscStatus.status === 'not_connected'
-                ? 'Search Console non connectée pour ce mandat.'
-                : 'Search Console connectée sans pages SEO observables sur la fenêtre disponible.',
-        };
-    }
-
-    return {
-        status: ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical',
-        reliability: 'measured',
-        label: 'Search Console',
-        connectorStatus: gscStatus.status,
-        lastObservedDate,
-        lastSyncedAt: gscStatus.lastSyncedAt,
-        detail: ageDays === null
-            ? 'Date observée non exploitable proprement.'
-            : ageDays <= 3
-                ? 'Données fraîches sur la fenêtre SEO active.'
-                : ageDays <= 7
-                    ? 'Données utilisables, mais à surveiller.'
-                    : 'Données trop anciennes pour qualifier un pilotage contenu fiable.',
-    };
-}
-
-function getPathname(value) {
-    if (!value) return null;
-
-    try {
-        return normalizePathname(new URL(value).pathname || '/');
-    } catch {
-        return null;
-    }
 }
 
 function getPageLabel(page) {
@@ -145,12 +34,6 @@ function getPageLabel(page) {
     const pathname = getPathname(url);
     if (!pathname) return page?.page_type || 'Page auditée';
     return pathname;
-}
-
-function getPrimarySegment(value) {
-    const pathname = getPathname(value);
-    if (!pathname || pathname === '/') return null;
-    return pathname.split('/').filter(Boolean)[0] || null;
 }
 
 function prettifySegment(segment) {
@@ -918,7 +801,7 @@ export async function getSeoContentSlice(clientId) {
         dataSources.gscRows = dataSources.connectors !== 'unavailable' && resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected' ? 'not_connected' : 'not_observed';
     }
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
-    const gscFreshness = buildGscFreshness(connectorRows, gscRows, dataSources);
+    const gscFreshness = buildGscFreshness(connectorRows, gscRows, dataSources, GSC_FRESHNESS_MESSAGES);
     const contentOpportunityCount = dataSources.opportunities === 'unavailable' ? null : toArray(latestOpportunities?.active)
         .filter((item) => item?.status === 'open' && item?.category === 'content').length;
 
