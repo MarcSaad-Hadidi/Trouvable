@@ -363,8 +363,8 @@ async function browserCase(context, test, base, out, mode, logFile) {
             await page.screenshot({ path: path.join(out, result.screenshot), fullPage: false });
         } else {
             if (result.status !== 200) result.failures.push(`Expected 200, received ${result.status}`);
+            if (test.admin) await page.locator('.geo-content').waitFor({ timeout: 20000 });
             if (test.client) {
-                await page.locator('.geo-content').waitFor({ timeout: 20000 });
                 await page
                     .getByText('Fixture locale QA', { exact: false })
                     .first()
@@ -409,7 +409,7 @@ async function browserCase(context, test, base, out, mode, logFile) {
                 }));
                 if (!result.faqKeyboard.open) result.failures.push('FAQ did not open with keyboard Enter');
             }
-            if (test.client) {
+            if (test.admin) {
                 result.scroll = await checkScroll(page);
                 if (!result.scroll.valid) result.failures.push('Admin single viewport scroll model failed');
             }
@@ -652,10 +652,12 @@ async function runMode(chromium, mode, opts, report) {
             ...AUTH.map((route) => ({ route, auth: true })),
             ...(mode === 'fixture'
                 ? [
-                      { route: '/admin' },
-                      { route: '/admin/clients', client: true },
-                      ...ADMIN.map((route) => ({ route, client: true })),
-                      ...ALIASES.map((alias) => ({ ...alias, client: true })),
+                      { route: '/admin', admin: true, client: true },
+                      { route: '/admin/clients', admin: true },
+                      { route: '/admin/clients/onboarding', admin: true },
+                      { route: '/admin/geo-compare', admin: true },
+                      ...ADMIN.map((route) => ({ route, admin: true, client: true })),
+                      ...ALIASES.map((alias) => ({ ...alias, admin: true, client: true })),
                   ]
                 : []),
         ];
