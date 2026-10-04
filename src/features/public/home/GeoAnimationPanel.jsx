@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getTypedSlice, inWindow, cycleEdgeOpacity } from './animation-timing';
 import { SITE_URL } from "@/lib/site-config";
 
 const SOFT_TRANSITION = "opacity 650ms cubic-bezier(0.22,1,0.36,1), transform 650ms cubic-bezier(0.22,1,0.36,1)";
@@ -19,28 +20,6 @@ function useCycleClock(cycleMs, tickMs = 40) {
   }, [cycleMs, tickMs]);
 
   return elapsed;
-}
-
-function getTypedSlice(text, elapsed, startMs, typeDurationMs) {
-  if (elapsed < startMs) return "";
-  if (elapsed >= startMs + typeDurationMs) return text;
-  const progress = (elapsed - startMs) / typeDurationMs;
-  const chars = Math.max(0, Math.floor(progress * text.length));
-  return text.slice(0, chars);
-}
-
-function inWindow(elapsed, startMs, endMs) {
-  return elapsed >= startMs && elapsed < endMs;
-}
-
-function smoothstep(edge0, edge1, x) {
-  if (edge1 <= edge0) return x >= edge1 ? 1 : 0;
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
-
-function cycleEdgeOpacity(elapsed, cycleMs, fadeInMs, fadeOutMs) {
-  return smoothstep(0, fadeInMs, elapsed) * (1 - smoothstep(cycleMs - fadeOutMs, cycleMs, elapsed));
 }
 
 export default function GeoAnimationPanel() {

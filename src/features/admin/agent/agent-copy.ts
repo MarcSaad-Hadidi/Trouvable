@@ -1,3 +1,10 @@
+export function scoreTone(score: number | null | undefined) {
+    if (score == null) return 'neutral';
+    if (score >= 70) return 'ok';
+    if (score >= 40) return 'warning';
+    return 'critical';
+}
+
 const STATUS_LABELS: Record<string, string> = {
     open: 'Ouvert',
     in_progress: 'En cours',

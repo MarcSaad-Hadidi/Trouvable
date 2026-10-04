@@ -8,14 +8,7 @@ import {
     pageActionLink,
 } from '@/features/admin/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
-import { formatAgentStatus, toneForStatus } from '@/features/admin/agent/agent-copy';
-
-function scoreTone(score) {
-    if (score == null) return 'neutral';
-    if (score >= 70) return 'ok';
-    if (score >= 40) return 'warning';
-    return 'critical';
-}
+import { scoreTone, formatAgentStatus, toneForStatus } from '@/features/admin/agent/agent-copy';
 
 export default function AgentReadinessPage() {
     const { client, clientId } = useGeoClient();

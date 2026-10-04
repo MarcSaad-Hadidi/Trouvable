@@ -39,16 +39,12 @@ export function GeoKpiCard({ label, value, hint, accent = 'default' }) {
     );
 }
 
-export function GeoProvenancePill({ meta, className = '' }) {
-    return <ProvenancePill meta={meta} className={className} />;
-}
-
 export function GeoMetaNote({ meta, children = null }) {
     return (
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
             <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="text-[11px] font-semibold text-white/85">Provenance</div>
-                <GeoProvenancePill meta={meta} />
+                <ProvenancePill meta={meta} />
             </div>
             <div className="text-[11px] text-white/45 leading-relaxed">{children || meta?.description}</div>
         </div>

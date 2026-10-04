@@ -3,11 +3,12 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import ContactButton from "@/features/public/shared/ContactButton";
+import TopicFaqList from '@/features/public/shared/TopicFaqList';
 import Navbar from "@/features/public/shared/Navbar";
 import SiteFooter from "@/features/public/shared/SiteFooter";
 import GeoSeoInjector from "@/features/public/shared/GeoSeoInjector";
 import { SITE_URL } from "@/lib/site-config";
-import { ArrowRight, MapPin, AlertTriangle, Wrench, BarChart3, HelpCircle, ChevronDown, Compass, Radio, Globe } from "lucide-react";
+import { ArrowRight, MapPin, AlertTriangle, Wrench, BarChart3, HelpCircle, Compass, Radio, Globe } from "lucide-react";
 
 const SECTION_CONFIG = {
     problems: {
@@ -253,21 +254,7 @@ export default function VillePageClient({ ville, composition, linkedExpertises }
                             </div>
                             <p className="text-[13px] text-[#666] mt-1">Les questions que posent les entreprises de {ville.name} avant de démarrer.</p>
                         </motion.div>
-                        <div className="space-y-2">
-                            {ville.faqs.map((faq, i) => (
-                                <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.05 }}>
-                                    <details className="group rounded-xl border border-white/7 bg-white/[0.02] transition hover:border-amber-400/15 [&_summary::-webkit-details-marker]:hidden">
-                                        <summary className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-medium text-white/90 outline-none">
-                                            <span>{faq.question}</span>
-                                            <ChevronDown className="h-4 w-4 shrink-0 text-white/30 transition-transform group-open:rotate-180" />
-                                        </summary>
-                                        <div className="px-5 pb-5 text-[14px] leading-[1.65] text-[#a0a0a0]">
-                                            <span>{faq.answer}</span>
-                                        </div>
-                                    </details>
-                                </motion.div>
-                            ))}
-                        </div>
+                        <TopicFaqList faqs={ville.faqs} />
                     </div>
                 </section>
 

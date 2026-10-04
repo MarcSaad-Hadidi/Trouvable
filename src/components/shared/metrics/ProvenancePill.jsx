@@ -1,5 +1,14 @@
 'use client';
 
+import MetricPill, { METRIC_PILL_TONES } from './MetricPill';
+
+const TONE_CLASSES = {
+    emerald: METRIC_PILL_TONES.emerald,
+    violet: METRIC_PILL_TONES.violet,
+    amber: METRIC_PILL_TONES.amber,
+    slate: METRIC_PILL_TONES.slate,
+};
+
 /**
  * Client-safe provenance metadata and pill component.
  *
@@ -39,13 +48,6 @@ export const PROVENANCE_META = {
     },
 };
 
-const TONE_CLASSES = {
-    emerald: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
-    violet: 'bg-violet-400/10 text-violet-300 border-violet-400/20',
-    amber: 'bg-amber-400/10 text-amber-200 border-amber-400/20',
-    slate: 'bg-white/[0.05] text-white/45 border-white/10',
-};
-
 /**
  * Resolve provenance metadata from a raw value string.
  * Returns the same shape as GeoProvenancePill expects: { label, shortLabel, tone, description }.
@@ -61,14 +63,5 @@ export function getClientProvenanceMeta(value) {
  */
 export function ProvenancePill({ meta, value, className = '' }) {
     const resolved = meta || (value ? getClientProvenanceMeta(value) : null);
-    if (!resolved?.label) return null;
-
-    return (
-        <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${TONE_CLASSES[resolved.tone] || TONE_CLASSES.slate} ${className}`}
-            title={resolved.description || resolved.label}
-        >
-            {resolved.shortLabel || resolved.label}
-        </span>
-    );
+    return <MetricPill meta={resolved} toneClass={TONE_CLASSES[resolved?.tone]} className={className} />;
 }

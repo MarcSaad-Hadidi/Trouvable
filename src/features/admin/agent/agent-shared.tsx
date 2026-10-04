@@ -1,9 +1,38 @@
 'use client';
 
 import { CommandChartCard } from '@/features/admin/shared/components/command/CommandChartCard';
-import { COMMAND_PANEL, cn } from '@/lib/tokens';
+import { COMMAND_PANEL, cn } from '@/lib/design/tokens';
 import { toneFromStatus } from '@/features/admin/agent/agent-page-primitives';
-import { formatAgentStatus } from '@/features/admin/agent/agent-copy';
+import { formatAgentStatus, formatAgentPriority, toneForPriority } from '@/features/admin/agent/agent-copy';
+
+type AgentMessage = {
+    message: string;
+    dimensionLabel?: string;
+};
+
+export function AgentStrengthMessage({ item }: { item: AgentMessage & { score?: number | null } }) {
+    return (
+        <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[13px] font-semibold text-white/92">{item.message}</span>
+                {item.score != null ? <AgentChip tone="ok">{item.score}/100</AgentChip> : null}
+            </div>
+            {item.dimensionLabel ? <div className="text-[12px] text-white/58">{item.dimensionLabel}</div> : null}
+        </div>
+    );
+}
+
+export function AgentFixMessage({ item }: { item: AgentMessage & { priority?: string } }) {
+    return (
+        <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[13px] font-semibold text-white/92">{item.message}</span>
+                {item.priority ? <AgentChip tone={toneForPriority(item.priority)}>{formatAgentPriority(item.priority)}</AgentChip> : null}
+            </div>
+            {item.dimensionLabel ? <div className="text-[12px] text-white/58">{item.dimensionLabel}</div> : null}
+        </div>
+    );
+}
 
 function toneClasses(tone) {
     if (tone === 'ok') return 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100';

@@ -7,15 +7,8 @@ import {
     AgentPageFrame,
     pageActionLink,
 } from '@/features/admin/agent/agent-page-primitives';
-import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
-import { formatAgentPriority, formatAgentReliability, toneForPriority } from '@/features/admin/agent/agent-copy';
-
-function scoreTone(score) {
-    if (score == null) return 'neutral';
-    if (score >= 70) return 'ok';
-    if (score >= 40) return 'warning';
-    return 'critical';
-}
+import { AgentStrengthMessage, AgentFixMessage, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
+import { scoreTone, formatAgentReliability } from '@/features/admin/agent/agent-copy';
 
 export default function AgentProtocolsPage() {
     const { client, clientId } = useGeoClient();
@@ -95,15 +88,7 @@ export default function AgentProtocolsPage() {
                     subtitle="Dimensions techniques déjà solides pour les agents."
                     items={data?.topStrengths || []}
                     emptyTitle="Aucun protocole solide n’est encore remonté."
-                    renderItem={(item) => (
-                        <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-[13px] font-semibold text-white/92">{item.message}</span>
-                                {item.score != null ? <AgentChip tone="ok">{item.score}/100</AgentChip> : null}
-                            </div>
-                            {item.dimensionLabel ? <div className="text-[12px] text-white/58">{item.dimensionLabel}</div> : null}
-                        </div>
-                    )}
+                    renderItem={(item) => <AgentStrengthMessage item={item} />}
                 />
             </div>
 
@@ -118,15 +103,7 @@ export default function AgentProtocolsPage() {
                 subtitle="Actions prioritaires pour rendre le mandat plus lisible et exécutable par les agents."
                 items={data?.topFixes || []}
                 emptyTitle="Aucun correctif protocole prioritaire."
-                renderItem={(item) => (
-                    <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[13px] font-semibold text-white/92">{item.message}</span>
-                            {item.priority ? <AgentChip tone={toneForPriority(item.priority)}>{formatAgentPriority(item.priority)}</AgentChip> : null}
-                        </div>
-                        {item.dimensionLabel ? <div className="text-[12px] text-white/58">{item.dimensionLabel}</div> : null}
-                    </div>
-                )}
+                renderItem={(item) => <AgentFixMessage item={item} />}
             />
         </AgentPageFrame>
     );
