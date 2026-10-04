@@ -1,7 +1,6 @@
 import 'server-only';
 
 import { normalizeClientProfileShape } from '@/lib/client-profile';
-import { getOperatorWorkspaceShell } from '@/lib/operator-intelligence/base';
 import { getAdminSupabase } from '@/lib/supabase-admin';
 
 export async function listOperatorClients() {
@@ -17,10 +16,6 @@ export async function listOperatorClients() {
     }
 
     return (data || []).map(normalizeClientProfileShape);
-}
-
-export async function getOperatorGeoWorkspacePayload(clientId) {
-    return getOperatorWorkspaceShell(clientId);
 }
 
 const RUNS_LOOKBACK_MS = 21 * 86400000;

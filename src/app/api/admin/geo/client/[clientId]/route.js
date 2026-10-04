@@ -1,7 +1,7 @@
 import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
-import { getOperatorGeoWorkspacePayload } from '@/lib/operator-data';
+import { getOperatorWorkspaceShell } from '@/lib/operator-intelligence/base';
 
 
 
@@ -17,7 +17,7 @@ export async function GET(_, { params }) {
             return noStoreJson({ error: 'ID invalide' }, { status: 400 });
         }
 
-        const payload = await getOperatorGeoWorkspacePayload(clientId);
+        const payload = await getOperatorWorkspaceShell(clientId);
         if (!payload?.client) {
             return noStoreJson({ error: 'Client non trouve' }, { status: 404 });
         }

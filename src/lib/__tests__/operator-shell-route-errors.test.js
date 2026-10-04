@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const boundary = vi.hoisted(() => ({ requireAdmin: vi.fn(), payload: vi.fn() }));
+vi.mock('server-only', () => ({}));
 vi.mock('@/lib/auth', () => ({ requireAdmin: boundary.requireAdmin }));
-vi.mock('@/lib/operator-data', () => ({ getOperatorGeoWorkspacePayload: boundary.payload }));
+vi.mock('@/lib/operator-intelligence/base', () => ({ getOperatorWorkspaceShell: boundary.payload }));
 
 import { GET } from '../../app/api/admin/geo/client/[clientId]/route.js';
 
