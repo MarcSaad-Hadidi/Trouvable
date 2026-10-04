@@ -47,7 +47,6 @@ export async function POST(request, { params }) {
         return noStoreJson({ success: true, opportunity: row });
     } catch (error) {
         console.error(`[api/admin/geo/client/${clientId}/opportunities/${opportunityId}]`, error);
-        return noStoreJson({ error: error.message }, { status: 500 });
+        return noStoreJson({ error: 'Erreur interne du serveur.' }, { status: 500 });
     }
 }
-

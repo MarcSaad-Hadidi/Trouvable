@@ -28,7 +28,7 @@ export async function GET(_, { params }) {
         return noStoreJson(data);
     } catch (error) {
         console.error(`[api/admin/geo/client/${clientId}/runs/${runId}]`, error);
-        return noStoreJson({ error: error.message }, { status: 500 });
+        return noStoreJson({ error: 'Erreur interne du serveur.' }, { status: 500 });
     }
 }
 
@@ -73,7 +73,6 @@ export async function POST(request, { params }) {
         return noStoreJson({ success: true, action: 'reparse', result });
     } catch (error) {
         console.error(`[api/admin/geo/client/${clientId}/runs/${runId}]`, error);
-        return noStoreJson({ error: error.message }, { status: 500 });
+        return noStoreJson({ error: 'Erreur interne du serveur.' }, { status: 500 });
     }
 }
-

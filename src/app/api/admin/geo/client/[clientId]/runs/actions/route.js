@@ -42,7 +42,6 @@ export async function POST(request, { params }) {
         return noStoreJson({ error: 'Action inconnue' }, { status: 400 });
     } catch (error) {
         console.error(`[api/admin/geo/client/${clientId}/runs/actions]`, error);
-        return noStoreJson({ error: error.message }, { status: 500 });
+        return noStoreJson({ error: 'Erreur interne du serveur.' }, { status: 500 });
     }
 }
-
