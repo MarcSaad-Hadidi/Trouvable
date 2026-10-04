@@ -119,6 +119,8 @@ must respect it or scroll will break in production:
 2. **`.geo-main`** — flex column, `min-height: 0; overflow: hidden`. Hosts the chrome (CommandStrip / MissionCommandHeader) and the content viewport.
 3. **`.geo-content`** — the **single** `overflow-y: auto` viewport. Every operator page is rendered inside it.
 
+Root admin pages use [AdminPageViewport](src/features/admin/shared/layout/AdminPageViewport.jsx); client layouts use [ClientWorkspaceShell](src/features/admin/shared/layout/ClientWorkspaceShell.jsx). Feature views must not add a second viewport.
+
 Rules for pages and feature components rendered inside `.geo-content`:
 
 - Do **not** set `h-screen`, `max-h-screen`, or `overflow-y-auto` on a top-level page wrapper. The shell already owns the scroll.

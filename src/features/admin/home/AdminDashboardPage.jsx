@@ -10,6 +10,7 @@ import {
     getToneMeta,
 } from '@/features/admin/shared/components/command';
 import CommandStrip from '@/features/admin/shared/components/CommandStrip';
+import AdminPageViewport from '@/features/admin/shared/layout/AdminPageViewport';
 
 export const dynamic = 'force-dynamic';
 
@@ -390,121 +391,115 @@ export default async function AdminDashboard() {
     );
 
     return (
-        <div className="geo-main min-h-0">
-            <CommandStrip />
-            <div className="geo-content flex-1 overflow-y-auto">
-                <CommandPageShell header={header}>
-                    {enrichError && (
-                        <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-200">
-                            Erreur de chargement : {enrichError}
-                        </div>
-                    )}
+        <AdminPageViewport chrome={<CommandStrip />}>
+            <CommandPageShell header={header}>
+                {enrichError && (
+                    <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-200">
+                        Erreur de chargement : {enrichError}
+                    </div>
+                )}
 
-                    {/* ── Row 1: Portfolio Pulse + Next Decision ── */}
-                    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-                        {/* Portfolio Pulse */}
-                        <div className={cn(COMMAND_SURFACE, 'p-5 sm:p-6')}>
-                            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35 mb-5">
-                                Portfolio Pulse
-                            </div>
-                            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
-                                <PulseRing counts={counts} total={clients.length} />
-                                <PulseLegend counts={counts} />
-                            </div>
+                {/* ── Row 1: Portfolio Pulse + Next Decision ── */}
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+                    {/* Portfolio Pulse */}
+                    <div className={cn(COMMAND_SURFACE, 'p-5 sm:p-6')}>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35 mb-5">
+                            Portfolio Pulse
                         </div>
-
-                        {/* Next Decision */}
-                        <NextDecisionCard client={urgentClient} />
+                        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
+                            <PulseRing counts={counts} total={clients.length} />
+                            <PulseLegend counts={counts} />
+                        </div>
                     </div>
 
-                    {/* ── Row 2: Freshness + Actions Pipeline ── */}
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <FreshnessCard rows={clients} now={now} />
-                        <ActionsPipelineCard
-                            totalActions={totalActions}
-                            criticalCount={counts.critical}
-                            attentionCount={counts.needs_attention}
-                        />
-                    </div>
+                    {/* Next Decision */}
+                    <NextDecisionCard client={urgentClient} />
+                </div>
 
-                    {/* ── Row 3: Priority Mandate Strip ── */}
-                    {sorted.length > 0 && (
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
-                                    Mandats par priorité
-                                </div>
-                                <Link
-                                    href="/admin/clients"
-                                    className="text-[10px] font-semibold text-white/30 hover:text-white/60 transition-colors"
-                                >
-                                    Voir tout →
-                                </Link>
+                {/* ── Row 2: Freshness + Actions Pipeline ── */}
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <FreshnessCard rows={clients} now={now} />
+                    <ActionsPipelineCard
+                        totalActions={totalActions}
+                        criticalCount={counts.critical}
+                        attentionCount={counts.needs_attention}
+                    />
+                </div>
+
+                {/* ── Row 3: Priority Mandate Strip ── */}
+                {sorted.length > 0 && (
+                    <div>
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
+                                Mandats par priorité
                             </div>
-                            <div className="flex gap-3 overflow-x-auto pb-2 -mb-2 scrollbar-thin scrollbar-thumb-white/10">
-                                {sorted.slice(0, 12).map((c) => (
-                                    <MandateCard key={c.id} client={c} />
-                                ))}
-                            </div>
+                            <Link
+                                href="/admin/clients"
+                                className="text-[10px] font-semibold text-white/30 hover:text-white/60 transition-colors"
+                            >
+                                Voir tout →
+                            </Link>
                         </div>
-                    )}
+                        <div className="flex gap-3 overflow-x-auto pb-2 -mb-2 scrollbar-thin scrollbar-thumb-white/10">
+                            {sorted.slice(0, 12).map((c) => (
+                                <MandateCard key={c.id} client={c} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                    {/* ── Row 4: Quick Actions ── */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* ── Row 4: Quick Actions ── */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Link
+                        href="/admin/clients"
+                        className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
+                    >
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
+                            Portefeuille
+                        </div>
+                        <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
+                            Tous les mandats
+                        </div>
+                    </Link>
+                    <Link
+                        href="/admin/clients/new"
+                        className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
+                    >
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
+                            Nouveau
+                        </div>
+                        <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
+                            Créer un mandat
+                        </div>
+                    </Link>
+                    {clients[0] && (
                         <Link
-                            href="/admin/clients"
+                            href={`/admin/clients/${clients[0].id}/dossier`}
                             className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
                         >
                             <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
-                                Portefeuille
+                                Dernier mandat
                             </div>
-                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
-                                Tous les mandats
+                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">
+                                {clients[0].client_name}
                             </div>
                         </Link>
+                    )}
+                    {counts.critical > 0 && urgentClient && (
                         <Link
-                            href="/admin/clients/new"
-                            className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
+                            href={`/admin/clients/${urgentClient.id}/dossier`}
+                            className="group rounded-[14px] border border-[#e06060]/20 bg-[#e06060]/[0.04] px-4 py-4 transition-all hover:border-[#e06060]/35"
                         >
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
-                                Nouveau
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e06060]/60 mb-2">
+                                Critique
                             </div>
-                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
-                                Créer un mandat
+                            <div className="text-[13px] font-semibold text-[#f0a8a8] transition-colors group-hover:text-white truncate">
+                                {urgentClient.client_name}
                             </div>
                         </Link>
-                        {clients[0] && (
-                            <Link
-                                href={`/admin/clients/${clients[0].id}/dossier`}
-                                className={cn(
-                                    COMMAND_PANEL,
-                                    'group px-4 py-4 transition-all hover:border-white/[0.18]',
-                                )}
-                            >
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
-                                    Dernier mandat
-                                </div>
-                                <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">
-                                    {clients[0].client_name}
-                                </div>
-                            </Link>
-                        )}
-                        {counts.critical > 0 && urgentClient && (
-                            <Link
-                                href={`/admin/clients/${urgentClient.id}/dossier`}
-                                className="group rounded-[14px] border border-[#e06060]/20 bg-[#e06060]/[0.04] px-4 py-4 transition-all hover:border-[#e06060]/35"
-                            >
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e06060]/60 mb-2">
-                                    Critique
-                                </div>
-                                <div className="text-[13px] font-semibold text-[#f0a8a8] transition-colors group-hover:text-white truncate">
-                                    {urgentClient.client_name}
-                                </div>
-                            </Link>
-                        )}
-                    </div>
-                </CommandPageShell>
-            </div>
-        </div>
+                    )}
+                </div>
+            </CommandPageShell>
+        </AdminPageViewport>
     );
 }
