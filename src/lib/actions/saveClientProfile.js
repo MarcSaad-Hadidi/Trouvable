@@ -89,7 +89,7 @@ export async function saveClientProfileAction(formDataObject) {
 
         const cleanAddress = Object.fromEntries(
             Object.entries(validatedData.address || {})
-                .filter(([_, v]) => v !== null && v !== undefined && v.toString().trim() !== '')
+                .filter(([, v]) => v !== null && v !== undefined && v.toString().trim() !== '')
         );
 
         const nextPublicationStatus = validatedData.is_published

@@ -277,15 +277,3 @@ export function validateProblemRef(ref) {
 
     return { ok: true };
 }
-
-export default {
-    PROBLEM_SOURCES,
-    TASK_TYPES,
-    TASK_TYPE_LABELS,
-    VARIANTS,
-    inferTaskType,
-    normalizeProblemRef,
-    problemRefFromSearchParams,
-    problemRefToQueryString,
-    validateProblemRef,
-};
