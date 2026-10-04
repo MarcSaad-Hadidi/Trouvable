@@ -78,3 +78,5 @@ Une mesure manuelle de marque, lorsqu’elle est explicitement autorisée, note 
 L'[inventaire de la première consolidation](https://github.com/MarcSaad-Hadidi/Trouvable/blob/6c06ad4c11ac795ccf0fb485933721867c98a320/docs/architecture/consolidation-files.csv) reste consultable au commit indiqué. Aucun code ou outil ne le consomme ; il explique un chantier passé et ne décrit pas automatiquement l'état actuel. Les comparaisons avant/après, SHA et résultats de validation appartiennent aux preuves de la PR.
 
 L'export manuel Code Scanning est décrit dans [CONTRIBUTING.md](../../CONTRIBUTING.md#export-manuel-des-alertes-code-scanning) ; ses sorties restent hors Git.
+
+Le lancement d’audit conserve son annulation coopérative entre les étapes et les timeouts bornés du scanner. Le scanner ne reçoit pas le signal HTTP du client : une annulation ne garantit pas l’interruption immédiate des IO en cours.
