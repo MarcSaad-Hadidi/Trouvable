@@ -289,6 +289,7 @@ test('an unpublished profile can only pass HTTP 200 with streamed not-found cont
     assert.equal(streamed.classification, 'streamed-not-found');
     assert.equal(streamed.profileVisible, false);
     assert.deepEqual(streamed.publishedLookups, requests);
+    assert.equal(checkUnpublishedProfile({ status: 200, body, requests: [...requests, ...requests] }).valid, true);
     assert.equal(checkUnpublishedProfile({ status: 404, body, requests }).classification, 'not-found');
     for (const input of [
         { status: 200, body: body + 'Fixture locale QA', requests },
@@ -302,6 +303,8 @@ test('an unpublished profile can only pass HTTP 200 with streamed not-found cont
             requests: [{ ...requests[0], query: '?client_slug=eq.fixture-qa&is_published=eq.false' }],
         },
         { status: 200, body, requests: [{ ...requests[0], status: 200 }] },
+        { status: 200, body, requests: [...requests, { ...requests[0], status: 200 }] },
+        { status: 200, body, requests: [...requests, { ...requests[0], status: 500 }] },
         { status: 500, body, requests },
     ]) {
         assert.equal(checkUnpublishedProfile(input).valid, false);

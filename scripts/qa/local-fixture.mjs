@@ -180,7 +180,7 @@ export function checkUnpublishedProfile({ status, body, requests }) {
         const params = new URLSearchParams(request.query);
         return params.get('client_slug') === `eq.${CLIENT.client_slug}` && params.get('is_published') === 'eq.true';
     });
-    const rejectedLookup = publishedLookups.some((request) => request.status === 406);
+    const rejectedLookup = publishedLookups.length > 0 && publishedLookups.every((request) => request.status === 406);
     const streamedNotFound = status === 200 && notFoundBoundary && noindex;
     const valid = !profileVisible && rejectedLookup && (status === 404 || streamedNotFound);
     return {
