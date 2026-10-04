@@ -4,20 +4,27 @@ import { getRecentAudits as dbGetRecentAudits } from '@/lib/db/audits';
 import { getActions as dbGetActions } from '@/lib/db/actions';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 
-const SAFE_ACTION_TYPES = [
-    'geo_queries_run',
-    'geo_query_run_single',
-    'geo_query_run_rerun',
-    'geo_query_reparse',
-    'geo_queries_benchmark_run',
-    'tracked_query_created',
-    'tracked_query_updated',
-    'tracked_query_toggled',
-    'tracked_query_deleted',
-    'publication_state_changed',
-    'client_onboarding_started',
-    'client_onboarding_activated',
-];
+const ACTION_COPY = {
+    geo_queries_run: {
+        title: 'Cycle de prompts terminé',
+        description: details => `${Number(details?.successful || 0)}/${Number(details?.total_queries || 0)} prompts suivis exécutés`,
+    },
+    geo_query_run_single: {
+        title: 'Exécution unitaire terminée',
+        description: details => Number(details?.successful || 0) > 0 ? 'Prompt exécuté avec succès.' : 'Prompt exécuté avec erreurs.',
+    },
+    geo_query_run_rerun: { title: "Relance d'exécution", description: "Une exécution existante a été relancée depuis l'inspecteur." },
+    geo_query_reparse: { title: 'Reparse effectué', description: 'Le pipeline extraction/citations/concurrents a été réappliqué sur une exécution stockée.' },
+    geo_queries_benchmark_run: { title: 'Benchmark sandbox exécuté', description: 'Comparaison multi-variantes terminée en mode sandbox gratuit.' },
+    tracked_query_created: { title: 'Prompt suivi ajouté', description: 'Un nouveau prompt suivi a été ajouté.' },
+    tracked_query_updated: { title: 'Prompt suivi mis à jour', description: 'Le texte ou la classification du prompt a été mis à jour.' },
+    tracked_query_toggled: { title: 'Statut prompt modifié', description: details => details?.is_active ? 'Prompt réactivé.' : 'Prompt mis en pause.' },
+    tracked_query_deleted: { title: 'Prompt suivi supprimé', description: 'Un prompt suivi a été retire de ce client.' },
+    publication_state_changed: { title: 'Profil public mis à jour', description: details => details?.is_published ? 'Le profil public est publié.' : 'Le profil public repasse en brouillon.' },
+    client_onboarding_started: { title: 'Onboarding démarré', description: 'Intake capture puis enrichissement automatique lancé.' },
+    client_onboarding_activated: { title: 'Onboarding activé', description: 'Le profil brouillon a été finalise avec revue opérateur.' },
+};
+const SAFE_ACTION_TYPES = Object.keys(ACTION_COPY);
 
 function mapAuditActivity(audit) {
     return {
@@ -31,142 +38,16 @@ function mapAuditActivity(audit) {
 }
 
 function mapActionActivity(action) {
-    if (action.action_type === 'geo_queries_run') {
-        const total = Number(action.details?.total_queries || 0);
-        const successful = Number(action.details?.successful || 0);
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Cycle de prompts terminé',
-            description: `${successful}/${total} prompts suivis exécutés`,
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'geo_query_run_single') {
-        const successful = Number(action.details?.successful || 0);
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Exécution unitaire terminée',
-            description: successful > 0 ? 'Prompt exécuté avec succès.' : 'Prompt exécuté avec erreurs.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'geo_query_run_rerun') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: "Relance d'exécution",
-            description: "Une exécution existante a été relancée depuis l'inspecteur.",
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'geo_query_reparse') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Reparse effectué',
-            description: 'Le pipeline extraction/citations/concurrents a été réappliqué sur une exécution stockée.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'geo_queries_benchmark_run') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Benchmark sandbox exécuté',
-            description: 'Comparaison multi-variantes terminée en mode sandbox gratuit.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'tracked_query_created') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Prompt suivi ajouté',
-            description: 'Un nouveau prompt suivi a été ajouté.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'tracked_query_updated') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Prompt suivi mis à jour',
-            description: 'Le texte ou la classification du prompt a été mis à jour.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'tracked_query_toggled') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Statut prompt modifié',
-            description: action.details?.is_active ? 'Prompt réactivé.' : 'Prompt mis en pause.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'tracked_query_deleted') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Prompt suivi supprimé',
-            description: 'Un prompt suivi a été retire de ce client.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'publication_state_changed') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Profil public mis à jour',
-            description: action.details?.is_published ? 'Le profil public est publié.' : 'Le profil public repasse en brouillon.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'client_onboarding_started') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Onboarding démarré',
-            description: 'Intake capture puis enrichissement automatique lancé.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    if (action.action_type === 'client_onboarding_activated') {
-        return {
-            id: `action-${action.id}`,
-            type: action.action_type,
-            title: 'Onboarding activé',
-            description: 'Le profil brouillon a été finalise avec revue opérateur.',
-            created_at: action.created_at,
-            provenance: getProvenanceMeta('observed'),
-        };
-    }
-
-    return null;
+    const copy = Object.hasOwn(ACTION_COPY, action.action_type) ? ACTION_COPY[action.action_type] : null;
+    if (!copy) return null;
+    return {
+        id: `action-${action.id}`,
+        type: action.action_type,
+        title: copy.title,
+        description: typeof copy.description === 'function' ? copy.description(action.details) : copy.description,
+        created_at: action.created_at,
+        provenance: getProvenanceMeta('observed'),
+    };
 }
 
 export async function getRecentSafeActivity(clientId, limit = 8) {

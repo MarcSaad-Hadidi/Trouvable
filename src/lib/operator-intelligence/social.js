@@ -1,7 +1,7 @@
 ﻿import 'server-only';
 
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
-import { getNotConnectedMeta, getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
+import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import {
     getLatestCollectionRun,
@@ -142,7 +142,7 @@ function buildNotConnectedSlice(client) {
         provenance: {
             observation: getProvenanceMeta('observed'),
             inferred: getProvenanceMeta('inferred'),
-            not_connected: getNotConnectedMeta(),
+            not_connected: getProvenanceMeta('not_connected'),
         },
         connection: {
             status: 'not_connected',
@@ -239,7 +239,7 @@ export async function getSocialSlice(clientId) {
         provenance: {
             observation: getProvenanceMeta('observed'),
             inferred: getProvenanceMeta('inferred'),
-            not_connected: getNotConnectedMeta(),
+            not_connected: getProvenanceMeta('not_connected'),
         },
         connection,
         summary: {
