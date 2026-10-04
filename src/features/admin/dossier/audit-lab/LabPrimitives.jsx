@@ -9,13 +9,14 @@ import { useState } from 'react';
  */
 
 export function LabSectionHeader({ eyebrow, title, subtitle, variant = 'stable', right }) {
-    const eyebrowTone = variant === 'diagnostic'
-        ? 'text-amber-300/70'
-        : variant === 'canonical'
-        ? 'text-violet-300/70'
-        : variant === 'debug'
-        ? 'text-white/35'
-        : 'text-emerald-300/70';
+    const eyebrowTone =
+        variant === 'diagnostic'
+            ? 'text-amber-300/70'
+            : variant === 'canonical'
+              ? 'text-violet-300/70'
+              : variant === 'debug'
+                ? 'text-white/35'
+                : 'text-emerald-300/70';
 
     return (
         <div className="mb-3 flex items-start justify-between gap-4">
@@ -24,9 +25,7 @@ export function LabSectionHeader({ eyebrow, title, subtitle, variant = 'stable',
                     <div className={`text-[10px] font-bold uppercase tracking-[0.12em] ${eyebrowTone}`}>{eyebrow}</div>
                 )}
                 <div className="mt-0.5 text-[15px] font-bold text-white/90">{title}</div>
-                {subtitle && (
-                    <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-white/45">{subtitle}</p>
-                )}
+                {subtitle && <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-white/45">{subtitle}</p>}
             </div>
             {right && <div className="shrink-0">{right}</div>}
         </div>
@@ -39,7 +38,9 @@ export function LabSectionHeader({ eyebrow, title, subtitle, variant = 'stable',
  */
 export function LabStableSection({ children, className = '' }) {
     return (
-        <section className={`relative rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-5 shadow-[0_16px_48px_rgba(0,0,0,0.45)] before:absolute before:top-0 before:left-6 before:right-6 before:h-px before:bg-gradient-to-r before:from-transparent before:via-violet-400/30 before:to-transparent ${className}`}>
+        <section
+            className={`relative rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-5 shadow-[0_16px_48px_rgba(0,0,0,0.45)] before:absolute before:top-0 before:left-6 before:right-6 before:h-px before:bg-gradient-to-r before:from-transparent before:via-violet-400/30 before:to-transparent ${className}`}
+        >
             {children}
         </section>
     );
@@ -59,7 +60,9 @@ export function LabStableSection({ children, className = '' }) {
 export function LabDiagnosticSection({ children, ribbon = false, className = '' }) {
     const showRibbon = ribbon !== false && ribbon != null && String(ribbon).length > 0;
     return (
-        <section className={`relative rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.015] p-5 ${className}`}>
+        <section
+            className={`relative rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.015] p-5 ${className}`}
+        >
             {showRibbon && (
                 <div className="absolute -top-2.5 left-5 rounded-full border border-amber-400/20 bg-[#09090c] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-300/75">
                     {ribbon}
@@ -72,7 +75,9 @@ export function LabDiagnosticSection({ children, ribbon = false, className = '' 
 
 export function LabCanonicalSection({ children, className = '' }) {
     return (
-        <section className={`relative rounded-2xl border border-violet-400/[0.14] bg-gradient-to-br from-violet-500/[0.025] via-transparent to-transparent p-5 ${className}`}>
+        <section
+            className={`relative rounded-2xl border border-violet-400/[0.14] bg-gradient-to-br from-violet-500/[0.025] via-transparent to-transparent p-5 ${className}`}
+        >
             <div className="absolute -top-2.5 left-5 rounded-full border border-violet-400/25 bg-[#09090c] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-violet-300/80">
                 Objet canonique · couches 3–4
             </div>
@@ -83,9 +88,7 @@ export function LabCanonicalSection({ children, className = '' }) {
 
 export function LabDebugSection({ children, className = '' }) {
     return (
-        <section className={`rounded-2xl border border-white/[0.05] bg-[#0a0a0c] p-5 ${className}`}>
-            {children}
-        </section>
+        <section className={`rounded-2xl border border-white/[0.05] bg-[#0a0a0c] p-5 ${className}`}>{children}</section>
     );
 }
 
@@ -110,13 +113,20 @@ export function LabCollapsible({ label, defaultOpen = false, children, hint }) {
 }
 
 export function LabPill({ label, tone = 'neutral' }) {
-    const toneClass = tone === 'good' ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20'
-        : tone === 'warn' ? 'bg-amber-400/10 text-amber-200 border-amber-400/20'
-        : tone === 'bad' ? 'bg-red-400/10 text-red-300 border-red-400/20'
-        : tone === 'info' ? 'bg-violet-400/10 text-violet-300 border-violet-400/20'
-        : 'bg-white/[0.05] text-white/60 border-white/10';
+    const toneClass =
+        tone === 'good'
+            ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20'
+            : tone === 'warn'
+              ? 'bg-amber-400/10 text-amber-200 border-amber-400/20'
+              : tone === 'bad'
+                ? 'bg-red-400/10 text-red-300 border-red-400/20'
+                : tone === 'info'
+                  ? 'bg-violet-400/10 text-violet-300 border-violet-400/20'
+                  : 'bg-white/[0.05] text-white/60 border-white/10';
     return (
-        <span className={`inline-flex items-center leading-none rounded-full border px-1.5 py-px text-[9px] font-semibold uppercase tracking-[0.06em] ${toneClass}`}>
+        <span
+            className={`inline-flex items-center leading-none rounded-full border px-1.5 py-px text-[9px] font-semibold uppercase tracking-[0.06em] ${toneClass}`}
+        >
             {label}
         </span>
     );
@@ -129,7 +139,9 @@ export function LabMetric({ label, value, suffix, tone }) {
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
             <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">{label}</div>
             <div className="mt-1 flex items-baseline gap-1">
-                <span className={`font-['Plus_Jakarta_Sans',sans-serif] text-lg font-extrabold tabular-nums ${toneClass}`}>
+                <span
+                    className={`font-['Plus_Jakarta_Sans',sans-serif] text-lg font-extrabold tabular-nums ${toneClass}`}
+                >
                     {displayValue}
                 </span>
                 {suffix && <span className="text-[10px] text-white/30">{suffix}</span>}
@@ -170,10 +182,7 @@ export function JsonInspect({ value, maxHeight = 400 }) {
                     {expanded ? 'Réduire' : 'Étendre'}
                 </button>
             </div>
-            <pre
-                className="overflow-auto p-3 text-[11px] leading-relaxed text-white/70"
-                style={maxStyle}
-            >
+            <pre className="overflow-auto p-3 text-[11px] leading-relaxed text-white/70" style={maxStyle}>
                 {text}
             </pre>
         </div>

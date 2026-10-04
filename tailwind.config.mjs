@@ -1,4 +1,4 @@
-import animate from 'tailwindcss-animate'
+import animate from 'tailwindcss-animate';
 
 /**
  * Trouvable Tailwind theme.
@@ -12,22 +12,13 @@ import animate from 'tailwindcss-animate'
  */
 /** @type {import('tailwindcss').Config} */
 const tailwindConfig = {
-    content: [
-        './src/**/*.{js,ts,jsx,tsx,mdx}',
-    ],
+    content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     theme: {
         extend: {
             fontFamily: {
                 sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                 display: ['var(--font-plus-jakarta-sans)', 'var(--font-inter)', 'sans-serif'],
-                mono: [
-                    'var(--font-jetbrains-mono)',
-                    'ui-monospace',
-                    'SFMono-Regular',
-                    'Menlo',
-                    'Monaco',
-                    'monospace',
-                ],
+                mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],
             },
             colors: {
                 /* Neutral ink scale — single source of truth */
@@ -190,6 +181,6 @@ const tailwindConfig = {
         preflight: false,
     },
     plugins: [animate],
-}
+};
 
 export default tailwindConfig;

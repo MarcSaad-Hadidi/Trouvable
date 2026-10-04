@@ -29,8 +29,8 @@ export default async function PostSignInPage() {
         <div className="flex min-h-dvh flex-col items-center justify-center bg-[#050505] px-6 py-12 text-center">
             <h1 className="mb-2 text-xl font-bold text-white">Aucun accès Trouvable pour ce compte</h1>
             <p className="mb-6 max-w-md text-sm text-white/45">
-                Le compte <span className="font-medium text-white/70">{userEmail}</span> n&apos;est pas configuré comme administrateur
-                ni comme invité sur un portail client actif.
+                Le compte <span className="font-medium text-white/70">{userEmail}</span> n&apos;est pas configuré comme
+                administrateur ni comme invité sur un portail client actif.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -39,7 +39,10 @@ export default async function PostSignInPage() {
                 >
                     Réessayer une autre connexion
                 </Link>
-                <Link href="/" className="rounded-xl bg-[#5b73ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#4a62ee]">
+                <Link
+                    href="/"
+                    className="rounded-xl bg-[#5b73ff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#4a62ee]"
+                >
                     Retour au site
                 </Link>
             </div>

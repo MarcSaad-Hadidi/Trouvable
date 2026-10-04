@@ -35,7 +35,13 @@ export function ClientProvider({ children, clientId }) {
     const [refreshToken, setRefreshToken] = useState(0);
 
     const loadClientShell = useCallback(async (id, signal) => {
-        if (!id) { setClient(null); setAudit(null); setWorkspace(null); setLoading(false); return; }
+        if (!id) {
+            setClient(null);
+            setAudit(null);
+            setWorkspace(null);
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
@@ -47,7 +53,9 @@ export function ClientProvider({ children, clientId }) {
         } catch (loadError) {
             if (signal?.aborted) return;
             setError(loadError.message);
-            setClient(null); setAudit(null); setWorkspace(null);
+            setClient(null);
+            setAudit(null);
+            setWorkspace(null);
         } finally {
             if (!signal?.aborted) setLoading(false);
         }
@@ -71,31 +79,39 @@ export function ClientProvider({ children, clientId }) {
     }, [clientId, loadClientShell, refreshToken]);
     // loadClients only updates React state after await fetchNoStore resolves.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    useEffect(() => { loadClients(); }, [loadClients]);
+    useEffect(() => {
+        loadClients();
+    }, [loadClients]);
 
-    const switchClient = useCallback((id) => {
-        if (id) router.push(`/admin/clients/${id}`);
-    }, [router]);
+    const switchClient = useCallback(
+        (id) => {
+            if (id) router.push(`/admin/clients/${id}`);
+        },
+        [router],
+    );
 
     const invalidateWorkspace = useCallback(() => {
         setRefreshToken((v) => v + 1);
     }, []);
 
-    const value = useMemo(() => ({
-        client: client?.id === clientId ? client : null,
-        audit: client?.id === clientId ? audit : null,
-        workspace: client?.id === clientId ? workspace : null,
-        clients,
-        clientId,
-        loading,
-        error,
-        isNewClientPage: false,
-        refreshToken,
-        switchClient,
-        invalidateWorkspace,
-        refetch: invalidateWorkspace,
-        getInitials: (name) => getInitials(name || (client?.id === clientId ? client?.client_name : null)),
-    }), [client, audit, workspace, clients, clientId, loading, error, refreshToken, switchClient, invalidateWorkspace]);
+    const value = useMemo(
+        () => ({
+            client: client?.id === clientId ? client : null,
+            audit: client?.id === clientId ? audit : null,
+            workspace: client?.id === clientId ? workspace : null,
+            clients,
+            clientId,
+            loading,
+            error,
+            isNewClientPage: false,
+            refreshToken,
+            switchClient,
+            invalidateWorkspace,
+            refetch: invalidateWorkspace,
+            getInitials: (name) => getInitials(name || (client?.id === clientId ? client?.client_name : null)),
+        }),
+        [client, audit, workspace, clients, clientId, loading, error, refreshToken, switchClient, invalidateWorkspace],
+    );
 
     return <ClientContext.Provider value={value}>{children}</ClientContext.Provider>;
 }
@@ -126,33 +142,45 @@ export function useGeoWorkspaceSlice(slice, options = {}) {
         return searchParams.toString();
     }, [params]);
 
-    const fetchSlice = useCallback(async (signal) => {
-        const requestId = ++requestSequence.current;
-        if (!enabled || !clientId || !slice) { setData(null); setLoading(false); setError(null); return; }
-        setLoading(true);
-        setError(null);
-        try {
-            const query = new URLSearchParams();
-            query.set('refresh', String(refreshToken));
-            if (serializedParams) {
-                const next = new URLSearchParams(serializedParams);
-                for (const [key, value] of next.entries()) {
-                    query.set(key, value);
-                }
+    const fetchSlice = useCallback(
+        async (signal) => {
+            const requestId = ++requestSequence.current;
+            if (!enabled || !clientId || !slice) {
+                setData(null);
+                setLoading(false);
+                setError(null);
+                return;
             }
-            const response = await fetch(`/api/admin/geo/client/${clientId}/${slice}?${query.toString()}`, { cache: 'no-store', signal });
-            const json = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
-            if (signal?.aborted || requestId !== requestSequence.current) return;
-            setData(json);
-            setDataClientId(clientId);
-        } catch (fetchError) {
-            if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError') return;
-            setError(fetchError.message);
-        } finally {
-            if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
-        }
-    }, [clientId, enabled, refreshToken, serializedParams, slice]);
+            setLoading(true);
+            setError(null);
+            try {
+                const query = new URLSearchParams();
+                query.set('refresh', String(refreshToken));
+                if (serializedParams) {
+                    const next = new URLSearchParams(serializedParams);
+                    for (const [key, value] of next.entries()) {
+                        query.set(key, value);
+                    }
+                }
+                const response = await fetch(`/api/admin/geo/client/${clientId}/${slice}?${query.toString()}`, {
+                    cache: 'no-store',
+                    signal,
+                });
+                const json = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+                if (signal?.aborted || requestId !== requestSequence.current) return;
+                setData(json);
+                setDataClientId(clientId);
+            } catch (fetchError) {
+                if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError')
+                    return;
+                setError(fetchError.message);
+            } finally {
+                if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
+            }
+        },
+        [clientId, enabled, refreshToken, serializedParams, slice],
+    );
 
     useEffect(() => {
         const controller = new AbortController();
@@ -190,33 +218,45 @@ export function useSeoWorkspaceSlice(slice, options = {}) {
         return searchParams.toString();
     }, [params]);
 
-    const fetchSlice = useCallback(async (signal) => {
-        const requestId = ++requestSequence.current;
-        if (!enabled || !clientId || !slice) { setData(null); setLoading(false); setError(null); return; }
-        setLoading(true);
-        setError(null);
-        try {
-            const query = new URLSearchParams();
-            query.set('refresh', String(refreshToken));
-            if (serializedParams) {
-                const next = new URLSearchParams(serializedParams);
-                for (const [key, value] of next.entries()) {
-                    query.set(key, value);
-                }
+    const fetchSlice = useCallback(
+        async (signal) => {
+            const requestId = ++requestSequence.current;
+            if (!enabled || !clientId || !slice) {
+                setData(null);
+                setLoading(false);
+                setError(null);
+                return;
             }
-            const response = await fetch(`/api/admin/seo/client/${clientId}/${slice}?${query.toString()}`, { cache: 'no-store', signal });
-            const json = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
-            if (signal?.aborted || requestId !== requestSequence.current) return;
-            setData(json);
-            setDataClientId(clientId);
-        } catch (fetchError) {
-            if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError') return;
-            setError(fetchError.message);
-        } finally {
-            if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
-        }
-    }, [clientId, enabled, refreshToken, serializedParams, slice]);
+            setLoading(true);
+            setError(null);
+            try {
+                const query = new URLSearchParams();
+                query.set('refresh', String(refreshToken));
+                if (serializedParams) {
+                    const next = new URLSearchParams(serializedParams);
+                    for (const [key, value] of next.entries()) {
+                        query.set(key, value);
+                    }
+                }
+                const response = await fetch(`/api/admin/seo/client/${clientId}/${slice}?${query.toString()}`, {
+                    cache: 'no-store',
+                    signal,
+                });
+                const json = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+                if (signal?.aborted || requestId !== requestSequence.current) return;
+                setData(json);
+                setDataClientId(clientId);
+            } catch (fetchError) {
+                if (signal?.aborted || requestId !== requestSequence.current || fetchError.name === 'AbortError')
+                    return;
+                setError(fetchError.message);
+            } finally {
+                if (!signal?.aborted && requestId === requestSequence.current) setLoading(false);
+            }
+        },
+        [clientId, enabled, refreshToken, serializedParams, slice],
+    );
 
     useEffect(() => {
         const controller = new AbortController();

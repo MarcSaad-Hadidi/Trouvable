@@ -53,11 +53,11 @@ export async function POST(request) {
         const resolvedDiscoveryMode = input.discovery_mode
             ? normalizeDiscoveryMode(input.discovery_mode)
             : inferDiscoveryMode({
-                category: input.category || input.query_type,
-                intentFamily: input.intent_family,
-                queryText: input.query_text,
-                clientName: client?.client_name || '',
-            });
+                  category: input.category || input.query_type,
+                  intentFamily: input.intent_family,
+                  queryText: input.query_text,
+                  clientName: client?.client_name || '',
+              });
         const activationBlocked = shouldSoftBlockPromptActivation(promptMetadata) && input.is_active !== false;
         const serialized = serializePromptContractForDb({
             contract: promptMetadata,

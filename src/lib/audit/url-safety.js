@@ -12,18 +12,10 @@ const PRIVATE_HOSTNAMES = new Set([
     'metadata.google.internal',
     'metadata.azure.com',
 ]);
-const PRIVATE_HOSTNAME_SUFFIXES = [
-    '.localhost',
-    '.local',
-    '.lan',
-    '.home',
-    '.internal',
-    '.intranet',
-];
+const PRIVATE_HOSTNAME_SUFFIXES = ['.localhost', '.local', '.lan', '.home', '.internal', '.intranet'];
 const BLOCKED_PORTS = new Set([
-    0, 21, 22, 23, 25, 53, 110, 111, 135, 139, 143, 389, 445, 465, 587,
-    993, 995, 1433, 1521, 2049, 2375, 2376, 3306, 3389, 5432, 5601, 5672,
-    5900, 5984, 6379, 9200, 9300, 11211, 27017,
+    0, 21, 22, 23, 25, 53, 110, 111, 135, 139, 143, 389, 445, 465, 587, 993, 995, 1433, 1521, 2049, 2375, 2376, 3306,
+    3389, 5432, 5601, 5672, 5900, 5984, 6379, 9200, 9300, 11211, 27017,
 ]);
 const BLOCKED_IPV4_CIDRS = [
     ['0.0.0.0', 8],
@@ -56,7 +48,9 @@ const BLOCKED_IPV6_CIDRS = [
 ];
 
 function stripIpv6Brackets(value) {
-    const hostname = String(value || '').trim().toLowerCase();
+    const hostname = String(value || '')
+        .trim()
+        .toLowerCase();
     if (hostname.startsWith('[') && hostname.endsWith(']')) return hostname.slice(1, -1);
     return hostname;
 }
@@ -68,7 +62,7 @@ function normalizeSafetyHostname(value) {
 function ipv4ToInteger(address) {
     const parts = address.split('.').map((part) => Number(part));
     if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return null;
-    return parts.reduce((acc, part) => (acc * 256) + part, 0);
+    return parts.reduce((acc, part) => acc * 256 + part, 0);
 }
 
 function isIpv4InCidr(address, baseAddress, prefixLength) {
@@ -106,9 +100,7 @@ function parseIpv6ToBigInt(address) {
     if (halves.length === 1 && missing !== 0) return null;
     if (halves.length === 2 && missing < 1) return null;
 
-    const groups = halves.length === 2
-        ? [...head, ...Array(missing).fill(0), ...tail]
-        : head;
+    const groups = halves.length === 2 ? [...head, ...Array(missing).fill(0), ...tail] : head;
     if (groups.length !== 8) return null;
 
     return groups.reduce((acc, group) => (acc << 16n) + BigInt(group), 0n);
@@ -120,20 +112,15 @@ function isIpv6InCidr(address, baseAddress, prefixLength) {
     if (value === null || base === null) return true;
     if (prefixLength === 0) return true;
     const shift = 128n - BigInt(prefixLength);
-    return (value >> shift) === (base >> shift);
+    return value >> shift === base >> shift;
 }
 
 function mappedIpv4FromIpv6(address) {
     const value = parseIpv6ToBigInt(address);
     if (value === null) return null;
-    if ((value >> 32n) !== 0xffffn) return null;
+    if (value >> 32n !== 0xffffn) return null;
     const ipv4 = Number(value & 0xffffffffn);
-    return [
-        (ipv4 >>> 24) & 255,
-        (ipv4 >>> 16) & 255,
-        (ipv4 >>> 8) & 255,
-        ipv4 & 255,
-    ].join('.');
+    return [(ipv4 >>> 24) & 255, (ipv4 >>> 16) & 255, (ipv4 >>> 8) & 255, ipv4 & 255].join('.');
 }
 
 function isPrivateIpv6(address) {
@@ -154,11 +141,11 @@ function isValidDnsHostname(hostname) {
     if (!hostname || hostname.length > 253) return false;
     if (hostname.includes('..') || hostname.includes('%')) return false;
     if (!hostname.includes('.')) return false;
-    return hostname.split('.').every((label) => (
-        label.length >= 1
-        && label.length <= 63
-        && /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)
-    ));
+    return hostname
+        .split('.')
+        .every(
+            (label) => label.length >= 1 && label.length <= 63 && /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label),
+        );
 }
 
 function isBlockedHostname(hostname) {
@@ -205,13 +192,16 @@ async function assertPublicHost(parsedUrl) {
     }
 }
 
-export async function fetchPublicResource(inputUrl, {
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    maxRedirects = DEFAULT_MAX_REDIRECTS,
-    headers = {},
-    method = 'GET',
-    signal = undefined,
-} = {}) {
+export async function fetchPublicResource(
+    inputUrl,
+    {
+        timeoutMs = DEFAULT_TIMEOUT_MS,
+        maxRedirects = DEFAULT_MAX_REDIRECTS,
+        headers = {},
+        method = 'GET',
+        signal = undefined,
+    } = {},
+) {
     let currentUrl = parsePublicHttpUrl(inputUrl);
     if (!currentUrl) throw new Error('invalid_public_http_url');
 

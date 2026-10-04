@@ -2,7 +2,14 @@ import 'server-only';
 
 import { getSourceStatus, loadIndependentSources } from './source-availability';
 
-import { createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, weightedPosition, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
+import {
+    createSearchMetricBucket,
+    accumulateSearchMetrics,
+    readSearchMetrics,
+    weightedPosition,
+    getObservedAgeDays,
+    resolveConnectorStatus,
+} from './seo-gsc';
 
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
@@ -64,7 +71,9 @@ function normalizeRange(value) {
 }
 
 function normalizeSegment(value) {
-    const raw = String(value || '').trim().toLowerCase();
+    const raw = String(value || '')
+        .trim()
+        .toLowerCase();
     if (raw === 'brand') return 'brand';
     if (raw === 'nonbrand') return 'nonbrand';
     return 'all';
@@ -76,12 +85,16 @@ function normalizeSearchType(value) {
 }
 
 function normalizeCountry(value) {
-    const raw = String(value || '').trim().toUpperCase();
+    const raw = String(value || '')
+        .trim()
+        .toUpperCase();
     return /^[A-Z]{2}$/.test(raw) ? raw : null;
 }
 
 function normalizeDevice(value) {
-    const raw = String(value || '').trim().toUpperCase();
+    const raw = String(value || '')
+        .trim()
+        .toUpperCase();
     if (raw === 'DESKTOP' || raw === 'MOBILE' || raw === 'TABLET') return raw;
     return null;
 }
@@ -101,7 +114,9 @@ function formatDateYmd(date) {
 }
 
 function shiftDateYmd(ymd, offsetDays) {
-    const [year, month, day] = String(ymd || '').split('-').map(Number);
+    const [year, month, day] = String(ymd || '')
+        .split('-')
+        .map(Number);
     if (!year || !month || !day) return null;
     const date = new Date(Date.UTC(year, month - 1, day));
     date.setUTCDate(date.getUTCDate() + offsetDays);
@@ -139,10 +154,12 @@ function filterRowsBetween(rows, startDate, endDate) {
 }
 
 function getLatestObservedDate(rows) {
-    return (rows || [])
-        .map((row) => rowDate(row))
-        .filter(Boolean)
-        .sort((left, right) => right.localeCompare(left))[0] || null;
+    return (
+        (rows || [])
+            .map((row) => rowDate(row))
+            .filter(Boolean)
+            .sort((left, right) => right.localeCompare(left))[0] || null
+    );
 }
 
 function buildFreshness(sourceLabel, connector, rows, { unavailableDetail = null } = {}) {
@@ -155,9 +172,11 @@ function buildFreshness(sourceLabel, connector, rows, { unavailableDetail = null
             status: connector.status === 'not_connected' ? 'unavailable' : 'warning',
             lastObservedDate: null,
             lastSyncedAt: connector.lastSyncedAt,
-            detail: unavailableDetail || (connector.status === 'not_connected'
-                ? 'Source non connectée pour ce mandat.'
-                : 'Source connectée sans données observées sur la fenêtre active.'),
+            detail:
+                unavailableDetail ||
+                (connector.status === 'not_connected'
+                    ? 'Source non connectée pour ce mandat.'
+                    : 'Source connectée sans données observées sur la fenêtre active.'),
             reliability: connector.status === 'not_connected' ? 'unavailable' : 'warning',
         };
     }
@@ -169,11 +188,12 @@ function buildFreshness(sourceLabel, connector, rows, { unavailableDetail = null
         status,
         lastObservedDate,
         lastSyncedAt: connector.lastSyncedAt,
-        detail: ageDays === null
-            ? 'Date observée non exploitable proprement.'
-            : ageDays <= 3
-                ? 'Données fraîches sur la fenêtre SEO active.'
-                : ageDays <= 7
+        detail:
+            ageDays === null
+                ? 'Date observée non exploitable proprement.'
+                : ageDays <= 3
+                  ? 'Données fraîches sur la fenêtre SEO active.'
+                  : ageDays <= 7
                     ? 'Données utilisables, mais à surveiller.'
                     : 'Données anciennes pour un pilotage quotidien.',
         reliability: 'measured',
@@ -192,7 +212,7 @@ function aggregateRawSearchRows(rows, getKey) {
 }
 
 function aggregateRowsByDimension(rows, dimension) {
-    return aggregateRawSearchRows(rows, row => String(row?.dimensions?.[dimension] || '').trim())
+    return aggregateRawSearchRows(rows, (row) => String(row?.dimensions?.[dimension] || '').trim())
         .map(({ key, ...metrics }) => ({ [dimension]: key, ...metrics }))
         .sort((left, right) => {
             const clicksDelta = right.clicks - left.clicks;
@@ -218,12 +238,14 @@ function buildComparison(currentRows, previousRows) {
 
     const currentPositionRows = aggregateDailySearchRows(currentRows);
     const previousPositionRows = aggregateDailySearchRows(previousRows);
-    const currentPosition = currentPositionRows.length > 0
-        ? currentPositionRows.reduce((sum, row) => sum + toNumber(row.position), 0) / currentPositionRows.length
-        : null;
-    const previousPosition = previousPositionRows.length > 0
-        ? previousPositionRows.reduce((sum, row) => sum + toNumber(row.position), 0) / previousPositionRows.length
-        : null;
+    const currentPosition =
+        currentPositionRows.length > 0
+            ? currentPositionRows.reduce((sum, row) => sum + toNumber(row.position), 0) / currentPositionRows.length
+            : null;
+    const previousPosition =
+        previousPositionRows.length > 0
+            ? previousPositionRows.reduce((sum, row) => sum + toNumber(row.position), 0) / previousPositionRows.length
+            : null;
 
     const deltaPercent = (currentValue, previousValue) => {
         if (!Number.isFinite(previousValue) || previousValue === 0) return null;
@@ -233,12 +255,12 @@ function buildComparison(currentRows, previousRows) {
     return {
         clicksDeltaPercent: deltaPercent(currentClicks, previousClicks),
         impressionsDeltaPercent: deltaPercent(currentImpressions, previousImpressions),
-        ctrDeltaPercent: currentCtr === null || previousCtr === null || previousCtr === 0
-            ? null
-            : ((currentCtr - previousCtr) / previousCtr) * 100,
-        positionDelta: currentPosition === null || previousPosition === null
-            ? null
-            : currentPosition - previousPosition,
+        ctrDeltaPercent:
+            currentCtr === null || previousCtr === null || previousCtr === 0
+                ? null
+                : ((currentCtr - previousCtr) / previousCtr) * 100,
+        positionDelta:
+            currentPosition === null || previousPosition === null ? null : currentPosition - previousPosition,
     };
 }
 
@@ -308,8 +330,10 @@ function inferIntent(query, brandTokens = []) {
 
     if (!normalized) return 'Informationnel';
     if (brandTokens.some((token) => normalized.includes(token))) return 'Navigationnel';
-    if (/(guide|comment|analyse|definition|c'est quoi|pourquoi|tutoriel|checklist|audit)/.test(normalized)) return 'Informationnel';
-    if (/(prix|tarif|devis|contact|demo|essai|plateforme|logiciel|outil|solution)/.test(normalized)) return 'Transactionnel';
+    if (/(guide|comment|analyse|definition|c'est quoi|pourquoi|tutoriel|checklist|audit)/.test(normalized))
+        return 'Informationnel';
+    if (/(prix|tarif|devis|contact|demo|essai|plateforme|logiciel|outil|solution)/.test(normalized))
+        return 'Transactionnel';
     if (/(comparatif|comparaison|meilleur|agence|consultant|service)/.test(normalized)) return 'Commercial';
     return 'Informationnel';
 }
@@ -331,7 +355,7 @@ function buildQuerySparklineMap(rows) {
     }
 
     return new Map(
-        Array.from(buckets.entries()).map(([query, dateMap]) => ([
+        Array.from(buckets.entries()).map(([query, dateMap]) => [
             query,
             Array.from(dateMap.values())
                 .sort((left, right) => left.date.localeCompare(right.date))
@@ -339,7 +363,7 @@ function buildQuerySparklineMap(rows) {
                     date: entry.date,
                     value: entry.impressions > 0 ? entry.impressions : entry.clicks,
                 })),
-        ])),
+        ]),
     );
 }
 
@@ -353,9 +377,8 @@ function buildTopQueryRows(currentRows, previousRows, brandTokens) {
         const previous = previousMap.get(row.query) || null;
         const previousPosition = previous?.position ?? null;
         const currentPosition = row.position ?? null;
-        const positionDelta = previousPosition === null || currentPosition === null
-            ? null
-            : previousPosition - currentPosition;
+        const positionDelta =
+            previousPosition === null || currentPosition === null ? null : previousPosition - currentPosition;
 
         return {
             ...row,
@@ -383,7 +406,9 @@ function buildIntentBreakdown(queryRows) {
 }
 
 function buildMovers(queryRows) {
-    const comparableRows = (queryRows || []).filter((row) => Number.isFinite(Number(row.positionDelta)) && Number(row.positionDelta) !== 0);
+    const comparableRows = (queryRows || []).filter(
+        (row) => Number.isFinite(Number(row.positionDelta)) && Number(row.positionDelta) !== 0,
+    );
     const winners = comparableRows
         .filter((row) => Number(row.positionDelta) > 0)
         .sort((left, right) => Number(right.positionDelta) - Number(left.positionDelta))
@@ -409,7 +434,9 @@ function buildUnavailableDeviceSplit(detail) {
 
 function buildDeviceSplit(rows, unavailableDetail = null) {
     if (!Array.isArray(rows) || rows.length === 0) {
-        return buildUnavailableDeviceSplit(unavailableDetail || 'La source GSC ne retourne aucune ligne appareil sur cette fenêtre.');
+        return buildUnavailableDeviceSplit(
+            unavailableDetail || 'La source GSC ne retourne aucune ligne appareil sur cette fenêtre.',
+        );
     }
 
     let desktopImpressions = 0;
@@ -417,7 +444,9 @@ function buildDeviceSplit(rows, unavailableDetail = null) {
     let excludedImpressions = 0;
 
     for (const row of rows) {
-        const device = String(row?.dimensions?.device || '').trim().toUpperCase();
+        const device = String(row?.dimensions?.device || '')
+            .trim()
+            .toUpperCase();
         const impressions = toNumber(row?.impressions);
         if (device === 'DESKTOP') {
             desktopImpressions += impressions;
@@ -431,10 +460,10 @@ function buildDeviceSplit(rows, unavailableDetail = null) {
     const mappedTotal = desktopImpressions + mobileImpressions;
     if (mappedTotal <= 0) {
         return buildUnavailableDeviceSplit(
-            unavailableDetail
-            || (excludedImpressions > 0
-                ? 'Les impressions disponibles sont uniquement tablette/autres, sans ligne ordinateur/telephone exploitable.'
-                : 'Les lignes appareil existent, mais sans impressions exploitables.'),
+            unavailableDetail ||
+                (excludedImpressions > 0
+                    ? 'Les impressions disponibles sont uniquement tablette/autres, sans ligne ordinateur/telephone exploitable.'
+                    : 'Les lignes appareil existent, mais sans impressions exploitables.'),
         );
     }
 
@@ -450,7 +479,9 @@ function buildDeviceSplit(rows, unavailableDetail = null) {
 
     const detailParts = [];
     if (excludedImpressions > 0) {
-        detailParts.push(`${Math.round(excludedImpressions)} impressions tablette/autres exclues du donut ordinateur/telephone.`);
+        detailParts.push(
+            `${Math.round(excludedImpressions)} impressions tablette/autres exclues du donut ordinateur/telephone.`,
+        );
     }
     if (unavailableDetail) {
         detailParts.push(unavailableDetail);
@@ -465,7 +496,6 @@ function buildDeviceSplit(rows, unavailableDetail = null) {
         excludedImpressions: Math.round(excludedImpressions),
         ...(categories.length > 0 ? {} : buildUnavailableDeviceSplit(unavailableDetail)),
     };
-
 }
 
 function isBrandQuery(query, tokens = []) {
@@ -483,10 +513,19 @@ function applySegmentFilter(queries, segment, brandTokens) {
     return queries || [];
 }
 
-function buildGscUnavailableReason({ gscStatus, siteUrl, refreshToken, fetchError, hasServerCredentials = false, clientUnavailable = false }) {
-    if (gscStatus?.status === 'unavailable' || clientUnavailable) return 'Données de configuration Search Console temporairement indisponibles.';
+function buildGscUnavailableReason({
+    gscStatus,
+    siteUrl,
+    refreshToken,
+    fetchError,
+    hasServerCredentials = false,
+    clientUnavailable = false,
+}) {
+    if (gscStatus?.status === 'unavailable' || clientUnavailable)
+        return 'Données de configuration Search Console temporairement indisponibles.';
     if (gscStatus?.status === 'disabled') return 'Le connecteur Search Console est désactivé pour ce mandat.';
-    if (gscStatus?.status === 'sample_mode') return 'Le connecteur Search Console est en mode échantillon, sans données brutes exploitables.';
+    if (gscStatus?.status === 'sample_mode')
+        return 'Le connecteur Search Console est en mode échantillon, sans données brutes exploitables.';
     if (fetchError) return 'Données Search Console temporairement indisponibles.';
     if (!siteUrl) return 'Aucune propriété GSC exploitable n’est configurée pour ce mandat.';
     if (!refreshToken && !hasServerCredentials) {
@@ -510,9 +549,16 @@ function buildRawSample(rows, limit = 20) {
 async function fetchLiveGscData({ siteUrl, refreshToken, window, filters }) {
     const request = (dimensions, startDate) => async () => {
         const response = await queryGscSearchAnalyticsRaw({
-            siteUrl, startDate, endDate: window.endDate, dimensions,
-            searchType: filters.searchType, country: filters.country, device: filters.device,
-            rowLimit: GSC_ROW_LIMIT, maxRows: GSC_MAX_ROWS, googleRefreshToken: refreshToken,
+            siteUrl,
+            startDate,
+            endDate: window.endDate,
+            dimensions,
+            searchType: filters.searchType,
+            country: filters.country,
+            device: filters.device,
+            rowLimit: GSC_ROW_LIMIT,
+            maxRows: GSC_MAX_ROWS,
+            googleRefreshToken: refreshToken,
         });
         if (!Array.isArray(response?.rows)) throw new Error('Invalid GSC response');
         return response;
@@ -546,9 +592,10 @@ export async function getVisibilitySlice(clientId, options = {}) {
     const connectorRows = values.connectors || [];
     const trafficRows = values.ga4Traffic || [];
     const ga4TopPages = values.ga4TopPages || [];
-    const connector = provider => dataSources.connectors === 'unavailable'
-        ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
-        : resolveConnectorStatus(connectorRows, provider);
+    const connector = (provider) =>
+        dataSources.connectors === 'unavailable'
+            ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
+            : resolveConnectorStatus(connectorRows, provider);
 
     const ga4Status = connector('ga4');
     const gscStatus = connector('gsc');
@@ -567,12 +614,12 @@ export async function getVisibilitySlice(clientId, options = {}) {
     let gscFetchError = null;
 
     if (
-        gscProperty
-        && (gscRefreshToken || hasServerGscCredentials)
-        && gscStatus.status !== 'unavailable'
-        && gscStatus.status !== 'not_connected'
-        && gscStatus.status !== 'disabled'
-        && gscStatus.status !== 'sample_mode'
+        gscProperty &&
+        (gscRefreshToken || hasServerGscCredentials) &&
+        gscStatus.status !== 'unavailable' &&
+        gscStatus.status !== 'not_connected' &&
+        gscStatus.status !== 'disabled' &&
+        gscStatus.status !== 'sample_mode'
     ) {
         try {
             const loaded = await fetchLiveGscData({
@@ -581,12 +628,27 @@ export async function getVisibilitySlice(clientId, options = {}) {
                 window,
                 filters,
             });
-            for (const [key, source] of [['query', 'gscQueries'], ['page', 'gscPages'], ['device', 'gscDevices']]) {
+            for (const [key, source] of [
+                ['query', 'gscQueries'],
+                ['page', 'gscPages'],
+                ['device', 'gscDevices'],
+            ]) {
                 const response = loaded.values[key];
-                dataSources[source] = loaded.dataSources[key] === 'unavailable' ? 'unavailable'
-                    : response.meta?.complete === false ? 'partial' : response.rows.length ? 'available' : 'empty';
+                dataSources[source] =
+                    loaded.dataSources[key] === 'unavailable'
+                        ? 'unavailable'
+                        : response.meta?.complete === false
+                          ? 'partial'
+                          : response.rows.length
+                            ? 'available'
+                            : 'empty';
             }
-            errors.push(...loaded.errors.map(error => ({ ...error, source: { query: 'gscQueries', page: 'gscPages', device: 'gscDevices' }[error.source] })));
+            errors.push(
+                ...loaded.errors.map((error) => ({
+                    ...error,
+                    source: { query: 'gscQueries', page: 'gscPages', device: 'gscDevices' }[error.source],
+                })),
+            );
             gscRaw = Object.values(loaded.values).some(Boolean) ? loaded.values : null;
             gscFetchError = loaded.errors.length ? new Error('GSC unavailable') : null;
         } catch (error) {
@@ -598,8 +660,12 @@ export async function getVisibilitySlice(clientId, options = {}) {
 
     for (const source of ['gscQueries', 'gscPages', 'gscDevices']) {
         // No request is an unavailable capability, not a successful empty query.
-        dataSources[source] ??= dataSources.connectors === 'unavailable' || dataSources.client === 'unavailable'
-            ? 'unavailable' : gscStatus.status === 'not_connected' ? 'not_connected' : 'not_observed';
+        dataSources[source] ??=
+            dataSources.connectors === 'unavailable' || dataSources.client === 'unavailable'
+                ? 'unavailable'
+                : gscStatus.status === 'not_connected'
+                  ? 'not_connected'
+                  : 'not_observed';
     }
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
     const gscUnavailableReason = buildGscUnavailableReason({
@@ -620,21 +686,35 @@ export async function getVisibilitySlice(clientId, options = {}) {
     const currentGscPageRows = filterRowsBetween(pageRowsAll, window.currentStartDate, window.endDate);
     const freshness = {
         ga4: buildFreshness('GA4', ga4Status, currentTrafficRows),
-        gsc: buildFreshness('Search Console', gscStatus, currentGscQueryRows, { unavailableDetail: gscUnavailableReason }),
+        gsc: buildFreshness('Search Console', gscStatus, currentGscQueryRows, {
+            unavailableDetail: gscUnavailableReason,
+        }),
     };
-    for (const [provider, source] of [['ga4', 'ga4Traffic'], ['gsc', 'gscQueries']]) {
+    for (const [provider, source] of [
+        ['ga4', 'ga4Traffic'],
+        ['gsc', 'gscQueries'],
+    ]) {
         if (dataSources[source] === 'unavailable') {
-            freshness[provider] = { ...freshness[provider], status: 'unavailable', reliability: 'unavailable', detail: 'Données temporairement indisponibles.' };
+            freshness[provider] = {
+                ...freshness[provider],
+                status: 'unavailable',
+                reliability: 'unavailable',
+                detail: 'Données temporairement indisponibles.',
+            };
         }
     }
 
-    const bothDisconnected =
-        ga4Status.status === 'not_connected' && gscStatus.status === 'not_connected';
+    const bothDisconnected = ga4Status.status === 'not_connected' && gscStatus.status === 'not_connected';
 
-    if (bothDisconnected && errors.length === 0 && currentTrafficRows.length === 0 && currentGscQueryRows.length === 0) {
+    if (
+        bothDisconnected &&
+        errors.length === 0 &&
+        currentTrafficRows.length === 0 &&
+        currentGscQueryRows.length === 0
+    ) {
         return {
             ...availability,
-        connectors: { ga4: ga4Status, gsc: gscStatus },
+            connectors: { ga4: ga4Status, gsc: gscStatus },
             freshness,
             summary: null,
             comparison: null,
@@ -677,19 +757,18 @@ export async function getVisibilitySlice(clientId, options = {}) {
 
     const clickTotal = sumField(currentGscQueryRows, 'clicks');
     const impressionTotal = sumField(currentGscQueryRows, 'impressions');
-    const weightedPositionSum = (currentGscQueryRows || [])
-        .reduce((sum, row) => sum + (toNumber(row.position) * Math.max(toNumber(row.impressions), 0)), 0);
-    const fallbackPositionSum = (currentGscQueryRows || [])
-        .reduce((sum, row) => sum + toNumber(row.position), 0);
-    const fallbackPositionCount = (currentGscQueryRows || [])
-        .filter((row) => toNumber(row.position) > 0).length;
+    const weightedPositionSum = (currentGscQueryRows || []).reduce(
+        (sum, row) => sum + toNumber(row.position) * Math.max(toNumber(row.impressions), 0),
+        0,
+    );
+    const fallbackPositionSum = (currentGscQueryRows || []).reduce((sum, row) => sum + toNumber(row.position), 0);
+    const fallbackPositionCount = (currentGscQueryRows || []).filter((row) => toNumber(row.position) > 0).length;
 
     const sessionsTotal = sumField(currentTrafficRows, 'sessions');
     const usersTotal = sumField(currentTrafficRows, 'users');
     const previousSessionsTotal = sumField(previousTrafficRows, 'sessions');
-    const ga4SessionsDeltaPercent = previousSessionsTotal > 0
-        ? ((sessionsTotal - previousSessionsTotal) / previousSessionsTotal) * 100
-        : null;
+    const ga4SessionsDeltaPercent =
+        previousSessionsTotal > 0 ? ((sessionsTotal - previousSessionsTotal) / previousSessionsTotal) * 100 : null;
 
     const hasTraffic = currentTrafficRows.length > 0;
     const hasQueries = currentGscQueryRows.length > 0;
@@ -746,23 +825,29 @@ export async function getVisibilitySlice(clientId, options = {}) {
             ...filters,
             segment,
         },
-        dimensions: gscRaw ? {
-            query: gscRaw.query?.meta?.dimensions ?? null,
-            page: gscRaw.page?.meta?.dimensions ?? null,
-            device: gscRaw.device?.meta?.dimensions ?? null,
-        } : null,
-        rowCounts: gscRaw ? {
-            queryRowsTotal: gscRaw.query ? queryRowsAll.length : null,
-            queryRowsCurrent: gscRaw.query ? currentGscQueryRows.length : null,
-            queryRowsPrevious: gscRaw.query ? previousGscQueryRows.length : null,
-            pageRowsCurrent: gscRaw.page ? currentGscPageRows.length : null,
-            deviceRows: gscRaw.device ? deviceRows.length : null,
-        } : null,
-        complete: gscRaw ? {
-            query: gscRaw.query?.meta?.complete ?? null,
-            page: gscRaw.page?.meta?.complete ?? null,
-            device: gscRaw.device?.meta?.complete ?? null,
-        } : null,
+        dimensions: gscRaw
+            ? {
+                  query: gscRaw.query?.meta?.dimensions ?? null,
+                  page: gscRaw.page?.meta?.dimensions ?? null,
+                  device: gscRaw.device?.meta?.dimensions ?? null,
+              }
+            : null,
+        rowCounts: gscRaw
+            ? {
+                  queryRowsTotal: gscRaw.query ? queryRowsAll.length : null,
+                  queryRowsCurrent: gscRaw.query ? currentGscQueryRows.length : null,
+                  queryRowsPrevious: gscRaw.query ? previousGscQueryRows.length : null,
+                  pageRowsCurrent: gscRaw.page ? currentGscPageRows.length : null,
+                  deviceRows: gscRaw.device ? deviceRows.length : null,
+              }
+            : null,
+        complete: gscRaw
+            ? {
+                  query: gscRaw.query?.meta?.complete ?? null,
+                  page: gscRaw.page?.meta?.complete ?? null,
+                  device: gscRaw.device?.meta?.complete ?? null,
+              }
+            : null,
     };
 
     return {
@@ -783,14 +868,21 @@ export async function getVisibilitySlice(clientId, options = {}) {
             clicks: hasQueries ? clickTotal : null,
             impressions: hasQueries ? impressionTotal : null,
             ctr: impressionTotal > 0 ? clickTotal / impressionTotal : null,
-            position: weightedPosition(impressionTotal, weightedPositionSum, fallbackPositionSum, fallbackPositionCount),
+            position: weightedPosition(
+                impressionTotal,
+                weightedPositionSum,
+                fallbackPositionSum,
+                fallbackPositionCount,
+            ),
             queryCount,
             pageCount,
             organicSessions: hasTraffic ? sessionsTotal : null,
             organicUsers: hasTraffic ? usersTotal : null,
         },
-        comparison: gscRaw?.query && (currentGscQueryRows.length || previousGscQueryRows.length)
-            ? buildComparison(currentGscQueryRows, previousGscQueryRows) : null,
+        comparison:
+            gscRaw?.query && (currentGscQueryRows.length || previousGscQueryRows.length)
+                ? buildComparison(currentGscQueryRows, previousGscQueryRows)
+                : null,
         trends: {
             gsc: aggregateDailySearchRows(currentGscQueryRows),
             ga4: currentTrafficRows,
@@ -810,13 +902,14 @@ export async function getVisibilitySlice(clientId, options = {}) {
         topQueries: enrichedQueries.slice(0, 40),
         intentBreakdown: gscRaw?.query ? buildIntentBreakdown(enrichedQueries) : [],
         movers: buildMovers(enrichedQueries),
-        debug: debugRawMode !== 'off' && gscRaw
-            ? {
-                rawQuerySample: buildRawSample(queryRowsAll, 30),
-                rawPageSample: buildRawSample(pageRowsAll, 30),
-                rawDeviceSample: buildRawSample(deviceRows, 30),
-            }
-            : null,
+        debug:
+            debugRawMode !== 'off' && gscRaw
+                ? {
+                      rawQuerySample: buildRawSample(queryRowsAll, 30),
+                      rawPageSample: buildRawSample(pageRowsAll, 30),
+                      rawDeviceSample: buildRawSample(deviceRows, 30),
+                  }
+                : null,
         emptyState: null,
     };
 }

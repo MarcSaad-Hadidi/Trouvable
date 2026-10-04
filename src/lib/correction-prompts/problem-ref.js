@@ -148,9 +148,8 @@ export function normalizeProblemRef(input) {
     const dimension = compactString(input.dimension);
     const category = compactString(input.category);
     const rawTaskType = compactString(input.taskType);
-    const taskType = rawTaskType && TASK_TYPES.includes(rawTaskType)
-        ? rawTaskType
-        : inferTaskType({ source, dimension, category });
+    const taskType =
+        rawTaskType && TASK_TYPES.includes(rawTaskType) ? rawTaskType : inferTaskType({ source, dimension, category });
 
     const presetVariant = compactString(input.presetVariant);
 

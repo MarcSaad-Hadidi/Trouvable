@@ -85,14 +85,16 @@ const PROBLEM_TYPE_META = {
 };
 
 function getProblemMeta(type) {
-    return PROBLEM_TYPE_META[type] || {
-        title: 'Element a revoir',
-        description: 'Un element operateur demande une verification humaine.',
-        family: 'operations',
-        impact: 'operability',
-        surface: 'site',
-        truth_class: 'uncertain',
-    };
+    return (
+        PROBLEM_TYPE_META[type] || {
+            title: 'Element a revoir',
+            description: 'Un element operateur demande une verification humaine.',
+            family: 'operations',
+            impact: 'operability',
+            surface: 'site',
+            truth_class: 'uncertain',
+        }
+    );
 }
 
 function buildDedupeKey(parts = []) {
@@ -135,23 +137,42 @@ export function normalizeProblemForReview(problem = {}, context = {}) {
     const truthClass = normalizeTruthClass(problem.truth_class || meta.truth_class, meta.truth_class);
     const confidence = normalizeConfidenceBand(problem.confidence, truthClass === 'observed' ? 'high' : 'medium');
     const reviewStatus = normalizeReviewStatus(problem.review_status, defaultReviewStatusForTruthClass(truthClass));
-    const queryRunId = context.queryRunId || problem.context?.query_run_id || problem.affected_entity?.query_run_id || null;
-    const trackedQueryId = context.trackedQueryId || problem.context?.tracked_query_id || problem.affected_entity?.tracked_query_id || null;
+    const queryRunId =
+        context.queryRunId || problem.context?.query_run_id || problem.affected_entity?.query_run_id || null;
+    const trackedQueryId =
+        context.trackedQueryId ||
+        problem.context?.tracked_query_id ||
+        problem.affected_entity?.tracked_query_id ||
+        null;
     const auditId = context.auditId || problem.context?.audit_id || problem.affected_entity?.audit_id || null;
-    const sourceType = context.sourceType || (problem.source === 'geo_runs' ? 'query_run_diagnostic' : problem.source === 'audit' ? 'audit_rule' : 'operator_signal');
-    const sourceTable = context.sourceTable || (problem.source === 'geo_runs' ? 'query_runs' : problem.source === 'audit' ? 'client_site_audits' : 'operator_review');
+    const sourceType =
+        context.sourceType ||
+        (problem.source === 'geo_runs'
+            ? 'query_run_diagnostic'
+            : problem.source === 'audit'
+              ? 'audit_rule'
+              : 'operator_signal');
+    const sourceTable =
+        context.sourceTable ||
+        (problem.source === 'geo_runs'
+            ? 'query_runs'
+            : problem.source === 'audit'
+              ? 'client_site_audits'
+              : 'operator_review');
     const title = problem.title || meta.title;
     const description = problem.description || meta.description;
     const evidenceSummary = problem.evidence_summary || problem.context?.evidence_summary || '';
     const recommendedFix = problem.recommended_fix || problem.context?.recommended_fix || '';
-    const dedupeKey = problem.dedupe_key || buildDedupeKey([
-        'problem',
-        problem.type,
-        trackedQueryId,
-        queryRunId,
-        auditId,
-        context.clientId || problem.clientId,
-    ]);
+    const dedupeKey =
+        problem.dedupe_key ||
+        buildDedupeKey([
+            'problem',
+            problem.type,
+            trackedQueryId,
+            queryRunId,
+            auditId,
+            context.clientId || problem.clientId,
+        ]);
 
     return {
         id: problem.id,
@@ -200,9 +221,18 @@ export function normalizeProblemForReview(problem = {}, context = {}) {
 }
 
 export function normalizeOpportunityReviewItem(row = {}) {
-    const truthClass = normalizeTruthClass(row.truth_class || mapOpportunitySourceToTruthClass(row.source), 'uncertain');
-    const confidence = normalizeConfidenceBand(row.confidence, row.priority === 'high' ? 'high' : row.priority === 'low' ? 'low' : 'medium');
-    const reviewStatus = normalizeReviewStatus(row.review_status, mapOpportunityStatusToReviewStatus(row.status, truthClass));
+    const truthClass = normalizeTruthClass(
+        row.truth_class || mapOpportunitySourceToTruthClass(row.source),
+        'uncertain',
+    );
+    const confidence = normalizeConfidenceBand(
+        row.confidence,
+        row.priority === 'high' ? 'high' : row.priority === 'low' ? 'low' : 'medium',
+    );
+    const reviewStatus = normalizeReviewStatus(
+        row.review_status,
+        mapOpportunityStatusToReviewStatus(row.status, truthClass),
+    );
 
     return {
         id: row.id,

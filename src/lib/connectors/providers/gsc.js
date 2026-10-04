@@ -18,7 +18,7 @@ function formatDate(date) {
 
 function resolveDateWindow({ startDate, endDate } = {}) {
     const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - (27 * 24 * 60 * 60 * 1000));
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
         throw new Error('Invalid GSC date window. Expected YYYY-MM-DD compatible dates.');
@@ -68,12 +68,16 @@ function normalizeSearchType(value) {
 }
 
 function normalizeCountry(value) {
-    const input = String(value || '').trim().toUpperCase();
+    const input = String(value || '')
+        .trim()
+        .toUpperCase();
     return /^[A-Z]{2}$/.test(input) ? input : null;
 }
 
 function normalizeDevice(value) {
-    const input = String(value || '').trim().toUpperCase();
+    const input = String(value || '')
+        .trim()
+        .toUpperCase();
     if (input === 'DESKTOP' || input === 'MOBILE' || input === 'TABLET') return input;
     return null;
 }
@@ -185,9 +189,8 @@ export async function queryGscSearchAnalyticsRaw({
     const normalizedCountry = normalizeCountry(country);
     const normalizedDevice = normalizeDevice(device);
     const limitPerPage = clampRowLimit(rowLimit, 25000);
-    const requestedMaxRows = (maxRows === null || maxRows === undefined)
-        ? limitPerPage
-        : clampMaxRows(maxRows, limitPerPage);
+    const requestedMaxRows =
+        maxRows === null || maxRows === undefined ? limitPerPage : clampMaxRows(maxRows, limitPerPage);
     const maxAllowedRows = Math.max(limitPerPage, requestedMaxRows);
 
     const google = await getGoogleApi();
@@ -197,7 +200,9 @@ export async function queryGscSearchAnalyticsRaw({
     ].filter((candidate) => candidate.auth);
 
     if (authCandidates.length === 0) {
-        throw new Error('queryGscSearchAnalyticsRaw requires Google OAuth or Search Console service-account credentials.');
+        throw new Error(
+            'queryGscSearchAnalyticsRaw requires Google OAuth or Search Console service-account credentials.',
+        );
     }
 
     async function queryWithAuth(auth) {
@@ -255,9 +260,10 @@ export async function queryGscSearchAnalyticsRaw({
             authSource = candidate.source;
             break;
         } catch (error) {
-            const canFallback = candidate.source === 'oauth'
-                && authCandidates[index + 1]?.source === 'service_account'
-                && isInvalidOAuthClientError(error);
+            const canFallback =
+                candidate.source === 'oauth' &&
+                authCandidates[index + 1]?.source === 'service_account' &&
+                isInvalidOAuthClientError(error);
             if (!canFallback) throw error;
         }
     }
@@ -285,13 +291,7 @@ export async function queryGscSearchAnalyticsRaw({
 /**
  * Query Search Console Search Analytics with a minimal scope returning query+page rows.
  */
-export async function fetchGscSearchAnalytics({
-    siteUrl,
-    startDate,
-    endDate,
-    rowLimit = 1000,
-    googleRefreshToken
-}) {
+export async function fetchGscSearchAnalytics({ siteUrl, startDate, endDate, rowLimit = 1000, googleRefreshToken }) {
     const result = await queryGscSearchAnalyticsRaw({
         siteUrl,
         startDate,
@@ -379,7 +379,14 @@ export async function getGscSnapshotFromDb({ connection, clientId }) {
         for (const row of rows) {
             if (row.query) {
                 if (!byQuery.has(row.query)) {
-                    byQuery.set(row.query, { query: row.query, clicks: 0, impressions: 0, ctrSum: 0, positionSum: 0, count: 0 });
+                    byQuery.set(row.query, {
+                        query: row.query,
+                        clicks: 0,
+                        impressions: 0,
+                        ctrSum: 0,
+                        positionSum: 0,
+                        count: 0,
+                    });
                 }
                 const q = byQuery.get(row.query);
                 q.clicks += Number(row.clicks || 0);

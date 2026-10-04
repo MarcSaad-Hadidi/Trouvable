@@ -1,8 +1,5 @@
 import ClientOnboardingWizard from '@/features/admin/portfolio/ClientOnboardingWizard';
-import {
-    CommandHeader,
-    CommandPageShell,
-} from '@/features/admin/shared/components/command';
+import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 
 export const metadata = {
     title: 'Onboarding client - Admin',

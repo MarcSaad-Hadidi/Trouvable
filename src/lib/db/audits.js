@@ -14,15 +14,11 @@ export async function getLatestAudit(clientId) {
     return data || null;
 }
 
-
-
 export async function createAuditRun(auditData) {
     const { data, error } = await db().from('client_site_audits').insert(auditData).select().single();
     if (error) throw new Error(`[DB] createAuditRun: ${error.message}`);
     return data;
 }
-
-
 
 export async function getRecentAudits(clientId, limit = 5) {
     const { data, error } = await db()

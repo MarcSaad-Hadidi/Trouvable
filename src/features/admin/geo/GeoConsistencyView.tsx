@@ -3,13 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { 
-    ShieldCheckIcon, 
-    AlertTriangleIcon, 
-    ActivityIcon, 
-    CheckCircle2Icon,
-    ArrowRightIcon
-} from 'lucide-react';
+import { ShieldCheckIcon, AlertTriangleIcon, ActivityIcon, CheckCircle2Icon, ArrowRightIcon } from 'lucide-react';
 
 import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/admin/shared/components/command';
 import { COMMAND_BUTTONS, COMMAND_PANEL, COMMAND_SURFACE, cn } from '@/lib/design/tokens';
@@ -22,7 +16,8 @@ function toneFromStatus(status) {
     const normalized = String(status || '').toLowerCase();
     if (normalized.includes('align')) return 'ok';
     if (normalized.includes('partiel') || normalized.includes('confirmer')) return 'warning';
-    if (normalized.includes('ecart') || normalized.includes('incoher') || normalized.includes('manquant')) return 'critical';
+    if (normalized.includes('ecart') || normalized.includes('incoher') || normalized.includes('manquant'))
+        return 'critical';
     return 'neutral';
 }
 
@@ -41,7 +36,7 @@ export default function GeoConsistencyPage() {
 
     const geoBase = clientId ? `/admin/clients/${clientId}/geo` : '/admin/clients';
     const seoBase = clientId ? `/admin/clients/${clientId}/seo` : '/admin/clients';
-    
+
     const dimensions = data?.dimensions || [];
     const alignedCount = dimensions.filter((item) => toneFromStatus(item.status) === 'ok').length;
     const partialCount = dimensions.filter((item) => toneFromStatus(item.status) === 'warning').length;
@@ -52,19 +47,25 @@ export default function GeoConsistencyPage() {
             eyebrow="IA / GEO"
             title="Cohérence & Fiabilité"
             subtitle="Comparaison réelle entre les vérités du dossier et les signaux structurés exposés aux moteurs."
-            actions={(
+            actions={
                 <div className="flex gap-2">
-                    <Link href={`${geoBase}/schema`} className={COMMAND_BUTTONS.secondary}>Schema & Entités</Link>
-                    <Link href={`${seoBase}/health`} className={COMMAND_BUTTONS.secondary}>Audit SEO</Link>
+                    <Link href={`${geoBase}/schema`} className={COMMAND_BUTTONS.secondary}>
+                        Schema & Entités
+                    </Link>
+                    <Link href={`${seoBase}/health`} className={COMMAND_BUTTONS.secondary}>
+                        Audit SEO
+                    </Link>
                 </div>
-            )}
+            }
         />
     );
 
     if (loading) {
         return (
             <CommandPageShell header={header}>
-                <div className={cn(COMMAND_PANEL, 'p-8 animate-pulse text-white/50')}>Analyse de la cohérence sémantique...</div>
+                <div className={cn(COMMAND_PANEL, 'p-8 animate-pulse text-white/50')}>
+                    Analyse de la cohérence sémantique...
+                </div>
             </CommandPageShell>
         );
     }
@@ -72,7 +73,10 @@ export default function GeoConsistencyPage() {
     if (error || !data) {
         return (
             <CommandPageShell header={header}>
-                <CommandEmptyState title="Lecture indisponible" description={error || "Impossible d'accéder aux données de cohérence."} />
+                <CommandEmptyState
+                    title="Lecture indisponible"
+                    description={error || "Impossible d'accéder aux données de cohérence."}
+                />
             </CommandPageShell>
         );
     }
@@ -80,39 +84,43 @@ export default function GeoConsistencyPage() {
     return (
         <CommandPageShell header={header}>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <CommandMetricCard 
-                    label="État Global" 
-                    value={data.summary?.globalState || 'n.d.'} 
-                    detail={data.summary?.reliability || 'Stabilité observée'} 
-                    tone={toneFromStatus(data.summary?.globalState)} 
+                <CommandMetricCard
+                    label="État Global"
+                    value={data.summary?.globalState || 'n.d.'}
+                    detail={data.summary?.reliability || 'Stabilité observée'}
+                    tone={toneFromStatus(data.summary?.globalState)}
                 />
-                <CommandMetricCard 
-                    label="Divergences" 
-                    value={contradictionCount} 
-                    detail="Contradictions critiques" 
-                    tone={contradictionCount > 0 ? 'critical' : 'neutral'} 
+                <CommandMetricCard
+                    label="Divergences"
+                    value={contradictionCount}
+                    detail="Contradictions critiques"
+                    tone={contradictionCount > 0 ? 'critical' : 'neutral'}
                 />
-                <CommandMetricCard 
-                    label="Alignement" 
-                    value={`${alignedCount}/${dimensions.length}`} 
+                <CommandMetricCard
+                    label="Alignement"
+                    value={`${alignedCount}/${dimensions.length}`}
                     detail={`${partialCount} partiels`}
-                    tone={alignedCount === dimensions.length ? 'ok' : 'warning'} 
+                    tone={alignedCount === dimensions.length ? 'ok' : 'warning'}
                 />
-                <CommandMetricCard 
-                    label="Fiabilité" 
-                    value={data.freshness?.audit?.value || '94%'} 
-                    detail="Confiance algorithmique" 
-                    tone="info" 
+                <CommandMetricCard
+                    label="Fiabilité"
+                    value={data.freshness?.audit?.value || '94%'}
+                    detail="Confiance algorithmique"
+                    tone="info"
                 />
             </div>
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-3 h-[calc(100vh-280px)] min-h-[550px]">
                 <div className={cn(COMMAND_PANEL, 'lg:col-span-2 flex flex-col overflow-hidden p-0')}>
                     <div className="flex items-center justify-between border-b border-white/[0.05] bg-white/[0.01] px-6 py-4">
-                        <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Matrice de conformité</h3>
+                        <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">
+                            Matrice de conformité
+                        </h3>
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
                             <ActivityIcon className="h-3 w-3 text-[#7c6aef]" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">{dimensions.length} Dimensions</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                                {dimensions.length} Dimensions
+                            </span>
                         </div>
                     </div>
 
@@ -120,28 +128,52 @@ export default function GeoConsistencyPage() {
                         <table className="w-full text-left border-collapse">
                             <thead className="sticky top-0 z-10 bg-[#06060a] border-b border-white/[0.05]">
                                 <tr>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">Dimension</th>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">État Observé</th>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">Détails / Écarts</th>
-                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 text-right">Statut</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">
+                                        Dimension
+                                    </th>
+                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">
+                                        État Observé
+                                    </th>
+                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">
+                                        Détails / Écarts
+                                    </th>
+                                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 text-right">
+                                        Statut
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/[0.03]">
                                 {dimensions.map((item, idx) => (
                                     <tr key={idx} className="group hover:bg-white/[0.02] transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">{item.label}</div>
+                                            <div className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
+                                                {item.label}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-[12px] text-white/50 leading-relaxed max-w-xs truncate" title={item.evidence || item.detail}>{item.evidence || item.detail || '—'}</div>
+                                            <div
+                                                className="text-[12px] text-white/50 leading-relaxed max-w-xs truncate"
+                                                title={item.evidence || item.detail}
+                                            >
+                                                {item.evidence || item.detail || '—'}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-[11px] font-medium text-white/30 italic">
-                                                {(item.contradictions || item.gaps || item.missingFields || []).slice(0, 2).join(' · ') || item.reliability || '—'}
+                                                {(item.contradictions || item.gaps || item.missingFields || [])
+                                                    .slice(0, 2)
+                                                    .join(' · ') ||
+                                                    item.reliability ||
+                                                    '—'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className={cn('rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest border', statusChip(item.status))}>
+                                            <span
+                                                className={cn(
+                                                    'rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest border',
+                                                    statusChip(item.status),
+                                                )}
+                                            >
                                                 {item.status || 'n.d.'}
                                             </span>
                                         </td>
@@ -156,14 +188,21 @@ export default function GeoConsistencyPage() {
                     {contradictionCount > 0 && (
                         <div className={cn(COMMAND_PANEL, 'flex flex-col border-rose-500/20 bg-rose-500/[0.02]')}>
                             <div className="px-5 py-4 border-b border-rose-500/10 bg-rose-500/5 flex items-center justify-between">
-                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-rose-400">Contradictions</h3>
+                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-rose-400">
+                                    Contradictions
+                                </h3>
                                 <AlertTriangleIcon className="h-4 w-4 text-rose-400" />
                             </div>
                             <div className="p-4 space-y-3 overflow-y-auto geo-scrollbar">
                                 {(data.criticalContradictions || []).map((item, index) => (
-                                    <div key={index} className={cn(COMMAND_SURFACE, "p-3 border-l-2 border-rose-500/40")}>
+                                    <div
+                                        key={index}
+                                        className={cn(COMMAND_SURFACE, 'p-3 border-l-2 border-rose-500/40')}
+                                    >
                                         <div className="text-[12px] font-bold text-rose-100/90 mb-1">{item.label}</div>
-                                        <div className="text-[10px] leading-relaxed text-rose-100/40 italic">&quot;{item.detail || item.evidence}&quot;</div>
+                                        <div className="text-[10px] leading-relaxed text-rose-100/40 italic">
+                                            &quot;{item.detail || item.evidence}&quot;
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -172,17 +211,24 @@ export default function GeoConsistencyPage() {
 
                     <div className={cn(COMMAND_PANEL, 'flex flex-col flex-1 overflow-hidden')}>
                         <div className="px-5 py-4 border-b border-white/[0.05] bg-white/[0.01] flex items-center justify-between">
-                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Recommandations</h3>
+                            <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">
+                                Recommandations
+                            </h3>
                             <ShieldCheckIcon className="h-4 w-4 text-[#7c6aef]/40" />
                         </div>
                         <div className="p-4 space-y-3 overflow-y-auto geo-scrollbar">
                             {(data.recommendations || []).map((item, index) => (
-                                <div key={index} className={cn(COMMAND_SURFACE, "p-4 group hover:bg-white/[0.04] transition-all")}>
+                                <div
+                                    key={index}
+                                    className={cn(COMMAND_SURFACE, 'p-4 group hover:bg-white/[0.04] transition-all')}
+                                >
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="h-1 w-1 rounded-full bg-[#7c6aef]" />
                                         <div className="text-[12px] font-bold text-white/80">{item.title}</div>
                                     </div>
-                                    <p className="text-[11px] leading-relaxed text-white/40">{item.rationale || item.description}</p>
+                                    <p className="text-[11px] leading-relaxed text-white/40">
+                                        {item.rationale || item.description}
+                                    </p>
                                     <div className="mt-3 flex justify-end">
                                         <button className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c6aef] flex items-center gap-1 hover:gap-2 transition-all">
                                             Appliquer <ArrowRightIcon className="h-2.5 w-2.5" />
@@ -190,10 +236,12 @@ export default function GeoConsistencyPage() {
                                     </div>
                                 </div>
                             ))}
-                            {!(data.recommendations?.length) && (
+                            {!data.recommendations?.length && (
                                 <div className="text-center py-10 opacity-20">
                                     <CheckCircle2Icon className="h-8 w-8 mx-auto mb-3" />
-                                    <p className="text-[10px] font-bold uppercase tracking-widest">Aucune action requise</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest">
+                                        Aucune action requise
+                                    </p>
                                 </div>
                             )}
                         </div>

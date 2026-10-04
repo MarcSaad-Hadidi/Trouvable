@@ -123,7 +123,10 @@ describe('deriveRunMetrics()', () => {
     });
 
     it('flags low sample size', () => {
-        const result = deriveRunMetrics([{ id: '1', provider: 'a', model: 'b' }], { totalQueryRuns: 3, brandRecommendations: 1 });
+        const result = deriveRunMetrics([{ id: '1', provider: 'a', model: 'b' }], {
+            totalQueryRuns: 3,
+            brandRecommendations: 1,
+        });
         expect(result.sampleSizeWarning).toBe(true);
         expect(result.visibilityProxyReliability).toBe('low');
         expect(result.visibilityProxyPercent.warnings.length).toBeGreaterThan(0);
@@ -173,15 +176,43 @@ describe('deriveRunMetrics()', () => {
 
 describe('deriveMentionMetrics()', () => {
     const baseMentions = [
-        { entity_type: 'source', source_type: 'editorial', business_name: 'yelp.ca', query_run_id: 'r1', created_at: '2025-01-01', normalized_domain: 'yelp.ca' },
-        { entity_type: 'source', source_type: 'client_own', business_name: 'mysite.com', query_run_id: 'r1', created_at: '2025-01-01', normalized_domain: 'mysite.com' },
+        {
+            entity_type: 'source',
+            source_type: 'editorial',
+            business_name: 'yelp.ca',
+            query_run_id: 'r1',
+            created_at: '2025-01-01',
+            normalized_domain: 'yelp.ca',
+        },
+        {
+            entity_type: 'source',
+            source_type: 'client_own',
+            business_name: 'mysite.com',
+            query_run_id: 'r1',
+            created_at: '2025-01-01',
+            normalized_domain: 'mysite.com',
+        },
         { entity_type: 'competitor', business_name: 'Rival Co', normalized_label: 'Rival Co', query_run_id: 'r1' },
         { entity_type: 'competitor', business_name: 'Rival Co', normalized_label: 'Rival Co', query_run_id: 'r2' },
-        { entity_type: 'generic_mention', business_name: 'Random Biz', normalized_label: 'Random Biz', query_run_id: 'r1' },
+        {
+            entity_type: 'generic_mention',
+            business_name: 'Random Biz',
+            normalized_label: 'Random Biz',
+            query_run_id: 'r1',
+        },
         { entity_type: 'business', is_target: true, business_name: 'Target', query_run_id: 'r1' },
-        { entity_type: 'business', is_target: false, business_name: 'OtherBiz', normalized_label: 'OtherBiz', query_run_id: 'r2' },
+        {
+            entity_type: 'business',
+            is_target: false,
+            business_name: 'OtherBiz',
+            normalized_label: 'OtherBiz',
+            query_run_id: 'r2',
+        },
     ];
-    const runs = [{ id: 'r1', provider: 'groq', model: 'llama' }, { id: 'r2', provider: 'openai', model: 'gpt4' }];
+    const runs = [
+        { id: 'r1', provider: 'groq', model: 'llama' },
+        { id: 'r2', provider: 'openai', model: 'gpt4' },
+    ];
 
     it('counts entity types correctly', () => {
         const result = deriveMentionMetrics(baseMentions, runs);
@@ -269,7 +300,12 @@ describe('computeGuardrails()', () => {
     it('warns on unconfirmed competitors', () => {
         const mentions = [];
         for (let i = 0; i < 5; i++) {
-            mentions.push({ entity_type: 'generic_mention', business_name: `Biz ${i}`, normalized_label: `Biz ${i}`, query_run_id: 'r1' });
+            mentions.push({
+                entity_type: 'generic_mention',
+                business_name: `Biz ${i}`,
+                normalized_label: `Biz ${i}`,
+                query_run_id: 'r1',
+            });
         }
         const runs = Array.from({ length: 6 }, (_, i) => ({ id: `r${i}`, provider: 'a', model: 'b' }));
         const warnings = computeGuardrails({
@@ -283,7 +319,8 @@ describe('computeGuardrails()', () => {
 
     it('warns on LLM degraded mode', () => {
         const audit = deriveAuditMetrics({
-            seo_score: 50, geo_score: 50,
+            seo_score: 50,
+            geo_score: 50,
             seo_breakdown: { overall: { llm_status: 'failed' } },
         });
         const warnings = computeGuardrails({
@@ -297,7 +334,10 @@ describe('computeGuardrails()', () => {
 
     it('warns on low parse confidence', () => {
         const runs = Array.from({ length: 6 }, (_, i) => ({
-            id: `r${i}`, provider: 'a', model: 'b', parse_confidence: 0.3,
+            id: `r${i}`,
+            provider: 'a',
+            model: 'b',
+            parse_confidence: 0.3,
         }));
         const warnings = computeGuardrails({
             audit: deriveAuditMetrics({ seo_score: 50, geo_score: 50 }),
@@ -325,7 +365,11 @@ describe('computeGuardrails()', () => {
 
     it('does not warn on healthy parse metrics', () => {
         const runs = Array.from({ length: 10 }, (_, i) => ({
-            id: `r${i}`, provider: 'a', model: 'b', parse_confidence: 0.9, parse_status: 'parsed_ok',
+            id: `r${i}`,
+            provider: 'a',
+            model: 'b',
+            parse_confidence: 0.9,
+            parse_status: 'parsed_ok',
         }));
         const warnings = computeGuardrails({
             audit: deriveAuditMetrics({ seo_score: 80, geo_score: 70 }),
@@ -345,7 +389,10 @@ describe('buildGeoKpiSnapshot()', () => {
         const mentions = deriveMentionMetrics([], []);
         const prompts = derivePromptMetrics([], new Map());
         const snapshot = buildGeoKpiSnapshot({
-            audit, runs, mentions, prompts,
+            audit,
+            runs,
+            mentions,
+            prompts,
             counts: { openOpportunities: 2 },
             lastRunAt: '2025-01-01',
         });
@@ -358,9 +405,7 @@ describe('buildGeoKpiSnapshot()', () => {
 
 describe('enrichModelPerformanceWithSources()', () => {
     it('adds source counts to model performance', () => {
-        const modelPerf = [
-            { provider: 'groq', model: 'llama', runs: 3, targetFound: 1, sources: 0 },
-        ];
+        const modelPerf = [{ provider: 'groq', model: 'llama', runs: 3, targetFound: 1, sources: 0 }];
         const mentions = [
             { entity_type: 'source', query_run_id: 'r1' },
             { entity_type: 'source', query_run_id: 'r2' },
@@ -377,13 +422,29 @@ describe('enrichModelPerformanceWithSources()', () => {
 
 describe('flattenSnapshotToLegacy()', () => {
     it('produces backward-compatible shape', () => {
-        const audit = deriveAuditMetrics({ seo_score: 85, geo_score: 70, created_at: '2025-01-01', strengths: ['s1'], issues: ['i1'] });
+        const audit = deriveAuditMetrics({
+            seo_score: 85,
+            geo_score: 70,
+            created_at: '2025-01-01',
+            strengths: ['s1'],
+            issues: ['i1'],
+        });
         const runs = deriveRunMetrics([{ id: '1' }], { totalQueryRuns: 10, brandRecommendations: 5 });
         const mentions = deriveMentionMetrics([], []);
         const prompts = derivePromptMetrics([{ id: 'q1' }], new Map());
         const snapshot = buildGeoKpiSnapshot({
-            audit, runs, mentions, prompts,
-            counts: { openOpportunities: 3, pendingMerge: 1, activeTrackedQueries: 5, totalTrackedQueries: 8, totalQueryRuns: 10, brandRecommendations: 5 },
+            audit,
+            runs,
+            mentions,
+            prompts,
+            counts: {
+                openOpportunities: 3,
+                pendingMerge: 1,
+                activeTrackedQueries: 5,
+                totalTrackedQueries: 8,
+                totalQueryRuns: 10,
+                brandRecommendations: 5,
+            },
             lastRunAt: '2025-01-01',
         });
         const legacy = flattenSnapshotToLegacy(snapshot, { id: 'audit-1', seo_score: 85 });

@@ -25,7 +25,9 @@ describe('url safety fetch guard', () => {
         await expect(fetchPublicResource('http://localhost/')).rejects.toThrow('blocked_private_host');
         await expect(fetchPublicResource('http://127.0.0.1/')).rejects.toThrow('blocked_private_ip');
         await expect(fetchPublicResource('http://10.0.0.1/')).rejects.toThrow('blocked_private_ip');
-        await expect(fetchPublicResource('http://169.254.169.254/latest/meta-data')).rejects.toThrow('blocked_private_ip');
+        await expect(fetchPublicResource('http://169.254.169.254/latest/meta-data')).rejects.toThrow(
+            'blocked_private_ip',
+        );
         await expect(fetchPublicResource('data:text/html,test')).rejects.toThrow('invalid_public_http_url');
         await expect(fetchPublicResource('file:///etc/passwd')).rejects.toThrow('invalid_public_http_url');
         await expect(fetchPublicResource('java' + 'script:alert(1)')).rejects.toThrow('invalid_public_http_url');
@@ -37,13 +39,17 @@ describe('url safety fetch guard', () => {
         const fetchMock = vi.fn();
         vi.stubGlobal('fetch', fetchMock);
 
-        await expect(fetchPublicResource('http://%6c%6f%63%61%6c%68%6f%73%74/')).rejects.toThrow('blocked_private_host');
+        await expect(fetchPublicResource('http://%6c%6f%63%61%6c%68%6f%73%74/')).rejects.toThrow(
+            'blocked_private_host',
+        );
         await expect(fetchPublicResource('http://2130706433/')).rejects.toThrow('blocked_private_ip');
         await expect(fetchPublicResource('http://0x7f000001/')).rejects.toThrow('blocked_private_ip');
         await expect(fetchPublicResource('http://[::1]/')).rejects.toThrow('blocked_private_ip');
         await expect(fetchPublicResource('http://[::ffff:127.0.0.1]/')).rejects.toThrow('blocked_private_ip');
         await expect(fetchPublicResource('http://[fe80::1]/')).rejects.toThrow('blocked_private_ip');
-        await expect(fetchPublicResource('http://[fd00:ec2::254]/latest/meta-data')).rejects.toThrow('blocked_private_ip');
+        await expect(fetchPublicResource('http://[fd00:ec2::254]/latest/meta-data')).rejects.toThrow(
+            'blocked_private_ip',
+        );
         await expect(fetchPublicResource('http://metadata.google.internal/')).rejects.toThrow('blocked_private_host');
         await expect(fetchPublicResource('http://example.internal/')).rejects.toThrow('blocked_private_host');
         await expect(fetchPublicResource('http://example.com:6379/')).rejects.toThrow('blocked_port');
@@ -69,9 +75,7 @@ describe('url safety fetch guard', () => {
             headers: { location: 'https://www.example.com/final' },
         });
         const okResponse = new Response('ok', { status: 200 });
-        const fetchMock = vi.fn()
-            .mockResolvedValueOnce(redirectResponse)
-            .mockResolvedValueOnce(okResponse);
+        const fetchMock = vi.fn().mockResolvedValueOnce(redirectResponse).mockResolvedValueOnce(okResponse);
         vi.stubGlobal('fetch', fetchMock);
 
         const response = await fetchPublicResource('https://example.com/start');
@@ -79,10 +83,12 @@ describe('url safety fetch guard', () => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
 
         lookupMock.mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }]);
-        fetchMock.mockResolvedValueOnce(new Response('', {
-            status: 302,
-            headers: { location: 'http://127.0.0.1/admin' },
-        }));
+        fetchMock.mockResolvedValueOnce(
+            new Response('', {
+                status: 302,
+                headers: { location: 'http://127.0.0.1/admin' },
+            }),
+        );
         await expect(fetchPublicResource('https://example.com/start')).rejects.toThrow('blocked_private_ip');
     });
 });

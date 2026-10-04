@@ -1,7 +1,9 @@
 export async function sendSlackAlert({ type, clientId, runId, errorMessage }) {
     const webhookUrl = process.env.SLACK_ALERT_WEBHOOK_URL;
     if (!webhookUrl) {
-        console.warn(`[Alert] No SLACK_ALERT_WEBHOOK_URL configured. Would have sent: [${type}] Client ${clientId} | Run ${runId} | Error: ${errorMessage}`);
+        console.warn(
+            `[Alert] No SLACK_ALERT_WEBHOOK_URL configured. Would have sent: [${type}] Client ${clientId} | Run ${runId} | Error: ${errorMessage}`,
+        );
         return;
     }
 

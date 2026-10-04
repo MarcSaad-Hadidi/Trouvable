@@ -40,7 +40,9 @@ export async function POST(request) {
         const supabase = getAdminSupabase();
         const { data: trackedQuery, error: trackedQueryError } = await supabase
             .from('tracked_queries')
-            .select('id, client_id, query_text, category, query_type, locale, discovery_mode, intent_family, prompt_metadata')
+            .select(
+                'id, client_id, query_text, category, query_type, locale, discovery_mode, intent_family, prompt_metadata',
+            )
             .eq('id', id)
             .single();
 
@@ -71,12 +73,14 @@ export async function POST(request) {
 
         const resolvedDiscoveryMode = updates.discovery_mode
             ? normalizeDiscoveryMode(updates.discovery_mode)
-            : (trackedQuery.discovery_mode || trackedQuery.prompt_metadata?.discovery_mode || inferDiscoveryMode({
-                category: updates.category || trackedQuery.category || trackedQuery.query_type,
-                intentFamily: updates.intent_family || trackedQuery.intent_family,
-                queryText: resolvedQueryText,
-                clientName: client?.client_name || '',
-            }));
+            : trackedQuery.discovery_mode ||
+              trackedQuery.prompt_metadata?.discovery_mode ||
+              inferDiscoveryMode({
+                  category: updates.category || trackedQuery.category || trackedQuery.query_type,
+                  intentFamily: updates.intent_family || trackedQuery.intent_family,
+                  queryText: resolvedQueryText,
+                  clientName: client?.client_name || '',
+              });
         const activationBlocked = shouldSoftBlockPromptActivation(promptMetadata) && updates.is_active === true;
         const serialized = serializePromptContractForDb({
             contract: promptMetadata,
@@ -113,9 +117,7 @@ export async function POST(request) {
             query: row,
             quality: promptMetadata,
             activation_blocked: activationBlocked,
-            warning: activationBlocked
-                ? 'Activation bloquee: prompt faible, revue operateur requise.'
-                : null,
+            warning: activationBlocked ? 'Activation bloquee: prompt faible, revue operateur requise.' : null,
         });
     } catch (error) {
         console.error('[queries/update]', error);

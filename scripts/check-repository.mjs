@@ -4,11 +4,25 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const sourceExtensions = ['', '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json', '.css',
-    '/index.js', '/index.jsx', '/index.ts', '/index.tsx'];
+const sourceExtensions = [
+    '',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+    '.mjs',
+    '.cjs',
+    '.json',
+    '.css',
+    '/index.js',
+    '/index.jsx',
+    '/index.ts',
+    '/index.tsx',
+];
 const codePattern = /\.[cm]?[jt]sx?$/;
-const isProduction = (file) => /^src\/(app|features|components|lib)\//.test(file)
-    && !/(?:__tests__|__fixtures__|fixtures)\//.test(file) || file === 'src/proxy.js';
+const isProduction = (file) =>
+    (/^src\/(app|features|components|lib)\//.test(file) && !/(?:__tests__|__fixtures__|fixtures)\//.test(file)) ||
+    file === 'src/proxy.js';
 
 function headingIds(markdown) {
     const occurrences = new Map();
@@ -16,8 +30,11 @@ function headingIds(markdown) {
     for (const line of markdown.split('\n')) {
         const match = /^#{1,6}\s+(.+?)\s*#*\s*$/.exec(line);
         if (!match) continue;
-        const base = match[1].toLowerCase().replace(/<[^>]*>/g, '')
-            .replace(/[^\p{L}\p{N}_\-\s]/gu, '').replace(/\s/g, '-');
+        const base = match[1]
+            .toLowerCase()
+            .replace(/<[^>]*>/g, '')
+            .replace(/[^\p{L}\p{N}_\-\s]/gu, '')
+            .replace(/\s/g, '-');
         const count = occurrences.get(base) || 0;
         ids.add(base + (count ? '-' + count : ''));
         occurrences.set(base, count + 1);
@@ -27,9 +44,15 @@ function headingIds(markdown) {
 
 /** Check tracked paths only; generated output is never used to satisfy imports. */
 export function checkRepository(root, trackedFiles) {
-    const files = trackedFiles || execFileSync('git', ['ls-files', '-z'], {
-        cwd: root, maxBuffer: 16 * 1024 * 1024,
-    }).toString().split('\0').filter(Boolean);
+    const files =
+        trackedFiles ||
+        execFileSync('git', ['ls-files', '-z'], {
+            cwd: root,
+            maxBuffer: 16 * 1024 * 1024,
+        })
+            .toString()
+            .split('\0')
+            .filter(Boolean);
     const tracked = new Set(files);
     const folded = new Map(files.map((file) => [file.toLowerCase(), file]));
     const graph = new Map();
@@ -49,8 +72,11 @@ export function checkRepository(root, trackedFiles) {
         return false;
     }
     function resolveImport(from, specifier) {
-        const base = specifier.startsWith('@/') ? 'src/' + specifier.slice(2)
-            : specifier.startsWith('.') ? path.posix.normalize(path.posix.join(path.posix.dirname(from), specifier)) : null;
+        const base = specifier.startsWith('@/')
+            ? 'src/' + specifier.slice(2)
+            : specifier.startsWith('.')
+              ? path.posix.normalize(path.posix.join(path.posix.dirname(from), specifier))
+              : null;
         if (base === null) return;
         imports++;
         const candidates = sourceExtensions.map((extension) => base + extension);
@@ -60,8 +86,12 @@ export function checkRepository(root, trackedFiles) {
             return;
         }
         const wrongCase = candidates.map((candidate) => folded.get(candidate.toLowerCase())).find(Boolean);
-        errors.push({ from, kind: wrongCase ? 'import-case' : 'missing-import', target: specifier,
-            ...(wrongCase ? { actual: wrongCase } : {}) });
+        errors.push({
+            from,
+            kind: wrongCase ? 'import-case' : 'missing-import',
+            target: specifier,
+            ...(wrongCase ? { actual: wrongCase } : {}),
+        });
     }
 
     for (const file of files) {
@@ -71,22 +101,31 @@ export function checkRepository(root, trackedFiles) {
             graph.set(file, new Set());
             const ast = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
             function walk(node) {
-                if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
-                    && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+                if (
+                    (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+                    node.moduleSpecifier &&
+                    ts.isStringLiteral(node.moduleSpecifier)
+                ) {
                     resolveImport(file, node.moduleSpecifier.text);
                 }
                 if (ts.isCallExpression(node)) {
                     const literal = node.arguments[0] && ts.isStringLiteral(node.arguments[0]);
                     const dynamic = node.expression.kind === ts.SyntaxKind.ImportKeyword;
                     const requireCall = ts.isIdentifier(node.expression) && node.expression.text === 'require';
-                    const mock = ts.isPropertyAccessExpression(node.expression)
-                        && ['mock', 'doMock', 'importActual'].includes(node.expression.name.text);
+                    const mock =
+                        ts.isPropertyAccessExpression(node.expression) &&
+                        ['mock', 'doMock', 'importActual'].includes(node.expression.name.text);
                     if (literal && (dynamic || requireCall || mock)) resolveImport(file, node.arguments[0].text);
                     else if (dynamic) computedImports++;
                 }
-                if (ts.isJsxAttribute(node) && node.name.getText(ast) === 'src'
-                    && node.initializer && ts.isStringLiteral(node.initializer)
-                    && node.initializer.text.startsWith('/') && !node.initializer.text.startsWith('//')) {
+                if (
+                    ts.isJsxAttribute(node) &&
+                    node.name.getText(ast) === 'src' &&
+                    node.initializer &&
+                    ts.isStringLiteral(node.initializer) &&
+                    node.initializer.text.startsWith('/') &&
+                    !node.initializer.text.startsWith('//')
+                ) {
                     assetReferences++;
                     inspectPath(file, 'public' + node.initializer.text.split(/[?#]/)[0], 'missing-asset');
                 }
@@ -102,10 +141,16 @@ export function checkRepository(root, trackedFiles) {
                 docLinks++;
                 const [pathname, fragment] = href.split('#');
                 const decoded = decodeURIComponent(pathname || '');
-                const target = pathname ? path.posix.normalize(path.posix.join(path.posix.dirname(file), decoded)) : file;
+                const target = pathname
+                    ? path.posix.normalize(path.posix.join(path.posix.dirname(file), decoded))
+                    : file;
                 if (!inspectPath(file, target, 'missing-doc-link')) continue;
-                if (fragment && /\.md$/.test(target) && tracked.has(target)
-                    && !headingIds(fs.readFileSync(path.join(root, target), 'utf8')).has(decodeURIComponent(fragment))) {
+                if (
+                    fragment &&
+                    /\.md$/.test(target) &&
+                    tracked.has(target) &&
+                    !headingIds(fs.readFileSync(path.join(root, target), 'utf8')).has(decodeURIComponent(fragment))
+                ) {
                     errors.push({ from: file, kind: 'missing-doc-anchor', target: href });
                 }
             }
@@ -132,8 +177,11 @@ export function checkRepository(root, trackedFiles) {
     for (const file of files) if (isProduction(file)) visit(file);
     for (const cycle of cycles) errors.push({ kind: 'production-cycle', files: cycle });
 
-    const artifacts = files.filter((file) => /(?:^|\/)(test-results|playwright-report)\//
-        .test(file) || /(?:^|\/)(?:trace\.zip|.*\.tsbuildinfo|scanner-temp\.js)$/.test(file));
+    const artifacts = files.filter(
+        (file) =>
+            /(?:^|\/)(test-results|playwright-report)\//.test(file) ||
+            /(?:^|\/)(?:trace\.zip|.*\.tsbuildinfo|scanner-temp\.js)$/.test(file),
+    );
     for (const file of artifacts) errors.push({ kind: 'generated-artifact', target: file });
     return { files: files.length, imports, computedImports, docLinks, assetReferences, errors };
 }

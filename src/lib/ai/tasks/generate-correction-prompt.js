@@ -36,7 +36,7 @@ function buildMessages(input) {
         {
             role: 'system',
             content: [
-                "Tu rediges des prompts premium pour un agent IA de code qui travaille dans le repo Trouvable.",
+                'Tu rediges des prompts premium pour un agent IA de code qui travaille dans le repo Trouvable.',
                 "Ton role n'est PAS de detecter le probleme: le systeme te fournit deja le probleme reel, le contexte reel et la preuve reelle.",
                 '',
                 'Regles absolues:',
@@ -44,7 +44,7 @@ function buildMessages(input) {
                 '- N invente jamais une preuve, une URL, un fichier, une route ou une certitude absente.',
                 '- Si une information manque, indique-la honnetement dans `donneesManquantes` et formule les consignes avec prudence.',
                 "- Le prompt doit demander a l'agent d'inspecter le code existant avant de modifier quoi que ce soit.",
-                "- Le prompt doit etre actionnable pour une correction dans ce repo, pas un diagnostic theorique.",
+                '- Le prompt doit etre actionnable pour une correction dans ce repo, pas un diagnostic theorique.',
                 '- Les champs de liste doivent TOUJOURS etre des tableaux JSON de chaines: jamais un objet, jamais une chaine simple.',
                 '- `preuveDisponible`, `fichiersOuSurfacesAInspecter`, `contraintesAbsolues`, `ceQueLiaDoitFaire`, `ceQueLiaNeDoitPasFaire`, `validationAttendue`, `formatDuLivrableFinal` et `donneesManquantes` doivent etre des tableaux JSON de chaines.',
                 '- `formatDuLivrableFinal` doit decrire des attentes de livrable en bullets, pas un schema objet imbrique.',

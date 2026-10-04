@@ -45,12 +45,7 @@ export async function executeTask(taskId, input, options = {}) {
     const task = TASKS[taskId];
     if (!task) throw new Error(`[AI/Tasks] Unknown task: ${taskId}`);
 
-    const {
-        clientId = null,
-        triggerSource = 'system',
-        parentRunId = null,
-        skipLog = false,
-    } = options;
+    const { clientId = null, triggerSource = 'system', parentRunId = null, skipLog = false } = options;
 
     const startMs = Date.now();
     let logRow = null;
@@ -96,9 +91,7 @@ export async function executeTask(taskId, input, options = {}) {
         const validation = validateOutput(task, rawResult);
 
         // Normalize if the task provides a normalizer
-        const data = task.normalize
-            ? task.normalize(validation.data, input)
-            : validation.data;
+        const data = task.normalize ? task.normalize(validation.data, input) : validation.data;
 
         if (task.assertResult) {
             task.assertResult({
@@ -171,9 +164,7 @@ function validateOutput(task, rawResult) {
         return { data: result.data, status: 'valid', warnings: [] };
     }
 
-    const warnings = result.error.issues.map(
-        (issue) => `${issue.path.join('.')}: ${issue.message}`
-    );
+    const warnings = result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
 
     return {
         data: raw,

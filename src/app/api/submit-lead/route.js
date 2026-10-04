@@ -19,12 +19,22 @@ function escapeHtml(unsafe) {
 
 const leadSchema = z
     .object({
-        name: z.string().trim().min(2, 'Le nom doit contenir au moins 2 caractères').max(80, 'Le nom est trop long (max 80 caractères)'),
+        name: z
+            .string()
+            .trim()
+            .min(2, 'Le nom doit contenir au moins 2 caractères')
+            .max(80, 'Le nom est trop long (max 80 caractères)'),
         email: z.string().trim().email("Format d'email invalide").max(254, 'Le courriel est trop long'),
-        message: z.string().trim().min(10, 'Le message doit contenir au moins 10 caractères').max(2000, 'Le message est trop long (max 2000 caractères)'),
+        message: z
+            .string()
+            .trim()
+            .min(10, 'Le message doit contenir au moins 10 caractères')
+            .max(2000, 'Le message est trop long (max 2000 caractères)'),
         phone: z.string().trim().max(30, 'Le téléphone est trop long').optional().nullable(),
         businessType: z.string().trim().max(80, 'Le type de commerce est trop long').optional().nullable(),
-        turnstileToken: z.string({ required_error: 'Vérification anti-robot manquante' }).min(1, 'Vérification anti-robot manquante'),
+        turnstileToken: z
+            .string({ required_error: 'Vérification anti-robot manquante' })
+            .min(1, 'Vérification anti-robot manquante'),
         page_path: z.string().trim().optional().nullable(),
         utm_source: z.string().trim().optional().nullable(),
         utm_medium: z.string().trim().optional().nullable(),
@@ -85,8 +95,8 @@ export async function POST(req) {
             client_context: clientContext,
         } = parsed.data;
 
-        const isLocalCloudflareBypass = isDevCloudflareBypassAllowedForRequest(req)
-            && isDevTurnstileToken(turnstileToken);
+        const isLocalCloudflareBypass =
+            isDevCloudflareBypassAllowedForRequest(req) && isDevTurnstileToken(turnstileToken);
 
         if (isLocalCloudflareBypass) {
             return NextResponse.json({ ok: true, dev_bypass: true }, { status: 200 });
@@ -98,7 +108,10 @@ export async function POST(req) {
 
         if (!supabaseUrl || !supabaseServiceKey) {
             console.error('[SubmitLead API] Missing Supabase keys in environment');
-            return NextResponse.json({ ok: false, error: 'Erreur interne du serveur. Veuillez réessayer plus tard.' }, { status: 500 });
+            return NextResponse.json(
+                { ok: false, error: 'Erreur interne du serveur. Veuillez réessayer plus tard.' },
+                { status: 500 },
+            );
         }
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -113,21 +126,24 @@ export async function POST(req) {
             console.error('[SubmitLead API] Rate Limit DB Error:', rateError);
         } else if (isBlocked) {
             console.warn(`[SubmitLead API] IP bloquée par le Rate Limit: ${clientIp}`);
-            return NextResponse.json({ ok: false, error: 'Trop de requêtes, veuillez réessayer dans quelques minutes.' }, { status: 429 });
+            return NextResponse.json(
+                { ok: false, error: 'Trop de requêtes, veuillez réessayer dans quelques minutes.' },
+                { status: 429 },
+            );
         }
 
         const isPortalSupport = formType === 'portal_support';
-        const dbBusinessType = isPortalSupport
-            ? `Espace client · ${portalTopic || 'Demande'}`
-            : businessType || null;
-        const dbMessage = isPortalSupport && clientContext
-            ? `Contexte dossier : ${clientContext}\n\n${message}`
-            : message;
+        const dbBusinessType = isPortalSupport ? `Espace client · ${portalTopic || 'Demande'}` : businessType || null;
+        const dbMessage =
+            isPortalSupport && clientContext ? `Contexte dossier : ${clientContext}\n\n${message}` : message;
 
         const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
         if (!turnstileSecret) {
             console.error('[SubmitLead API] Missing TURNSTILE_SECRET_KEY in environment');
-            return NextResponse.json({ ok: false, error: 'Vérification anti-robot temporairement indisponible.' }, { status: 503 });
+            return NextResponse.json(
+                { ok: false, error: 'Vérification anti-robot temporairement indisponible.' },
+                { status: 503 },
+            );
         }
 
         const turnstileForm = new URLSearchParams();
@@ -144,13 +160,19 @@ export async function POST(req) {
 
             if (!turnstileRes.ok) {
                 console.error(`[SubmitLead API] Turnstile verify request failed with status ${turnstileRes.status}`);
-                return NextResponse.json({ ok: false, error: 'Vérification anti-robot indisponible, merci de réessayer.' }, { status: 503 });
+                return NextResponse.json(
+                    { ok: false, error: 'Vérification anti-robot indisponible, merci de réessayer.' },
+                    { status: 503 },
+                );
             }
 
             turnstileOutcome = await turnstileRes.json();
         } catch (turnstileErr) {
             console.error('[SubmitLead API] Turnstile verify network error:', turnstileErr);
-            return NextResponse.json({ ok: false, error: 'Vérification anti-robot indisponible, merci de réessayer.' }, { status: 503 });
+            return NextResponse.json(
+                { ok: false, error: 'Vérification anti-robot indisponible, merci de réessayer.' },
+                { status: 503 },
+            );
         }
 
         if (!turnstileOutcome.success) {
@@ -161,26 +183,31 @@ export async function POST(req) {
             console.warn(`[SubmitLead API] Turnstile verification failed. Codes: ${turnstileCodes || 'unknown'}`);
             return NextResponse.json(
                 { ok: false, error: 'Échec de la vérification anti-robot.', turnstile_codes: turnstileCodes || null },
-                { status: 403 }
+                { status: 403 },
             );
         }
 
-        const { error: dbError } = await supabase.from('leads').insert([{
-            name,
-            email,
-            phone: phone || null,
-            business_type: dbBusinessType,
-            message: dbMessage,
-            status: 'new',
-            page_path: pagePath,
-            utm_source: utmSource,
-            utm_medium: utmMedium,
-            utm_campaign: utmCampaign,
-        }]);
+        const { error: dbError } = await supabase.from('leads').insert([
+            {
+                name,
+                email,
+                phone: phone || null,
+                business_type: dbBusinessType,
+                message: dbMessage,
+                status: 'new',
+                page_path: pagePath,
+                utm_source: utmSource,
+                utm_medium: utmMedium,
+                utm_campaign: utmCampaign,
+            },
+        ]);
 
         if (dbError) {
             console.error('[SubmitLead API] Supabase Insertion Error:', dbError);
-            return NextResponse.json({ ok: false, error: 'Impossible d\'enregistrer votre demande. Veuillez réessayer plus tard.' }, { status: 500 });
+            return NextResponse.json(
+                { ok: false, error: "Impossible d'enregistrer votre demande. Veuillez réessayer plus tard." },
+                { status: 500 },
+            );
         }
 
         try {
@@ -195,10 +222,11 @@ export async function POST(req) {
                 const adminBorderColor = isPortalSupport ? '#5b73ff' : '#ea580c';
                 const typeLine = isPortalSupport
                     ? escapeHtml(String(portalTopic || '')) || '—'
-                    : (escapeHtml(String(businessType || '')) || 'Non précisé');
-                const contextBlock = isPortalSupport && clientContext
-                    ? `<p style="margin: 0 0 8px 0; color: #18181b; font-size: 15px;"><strong>Dossier :</strong> ${escapeHtml(String(clientContext))}</p>`
-                    : '';
+                    : escapeHtml(String(businessType || '')) || 'Non précisé';
+                const contextBlock =
+                    isPortalSupport && clientContext
+                        ? `<p style="margin: 0 0 8px 0; color: #18181b; font-size: 15px;"><strong>Dossier :</strong> ${escapeHtml(String(clientContext))}</p>`
+                        : '';
 
                 const { error: adminEmailError } = await resend.emails.send({
                     from: fromEmail,

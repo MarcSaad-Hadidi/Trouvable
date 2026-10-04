@@ -13,11 +13,24 @@ describe('getExtractionVersion', () => {
 describe('buildExtractionArtifacts', () => {
     const baseParams = {
         queryText: 'Best plumber in Montreal',
-        responseText: 'ABC Plumbing is a top plumber in Montreal. XYZ Services also operates there. Visit https://yelp.com/biz/abc for reviews.',
+        responseText:
+            'ABC Plumbing is a top plumber in Montreal. XYZ Services also operates there. Visit https://yelp.com/biz/abc for reviews.',
         analysis: {
             mentioned_businesses: [
-                { name: 'ABC Plumbing', position: 1, context: 'ABC Plumbing is a top plumber', is_target: true, sentiment: 'positive' },
-                { name: 'XYZ Services', position: 2, context: 'XYZ Services also operates', is_target: false, sentiment: 'neutral' },
+                {
+                    name: 'ABC Plumbing',
+                    position: 1,
+                    context: 'ABC Plumbing is a top plumber',
+                    is_target: true,
+                    sentiment: 'positive',
+                },
+                {
+                    name: 'XYZ Services',
+                    position: 2,
+                    context: 'XYZ Services also operates',
+                    is_target: false,
+                    sentiment: 'neutral',
+                },
             ],
         },
         clientName: 'ABC Plumbing',
@@ -45,8 +58,20 @@ describe('buildExtractionArtifacts', () => {
             knownCompetitors: [],
             analysis: {
                 mentioned_businesses: [
-                    { name: 'ABC Plumbing', position: 1, context: 'ABC Plumbing is a top plumber', is_target: true, sentiment: 'positive' },
-                    { name: 'Random Restaurant', position: 2, context: 'Random Restaurant is nearby', is_target: false, sentiment: 'neutral' },
+                    {
+                        name: 'ABC Plumbing',
+                        position: 1,
+                        context: 'ABC Plumbing is a top plumber',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
+                    {
+                        name: 'Random Restaurant',
+                        position: 2,
+                        context: 'Random Restaurant is nearby',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
                 ],
             },
         };
@@ -58,16 +83,34 @@ describe('buildExtractionArtifacts', () => {
 
     it('classifies peers in French comparative prose as competitors (response window + cues)', () => {
         const responseText =
-            "PortfolioSignal se démarque. Contrairement à des plateformes comme Wealthsimple (https://www.wealthsimple.com/) ou Nest Wealth (https://www.nestwealth.com/), automatisées. "
-            + "D'autres entreprises, telles que Questrade (https://www.questrade.com/), existent aussi.";
+            'PortfolioSignal se démarque. Contrairement à des plateformes comme Wealthsimple (https://www.wealthsimple.com/) ou Nest Wealth (https://www.nestwealth.com/), automatisées. ' +
+            "D'autres entreprises, telles que Questrade (https://www.questrade.com/), existent aussi.";
         const result = buildExtractionArtifacts({
             queryText: "Qu'est-ce qui démarque Portfolio Signal ?",
             responseText,
             analysis: {
                 mentioned_businesses: [
-                    { name: 'PortfolioSignal', position: 1, context: 'PortfolioSignal se démarque', is_target: true, sentiment: 'positive' },
-                    { name: 'Wealthsimple', position: 2, context: 'Wealthsimple', is_target: false, sentiment: 'neutral' },
-                    { name: 'Nest Wealth', position: 3, context: 'Nest Wealth', is_target: false, sentiment: 'neutral' },
+                    {
+                        name: 'PortfolioSignal',
+                        position: 1,
+                        context: 'PortfolioSignal se démarque',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
+                    {
+                        name: 'Wealthsimple',
+                        position: 2,
+                        context: 'Wealthsimple',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
+                    {
+                        name: 'Nest Wealth',
+                        position: 3,
+                        context: 'Nest Wealth',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
                     { name: 'Questrade', position: 4, context: 'Questrade', is_target: false, sentiment: 'neutral' },
                 ],
             },
@@ -122,7 +165,13 @@ describe('buildExtractionArtifacts', () => {
             knownCompetitors: [],
             analysis: {
                 mentioned_businesses: [
-                    { name: 'ABC Plumbing', position: 1, context: 'top plumber', is_target: true, sentiment: 'positive' },
+                    {
+                        name: 'ABC Plumbing',
+                        position: 1,
+                        context: 'top plumber',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
                 ],
             },
         };
@@ -136,8 +185,20 @@ describe('buildExtractionArtifacts', () => {
             knownCompetitors: ['Strong Comp'],
             analysis: {
                 mentioned_businesses: [
-                    { name: 'ABC Plumbing', position: 1, context: 'top plumber', is_target: true, sentiment: 'positive' },
-                    { name: 'Strong Comp', position: 2, context: 'Strong Comp is the top meilleur choice', is_target: false, sentiment: 'positive' },
+                    {
+                        name: 'ABC Plumbing',
+                        position: 1,
+                        context: 'top plumber',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
+                    {
+                        name: 'Strong Comp',
+                        position: 2,
+                        context: 'Strong Comp is the top meilleur choice',
+                        is_target: false,
+                        sentiment: 'positive',
+                    },
                 ],
             },
         };
@@ -157,13 +218,13 @@ describe('buildExtractionArtifacts', () => {
 
     it('uses fallback extraction when analysis returns empty mentioned_businesses but text has numbered bold names', () => {
         const responseText =
-            '### Alternatives à Trouvable à Montréal\n\n'
-            + 'Si vous recherchez des alternatives à Trouvable, voici quelques entreprises qui offrent des services similaires :\n\n'
-            + '1. **SEO Montréal** : Spécialisée dans le référencement local, cette agence propose des services d\'optimisation. Plus d\'infos : https://www.seomontreal.com.\n\n'
-            + '2. **Tactik** : Cette agence offre des services de marketing numérique. Plus d\'infos ici : https://www.tactik.ca.\n\n'
-            + '3. **Webgeek** : Ils se concentrent sur le SEO et le marketing digital. Plus d\'infos : https://www.webgeek.ca.\n\n'
-            + '4. **360 Agency** : Proposant des services de marketing digital. Plus d\'infos : https://www.360agency.ca.\n\n'
-            + 'Ces entreprises peuvent offrir des services complémentaires ou alternatifs à ceux de Trouvable.';
+            '### Alternatives à Trouvable à Montréal\n\n' +
+            'Si vous recherchez des alternatives à Trouvable, voici quelques entreprises qui offrent des services similaires :\n\n' +
+            "1. **SEO Montréal** : Spécialisée dans le référencement local, cette agence propose des services d'optimisation. Plus d'infos : https://www.seomontreal.com.\n\n" +
+            "2. **Tactik** : Cette agence offre des services de marketing numérique. Plus d'infos ici : https://www.tactik.ca.\n\n" +
+            "3. **Webgeek** : Ils se concentrent sur le SEO et le marketing digital. Plus d'infos : https://www.webgeek.ca.\n\n" +
+            "4. **360 Agency** : Proposant des services de marketing digital. Plus d'infos : https://www.360agency.ca.\n\n" +
+            'Ces entreprises peuvent offrir des services complémentaires ou alternatifs à ceux de Trouvable.';
 
         const result = buildExtractionArtifacts({
             queryText: 'Quels sont les concurrents de Trouvable à Montréal ?',
@@ -191,17 +252,29 @@ describe('buildExtractionArtifacts', () => {
 
     it('detects competitor framing from response heading and classifies all listed businesses as competitors', () => {
         const responseText =
-            '### Alternatives à MonService\n\n'
-            + '1. **CompA** : Une agence spécialisée.\n'
-            + '2. **CompB** : Un prestataire reconnu.\n';
+            '### Alternatives à MonService\n\n' +
+            '1. **CompA** : Une agence spécialisée.\n' +
+            '2. **CompB** : Un prestataire reconnu.\n';
 
         const result = buildExtractionArtifacts({
             queryText: 'Quelles sont les alternatives à MonService ?',
             responseText,
             analysis: {
                 mentioned_businesses: [
-                    { name: 'CompA', position: 1, context: 'Une agence spécialisée', is_target: false, sentiment: 'neutral' },
-                    { name: 'CompB', position: 2, context: 'Un prestataire reconnu', is_target: false, sentiment: 'neutral' },
+                    {
+                        name: 'CompA',
+                        position: 1,
+                        context: 'Une agence spécialisée',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
+                    {
+                        name: 'CompB',
+                        position: 2,
+                        context: 'Un prestataire reconnu',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
                 ],
             },
             clientName: 'MonService',

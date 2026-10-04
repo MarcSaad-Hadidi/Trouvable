@@ -5,13 +5,26 @@ vi.mock('@/lib/db/clients', () => ({}));
 vi.mock('@/lib/db/opportunities', () => ({}));
 vi.mock('@/lib/db/community', () => ({}));
 
-import { buildSeedQueries, buildRelevanceAnchors, scoreThemeRelevance, THEME_RELEVANCE_THRESHOLD, getSocialWatchConfig } from '@/lib/agent-reach/community-context';
-import { extractMentionsFromDocuments, aggregateMentionsToClusters, deriveOpportunitiesFromClusters, detectSignalFamilies } from '@/lib/agent-reach/community-signals';
-import { classifyCollectionOutcome, buildCollectionDiagnosis, COLLECTION_FAILURE_CLASS } from '@/lib/agent-reach/community-collection';
-
 import {
-    computeCompositeScore,
-} from '@/lib/agent-reach/contracts';
+    buildSeedQueries,
+    buildRelevanceAnchors,
+    scoreThemeRelevance,
+    THEME_RELEVANCE_THRESHOLD,
+    getSocialWatchConfig,
+} from '@/lib/agent-reach/community-context';
+import {
+    extractMentionsFromDocuments,
+    aggregateMentionsToClusters,
+    deriveOpportunitiesFromClusters,
+    detectSignalFamilies,
+} from '@/lib/agent-reach/community-signals';
+import {
+    classifyCollectionOutcome,
+    buildCollectionDiagnosis,
+    COLLECTION_FAILURE_CLASS,
+} from '@/lib/agent-reach/community-collection';
+
+import { computeCompositeScore } from '@/lib/agent-reach/contracts';
 
 // ──────────────────────────────────────────────────────────────
 // Fixtures for the actual exported community transformations.
@@ -415,7 +428,10 @@ describe('extractMentionsFromDocuments (real pipeline stage 4)', () => {
 
     it('does not emit junk single tokens as theme mentions for a Trouvable-like client', () => {
         const docs = [
-            makeDoc('Best park near Montreal for a walk', 'People love the park with bagels and oven-baked goods. Canadian winter is long.'),
+            makeDoc(
+                'Best park near Montreal for a walk',
+                'People love the park with bagels and oven-baked goods. Canadian winter is long.',
+            ),
         ];
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, trouvableAnchors);
         const themeLabels = mentions.filter((m) => m.mention_type === 'theme').map((m) => m.label);
@@ -431,15 +447,20 @@ describe('extractMentionsFromDocuments (real pipeline stage 4)', () => {
 
     it('emits relevant category/entity terms as theme mentions', () => {
         const docs = [
-            makeDoc('Best SEO agency in Montreal for local ranking', 'Looking for a good agence SEO to improve referencement and visibility in local search.'),
+            makeDoc(
+                'Best SEO agency in Montreal for local ranking',
+                'Looking for a good agence SEO to improve referencement and visibility in local search.',
+            ),
         ];
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, trouvableAnchors);
         const themeLabels = mentions.filter((m) => m.mention_type === 'theme').map((m) => m.label);
 
         // At least some relevant terms should appear
-        const hasRelevantTheme = themeLabels.some((label) =>
-            ['seo', 'agence', 'montreal', 'ranking', 'referencement', 'local'].includes(label) ||
-            label.includes('seo') || label.includes('agence')
+        const hasRelevantTheme = themeLabels.some(
+            (label) =>
+                ['seo', 'agence', 'montreal', 'ranking', 'referencement', 'local'].includes(label) ||
+                label.includes('seo') ||
+                label.includes('agence'),
         );
         expect(hasRelevantTheme).toBe(true);
     });
@@ -464,9 +485,7 @@ describe('extractMentionsFromDocuments (real pipeline stage 4)', () => {
         // Intent vocab words like "help", "support", "problem" should NOT
         // alone qualify a random token as a theme — they need to score
         // above the threshold, which means they need more evidence.
-        const docs = [
-            makeDoc('Need help with my kitchen problem', 'Support for fixing broken appliance issue.'),
-        ];
+        const docs = [makeDoc('Need help with my kitchen problem', 'Support for fixing broken appliance issue.')];
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, trouvableAnchors);
         const themeLabels = mentions.filter((m) => m.mention_type === 'theme').map((m) => m.label);
 
@@ -478,9 +497,7 @@ describe('extractMentionsFromDocuments (real pipeline stage 4)', () => {
     });
 
     it('emits bigrams only when they meet the relevance threshold', () => {
-        const docs = [
-            makeDoc('SEO local vs park bench comparison', 'Best local agence for referencement.'),
-        ];
+        const docs = [makeDoc('SEO local vs park bench comparison', 'Best local agence for referencement.')];
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, trouvableAnchors);
         const themeBigrams = mentions
             .filter((m) => m.mention_type === 'theme')
@@ -595,7 +612,12 @@ describe('deriveOpportunitiesFromClusters (real pipeline stage 6)', () => {
             },
         ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, trouvableAnchors);
-        const contentOpps = opps.filter((o) => o.opportunity_type === 'content' || o.opportunity_type === 'content_opportunity' || o.opportunity_type === 'ai_mention_opportunity');
+        const contentOpps = opps.filter(
+            (o) =>
+                o.opportunity_type === 'content' ||
+                o.opportunity_type === 'content_opportunity' ||
+                o.opportunity_type === 'ai_mention_opportunity',
+        );
 
         expect(contentOpps.length).toBe(0);
     });
@@ -613,7 +635,9 @@ describe('deriveOpportunitiesFromClusters (real pipeline stage 6)', () => {
         ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, trouvableAnchors);
         // v2: theme clusters produce content_opportunity (or ai_mention_opportunity if AI-related)
-        const contentOpps = opps.filter((o) => o.opportunity_type === 'content_opportunity' || o.opportunity_type === 'content');
+        const contentOpps = opps.filter(
+            (o) => o.opportunity_type === 'content_opportunity' || o.opportunity_type === 'content',
+        );
 
         expect(contentOpps.length).toBe(1);
         expect(contentOpps[0].title).toContain('seo');
@@ -653,9 +677,18 @@ describe('full pipeline flow (extraction → clustering → opportunities)', () 
             makeDoc('Best SEO agence in Montreal', 'Looking for local SEO agency for better ranking and visibility.'),
             makeDoc('Best SEO agence in Montreal', 'Looking for local SEO agency for better ranking and visibility.'),
             makeDoc('Best SEO agence in Montreal', 'Looking for local SEO agency for better ranking and visibility.'),
-            makeDoc('Park near downtown Montreal', 'People love the park. Great bagels nearby. Canadian winter hockey.'),
-            makeDoc('Park near downtown Montreal', 'People love the park. Great bagels nearby. Canadian winter hockey.'),
-            makeDoc('Park near downtown Montreal', 'People love the park. Great bagels nearby. Canadian winter hockey.'),
+            makeDoc(
+                'Park near downtown Montreal',
+                'People love the park. Great bagels nearby. Canadian winter hockey.',
+            ),
+            makeDoc(
+                'Park near downtown Montreal',
+                'People love the park. Great bagels nearby. Canadian winter hockey.',
+            ),
+            makeDoc(
+                'Park near downtown Montreal',
+                'People love the park. Great bagels nearby. Canadian winter hockey.',
+            ),
             makeDoc('My oven is broken, need help', 'This expensive oven has a serious problem. Worst purchase ever.'),
             makeDoc('My oven is broken, need help', 'This expensive oven has a serious problem. Worst purchase ever.'),
         ];
@@ -681,9 +714,12 @@ describe('full pipeline flow (extraction → clustering → opportunities)', () 
         // Note: complaint-type opportunities are observed signals, not theme-derived,
         // so they correctly include irrelevant topics if users actually complained about them.
         // v2: theme-derived opps use content_opportunity or ai_mention_opportunity types
-        const contentOpps = opps.filter((o) =>
-            (o.opportunity_type === 'content' || o.opportunity_type === 'content_opportunity' || o.opportunity_type === 'ai_mention_opportunity') &&
-            (o.title.startsWith('Angle contenu') || o.title.startsWith('Opportunité citation'))
+        const contentOpps = opps.filter(
+            (o) =>
+                (o.opportunity_type === 'content' ||
+                    o.opportunity_type === 'content_opportunity' ||
+                    o.opportunity_type === 'ai_mention_opportunity') &&
+                (o.title.startsWith('Angle contenu') || o.title.startsWith('Opportunité citation')),
         );
         for (const opp of contentOpps) {
             expect(opp.title).not.toContain('park');
@@ -693,7 +729,8 @@ describe('full pipeline flow (extraction → clustering → opportunities)', () 
 
         // Verify: relevant terms survive (at least some SEO/Montreal-related themes)
         const allThemeLabels = themeLabels.join(' ');
-        const hasRelevant = allThemeLabels.includes('seo') ||
+        const hasRelevant =
+            allThemeLabels.includes('seo') ||
             allThemeLabels.includes('agence') ||
             allThemeLabels.includes('montreal') ||
             allThemeLabels.includes('ranking') ||
@@ -731,13 +768,21 @@ describe('full pipeline flow (extraction → clustering → opportunities)', () 
 
 describe('detectSignalFamilies', () => {
     it('detects buyer_question from question with buying keywords', () => {
-        const families = detectSignalFamilies('question', 'How to find the best SEO agency?', 'Looking for a recommendation');
+        const families = detectSignalFamilies(
+            'question',
+            'How to find the best SEO agency?',
+            'Looking for a recommendation',
+        );
         expect(families).toContain('buyer_question');
     });
 
     it('detects best_tool_intent when multiple tool keywords present', () => {
         // Requires ≥2 keyword matches for signal family — "best" alone is not enough
-        const families = detectSignalFamilies('question', 'What is the best SEO tool?', 'Looking for the best platform for my agency');
+        const families = detectSignalFamilies(
+            'question',
+            'What is the best SEO tool?',
+            'Looking for the best platform for my agency',
+        );
         expect(families).toContain('best_tool_intent');
     });
 
@@ -753,7 +798,11 @@ describe('detectSignalFamilies', () => {
     });
 
     it('detects pain_point from complaint with frustration', () => {
-        const families = detectSignalFamilies('complaint', 'Terrible support experience', 'This is frustrating, the worst service');
+        const families = detectSignalFamilies(
+            'complaint',
+            'Terrible support experience',
+            'This is frustrating, the worst service',
+        );
         expect(families).toContain('pain_point');
     });
 
@@ -763,7 +812,11 @@ describe('detectSignalFamilies', () => {
     });
 
     it('detects response_opportunity from question seeking help', () => {
-        const families = detectSignalFamilies('question', 'Anyone have experience with SEO agencies?', 'Looking for advice and recommendation');
+        const families = detectSignalFamilies(
+            'question',
+            'Anyone have experience with SEO agencies?',
+            'Looking for advice and recommendation',
+        );
         expect(families).toContain('response_opportunity');
     });
 
@@ -780,13 +833,21 @@ describe('detectSignalFamilies', () => {
 
     it('does not false-positive on "ai" inside longer words', () => {
         // v3: word-boundary matching prevents "ai" matching inside "maintain", "certain"
-        const families = detectSignalFamilies('theme', 'How to maintain your website', 'certain practices for better domain authority');
+        const families = detectSignalFamilies(
+            'theme',
+            'How to maintain your website',
+            'certain practices for better domain authority',
+        );
         expect(families).not.toContain('ai_mention_opportunity');
     });
 
     it('does not false-positive on negated terms', () => {
         // v3: negation awareness prevents "no problem" from triggering pain_point
-        const families = detectSignalFamilies('complaint', 'No problem with this service', 'not bad at all, never had issues');
+        const families = detectSignalFamilies(
+            'complaint',
+            'No problem with this service',
+            'not bad at all, never had issues',
+        );
         expect(families).toEqual([]);
     });
 });
@@ -797,7 +858,12 @@ describe('detectSignalFamilies', () => {
 
 describe('computeCompositeScore', () => {
     it('returns score between 0 and 100', () => {
-        const cluster = { label: 'seo ranking', mention_count: 5, cluster_type: 'question', example_snippet: 'best seo tool' };
+        const cluster = {
+            label: 'seo ranking',
+            mention_count: 5,
+            cluster_type: 'question',
+            example_snippet: 'best seo tool',
+        };
         const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
         const result = computeCompositeScore(cluster, { anchors, city: 'Montréal' });
         expect(result.score).toBeGreaterThanOrEqual(0);
@@ -807,7 +873,12 @@ describe('computeCompositeScore', () => {
     it('returns higher score for business-relevant content', () => {
         const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
         const relevant = computeCompositeScore(
-            { label: 'seo agence montreal', mention_count: 5, cluster_type: 'question', example_snippet: 'recommend best seo' },
+            {
+                label: 'seo agence montreal',
+                mention_count: 5,
+                cluster_type: 'question',
+                example_snippet: 'recommend best seo',
+            },
             { anchors, city: 'Montréal' },
         );
         const irrelevant = computeCompositeScore(
@@ -824,7 +895,12 @@ describe('computeCompositeScore', () => {
             { anchors, city: 'Montréal' },
         );
         const spam = computeCompositeScore(
-            { label: 'crypto earn money forex', mention_count: 3, cluster_type: 'question', example_snippet: 'casino nft' },
+            {
+                label: 'crypto earn money forex',
+                mention_count: 3,
+                cluster_type: 'question',
+                example_snippet: 'casino nft',
+            },
             { anchors, city: 'Montréal' },
         );
         expect(clean.score).toBeGreaterThan(spam.score);
@@ -876,80 +952,92 @@ describe('deriveOpportunitiesFromClusters v2', () => {
     const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
 
     it('produces recurring_buyer_question when cluster has buyer_question signal family', () => {
-        const clusters = [{
-            cluster_type: 'question',
-            label: 'Best SEO agency in Montreal?',
-            mention_count: 4,
-            evidence_level: 'medium',
-            id: null,
-            metadata: { signal_families: ['buyer_question', 'best_tool_intent'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'question',
+                label: 'Best SEO agency in Montreal?',
+                mention_count: 4,
+                evidence_level: 'medium',
+                id: null,
+                metadata: { signal_families: ['buyer_question', 'best_tool_intent'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         expect(opps.some((o) => o.opportunity_type === 'recurring_buyer_question')).toBe(true);
     });
 
     it('produces response_opportunity when cluster has response_opportunity signal family', () => {
-        const clusters = [{
-            cluster_type: 'question',
-            label: 'Anyone recommend an SEO tool?',
-            mention_count: 3,
-            evidence_level: 'low',
-            id: null,
-            metadata: { signal_families: ['response_opportunity'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'question',
+                label: 'Anyone recommend an SEO tool?',
+                mention_count: 3,
+                evidence_level: 'low',
+                id: null,
+                metadata: { signal_families: ['response_opportunity'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         expect(opps.some((o) => o.opportunity_type === 'response_opportunity')).toBe(true);
     });
 
     it('produces comparison_discussion when cluster has comparison_intent signal family', () => {
-        const clusters = [{
-            cluster_type: 'competitor_complaint',
-            label: 'Semrush vs Ahrefs pricing',
-            mention_count: 5,
-            evidence_level: 'medium',
-            id: null,
-            metadata: { signal_families: ['comparison_intent'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'competitor_complaint',
+                label: 'Semrush vs Ahrefs pricing',
+                mention_count: 5,
+                evidence_level: 'medium',
+                id: null,
+                metadata: { signal_families: ['comparison_intent'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         expect(opps.some((o) => o.opportunity_type === 'comparison_discussion')).toBe(true);
     });
 
     it('produces ai_mention_opportunity when theme has AI signal family', () => {
-        const clusters = [{
-            cluster_type: 'theme',
-            label: 'chatgpt seo',
-            mention_count: 4,
-            evidence_level: 'medium',
-            id: null,
-            metadata: { signal_families: ['ai_mention_opportunity'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'theme',
+                label: 'chatgpt seo',
+                mention_count: 4,
+                evidence_level: 'medium',
+                id: null,
+                metadata: { signal_families: ['ai_mention_opportunity'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         expect(opps.some((o) => o.opportunity_type === 'ai_mention_opportunity')).toBe(true);
     });
 
     it('produces recurring_pain_point when complaint has pain_point signal family', () => {
-        const clusters = [{
-            cluster_type: 'complaint',
-            label: 'Terrible support experience',
-            mention_count: 6,
-            evidence_level: 'medium',
-            id: null,
-            metadata: { signal_families: ['pain_point'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'complaint',
+                label: 'Terrible support experience',
+                mention_count: 6,
+                evidence_level: 'medium',
+                id: null,
+                metadata: { signal_families: ['pain_point'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         expect(opps.some((o) => o.opportunity_type === 'recurring_pain_point')).toBe(true);
     });
 
     it('includes v2 metadata in opportunity objects', () => {
-        const clusters = [{
-            cluster_type: 'question',
-            label: 'How to find best SEO?',
-            mention_count: 4,
-            evidence_level: 'medium',
-            id: null,
-            score: 42,
-            metadata: { signal_families: ['buyer_question'] },
-        }];
+        const clusters = [
+            {
+                cluster_type: 'question',
+                label: 'How to find best SEO?',
+                mention_count: 4,
+                evidence_level: 'medium',
+                id: null,
+                score: 42,
+                metadata: { signal_families: ['buyer_question'] },
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         const opp = opps[0];
         expect(opp.metadata).toBeDefined();
@@ -959,14 +1047,16 @@ describe('deriveOpportunitiesFromClusters v2', () => {
     });
 
     it('falls back to legacy types when no signal families are detected', () => {
-        const clusters = [{
-            cluster_type: 'question',
-            label: 'What is the weather today?',
-            mention_count: 3,
-            evidence_level: 'low',
-            id: null,
-            metadata: {},
-        }];
+        const clusters = [
+            {
+                cluster_type: 'question',
+                label: 'What is the weather today?',
+                mention_count: 3,
+                evidence_level: 'low',
+                id: null,
+                metadata: {},
+            },
+        ];
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
         // With no signal families, should produce a standard FAQ
         expect(opps.some((o) => o.opportunity_type === 'faq')).toBe(true);
@@ -1010,8 +1100,8 @@ describe('extractMentionsFromDocuments with signal families', () => {
         const clusters = aggregateMentionsToClusters(mentions, CLIENT_ID, anchors);
         const questionClusters = clusters.filter((c) => c.cluster_type === 'question');
         // At least one question cluster should have signal families in metadata
-        const hasSignalFamilies = questionClusters.some((c) =>
-            c.metadata?.signal_families && c.metadata.signal_families.length > 0
+        const hasSignalFamilies = questionClusters.some(
+            (c) => c.metadata?.signal_families && c.metadata.signal_families.length > 0,
         );
         expect(hasSignalFamilies).toBe(true);
     });
@@ -1026,18 +1116,28 @@ describe('v3 false positive control', () => {
 
     describe('word-boundary keyword matching', () => {
         it('does not match "ai" inside "maintain" or "certain"', () => {
-            const families = detectSignalFamilies('theme', 'How to maintain your website', 'certain practices for domain authority');
+            const families = detectSignalFamilies(
+                'theme',
+                'How to maintain your website',
+                'certain practices for domain authority',
+            );
             expect(families).not.toContain('ai_mention_opportunity');
         });
 
         it('matches "ai" as standalone word', () => {
-            const families = detectSignalFamilies('theme', 'ChatGPT and AI tools for SEO', 'using AI and LLM for keyword research');
+            const families = detectSignalFamilies(
+                'theme',
+                'ChatGPT and AI tools for SEO',
+                'using AI and LLM for keyword research',
+            );
             expect(families).toContain('ai_mention_opportunity');
         });
 
         it('does not match "bad" inside "badge"', () => {
             const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
-            const docs = [makeDoc('SEO Badge Program', 'Get your digital badge for completing the certification program.')];
+            const docs = [
+                makeDoc('SEO Badge Program', 'Get your digital badge for completing the certification program.'),
+            ];
             const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
             const complaints = mentions.filter((m) => m.mention_type === 'complaint');
             expect(complaints.length).toBe(0);
@@ -1045,7 +1145,12 @@ describe('v3 false positive control', () => {
 
         it('does not match "bug" inside "debugging"', () => {
             const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
-            const docs = [makeDoc('Debugging guide for web developers', 'Learn debugging techniques and tools for modern web apps.')];
+            const docs = [
+                makeDoc(
+                    'Debugging guide for web developers',
+                    'Learn debugging techniques and tools for modern web apps.',
+                ),
+            ];
             const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
             const complaints = mentions.filter((m) => m.mention_type === 'complaint');
             expect(complaints.length).toBe(0);
@@ -1055,7 +1160,9 @@ describe('v3 false positive control', () => {
     describe('negation awareness', () => {
         it('does not trigger complaint on "no problem"', () => {
             const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
-            const docs = [makeDoc('SEO setup guide', 'No problem with the installation. Not bad at all, it works great.')];
+            const docs = [
+                makeDoc('SEO setup guide', 'No problem with the installation. Not bad at all, it works great.'),
+            ];
             const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
             const complaints = mentions.filter((m) => m.mention_type === 'complaint');
             expect(complaints.length).toBe(0);
@@ -1063,7 +1170,9 @@ describe('v3 false positive control', () => {
 
         it('does not trigger complaint on "never had issues"', () => {
             const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
-            const docs = [makeDoc('My SEO experience', 'Never had issues with this tool, without any problem whatsoever.')];
+            const docs = [
+                makeDoc('My SEO experience', 'Never had issues with this tool, without any problem whatsoever.'),
+            ];
             const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
             const complaints = mentions.filter((m) => m.mention_type === 'complaint');
             expect(complaints.length).toBe(0);
@@ -1079,7 +1188,11 @@ describe('v3 false positive control', () => {
 
         it('assigns signal family when ≥2 keywords match', () => {
             // "best" + "tool" should trigger best_tool_intent
-            const families = detectSignalFamilies('question', 'What is the best SEO tool?', 'Looking for the top platform');
+            const families = detectSignalFamilies(
+                'question',
+                'What is the best SEO tool?',
+                'Looking for the top platform',
+            );
             expect(families).toContain('best_tool_intent');
         });
     });
@@ -1104,7 +1217,12 @@ describe('v3 false positive control', () => {
 
         it('triggers complaint when ≥2 weak terms co-occur', () => {
             const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
-            const docs = [makeDoc('Slow and expensive SEO tool', 'This tool is slow and the pricing is too expensive for what it does.')];
+            const docs = [
+                makeDoc(
+                    'Slow and expensive SEO tool',
+                    'This tool is slow and the pricing is too expensive for what it does.',
+                ),
+            ];
             const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
             const complaints = mentions.filter((m) => m.mention_type === 'complaint');
             expect(complaints.length).toBe(1);
@@ -1146,8 +1264,14 @@ describe('v3 representative scenario tests', () => {
         const anchors = buildRelevanceAnchors(client);
 
         const docs = [
-            makeDoc('Meilleur agence web à Lyon?', 'Je cherche une bonne agence web marketing pour mon entreprise à Lyon.'),
-            makeDoc('Meilleur agence web à Lyon?', 'Je cherche une bonne agence web marketing pour mon entreprise à Lyon.'),
+            makeDoc(
+                'Meilleur agence web à Lyon?',
+                'Je cherche une bonne agence web marketing pour mon entreprise à Lyon.',
+            ),
+            makeDoc(
+                'Meilleur agence web à Lyon?',
+                'Je cherche une bonne agence web marketing pour mon entreprise à Lyon.',
+            ),
             makeDoc('Recette crêpes bretonnes', 'La meilleure recette de crêpes avec du beurre salé.'),
             makeDoc('Recette crêpes bretonnes', 'La meilleure recette de crêpes avec du beurre salé.'),
         ];
@@ -1201,9 +1325,8 @@ describe('v3 representative scenario tests', () => {
         const opps = deriveOpportunitiesFromClusters(clusters, CLIENT_ID, anchors);
 
         // Pure noise should produce zero content/AI opportunities
-        const contentOpps = opps.filter((o) =>
-            o.opportunity_type === 'content_opportunity' ||
-            o.opportunity_type === 'ai_mention_opportunity'
+        const contentOpps = opps.filter(
+            (o) => o.opportunity_type === 'content_opportunity' || o.opportunity_type === 'ai_mention_opportunity',
         );
         expect(contentOpps.length).toBe(0);
     });
@@ -1213,8 +1336,14 @@ describe('v3 representative scenario tests', () => {
 
         // A thread that mentions SEO tangentially but isn't actionable
         const docs = [
-            makeDoc('General discussion about the internet', 'People sometimes talk about seo and marketing in general.'),
-            makeDoc('General discussion about the internet', 'People sometimes talk about seo and marketing in general.'),
+            makeDoc(
+                'General discussion about the internet',
+                'People sometimes talk about seo and marketing in general.',
+            ),
+            makeDoc(
+                'General discussion about the internet',
+                'People sometimes talk about seo and marketing in general.',
+            ),
         ];
 
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
@@ -1233,18 +1362,25 @@ describe('v3 representative scenario tests', () => {
         const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
 
         const docs = [
-            makeDoc('Semrush vs Ahrefs vs Moz — which is best?', 'I want to compare these SEO tools. Alternative to Semrush?'),
-            makeDoc('Semrush vs Ahrefs vs Moz — which is best?', 'I want to compare these SEO tools. Alternative to Semrush?'),
-            makeDoc('Semrush vs Ahrefs vs Moz — which is best?', 'I want to compare these SEO tools. Alternative to Semrush?'),
+            makeDoc(
+                'Semrush vs Ahrefs vs Moz — which is best?',
+                'I want to compare these SEO tools. Alternative to Semrush?',
+            ),
+            makeDoc(
+                'Semrush vs Ahrefs vs Moz — which is best?',
+                'I want to compare these SEO tools. Alternative to Semrush?',
+            ),
+            makeDoc(
+                'Semrush vs Ahrefs vs Moz — which is best?',
+                'I want to compare these SEO tools. Alternative to Semrush?',
+            ),
         ];
 
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
         const clusters = aggregateMentionsToClusters(mentions, CLIENT_ID, anchors);
 
         // The comparison clusters should have comparison_intent signal
-        const compClusters = clusters.filter((c) =>
-            (c.metadata?.signal_families || []).includes('comparison_intent')
-        );
+        const compClusters = clusters.filter((c) => (c.metadata?.signal_families || []).includes('comparison_intent'));
         expect(compClusters.length).toBeGreaterThan(0);
     });
 
@@ -1252,9 +1388,18 @@ describe('v3 representative scenario tests', () => {
         const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
 
         const docs = [
-            makeDoc('Terrible experience with local SEO agency', 'Frustrated with the horrible service, the worst agency I ever worked with.'),
-            makeDoc('Terrible experience with local SEO agency', 'Frustrated with the horrible service, the worst agency I ever worked with.'),
-            makeDoc('Terrible experience with local SEO agency', 'Frustrated with the horrible service, the worst agency I ever worked with.'),
+            makeDoc(
+                'Terrible experience with local SEO agency',
+                'Frustrated with the horrible service, the worst agency I ever worked with.',
+            ),
+            makeDoc(
+                'Terrible experience with local SEO agency',
+                'Frustrated with the horrible service, the worst agency I ever worked with.',
+            ),
+            makeDoc(
+                'Terrible experience with local SEO agency',
+                'Frustrated with the horrible service, the worst agency I ever worked with.',
+            ),
         ];
 
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
@@ -1268,9 +1413,18 @@ describe('v3 representative scenario tests', () => {
         const anchors = buildRelevanceAnchors(TROUVABLE_CLIENT);
 
         const docs = [
-            makeDoc('ChatGPT vs Gemini for SEO content', 'Which LLM is best for generating SEO content and AI overviews?'),
-            makeDoc('ChatGPT vs Gemini for SEO content', 'Which LLM is best for generating SEO content and AI overviews?'),
-            makeDoc('ChatGPT vs Gemini for SEO content', 'Which LLM is best for generating SEO content and AI overviews?'),
+            makeDoc(
+                'ChatGPT vs Gemini for SEO content',
+                'Which LLM is best for generating SEO content and AI overviews?',
+            ),
+            makeDoc(
+                'ChatGPT vs Gemini for SEO content',
+                'Which LLM is best for generating SEO content and AI overviews?',
+            ),
+            makeDoc(
+                'ChatGPT vs Gemini for SEO content',
+                'Which LLM is best for generating SEO content and AI overviews?',
+            ),
         ];
 
         const mentions = extractMentionsFromDocuments(docs, CLIENT_ID, anchors);
@@ -1278,7 +1432,7 @@ describe('v3 representative scenario tests', () => {
 
         // Should detect AI-related theme signals
         const aiSignals = clusters.filter((c) =>
-            (c.metadata?.signal_families || []).includes('ai_mention_opportunity')
+            (c.metadata?.signal_families || []).includes('ai_mention_opportunity'),
         );
         expect(aiSignals.length).toBeGreaterThan(0);
     });
@@ -1342,7 +1496,7 @@ describe('isNegated', () => {
     });
 
     it('detects "pas de probleme" as negated', () => {
-        expect(isNegated('il n\'y a pas de probleme', 'probleme')).toBe(true);
+        expect(isNegated("il n'y a pas de probleme", 'probleme')).toBe(true);
     });
 
     it('does not flag non-negated terms', () => {
@@ -1383,7 +1537,13 @@ describe('classifyCollectionOutcome', () => {
     it('returns null failureClass when posts were collected', () => {
         const diags = [
             { seed: 'test', status: 'ok', results: 5 },
-            { seed: 'test2', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
+            {
+                seed: 'test2',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
         ];
         const result = classifyCollectionOutcome(diags, 5);
         expect(result.failureClass).toBeNull();
@@ -1392,9 +1552,27 @@ describe('classifyCollectionOutcome', () => {
 
     it('classifies all-403 as source_access_failure', () => {
         const diags = [
-            { seed: 'q1', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
-            { seed: 'q2', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
-            { seed: 'q3', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
+            {
+                seed: 'q1',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
+            {
+                seed: 'q2',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
+            {
+                seed: 'q3',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
         ];
         const result = classifyCollectionOutcome(diags, 0);
         expect(result.failureClass).toBe(COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE);
@@ -1425,8 +1603,20 @@ describe('classifyCollectionOutcome', () => {
 
     it('classifies mixed errors + zero-results as source_access_failure when majority are access errors', () => {
         const diags = [
-            { seed: 'q1', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
-            { seed: 'q2', status: 'error', detail: 'HTTP 403', http_status: 403, failure_class: 'source_access_failure' },
+            {
+                seed: 'q1',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
+            {
+                seed: 'q2',
+                status: 'error',
+                detail: 'HTTP 403',
+                http_status: 403,
+                failure_class: 'source_access_failure',
+            },
             { seed: 'q3', status: 'ok', results: 0 },
         ];
         const result = classifyCollectionOutcome(diags, 0);
@@ -1479,56 +1669,68 @@ describe('classifyCollectionOutcome', () => {
 
 describe('buildCollectionDiagnosis', () => {
     it('returns access failure diagnosis with correct severity', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE,
-            { ok: 0, error: 5, total: 5, errorBreakdown: { source_access_failure: 5 } },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE, {
+            ok: 0,
+            error: 5,
+            total: 5,
+            errorBreakdown: { source_access_failure: 5 },
+        });
         expect(diagnosis.severity).toBe('error');
         expect(diagnosis.isAccessFailure).toBe(true);
         expect(diagnosis.title).toContain('accès');
     });
 
     it('returns rate limit diagnosis with warning severity', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.SOURCE_RATE_LIMITED,
-            { ok: 0, error: 3, total: 3, errorBreakdown: { source_rate_limited: 3 } },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.SOURCE_RATE_LIMITED, {
+            ok: 0,
+            error: 3,
+            total: 3,
+            errorBreakdown: { source_rate_limited: 3 },
+        });
         expect(diagnosis.severity).toBe('warning');
         expect(diagnosis.isAccessFailure).toBe(true);
     });
 
     it('returns seed quality diagnosis as info', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.SEED_QUALITY_FAILURE,
-            { ok: 3, error: 0, total: 3, errorBreakdown: {} },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.SEED_QUALITY_FAILURE, {
+            ok: 3,
+            error: 0,
+            total: 3,
+            errorBreakdown: {},
+        });
         expect(diagnosis.severity).toBe('info');
         expect(diagnosis.isAccessFailure).toBe(false);
     });
 
     it('returns no signal diagnosis as info', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.NO_SIGNAL_FOUND,
-            { ok: 3, error: 0, total: 3, errorBreakdown: {} },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.NO_SIGNAL_FOUND, {
+            ok: 3,
+            error: 0,
+            total: 3,
+            errorBreakdown: {},
+        });
         expect(diagnosis.severity).toBe('info');
         expect(diagnosis.isAccessFailure).toBe(false);
     });
 
     it('returns unknown failure as warning', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.UNKNOWN_COLLECTION_FAILURE,
-            { ok: 0, error: 2, total: 2, errorBreakdown: { unknown_collection_failure: 2 } },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.UNKNOWN_COLLECTION_FAILURE, {
+            ok: 0,
+            error: 2,
+            total: 2,
+            errorBreakdown: { unknown_collection_failure: 2 },
+        });
         expect(diagnosis.severity).toBe('warning');
         expect(diagnosis.isAccessFailure).toBe(false);
     });
 
     it('access failure diagnosis explicitly states no market conclusion should be drawn', () => {
-        const diagnosis = buildCollectionDiagnosis(
-            COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE,
-            { ok: 0, error: 3, total: 3, errorBreakdown: { source_access_failure: 3 } },
-        );
+        const diagnosis = buildCollectionDiagnosis(COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE, {
+            ok: 0,
+            error: 3,
+            total: 3,
+            errorBreakdown: { source_access_failure: 3 },
+        });
         expect(diagnosis.operatorAction).toContain('technique');
         expect(diagnosis.description).toContain('blocage technique');
     });

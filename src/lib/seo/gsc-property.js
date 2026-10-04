@@ -119,7 +119,9 @@ const GOOGLE_OAUTH_ERROR_REMEDY = {
 };
 
 export function mapGoogleOAuthError(code = null, fallbackMessage = null) {
-    const normalized = String(code || '').trim().toLowerCase();
+    const normalized = String(code || '')
+        .trim()
+        .toLowerCase();
     if (normalized && GOOGLE_OAUTH_ERROR_REMEDY[normalized]) {
         return {
             code: normalized,

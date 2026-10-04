@@ -45,16 +45,22 @@ describe('operator shell route error boundary', () => {
     });
 
     it('contains rejected route params before loading client data', async () => {
-        await expectNoStoreJson(await GET(undefined, { params: Promise.reject(new Error('private route stack')) }), 500,
-            { error: 'Erreur interne du serveur.', status: 500 });
+        await expectNoStoreJson(
+            await GET(undefined, { params: Promise.reject(new Error('private route stack')) }),
+            500,
+            { error: 'Erreur interne du serveur.', status: 500 },
+        );
         expect(boundary.payload).not.toHaveBeenCalled();
     });
 
-    it.each(['anonymous', 'forbidden'])('preserves the existing 401 denial for %s access before client reads', async () => {
-        boundary.requireAdmin.mockResolvedValue(null);
-        await expectNoStoreJson(await invoke(), 401, { error: 'Non autorise' });
-        expect(boundary.payload).not.toHaveBeenCalled();
-    });
+    it.each(['anonymous', 'forbidden'])(
+        'preserves the existing 401 denial for %s access before client reads',
+        async () => {
+            boundary.requireAdmin.mockResolvedValue(null);
+            await expectNoStoreJson(await invoke(), 401, { error: 'Non autorise' });
+            expect(boundary.payload).not.toHaveBeenCalled();
+        },
+    );
 
     it('preserves invalid-ID 400 before client reads', async () => {
         await expectNoStoreJson(await invoke('invalid'), 400, { error: 'ID invalide' });
@@ -67,7 +73,12 @@ describe('operator shell route error boundary', () => {
     });
 
     it('preserves an independent partial payload with 200 and no-store', async () => {
-        const payload = { client: { id: clientId }, status: 'partial', dataSources: { audit: 'unavailable' }, errors: [{ source: 'audit', message: 'Données temporairement indisponibles.' }] };
+        const payload = {
+            client: { id: clientId },
+            status: 'partial',
+            dataSources: { audit: 'unavailable' },
+            errors: [{ source: 'audit', message: 'Données temporairement indisponibles.' }],
+        };
         boundary.payload.mockResolvedValue(payload);
         await expectNoStoreJson(await invoke(), 200, payload);
     });

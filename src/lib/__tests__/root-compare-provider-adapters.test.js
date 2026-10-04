@@ -15,7 +15,15 @@ const adapters = [
 
 beforeEach(() => {
     vi.resetAllMocks();
-    for (const name of ['GOOGLE_MODEL_COMPARE', 'GEMINI_MODEL_COMPARE', 'GROQ_MODEL_COMPARE', 'MISTRAL_MODEL_COMPARE', 'OPENROUTER_MODEL_COMPARE', 'OPENROUTER_MODEL_QUERY']) vi.stubEnv(name, '');
+    for (const name of [
+        'GOOGLE_MODEL_COMPARE',
+        'GEMINI_MODEL_COMPARE',
+        'GROQ_MODEL_COMPARE',
+        'MISTRAL_MODEL_COMPARE',
+        'OPENROUTER_MODEL_COMPARE',
+        'OPENROUTER_MODEL_QUERY',
+    ])
+        vi.stubEnv(name, '');
 });
 afterEach(() => vi.unstubAllEnvs());
 
@@ -37,21 +45,37 @@ describe.each(adapters)('%s comparison adapter', (provider, defaultModel, envNam
     it('sends the bounded comparison request once without fallback and normalizes output', async () => {
         callAiText.mockResolvedValue({ text: '  réponse  ', usage: { prompt_tokens: 2, completion_tokens: 3 } });
         const output = await run({ prompt: 'analyse', content: 'contenu' });
-        expect(callAiText.mock.calls).toEqual([[{
-            providerOverride: provider, fallbackProvider: null, purpose: 'query', modelOverride: defaultModel,
-            temperature: 0.2, maxTokens: 2048,
-            messages: [
-                { role: 'system', content: 'Tu es un analyste qui suit strictement l instruction donnee.' },
-                { role: 'user', content: 'Instruction:\nanalyse\n\nContenu:\ncontenu' },
+        expect(callAiText.mock.calls).toEqual([
+            [
+                {
+                    providerOverride: provider,
+                    fallbackProvider: null,
+                    purpose: 'query',
+                    modelOverride: defaultModel,
+                    temperature: 0.2,
+                    maxTokens: 2048,
+                    messages: [
+                        { role: 'system', content: 'Tu es un analyste qui suit strictement l instruction donnee.' },
+                        { role: 'user', content: 'Instruction:\nanalyse\n\nContenu:\ncontenu' },
+                    ],
+                },
             ],
-        }]]);
-        expect(output).toEqual({ provider, model: defaultModel, content: 'réponse', usage: { prompt_tokens: 2, completion_tokens: 3, total_tokens: 5 } });
+        ]);
+        expect(output).toEqual({
+            provider,
+            model: defaultModel,
+            content: 'réponse',
+            usage: { prompt_tokens: 2, completion_tokens: 3, total_tokens: 5 },
+        });
     });
 
     it('preserves explicit model overrides and absent response usage', async () => {
         callAiText.mockResolvedValue({});
         expect(await run({ prompt: 'p', content: 'c', modelOverride: 'override-model' })).toEqual({
-            provider, model: 'override-model', content: '', usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+            provider,
+            model: 'override-model',
+            content: '',
+            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
         });
         expect(callAiText.mock.calls[0][0].modelOverride).toBe('override-model');
     });

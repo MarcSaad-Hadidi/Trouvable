@@ -5,7 +5,13 @@ import { getTrendSlice } from '@/lib/continuous/jobs';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { getRecentQueryRuns as dbGetRecentQueryRuns } from '@/lib/db/query-runs';
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
-import { problemsFromAuditResult, problemsFromGeoRun, problemsFromGeoRuns, problemsFromJobRun, problemsFromTrendSlice } from '@/lib/remediation/problem-mapper';
+import {
+    problemsFromAuditResult,
+    problemsFromGeoRun,
+    problemsFromGeoRuns,
+    problemsFromJobRun,
+    problemsFromTrendSlice,
+} from '@/lib/remediation/problem-mapper';
 import { createProblem } from '@/lib/remediation/problem-types';
 import { buildRemediationPrompt } from '@/lib/remediation/prompt-builder';
 import { callMistralForRemediation, isMistralRemediationType } from '@/lib/remediation/remediation-ai';
@@ -17,8 +23,10 @@ const MAX_SUGGESTIONS_PER_RUN = 5;
 function buildClientContext(client) {
     return {
         company_name: client?.client_name || null,
-        company_short_description: getBusinessShortDescription(client?.business_details) || client?.seo_description || null,
-        company_city: typeof client?.address === 'object' ? (client.address?.city || client.address?.region || null) : null,
+        company_short_description:
+            getBusinessShortDescription(client?.business_details) || client?.seo_description || null,
+        company_city:
+            typeof client?.address === 'object' ? client.address?.city || client.address?.region || null : null,
         company_website: client?.website_url || null,
     };
 }
@@ -71,8 +79,9 @@ export async function generateRemediationSuggestionsForClient(clientId, options 
         problems.push(...mapped);
     }
 
-    const aggregateGeoProblems = problemsFromGeoRuns(recentRuns || [], clientId)
-        .map((problem) => withClientContext(problem, clientContext));
+    const aggregateGeoProblems = problemsFromGeoRuns(recentRuns || [], clientId).map((problem) =>
+        withClientContext(problem, clientContext),
+    );
     problems.push(...aggregateGeoProblems);
 
     const jobs = trendSlice?.jobs?.jobs || [];
@@ -85,17 +94,22 @@ export async function generateRemediationSuggestionsForClient(clientId, options 
 
     for (const job of jobs) {
         const latestRun = latestRunByJobId.get(job.id) || null;
-        const mapped = problemsFromJobRun(latestRun, job, clientId).map((problem) => withClientContext(problem, clientContext));
+        const mapped = problemsFromJobRun(latestRun, job, clientId).map((problem) =>
+            withClientContext(problem, clientContext),
+        );
         problems.push(...mapped);
     }
 
-    const trendProblems = problemsFromTrendSlice(trendSlice, clientId).map((problem) => withClientContext(problem, clientContext));
+    const trendProblems = problemsFromTrendSlice(trendSlice, clientId).map((problem) =>
+        withClientContext(problem, clientContext),
+    );
     problems.push(...trendProblems);
 
     // Audit-originated problems (llms.txt, crawler access)
     if (latestAudit) {
-        const auditProblems = problemsFromAuditResult(latestAudit, clientId)
-            .map((problem) => withClientContext(problem, clientContext));
+        const auditProblems = problemsFromAuditResult(latestAudit, clientId).map((problem) =>
+            withClientContext(problem, clientContext),
+        );
         problems.push(...auditProblems);
     }
 
@@ -133,7 +147,7 @@ export async function generateRemediationSuggestionsForClient(clientId, options 
         (existingSuggestions || [])
             .filter((item) => item?.status === 'draft')
             .map((item) => extractProblemIdFromPromptUser(item?.prompt_user))
-            .filter(Boolean)
+            .filter(Boolean),
     );
 
     const notAlreadyDrafted = candidateProblems.filter((problem) => !existingDraftProblemIds.has(problem.id));

@@ -73,7 +73,7 @@ export async function callAiText({
             };
         } catch (fallbackErr) {
             throw new Error(
-                `[AI] Tous les providers ont echoue. Primary(${primary}): ${primaryErr.message} | Fallback(${fallback}): ${fallbackErr.message}`
+                `[AI] Tous les providers ont echoue. Primary(${primary}): ${primaryErr.message} | Fallback(${fallback}): ${fallbackErr.message}`,
             );
         }
     }
@@ -121,7 +121,7 @@ export async function callAiJson({
             return await tryProvider(fallback);
         } catch (fallbackErr) {
             throw new Error(
-                `[AI] JSON: tous echoues. Primary: ${primaryErr.message} | Fallback: ${fallbackErr.message}`
+                `[AI] JSON: tous echoues. Primary: ${primaryErr.message} | Fallback: ${fallbackErr.message}`,
             );
         }
     }

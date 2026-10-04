@@ -32,11 +32,18 @@ export async function getOverviewSlice(clientId) {
         dataSources[source] = failed ? 'unavailable' : value?.status || 'available';
         if (failed) errors.push({ source, message: 'Données temporairement indisponibles.' });
         for (const [key, status] of Object.entries(value?.dataSources || {})) dataSources[`${source}.${key}`] = status;
-        for (const error of value?.errors || []) errors.push({ source: `${source}.${error.source}`, message: 'Données temporairement indisponibles.' });
+        for (const error of value?.errors || [])
+            errors.push({ source: `${source}.${error.source}`, message: 'Données temporairement indisponibles.' });
     }
     const {
-        auditMetrics, runMetrics, mentionMetrics, promptMetrics,
-        snapshot, modelPerformance, latestAudit, lastRunAt,
+        auditMetrics,
+        runMetrics,
+        mentionMetrics,
+        promptMetrics,
+        snapshot,
+        modelPerformance,
+        latestAudit,
+        lastRunAt,
         completedRuns,
     } = ws;
 
@@ -44,7 +51,10 @@ export async function getOverviewSlice(clientId) {
     const staleOppsCount = latestOpps?.stale?.length ?? 0;
 
     return {
-        status: errors.length > 0 || Object.values(dataSources).some(state => ['partial', 'unavailable'].includes(state)) ? 'partial' : snapshot.status,
+        status:
+            errors.length > 0 || Object.values(dataSources).some((state) => ['partial', 'unavailable'].includes(state))
+                ? 'partial'
+                : snapshot.status,
         dataSources,
         errors,
         provenance: {
@@ -60,8 +70,10 @@ export async function getOverviewSlice(clientId) {
             citationCoveragePercent: mentionMetrics.citationCoveragePercent.value,
             competitorMentionsCount: mentionMetrics.confirmedCompetitorMentions.value,
             genericMentionsCount: mentionMetrics.genericMentions.value,
-            openOpportunitiesCount: latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
-            staleOpportunitiesCount: latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? staleOppsCount : null,
+            openOpportunitiesCount:
+                latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
+            staleOpportunitiesCount:
+                latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? staleOppsCount : null,
             visibilityProxyPercent: runMetrics.visibilityProxyPercent.value,
             visibilityProxyReliability: runMetrics.visibilityProxyReliability,
             avgParseConfidence: runMetrics.avgParseConfidence.value,
@@ -100,8 +112,10 @@ export async function getOverviewSlice(clientId) {
         },
         opportunities: {
             summary: {
-                open: latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
-                total: latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
+                open:
+                    latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
+                total:
+                    latestOpps && latestOpps.dataSources?.opportunities !== 'unavailable' ? relevantOpps.length : null,
             },
             openItems: relevantOpps
                 .sort((a, b) => {

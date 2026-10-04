@@ -30,7 +30,14 @@ describe('public animation timing', () => {
 });
 
 it('keeps native FAQ details closed, all content and responsive classes', () => {
-    const html = renderToStaticMarkup(createElement(TopicFaqList, { faqs: [{ question: 'Question ?', answer: 'Réponse.' }, { question: 'Autre ?', answer: 'Suite.' }] }));
+    const html = renderToStaticMarkup(
+        createElement(TopicFaqList, {
+            faqs: [
+                { question: 'Question ?', answer: 'Réponse.' },
+                { question: 'Autre ?', answer: 'Suite.' },
+            ],
+        }),
+    );
     expect(html.match(/<details /g)).toHaveLength(2);
     expect(html.match(/<summary /g)).toHaveLength(2);
     expect(html).not.toContain(' open');
@@ -40,19 +47,34 @@ it('keeps native FAQ details closed, all content and responsive classes', () => 
     expect(html).toContain('group-open:rotate-180');
 });
 
-it.each([[null, 'neutral'], [undefined, 'neutral'], [0, 'critical'], [39, 'critical'], [40, 'warning'], [69, 'warning'], [70, 'ok'], [100, 'ok']])('keeps score %s tone %s', (score, tone) => {
+it.each([
+    [null, 'neutral'],
+    [undefined, 'neutral'],
+    [0, 'critical'],
+    [39, 'critical'],
+    [40, 'warning'],
+    [69, 'warning'],
+    [70, 'ok'],
+    [100, 'ok'],
+])('keeps score %s tone %s', (score, tone) => {
     expect(scoreTone(score)).toBe(tone);
 });
 
 it('shows actual zero strength and preserves missing scores', () => {
-    const html = renderToStaticMarkup(createElement(AgentStrengthMessage, { item: { message: 'Observé', score: 0, dimensionLabel: 'Protocoles' } }));
+    const html = renderToStaticMarkup(
+        createElement(AgentStrengthMessage, { item: { message: 'Observé', score: 0, dimensionLabel: 'Protocoles' } }),
+    );
     expect(html).toContain('0/100');
     expect(html).toContain('Protocoles');
-    expect(renderToStaticMarkup(createElement(AgentStrengthMessage, { item: { message: 'Observé', score: null } }))).not.toContain('/100');
+    expect(
+        renderToStaticMarkup(createElement(AgentStrengthMessage, { item: { message: 'Observé', score: null } })),
+    ).not.toContain('/100');
 });
 
 it('keeps fix priority labels and chip color', () => {
-    const html = renderToStaticMarkup(createElement(AgentFixMessage, { item: { message: 'Corriger', priority: 'high', dimensionLabel: 'Surface' } }));
+    const html = renderToStaticMarkup(
+        createElement(AgentFixMessage, { item: { message: 'Corriger', priority: 'high', dimensionLabel: 'Surface' } }),
+    );
     expect(html).toContain('Corriger');
     expect(html).toContain('Surface');
     expect(html).toContain('Priorité haute');

@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-    AGENT_SCORE_WEIGHTS,
-    computeAgentScore,
-    deriveAgentInputs,
-    __internal__,
-} from '../agent/score.js';
+import { AGENT_SCORE_WEIGHTS, computeAgentScore, deriveAgentInputs, __internal__ } from '../agent/score.js';
 
 function approx(a, b, tol = 1) {
     return Math.abs(a - b) <= tol;
@@ -18,8 +13,8 @@ describe('AGENT score weights', () => {
     });
 
     it('holds the exact Phase 1 contract weights', () => {
-        expect(AGENT_SCORE_WEIGHTS.visibility).toBe(0.40);
-        expect(AGENT_SCORE_WEIGHTS.readiness).toBe(0.30);
+        expect(AGENT_SCORE_WEIGHTS.visibility).toBe(0.4);
+        expect(AGENT_SCORE_WEIGHTS.readiness).toBe(0.3);
         expect(AGENT_SCORE_WEIGHTS.actionability).toBe(0.25);
         expect(AGENT_SCORE_WEIGHTS.advanced_protocols).toBe(0.05);
     });
@@ -172,14 +167,23 @@ describe('deriveAgentInputs', () => {
     });
 });
 
-
 describe('visibility required source failures', () => {
     it('keeps an incomplete visibility computation unavailable', () => {
-        const result = deriveAgentInputs({ overviewSlice: { dataSources: { mentions: 'unavailable' }, kpis: { mentionRatePercent: 100, visibilityProxyPercent: 80, citationCoveragePercent: null } } });
+        const result = deriveAgentInputs({
+            overviewSlice: {
+                dataSources: { mentions: 'unavailable' },
+                kpis: { mentionRatePercent: 100, visibilityProxyPercent: 80, citationCoveragePercent: null },
+            },
+        });
         expect(result.visibility).toMatchObject({ score: null, reliability: 'unavailable' });
     });
     it('retains visibility when an unrelated opportunities source fails', () => {
-        const result = deriveAgentInputs({ overviewSlice: { dataSources: { openOpportunities: 'unavailable' }, kpis: { mentionRatePercent: 0, visibilityProxyPercent: 0, citationCoveragePercent: 0 } } });
+        const result = deriveAgentInputs({
+            overviewSlice: {
+                dataSources: { openOpportunities: 'unavailable' },
+                kpis: { mentionRatePercent: 0, visibilityProxyPercent: 0, citationCoveragePercent: 0 },
+            },
+        });
         expect(result.visibility.score).toBe(0);
     });
 });

@@ -10,8 +10,10 @@ const HEADING_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 const BLOCK_CONTENT_TAGS = new Set(['p', 'li', 'dd', 'blockquote']);
 const PRONOUN_START = /^(it|this|that|these|those|ils?|elles?|ce|cet|cette|ces)\b/i;
 const QUESTION_ANSWER_PATTERN = /\?\s*\n|\?\s+[A-Z\u00C0-\u00FF]/;
-const ASSERTION_VERBS = /\b(est|sont|a|ont|propose|offre|garantit|assure|permet|fournit|is|are|has|have|provides|offers|ensures|guarantees)\b/i;
-const DATE_PATTERN = /\b(20[0-9]{2}|19[0-9]{2}|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december)\b/i;
+const ASSERTION_VERBS =
+    /\b(est|sont|a|ont|propose|offre|garantit|assure|permet|fournit|is|are|has|have|provides|offers|ensures|guarantees)\b/i;
+const DATE_PATTERN =
+    /\b(20[0-9]{2}|19[0-9]{2}|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december)\b/i;
 const AMOUNT_PATTERN = /\b\d+[\s]?[$€£%]\b|\b[$€£]\s?\d+|\b\d+\s?%/;
 const NUMBER_PATTERN = /\b\d{2,}\b/;
 
@@ -22,7 +24,10 @@ function makeBlockId(pageUrl, position, heading) {
 
 function normalizeText(value) {
     if (!value || typeof value !== 'string') return '';
-    return value.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    return value
+        .replace(/\u00a0/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function countWords(text) {
@@ -78,7 +83,10 @@ function scoreAnswerDensity(text) {
     if (QUESTION_ANSWER_PATTERN.test(text)) score += 10;
     if (ASSERTION_VERBS.test(text)) score += 5;
     const words = text.split(/\s+/).length;
-    const contentWords = text.replace(/\b(le|la|les|de|du|des|un|une|et|ou|en|a|the|a|an|of|in|to|and|or|is|are)\b/gi, '').split(/\s+/).filter(Boolean).length;
+    const contentWords = text
+        .replace(/\b(le|la|les|de|du|des|un|une|et|ou|en|a|the|a|an|of|in|to|and|or|is|are)\b/gi, '')
+        .split(/\s+/)
+        .filter(Boolean).length;
     const density = words > 0 ? contentWords / words : 0;
     if (density > 0.7) score += 10;
     else if (density > 0.5) score += 5;
@@ -119,10 +127,12 @@ export function collectContentBlocks($, pageUrl) {
     let position = 0;
 
     // Detect FAQ schema context on the page
-    const hasFaqSchema = $('script[type="application/ld+json"]').toArray().some((el) => {
-        const html = $(el).html();
-        return html && /faqpage/i.test(html);
-    });
+    const hasFaqSchema = $('script[type="application/ld+json"]')
+        .toArray()
+        .some((el) => {
+            const html = $(el).html();
+            return html && /faqpage/i.test(html);
+        });
 
     // Walk direct children and their descendants for headings and content
     const children = container.children().toArray();
@@ -134,11 +144,12 @@ export function collectContentBlocks($, pageUrl) {
     function flushBlock() {
         const text = normalizeText(currentTexts.join(' '));
         if (text.length >= MIN_BLOCK_CHARS && blocks.length < MAX_BLOCKS_PER_PAGE) {
-            const blockType = currentBlockType === 'list_item'
-                ? 'list_item'
-                : hasFaqSchema && currentHeading && /\?/.test(currentHeading)
-                    ? 'faq_answer'
-                    : 'paragraph';
+            const blockType =
+                currentBlockType === 'list_item'
+                    ? 'list_item'
+                    : hasFaqSchema && currentHeading && /\?/.test(currentHeading)
+                      ? 'faq_answer'
+                      : 'paragraph';
             blocks.push({
                 block_id: makeBlockId(pageUrl, position, currentHeading),
                 page_url: pageUrl || '',
@@ -178,40 +189,42 @@ export function collectContentBlocks($, pageUrl) {
 
         // Recurse into div/section/article children
         if (['div', 'section', 'article'].includes(tagName)) {
-            $(child).find('h1, h2, h3, h4, h5, h6, p, li, dd, blockquote').each((_, el) => {
-                const elTag = (el.tagName || '').toLowerCase();
-                if (HEADING_TAGS.has(elTag)) {
-                    flushBlock();
-                    currentHeading = normalizeText($(el).text());
-                    currentHeadingLevel = Number(elTag.slice(1)) || null;
-                } else if (BLOCK_CONTENT_TAGS.has(elTag)) {
-                    const text = normalizeText($(el).text());
-                    if (text.length >= 15) {
-                        // Detect list items as separate block type
-                        if (elTag === 'li') {
-                            flushBlock();
-                            if (text.length >= MIN_BLOCK_CHARS && blocks.length < MAX_BLOCKS_PER_PAGE) {
-                                blocks.push({
-                                    block_id: makeBlockId(pageUrl, position, currentHeading),
-                                    page_url: pageUrl || '',
-                                    heading: currentHeading,
-                                    heading_level: currentHeadingLevel,
-                                    block_text: text,
-                                    text,
-                                    block_type: 'list_item',
-                                    position,
-                                    char_count: text.length,
-                                    word_count: countWords(text),
-                                });
-                                position += 1;
+            $(child)
+                .find('h1, h2, h3, h4, h5, h6, p, li, dd, blockquote')
+                .each((_, el) => {
+                    const elTag = (el.tagName || '').toLowerCase();
+                    if (HEADING_TAGS.has(elTag)) {
+                        flushBlock();
+                        currentHeading = normalizeText($(el).text());
+                        currentHeadingLevel = Number(elTag.slice(1)) || null;
+                    } else if (BLOCK_CONTENT_TAGS.has(elTag)) {
+                        const text = normalizeText($(el).text());
+                        if (text.length >= 15) {
+                            // Detect list items as separate block type
+                            if (elTag === 'li') {
+                                flushBlock();
+                                if (text.length >= MIN_BLOCK_CHARS && blocks.length < MAX_BLOCKS_PER_PAGE) {
+                                    blocks.push({
+                                        block_id: makeBlockId(pageUrl, position, currentHeading),
+                                        page_url: pageUrl || '',
+                                        heading: currentHeading,
+                                        heading_level: currentHeadingLevel,
+                                        block_text: text,
+                                        text,
+                                        block_type: 'list_item',
+                                        position,
+                                        char_count: text.length,
+                                        word_count: countWords(text),
+                                    });
+                                    position += 1;
+                                }
+                            } else {
+                                currentBlockType = 'paragraph';
+                                currentTexts.push(text);
                             }
-                        } else {
-                            currentBlockType = 'paragraph';
-                            currentTexts.push(text);
                         }
                     }
-                }
-            });
+                });
         }
     }
 
@@ -227,7 +240,11 @@ export function collectContentBlocks($, pageUrl) {
  */
 export function scoreBlockCitability(block) {
     if (!block || !block.text) {
-        return { score: 0, citability_score: 0, sub_scores: { specificity: 0, self_containment: 0, answer_density: 0, factual_density: 0 } };
+        return {
+            score: 0,
+            citability_score: 0,
+            sub_scores: { specificity: 0, self_containment: 0, answer_density: 0, factual_density: 0 },
+        };
     }
 
     const text = block.text;

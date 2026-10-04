@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { AI_FAQ_PAYLOAD, AI_SERVICE_PAYLOAD, AI_SUMMARY_PAYLOAD, renderLlmsFullTxt, renderLlmsTxt } from '@/lib/agent-discovery/public-data';
+import {
+    AI_FAQ_PAYLOAD,
+    AI_SERVICE_PAYLOAD,
+    AI_SUMMARY_PAYLOAD,
+    renderLlmsFullTxt,
+    renderLlmsTxt,
+} from '@/lib/agent-discovery/public-data';
 import { SEO_GROWTH_PAGES, SEO_GROWTH_PAGE_PATHS } from '@/lib/data/seo-growth-pages';
 import { SITE_URL } from '@/lib/site-config';
 

@@ -16,7 +16,15 @@ function renderOverview(snapshot, status) {
 
 describe('AGENT overview source availability', () => {
     it('keeps failed snapshot counts unavailable and reports partial data', () => {
-        const text = renderOverview({ completedRunsTotal: null, trackedPromptsTotal: null, openOpportunitiesCount: null, highPriorityOpen: null }, 'partial');
+        const text = renderOverview(
+            {
+                completedRunsTotal: null,
+                trackedPromptsTotal: null,
+                openOpportunitiesCount: null,
+                highPriorityOpen: null,
+            },
+            'partial',
+        );
         expect(text).toContain('Exécutions complétéesn.d.');
         expect(text).toContain('Prompts suivisn.d.');
         expect(text).toContain('Correctifs actifsn.d.');
@@ -25,7 +33,10 @@ describe('AGENT overview source availability', () => {
     });
 
     it('preserves observed zero counts', () => {
-        const text = renderOverview({ completedRunsTotal: 0, trackedPromptsTotal: 0, openOpportunitiesCount: 0, highPriorityOpen: 0 }, 'available');
+        const text = renderOverview(
+            { completedRunsTotal: 0, trackedPromptsTotal: 0, openOpportunitiesCount: 0, highPriorityOpen: 0 },
+            'available',
+        );
         expect(text).toContain('Exécutions complétées0');
         expect(text).toContain('Prompts suivis0');
         expect(text).toContain('Correctifs actifs0');

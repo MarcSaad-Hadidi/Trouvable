@@ -46,18 +46,22 @@ describe('GSC provider auth fallback', () => {
 
     it('retries with the server service account when OAuth refresh fails with invalid_client', async () => {
         queryMock
-            .mockRejectedValueOnce(Object.assign(new Error('invalid_client'), {
-                response: { data: { error: 'invalid_client' } },
-            }))
+            .mockRejectedValueOnce(
+                Object.assign(new Error('invalid_client'), {
+                    response: { data: { error: 'invalid_client' } },
+                }),
+            )
             .mockResolvedValueOnce({
                 data: {
-                    rows: [{
-                        keys: ['test query'],
-                        clicks: 3,
-                        impressions: 30,
-                        ctr: 0.1,
-                        position: 2,
-                    }],
+                    rows: [
+                        {
+                            keys: ['test query'],
+                            clicks: 3,
+                            impressions: 30,
+                            ctr: 0.1,
+                            position: 2,
+                        },
+                    ],
                 },
             });
 

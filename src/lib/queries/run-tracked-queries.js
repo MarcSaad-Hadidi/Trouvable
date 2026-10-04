@@ -4,16 +4,31 @@ import { callAiJson, callAiText } from '@/lib/ai/index';
 import { normalizeGeoQueryAnalysis } from '@/lib/ai/normalize';
 import { buildGeoQueryAnalysisPrompt, buildGeoPromptForMode } from '@/lib/ai/prompts';
 import { getBusinessShortDescription } from '@/lib/client-profile';
-import { createQueryRun as dbCreateQueryRun, updateQueryRun as dbUpdateQueryRun, createQueryMentions as dbCreateQueryMentions, countQueryRunsForClientSince as dbCountQueryRunsForClientSince, getQueryRunById as dbGetQueryRunById, deleteQueryMentionsByRunId as dbDeleteQueryMentionsByRunId } from '@/lib/db/query-runs';
+import {
+    createQueryRun as dbCreateQueryRun,
+    updateQueryRun as dbUpdateQueryRun,
+    createQueryMentions as dbCreateQueryMentions,
+    countQueryRunsForClientSince as dbCountQueryRunsForClientSince,
+    getQueryRunById as dbGetQueryRunById,
+    deleteQueryMentionsByRunId as dbDeleteQueryMentionsByRunId,
+} from '@/lib/db/query-runs';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
-import { getTrackedQueriesAll as dbGetTrackedQueriesAll, getTrackedQueries as dbGetTrackedQueries } from '@/lib/db/tracked-queries';
+import {
+    getTrackedQueriesAll as dbGetTrackedQueriesAll,
+    getTrackedQueries as dbGetTrackedQueries,
+} from '@/lib/db/tracked-queries';
 import { getCompetitorAliases as dbGetCompetitorAliases } from '@/lib/db/competitors';
 import { logAction as dbLogAction } from '@/lib/db/actions';
 import { getExtractionVersion, buildExtractionArtifacts } from '@/lib/queries/extraction-v2';
 import { ENGINE_VARIANTS, resolveRequestedBenchmarkVariants, runBenchmarkVariant } from '@/lib/queries/engine-variants';
 import { buildRunReviewContract } from '@/lib/queries/run-review-contract';
 import { normalizeEntityTypeForDb } from '@/lib/queries/mention-entity-type';
-import { normalizeDiscoveryMode, inferDiscoveryMode, isVisibilityEligible, classifyMeasurementOutcome } from '@/lib/operator-intelligence/prompt-taxonomy';
+import {
+    normalizeDiscoveryMode,
+    inferDiscoveryMode,
+    isVisibilityEligible,
+    classifyMeasurementOutcome,
+} from '@/lib/operator-intelligence/prompt-taxonomy';
 
 const GEO_DEFAULT_ENGINE_VARIANT = 'tavily_orchestrated';
 const GEO_MISTRAL_ENGINE_VARIANT = 'mistral_geo_default';
@@ -38,10 +53,7 @@ function resolveMaxGeoRunsPerClientPerDay() {
 function resolveClientGeoEngineVariant(client = {}) {
     // TODO: prefer a dedicated DB field (e.g. client_geo_profiles.engine_variant) once schema-level toggle is available.
     const requested = String(
-        client?.engine_variant
-        || client?.geo_ai_data?.engine_variant
-        || client?.settings?.geo_engine_variant
-        || ''
+        client?.engine_variant || client?.geo_ai_data?.engine_variant || client?.settings?.geo_engine_variant || '',
     ).trim();
 
     if (requested && ENGINE_VARIANTS[requested]) {
@@ -54,8 +66,9 @@ function resolveClientGeoEngineVariant(client = {}) {
     }
 
     const mistralVariant = ENGINE_VARIANTS[GEO_MISTRAL_ENGINE_VARIANT];
-    const isMistralAvailable = Boolean(mistralVariant
-        && (typeof mistralVariant.is_available !== 'function' || mistralVariant.is_available()));
+    const isMistralAvailable = Boolean(
+        mistralVariant && (typeof mistralVariant.is_available !== 'function' || mistralVariant.is_available()),
+    );
     return isMistralAvailable ? GEO_MISTRAL_ENGINE_VARIANT : GEO_DEFAULT_ENGINE_VARIANT;
 }
 
@@ -103,7 +116,11 @@ function resolveQueryDiscoveryMode(query, clientName = '') {
     // Explicit discovery_mode on the tracked query takes priority
     const explicit = query.discovery_mode || query.prompt_metadata?.discovery_mode;
     if (explicit) {
-        const raw = String(explicit || '').trim().toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+        const raw = String(explicit || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/-/g, '_');
         const normalized = normalizeDiscoveryMode(explicit);
         if (normalized !== 'brand_aware' || raw === 'brand_aware') {
             return normalized;
@@ -127,7 +144,11 @@ function normalizeKnownCompetitors(client = {}, competitorAliases = []) {
         .map((row) => String(row?.canonical_name || '').trim())
         .filter(Boolean);
 
-    return [...new Set([...profileCompetitors, ...aliasCanonicals].map((value) => String(value || '').trim()).filter(Boolean))];
+    return [
+        ...new Set(
+            [...profileCompetitors, ...aliasCanonicals].map((value) => String(value || '').trim()).filter(Boolean),
+        ),
+    ];
 }
 
 function toUsageTotals(queryUsage = {}, analysisUsage = {}) {
@@ -157,7 +178,8 @@ function classifyRunError(errorMessage = '', engineVariant = '') {
     if (variantMeta.provider === 'mistral' || message.includes('mistral')) return 'mistral_error';
     if (message.includes('timeout')) return 'timeout';
     if (message.includes('rate') || message.includes('429')) return 'rate_limit';
-    if (message.includes('provider') || message.includes('api key') || message.includes('http')) return 'provider_error';
+    if (message.includes('provider') || message.includes('api key') || message.includes('http'))
+        return 'provider_error';
     if (message.includes('parse') || message.includes('json')) return 'parse_error';
     return 'runtime_error';
 }
@@ -166,7 +188,7 @@ function mapMentionsForInsert(queryRunId, mentions = []) {
     return (mentions || []).map((item, index) => ({
         query_run_id: queryRunId,
         business_name: item.business_name || item.normalized_label || '[unknown mention]',
-        position: Number.isFinite(Number(item.position)) ? Number(item.position) : (index + 1),
+        position: Number.isFinite(Number(item.position)) ? Number(item.position) : index + 1,
         context: String(item.context || item.evidence_span || '').slice(0, 2000),
         is_target: item.is_target === true,
         sentiment: item.sentiment || 'neutral',
@@ -326,7 +348,11 @@ async function executeVariantForQuery({
             console.warn(`[runTrackedQueries] JSON analysis failed for run ${queryRun.id}: ${analysisError.message}`);
             analysisResult = {
                 data: {
-                    answerability: { text_contains_relevant_recommendations: true, reasoning: 'Fallback text extraction', needs_rephrase: false },
+                    answerability: {
+                        text_contains_relevant_recommendations: true,
+                        reasoning: 'Fallback text extraction',
+                        needs_rephrase: false,
+                    },
                     mentions: [],
                 },
                 usage: {},
@@ -381,7 +407,8 @@ async function executeVariantForQuery({
             target_found: extraction.targetDetection.target_found,
             target_position: extraction.targetDetection.target_position,
             brand_mentioned: normalizedAnalysis.data?.brand_mentioned ?? extraction.targetDetection.target_found,
-            brand_position: normalizedAnalysis.data?.brand_position ?? extraction.targetDetection.target_position ?? null,
+            brand_position:
+                normalizedAnalysis.data?.brand_position ?? extraction.targetDetection.target_position ?? null,
             competitors_mentioned: normalizedAnalysis.data?.competitors_mentioned || [],
             urls_cited: normalizedAnalysis.data?.urls_cited || [],
             unsupported_claims: normalizedAnalysis.data?.unsupported_claims || [],
@@ -455,12 +482,15 @@ async function executeVariantForQuery({
                 ...extraction.normalizedResponse,
                 prompt_metadata: promptMetadata,
                 operator_extraction: {
-                    brand_mentioned: normalizedAnalysis.data?.brand_mentioned ?? extraction.targetDetection.target_found,
-                    brand_position: normalizedAnalysis.data?.brand_position ?? extraction.targetDetection.target_position ?? null,
+                    brand_mentioned:
+                        normalizedAnalysis.data?.brand_mentioned ?? extraction.targetDetection.target_found,
+                    brand_position:
+                        normalizedAnalysis.data?.brand_position ?? extraction.targetDetection.target_position ?? null,
                     competitors_mentioned: normalizedAnalysis.data?.competitors_mentioned || [],
                     urls_cited: normalizedAnalysis.data?.urls_cited || [],
                     sentiment: normalizedAnalysis.data?.sentiment || 'neutral',
-                    evidence_level: normalizedAnalysis.data?.evidence_level || promptPayloadRow?.evidence_level || 'none',
+                    evidence_level:
+                        normalizedAnalysis.data?.evidence_level || promptPayloadRow?.evidence_level || 'none',
                     claims: normalizedAnalysis.data?.claims || [],
                     unsupported_claims: normalizedAnalysis.data?.unsupported_claims || [],
                     citations: normalizedAnalysis.data?.citations || [],
@@ -488,7 +518,9 @@ async function executeVariantForQuery({
         if (mentionRows.length > 0) {
             await dbCreateQueryMentions(mentionRows);
         } else {
-            console.warn(`[runTrackedQueries] Run ${queryRun.id} (${engineVariant}) extracted 0 mentions. Source reason: ${extraction.diagnostics?.zero_citation_reason}, Competitor reason: ${extraction.diagnostics?.zero_competitor_reason}`);
+            console.warn(
+                `[runTrackedQueries] Run ${queryRun.id} (${engineVariant}) extracted 0 mentions. Source reason: ${extraction.diagnostics?.zero_citation_reason}, Competitor reason: ${extraction.diagnostics?.zero_competitor_reason}`,
+            );
         }
 
         return {
@@ -567,9 +599,7 @@ export async function runTrackedQueriesForClient({
         ? await dbGetTrackedQueriesAll(clientId)
         : await dbGetTrackedQueries(clientId, true);
 
-    const queries = trackedQueryId
-        ? sourceQueries.filter((query) => query.id === trackedQueryId)
-        : sourceQueries;
+    const queries = trackedQueryId ? sourceQueries.filter((query) => query.id === trackedQueryId) : sourceQueries;
 
     if (trackedQueryId && queries.length === 0) {
         return {
@@ -598,17 +628,18 @@ export async function runTrackedQueriesForClient({
     const businessContext = {
         name: client.client_name,
         description: getBusinessShortDescription(client.business_details) || client.seo_description || '',
-        area: typeof client.address === 'object' ? (client.address?.city || client.address?.region || '') : '',
+        area: typeof client.address === 'object' ? client.address?.city || client.address?.region || '' : '',
         services: client.business_details?.services || [],
         known_competitors: knownCompetitors.slice(0, 20),
     };
 
-    const variants = runMode === 'benchmark'
-        ? resolveRequestedBenchmarkVariants(benchmarkVariants)
-        : [resolveClientGeoEngineVariant(client)];
+    const variants =
+        runMode === 'benchmark'
+            ? resolveRequestedBenchmarkVariants(benchmarkVariants)
+            : [resolveClientGeoEngineVariant(client)];
 
     const maxRunsPerDay = resolveMaxGeoRunsPerClientPerDay();
-    const isMistralVariant = variants.some((variant) => (ENGINE_VARIANTS[variant]?.provider === 'mistral'));
+    const isMistralVariant = variants.some((variant) => ENGINE_VARIANTS[variant]?.provider === 'mistral');
     let cappedQueries = queries;
     let capInfo = null;
 
@@ -674,11 +705,7 @@ export async function runTrackedQueriesForClient({
     };
 }
 
-export async function rerunStoredQueryRun({
-    clientId,
-    runId,
-    performedBy = null,
-}) {
+export async function rerunStoredQueryRun({ clientId, runId, performedBy = null }) {
     const run = await dbGetQueryRunById(runId);
     if (!run || run.client_id !== clientId) {
         throw new Error('Execution introuvable pour ce client.');
@@ -695,11 +722,7 @@ export async function rerunStoredQueryRun({
     });
 }
 
-export async function reparseStoredQueryRun({
-    clientId,
-    runId,
-    performedBy = null,
-}) {
+export async function reparseStoredQueryRun({ clientId, runId, performedBy = null }) {
     const run = await dbGetQueryRunById(runId);
     if (!run || run.client_id !== clientId) {
         throw new Error('Execution introuvable pour ce client.');

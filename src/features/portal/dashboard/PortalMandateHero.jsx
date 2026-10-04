@@ -19,10 +19,20 @@ function formatDate(iso) {
 
 function freshnessConfig(freshness) {
     if (freshness === 'recent')
-        return { label: 'Revue à jour', cls: 'text-emerald-400', ring: 'border-emerald-400/30', bg: 'bg-emerald-400/[0.06]' };
+        return {
+            label: 'Revue à jour',
+            cls: 'text-emerald-400',
+            ring: 'border-emerald-400/30',
+            bg: 'bg-emerald-400/[0.06]',
+        };
     if (freshness === 'outdated')
-        return { label: 'Revue à planifier', cls: 'text-amber-300', ring: 'border-amber-400/30', bg: 'bg-amber-400/[0.06]' };
-    return { label: "Première revue en attente", cls: 'text-white/45', ring: 'border-white/10', bg: 'bg-white/[0.02]' };
+        return {
+            label: 'Revue à planifier',
+            cls: 'text-amber-300',
+            ring: 'border-amber-400/30',
+            bg: 'bg-amber-400/[0.06]',
+        };
+    return { label: 'Première revue en attente', cls: 'text-white/45', ring: 'border-white/10', bg: 'bg-white/[0.02]' };
 }
 
 function deriveSynthesis(client, visibility, completeness) {

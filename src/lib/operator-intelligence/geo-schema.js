@@ -15,8 +15,10 @@ import {
     toArray,
 } from './geo-foundation-shared';
 
-const LOCAL_BUSINESS_REGEX = /(localbusiness|professionalservice|store|restaurant|dentist|medicalclinic|plumber|electrician|hvac|roofing|autobody|autorepair|barber|beautysalon|daycare|dryclean|florist|hairsalon|homeandconstructionbusiness|legalservice|locksmith|movingcompany|notary|petstore|realestateagent)/i;
-const ORGANIZATION_REGEX = /(organization|localbusiness|professionalservice|corporation|medicalbusiness|legalservice|realestateagent|store|restaurant)/i;
+const LOCAL_BUSINESS_REGEX =
+    /(localbusiness|professionalservice|store|restaurant|dentist|medicalclinic|plumber|electrician|hvac|roofing|autobody|autorepair|barber|beautysalon|daycare|dryclean|florist|hairsalon|homeandconstructionbusiness|legalservice|locksmith|movingcompany|notary|petstore|realestateagent)/i;
+const ORGANIZATION_REGEX =
+    /(organization|localbusiness|professionalservice|corporation|medicalbusiness|legalservice|realestateagent|store|restaurant)/i;
 
 function uniqueStrings(values = []) {
     return [...new Set((values || []).map((value) => String(value || '').trim()).filter(Boolean))];
@@ -65,26 +67,42 @@ function collectCoverageNodes(audit) {
 
 function propertyPresent(nodes, entities, propertyKey) {
     if (propertyKey === 'name') {
-        return nodes.some((node) => compactString(node?.name)) || entities.some((entity) => compactString(entity?.name));
+        return (
+            nodes.some((node) => compactString(node?.name)) || entities.some((entity) => compactString(entity?.name))
+        );
     }
     if (propertyKey === 'url') {
         return nodes.some((node) => compactString(node?.url)) || entities.some((entity) => compactString(entity?.url));
     }
     if (propertyKey === 'description') {
-        return nodes.some((node) => compactString(node?.description)) || entities.some((entity) => compactString(entity?.description));
+        return (
+            nodes.some((node) => compactString(node?.description)) ||
+            entities.some((entity) => compactString(entity?.description))
+        );
     }
     if (propertyKey === 'sameAs') {
-        return nodes.some((node) => toArray(node?.sameAs).length > 0) || entities.some((entity) => toArray(entity?.sameAs).length > 0);
+        return (
+            nodes.some((node) => toArray(node?.sameAs).length > 0) ||
+            entities.some((entity) => toArray(entity?.sameAs).length > 0)
+        );
     }
     if (propertyKey === 'address') {
-        return nodes.some((node) => node?.address) || entities.some((entity) => compactString(entity?.address?.line || entity?.address));
+        return (
+            nodes.some((node) => node?.address) ||
+            entities.some((entity) => compactString(entity?.address?.line || entity?.address))
+        );
     }
     if (propertyKey === 'contact') {
-        return nodes.some((node) => compactString(node?.telephone) || compactString(node?.email))
-            || entities.some((entity) => compactString(entity?.telephone) || compactString(entity?.email));
+        return (
+            nodes.some((node) => compactString(node?.telephone) || compactString(node?.email)) ||
+            entities.some((entity) => compactString(entity?.telephone) || compactString(entity?.email))
+        );
     }
     if (propertyKey === 'areaServed') {
-        return nodes.some((node) => toArray(node?.areaServed).length > 0) || entities.some((entity) => toArray(entity?.areaServed).length > 0);
+        return (
+            nodes.some((node) => toArray(node?.areaServed).length > 0) ||
+            entities.some((entity) => toArray(entity?.areaServed).length > 0)
+        );
     }
     if (propertyKey === 'provider') {
         return nodes.some((node) => node?.provider || node?.brand);
@@ -132,18 +150,22 @@ function normalizeSchemaNameMatch(left, right) {
 function buildEntityConsistency(client, entities) {
     const relevantEntities = identityEntities(entities);
     const observedNames = uniqueStrings(relevantEntities.map((entity) => compactString(entity?.name)).filter(Boolean));
-    const observedPhones = uniqueStrings(relevantEntities.map((entity) => normalizeComparablePhone(entity?.telephone)).filter(Boolean));
-    const observedEmails = uniqueStrings(relevantEntities.map((entity) => normalizeComparableText(entity?.email)).filter(Boolean));
-    const observedAddresses = uniqueStrings(relevantEntities.map((entity) => compactString(entity?.address?.line || entity?.address)).filter(Boolean));
+    const observedPhones = uniqueStrings(
+        relevantEntities.map((entity) => normalizeComparablePhone(entity?.telephone)).filter(Boolean),
+    );
+    const observedEmails = uniqueStrings(
+        relevantEntities.map((entity) => normalizeComparableText(entity?.email)).filter(Boolean),
+    );
+    const observedAddresses = uniqueStrings(
+        relevantEntities.map((entity) => compactString(entity?.address?.line || entity?.address)).filter(Boolean),
+    );
 
     const clientName = compactString(client?.client_name);
     const clientPhone = normalizeComparablePhone(client?.contact_info?.phone);
     const clientEmail = normalizeComparableText(client?.contact_info?.public_email || client?.contact_info?.email);
-    const clientAddress = compactString([
-        client?.address?.street,
-        client?.address?.city,
-        client?.address?.region,
-    ].filter(Boolean).join(', '));
+    const clientAddress = compactString(
+        [client?.address?.street, client?.address?.city, client?.address?.region].filter(Boolean).join(', '),
+    );
 
     const rows = [];
 
@@ -152,11 +174,14 @@ function buildEntityConsistency(client, entities) {
         status: !clientName
             ? 'à confirmer'
             : observedNames.length === 0
-                ? 'manquant'
-                : observedNames.some((value) => normalizeSchemaNameMatch(clientName, value))
-                    ? 'aligné'
-                    : 'écart',
-        detail: observedNames.length > 0 ? observedNames.slice(0, 2).join(' · ') : 'Aucun nom d’entité observé dans le schema.',
+              ? 'manquant'
+              : observedNames.some((value) => normalizeSchemaNameMatch(clientName, value))
+                ? 'aligné'
+                : 'écart',
+        detail:
+            observedNames.length > 0
+                ? observedNames.slice(0, 2).join(' · ')
+                : 'Aucun nom d’entité observé dans le schema.',
         reliability: 'calculated',
     });
 
@@ -165,10 +190,10 @@ function buildEntityConsistency(client, entities) {
         status: !clientPhone
             ? 'à confirmer'
             : observedPhones.length === 0
-                ? 'manquant'
-                : observedPhones.includes(clientPhone)
-                    ? 'aligné'
-                    : 'écart',
+              ? 'manquant'
+              : observedPhones.includes(clientPhone)
+                ? 'aligné'
+                : 'écart',
         detail: observedPhones.length > 0 ? observedPhones.join(' · ') : 'Aucun téléphone observé dans le schema.',
         reliability: 'calculated',
     });
@@ -178,10 +203,10 @@ function buildEntityConsistency(client, entities) {
         status: !clientEmail
             ? 'à confirmer'
             : observedEmails.length === 0
-                ? 'manquant'
-                : observedEmails.includes(clientEmail)
-                    ? 'aligné'
-                    : 'écart',
+              ? 'manquant'
+              : observedEmails.includes(clientEmail)
+                ? 'aligné'
+                : 'écart',
         detail: observedEmails.length > 0 ? observedEmails.join(' · ') : 'Aucun courriel observé dans le schema.',
         reliability: 'calculated',
     });
@@ -192,11 +217,18 @@ function buildEntityConsistency(client, entities) {
         status: !normalizedClientAddress
             ? 'à confirmer'
             : observedAddresses.length === 0
-                ? 'manquant'
-                : observedAddresses.some((value) => normalizeComparableText(value).includes(normalizedClientAddress) || normalizedClientAddress.includes(normalizeComparableText(value)))
-                    ? 'aligné'
-                    : 'écart',
-        detail: observedAddresses.length > 0 ? observedAddresses.slice(0, 2).join(' · ') : 'Aucune adresse d’entité observée.',
+              ? 'manquant'
+              : observedAddresses.some(
+                      (value) =>
+                          normalizeComparableText(value).includes(normalizedClientAddress) ||
+                          normalizedClientAddress.includes(normalizeComparableText(value)),
+                  )
+                ? 'aligné'
+                : 'écart',
+        detail:
+            observedAddresses.length > 0
+                ? observedAddresses.slice(0, 2).join(' · ')
+                : 'Aucune adresse d’entité observée.',
         reliability: 'calculated',
     });
 
@@ -259,7 +291,10 @@ function buildMissingProperties({ coverageItems, client, audit }) {
         }
     }
 
-    if (toArray(client?.business_details?.services).length > 0 && toArray(audit?.extracted_data?.page_summaries).filter((page) => page?.page_type === 'services').length > 0) {
+    if (
+        toArray(client?.business_details?.services).length > 0 &&
+        toArray(audit?.extracted_data?.page_summaries).filter((page) => page?.page_type === 'services').length > 0
+    ) {
         const hasServiceItem = items.some((item) => item.label.startsWith('Service'));
         if (!hasServiceItem) {
             items.push({
@@ -278,11 +313,18 @@ function buildMissingProperties({ coverageItems, client, audit }) {
 function buildRecommendations({ coverageItems, sameAsSummary, consistencyRows, auditSchemaSignal }) {
     const recommendations = [];
 
-    if (coverageItems.some((item) => item.key === 'localbusiness' && item.operatorStatus === 'absent' && item.shouldExist)) {
+    if (
+        coverageItems.some(
+            (item) => item.key === 'localbusiness' && item.operatorStatus === 'absent' && item.shouldExist,
+        )
+    ) {
         recommendations.push({
             title: 'Renforcer l’entité locale principale',
-            description: 'Le mandat a des signaux locaux, mais aucune entité LocalBusiness exploitable n’a été observée dans le schema audité.',
-            evidence: coverageItems.find((item) => item.key === 'localbusiness')?.evidence || 'Aucune entité locale observée.',
+            description:
+                'Le mandat a des signaux locaux, mais aucune entité LocalBusiness exploitable n’a été observée dans le schema audité.',
+            evidence:
+                coverageItems.find((item) => item.key === 'localbusiness')?.evidence ||
+                'Aucune entité locale observée.',
             reliability: 'calculated',
         });
     }
@@ -290,7 +332,8 @@ function buildRecommendations({ coverageItems, sameAsSummary, consistencyRows, a
     if (coverageItems.some((item) => item.key === 'service' && item.operatorStatus !== 'couvert' && item.shouldExist)) {
         recommendations.push({
             title: 'Structurer les offres en entités Service',
-            description: 'Les services listés dans le dossier ne ressortent pas encore proprement en entités `Service` observables.',
+            description:
+                'Les services listés dans le dossier ne ressortent pas encore proprement en entités `Service` observables.',
             evidence: coverageItems.find((item) => item.key === 'service')?.evidence || 'Couverture Service partielle.',
             reliability: 'calculated',
         });
@@ -300,7 +343,9 @@ function buildRecommendations({ coverageItems, sameAsSummary, consistencyRows, a
         recommendations.push({
             title: 'Aligner sameAs avec les profils mandatés',
             description: 'La comparaison dossier partagé ↔ schema montre des profils absents ou divergents.',
-            evidence: sameAsSummary.missingFromSchema.concat(sameAsSummary.unexpectedInSchema).slice(0, 4).join(' · ') || 'sameAs incomplet.',
+            evidence:
+                sameAsSummary.missingFromSchema.concat(sameAsSummary.unexpectedInSchema).slice(0, 4).join(' · ') ||
+                'sameAs incomplet.',
             reliability: 'calculated',
         });
     }
@@ -308,8 +353,12 @@ function buildRecommendations({ coverageItems, sameAsSummary, consistencyRows, a
     if (consistencyRows.some((row) => row.status === 'écart')) {
         recommendations.push({
             title: 'Réconcilier les coordonnées d’entité',
-            description: 'Certaines coordonnées observées dans le schema ne recoupent pas le dossier partagé du mandat.',
-            evidence: consistencyRows.filter((row) => row.status === 'écart').map((row) => `${row.label} · ${row.detail}`).join(' · '),
+            description:
+                'Certaines coordonnées observées dans le schema ne recoupent pas le dossier partagé du mandat.',
+            evidence: consistencyRows
+                .filter((row) => row.status === 'écart')
+                .map((row) => `${row.label} · ${row.detail}`)
+                .join(' · '),
             reliability: 'calculated',
         });
     }
@@ -317,12 +366,14 @@ function buildRecommendations({ coverageItems, sameAsSummary, consistencyRows, a
     if (auditSchemaSignal?.item) {
         recommendations.push({
             title: auditSchemaSignal.kind === 'issue' ? 'Dernière alerte audit' : 'Dernier signal favorable audit',
-            description: localizeAuditCopy(compactString(auditSchemaSignal.item.recommended_fix))
-                || localizeAuditCopy(compactString(auditSchemaSignal.item.description))
-                || 'Le dernier audit contient un signal schema exploitable.',
-            evidence: localizeAuditCopy(compactString(auditSchemaSignal.item.evidence_summary))
-                || localizeAuditCopy(compactString(auditSchemaSignal.item.description))
-                || 'Preuve audit disponible.',
+            description:
+                localizeAuditCopy(compactString(auditSchemaSignal.item.recommended_fix)) ||
+                localizeAuditCopy(compactString(auditSchemaSignal.item.description)) ||
+                'Le dernier audit contient un signal schema exploitable.',
+            evidence:
+                localizeAuditCopy(compactString(auditSchemaSignal.item.evidence_summary)) ||
+                localizeAuditCopy(compactString(auditSchemaSignal.item.description)) ||
+                'Preuve audit disponible.',
             reliability: auditItemReliability(auditSchemaSignal.item),
         });
     }
@@ -358,13 +409,15 @@ function buildEvidenceLayers({ coverageItems, missingProperties, sameAsSummary }
         },
         ai: {
             title: 'Analyse IA',
-            description: 'Aucune analyse IA ciblée sur la clarté d’entité n’est persistée pour cette surface à ce stade.',
+            description:
+                'Aucune analyse IA ciblée sur la clarté d’entité n’est persistée pour cette surface à ce stade.',
             reliability: 'unavailable',
             items: ['Les recommandations affichées ici restent déterministes et fondées sur l’audit observé.'],
         },
         unavailable: {
             title: 'Indisponible',
-            description: 'Le repo ne réconcilie pas encore honnêtement les profils externes au-delà du dossier partagé et du schema observé.',
+            description:
+                'Le repo ne réconcilie pas encore honnêtement les profils externes au-delà du dossier partagé et du schema observé.',
             reliability: 'unavailable',
             items: ['Pas de réconciliation externe complète site ↔ annuaires ↔ profils tiers.'],
         },
@@ -410,10 +463,18 @@ export async function getSchemaSlice(clientId) {
             key: 'localbusiness',
             label: 'LocalBusiness',
             nodes: collected.localBusinessNodes,
-            entities: collected.entities.filter((entity) => normalizeTypeList(entity?.types?.length ? entity.types : entity?.type).some((type) => LOCAL_BUSINESS_REGEX.test(type))),
+            entities: collected.entities.filter((entity) =>
+                normalizeTypeList(entity?.types?.length ? entity.types : entity?.type).some((type) =>
+                    LOCAL_BUSINESS_REGEX.test(type),
+                ),
+            ),
             expectedProperties: ['name', 'address', 'contact', 'areaServed'],
             evidenceLabel: 'LocalBusiness / ancrage local',
-            shouldExist: Boolean(compactString(client?.address?.city) || compactString(client?.address?.street) || compactString(client?.business_type)),
+            shouldExist: Boolean(
+                compactString(client?.address?.city) ||
+                compactString(client?.address?.street) ||
+                compactString(client?.business_type),
+            ),
         }),
         buildCoverageItem({
             key: 'service',
@@ -436,7 +497,11 @@ export async function getSchemaSlice(clientId) {
     ];
 
     const missingProperties = buildMissingProperties({ coverageItems, client, audit });
-    const sameAsSummary = buildSameAsSummary(client, collected.organizationNodes.concat(collected.localBusinessNodes), collected.entities);
+    const sameAsSummary = buildSameAsSummary(
+        client,
+        collected.organizationNodes.concat(collected.localBusinessNodes),
+        collected.entities,
+    );
     const consistencyRows = buildEntityConsistency(client, collected.entities);
     const auditSchemaSignal = findAuditItem(audit, (item) => {
         const haystack = `${item?.title || ''} ${item?.description || ''}`.toLowerCase();
@@ -452,7 +517,9 @@ export async function getSchemaSlice(clientId) {
             not_connected: getProvenanceMeta('not_connected'),
         },
         summary: {
-            coveragePercent: Math.round((coverageItems.filter((item) => item.operatorStatus !== 'absent').length / coverageItems.length) * 100),
+            coveragePercent: Math.round(
+                (coverageItems.filter((item) => item.operatorStatus !== 'absent').length / coverageItems.length) * 100,
+            ),
             observedTypeCount: uniqueStrings(collected.rawNodes.flatMap((node) => rawNodeTypes(node))).length,
             criticalGapCount: missingProperties.filter((item) => item.severity === 'high').length,
             auditFreshness: timeSince(audit?.created_at) || 'Indisponible',
@@ -475,13 +542,14 @@ export async function getSchemaSlice(clientId) {
             createdAt: audit?.created_at || null,
             latestSignal: auditSchemaSignal?.item
                 ? {
-                    kind: auditSchemaSignal.kind,
-                    title: localizeAuditCopy(compactString(auditSchemaSignal.item.title)) || 'Signal audit schema',
-                    evidence: localizeAuditCopy(compactString(auditSchemaSignal.item.evidence_summary))
-                        || localizeAuditCopy(compactString(auditSchemaSignal.item.description))
-                        || null,
-                    reliability: auditItemReliability(auditSchemaSignal.item),
-                }
+                      kind: auditSchemaSignal.kind,
+                      title: localizeAuditCopy(compactString(auditSchemaSignal.item.title)) || 'Signal audit schema',
+                      evidence:
+                          localizeAuditCopy(compactString(auditSchemaSignal.item.evidence_summary)) ||
+                          localizeAuditCopy(compactString(auditSchemaSignal.item.description)) ||
+                          null,
+                      reliability: auditItemReliability(auditSchemaSignal.item),
+                  }
                 : null,
         },
         emptyState: null,

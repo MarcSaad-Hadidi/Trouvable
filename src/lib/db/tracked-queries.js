@@ -64,10 +64,14 @@ export async function createTrackedQuery({
     if (isTrackedQueryConstraintDriftError(error)) {
         const legacyRow = mapTrackedQueryWriteToLegacy(row);
         console.warn(
-            '[DB] createTrackedQuery: tracked_queries category/query_type constraint drift detected. Retrying with legacy mapping; apply latest Supabase migrations.'
+            '[DB] createTrackedQuery: tracked_queries category/query_type constraint drift detected. Retrying with legacy mapping; apply latest Supabase migrations.',
         );
 
-        const { data: retryData, error: retryError } = await db().from('tracked_queries').insert(legacyRow).select().single();
+        const { data: retryData, error: retryError } = await db()
+            .from('tracked_queries')
+            .insert(legacyRow)
+            .select()
+            .single();
         if (!retryError) return retryData;
 
         throw createDbError('createTrackedQuery', retryError, {
@@ -93,8 +97,17 @@ export async function getTrackedQueriesAll(clientId) {
 export async function updateTrackedQuery(id, updates) {
     let normalizedUpdates = updates;
 
-    if (updates.category !== undefined || updates.query_type !== undefined || updates.query_text !== undefined || updates.locale !== undefined) {
-        const { data: existing, error: existingError } = await db().from('tracked_queries').select('*').eq('id', id).single();
+    if (
+        updates.category !== undefined ||
+        updates.query_type !== undefined ||
+        updates.query_text !== undefined ||
+        updates.locale !== undefined
+    ) {
+        const { data: existing, error: existingError } = await db()
+            .from('tracked_queries')
+            .select('*')
+            .eq('id', id)
+            .single();
         if (existingError) throw new Error(`[DB] updateTrackedQuery ${id}: ${existingError.message}`);
         normalizedUpdates = prepareTrackedQueryWrite(updates, existing);
     }
@@ -105,10 +118,15 @@ export async function updateTrackedQuery(id, updates) {
     if (isTrackedQueryConstraintDriftError(error)) {
         const legacyUpdates = mapTrackedQueryWriteToLegacy(normalizedUpdates);
         console.warn(
-            `[DB] updateTrackedQuery ${id}: tracked_queries category/query_type constraint drift detected. Retrying with legacy mapping; apply latest Supabase migrations.`
+            `[DB] updateTrackedQuery ${id}: tracked_queries category/query_type constraint drift detected. Retrying with legacy mapping; apply latest Supabase migrations.`,
         );
 
-        const { data: retryData, error: retryError } = await db().from('tracked_queries').update(legacyUpdates).eq('id', id).select().single();
+        const { data: retryData, error: retryError } = await db()
+            .from('tracked_queries')
+            .update(legacyUpdates)
+            .eq('id', id)
+            .select()
+            .single();
         if (!retryError) return retryData;
 
         throw createDbError(`updateTrackedQuery ${id}`, retryError, {

@@ -11,7 +11,9 @@ const ports = new Set((process.env.TROUVABLE_QA_PORTS || '').split(',').filter(B
 const allowFonts = process.env.TROUVABLE_QA_ALLOW_FONTS === '1';
 
 function check(host, port) {
-    host = String(host || 'localhost').toLowerCase().replace(/^\[|\]$/g, '');
+    host = String(host || 'localhost')
+        .toLowerCase()
+        .replace(/^\[|\]$/g, '');
     if (localHosts.has(host) && (port === undefined || ports.has(String(port)))) return;
     if (allowFonts && fonts.has(host) && (port === undefined || String(port) === '443')) return;
     const error = new Error(`QA blocked network destination: ${host}${port === undefined ? '' : `:${port}`}`);
@@ -23,13 +25,14 @@ function check(host, port) {
 function destination(args, defaultPort) {
     let first = args[0];
     if (Array.isArray(first)) first = first[0]; // Node's normalized Socket.connect arguments.
-    if (first instanceof URL || typeof first === 'string' && /^https?:/.test(first)) {
+    if (first instanceof URL || (typeof first === 'string' && /^https?:/.test(first))) {
         const url = new URL(first);
         return [url.hostname, url.port || (url.protocol === 'https:' ? 443 : 80)];
     }
     if (typeof first === 'number') return [typeof args[1] === 'string' ? args[1] : 'localhost', first];
     if (typeof first === 'string') throw new Error('QA does not permit Unix socket connections');
-    if (first?.path && !first.host && !first.hostname && !first.port) throw new Error('QA does not permit Unix socket connections');
+    if (first?.path && !first.host && !first.hostname && !first.port)
+        throw new Error('QA does not permit Unix socket connections');
     return [first?.hostname || first?.host || 'localhost', first?.port ?? defaultPort];
 }
 const fetchOriginal = globalThis.fetch;
@@ -42,7 +45,10 @@ globalThis.fetch = function (input, ...args) {
     }
     return fetchOriginal.call(this, input, ...args);
 };
-for (const [moduleName, defaultPort] of [['node:http', 80], ['node:https', 443]]) {
+for (const [moduleName, defaultPort] of [
+    ['node:http', 80],
+    ['node:https', 443],
+]) {
     const transport = require(moduleName);
     for (const name of ['request', 'get']) {
         const original = transport[name];
@@ -57,17 +63,38 @@ for (const [moduleName, defaultPort] of [['node:http', 80], ['node:https', 443]]
         };
     }
 }
-for (const [transport, name] of [[net, 'connect'], [net, 'createConnection'], [net.Socket.prototype, 'connect'], [tls, 'connect']]) {
+for (const [transport, name] of [
+    [net, 'connect'],
+    [net, 'createConnection'],
+    [net.Socket.prototype, 'connect'],
+    [tls, 'connect'],
+]) {
     const original = transport[name];
     transport[name] = function (...args) {
         check(...destination(args));
         return original.apply(this, args);
     };
 }
-for (const name of ['lookup', 'resolve', 'resolve4', 'resolve6', 'resolveAny', 'resolveCname', 'resolveMx', 'resolveNs', 'resolvePtr', 'resolveSoa', 'resolveSrv', 'resolveTxt', 'reverse']) {
+for (const name of [
+    'lookup',
+    'resolve',
+    'resolve4',
+    'resolve6',
+    'resolveAny',
+    'resolveCname',
+    'resolveMx',
+    'resolveNs',
+    'resolvePtr',
+    'resolveSoa',
+    'resolveSrv',
+    'resolveTxt',
+    'reverse',
+]) {
     const original = dns[name];
     dns[name] = function (host, ...args) {
-        try { check(host); } catch (error) {
+        try {
+            check(host);
+        } catch (error) {
             const callback = args.at(-1);
             if (typeof callback === 'function') return process.nextTick(() => callback(error));
             throw error;
@@ -82,10 +109,25 @@ for (const name of ['lookup', 'resolve', 'resolve4', 'resolve6', 'resolveAny', '
 }
 // Resolver instances must not bypass the module-level DNS hooks.
 for (const prototype of [dns.Resolver.prototype, dns.promises.Resolver.prototype]) {
-    for (const name of ['resolve', 'resolve4', 'resolve6', 'resolveAny', 'resolveCname', 'resolveMx', 'resolveNs', 'resolvePtr', 'resolveSoa', 'resolveSrv', 'resolveTxt', 'reverse']) {
+    for (const name of [
+        'resolve',
+        'resolve4',
+        'resolve6',
+        'resolveAny',
+        'resolveCname',
+        'resolveMx',
+        'resolveNs',
+        'resolvePtr',
+        'resolveSoa',
+        'resolveSrv',
+        'resolveTxt',
+        'reverse',
+    ]) {
         const original = prototype[name];
         prototype[name] = function (host, ...args) {
-            try { check(host); } catch (error) {
+            try {
+                check(host);
+            } catch (error) {
                 const callback = args.at(-1);
                 if (typeof callback === 'function') return process.nextTick(() => callback(error));
                 if (prototype === dns.promises.Resolver.prototype) return Promise.reject(error);

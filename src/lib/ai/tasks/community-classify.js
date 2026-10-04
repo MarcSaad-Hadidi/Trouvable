@@ -23,15 +23,20 @@ const outputSchema = z.object({
 function buildMessages(input) {
     const { documents, clientName, businessType, competitors, mandateContext } = input;
 
-    const docSummaries = documents.map((doc, i) => {
-        const title = String(doc.title || '').trim();
-        const body = String(doc.body || '').slice(0, 600).trim();
-        return `--- Document ${i + 1} (id: ${doc.id}) ---\nTitle: ${title}\nBody: ${body}`;
-    }).join('\n\n');
+    const docSummaries = documents
+        .map((doc, i) => {
+            const title = String(doc.title || '').trim();
+            const body = String(doc.body || '')
+                .slice(0, 600)
+                .trim();
+            return `--- Document ${i + 1} (id: ${doc.id}) ---\nTitle: ${title}\nBody: ${body}`;
+        })
+        .join('\n\n');
 
-    const competitorList = (competitors || []).length > 0
-        ? `Known competitors: ${competitors.join(', ')}`
-        : 'No known competitors provided.';
+    const competitorList =
+        (competitors || []).length > 0
+            ? `Known competitors: ${competitors.join(', ')}`
+            : 'No known competitors provided.';
 
     // Build mandate context section for richer classification
     const mandateLines = [];
@@ -49,9 +54,7 @@ function buildMessages(input) {
             mandateLines.push(`Business description: ${mandateContext.seo_description}`);
         }
     }
-    const mandateSection = mandateLines.length > 0
-        ? ['', 'Business context:', ...mandateLines].join('\n')
-        : '';
+    const mandateSection = mandateLines.length > 0 ? ['', 'Business context:', ...mandateLines].join('\n') : '';
 
     return [
         {
@@ -97,7 +100,9 @@ function buildMessages(input) {
                 '',
                 'Extract all mentions as JSON: { "mentions": [...] }',
                 'Remember: 0 mentions is valid for irrelevant documents. Quality over quantity.',
-            ].filter(Boolean).join('\n'),
+            ]
+                .filter(Boolean)
+                .join('\n'),
         },
     ];
 }
@@ -123,9 +128,22 @@ function normalize(raw, input) {
             const label = String(m.label || '').trim();
             if (label.length < MIN_LABEL_LENGTH) return false;
             // Quality gate: reject mentions with generic single-word labels
-            if (label.split(/\s+/).length === 1 && label.length < MIN_SINGLE_WORD_THEME_LENGTH && m.mention_type === 'theme') return false;
+            if (
+                label.split(/\s+/).length === 1 &&
+                label.length < MIN_SINGLE_WORD_THEME_LENGTH &&
+                m.mention_type === 'theme'
+            )
+                return false;
             // Quality gate: reject valid-type check
-            const validTypes = ['complaint', 'question', 'theme', 'competitor', 'recommendation', 'opportunity', 'language'];
+            const validTypes = [
+                'complaint',
+                'question',
+                'theme',
+                'competitor',
+                'recommendation',
+                'opportunity',
+                'language',
+            ];
             if (!validTypes.includes(m.mention_type)) return false;
             return true;
         })

@@ -3,11 +3,7 @@
 import Link from 'next/link';
 
 import { useGeoClient } from '@/features/admin/shared/context/ClientContext';
-import {
-    COMMAND_BUTTONS,
-    CommandHeader,
-    CommandPageShell,
-} from '@/features/admin/shared/components/command';
+import { COMMAND_BUTTONS, CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 
 import AuditLabBenchmark from './AuditLabBenchmark';
 import AuditLabCanonical from './AuditLabCanonical';
@@ -54,7 +50,7 @@ export default function OperatorAuditLabView() {
             eyebrow="Audit Trouvable · espace opérateur"
             title="Audit du mandat"
             subtitle="Lancez un audit, lisez le résultat Trouvable final, puis descendez dans l’interprétation SEO vs GEO et les diagnostics techniques si besoin. Un seul score fait foi pour le client : le score Trouvable de la Section A."
-            actions={(
+            actions={
                 <>
                     <Link href="#audit-runner" className={COMMAND_BUTTONS.primary}>
                         Lancer un audit
@@ -69,7 +65,7 @@ export default function OperatorAuditLabView() {
                         Vue dossier
                     </Link>
                 </>
-            )}
+            }
         />
     );
 
@@ -98,11 +94,13 @@ export default function OperatorAuditLabView() {
                     Comment lire cette page
                 </div>
                 <p className="mt-1 text-[12px] leading-relaxed text-white/60">
-                    <span className="text-white/85">A. Résultat Trouvable</span> : vérité produit partagée avec le client.
+                    <span className="text-white/85">A. Résultat Trouvable</span> : vérité produit partagée avec le
+                    client.
                     <span className="mx-1 text-white/20">·</span>
                     <span className="text-white/80">B. Lecture SEO vs GEO</span> : pourquoi chaque côté est haut ou bas.
                     <span className="mx-1 text-white/20">·</span>
-                    <span className="text-white/70">C. Scan GEO brut</span> : console diagnostique sur le crawl et les contrôles.
+                    <span className="text-white/70">C. Scan GEO brut</span> : console diagnostique sur le crawl et les
+                    contrôles.
                     <span className="mx-1 text-white/20">·</span>
                     <span className="text-white/70">D. Enrichissements experts</span> : modules IA, marque, confiance.
                     <span className="mx-1 text-white/20">·</span>
@@ -111,7 +109,8 @@ export default function OperatorAuditLabView() {
                     <span className="text-white/50">F. Débogage</span> : timings &amp; payload.
                 </p>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-white/45">
-                    Les scores des sections B, C, D et E sont des lectures internes — elles n’écrasent jamais le score Trouvable de la Section A.
+                    Les scores des sections B, C, D et E sont des lectures internes — elles n’écrasent jamais le score
+                    Trouvable de la Section A.
                 </p>
             </div>
 

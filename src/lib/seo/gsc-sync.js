@@ -12,7 +12,7 @@ function dateToYmd(date) {
 
 function resolveWindow({ startDate, endDate } = {}) {
     const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - (27 * 24 * 60 * 60 * 1000));
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
         throw new Error('Invalid GSC sync window.');
@@ -46,11 +46,11 @@ function classifyGscSyncError(error) {
     if (rawCode.includes('invalid_client')) return 'invalid_client';
     if (rawCode.includes('invalid_grant')) return 'invalid_grant';
     if (
-        error?.response?.status === 403
-        || rawCode.includes('permission')
-        || rawMessage.includes('permission')
-        || rawMessage.includes('site not found')
-        || rawMessage.includes('insufficient')
+        error?.response?.status === 403 ||
+        rawCode.includes('permission') ||
+        rawMessage.includes('permission') ||
+        rawMessage.includes('site not found') ||
+        rawMessage.includes('insufficient')
     ) {
         return 'no_property_access';
     }
@@ -60,7 +60,7 @@ function classifyGscSyncError(error) {
 export async function runGscSyncForClient(clientId, options = {}) {
     const client = await getClientById(clientId);
     const connectors = await getClientConnectorRows(clientId);
-    const gscConnector = connectors.find(c => c.provider === 'gsc');
+    const gscConnector = connectors.find((c) => c.provider === 'gsc');
 
     /* Use the shared resolver so the sync job and the read-side
        (lib/operator-intelligence/visibility.js) target the exact same
@@ -119,7 +119,9 @@ export async function runGscSyncForClient(clientId, options = {}) {
             clientId,
             provider: 'gsc',
             status: 'error',
-            lastError: remedy ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}` : (fetchError.message || 'gsc_sync_failed'),
+            lastError: remedy
+                ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}`
+                : fetchError.message || 'gsc_sync_failed',
         });
         throw fetchError;
     }

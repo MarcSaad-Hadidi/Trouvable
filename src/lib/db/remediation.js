@@ -14,11 +14,7 @@ export async function insertRemediationSuggestion(input) {
         ai_output: input.aiOutput,
     };
 
-    const { data, error } = await db()
-        .from('remediation_suggestions')
-        .insert(payload)
-        .select('*')
-        .single();
+    const { data, error } = await db().from('remediation_suggestions').insert(payload).select('*').single();
 
     if (error) throw new Error(`[DB/remediation] insertRemediationSuggestion: ${error.message}`);
     return data;

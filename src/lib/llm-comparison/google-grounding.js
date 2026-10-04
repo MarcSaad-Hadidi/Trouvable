@@ -15,9 +15,7 @@ function normalizeWebItems(items = [], limit = 5) {
 function serializeWebItems(items = []) {
     if (!items.length) return '';
     return items
-        .map((item) => (
-            `[${item.rank}] ${item.title}\nURL: ${item.url}\nSnippet: ${item.snippet || '-'}`
-        ))
+        .map((item) => `[${item.rank}] ${item.title}\nURL: ${item.url}\nSnippet: ${item.snippet || '-'}`)
         .join('\n\n');
 }
 

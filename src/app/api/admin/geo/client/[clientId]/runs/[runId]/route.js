@@ -10,8 +10,6 @@ const actionSchema = z.discriminatedUnion('action', [
     z.object({ action: z.literal('reparse') }),
 ]);
 
-
-
 export async function GET(_, { params }) {
     const admin = await requireAdmin();
     if (!admin) {

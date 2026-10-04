@@ -9,20 +9,23 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock('react', async (original) => ({
-    ...await original(),
-    useEffect: (callback) => { state.effects.push(callback); },
+    ...(await original()),
+    useEffect: (callback) => {
+        state.effects.push(callback);
+    },
 }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: state.replace }) }));
 vi.mock('@clerk/nextjs', () => ({ useAuth: () => state.auth }));
 vi.mock('next/dynamic', () => ({
-    default: () => function ClerkForm({ path, routing, forceRedirectUrl, fallbackRedirectUrl }) {
-        return createElement('div', {
-            'data-path': path,
-            'data-routing': routing,
-            'data-force': forceRedirectUrl,
-            'data-fallback': fallbackRedirectUrl,
-        });
-    },
+    default: () =>
+        function ClerkForm({ path, routing, forceRedirectUrl, fallbackRedirectUrl }) {
+            return createElement('div', {
+                'data-path': path,
+                'data-routing': routing,
+                'data-force': forceRedirectUrl,
+                'data-fallback': fallbackRedirectUrl,
+            });
+        },
 }));
 
 import AdminSignInClient from '@/features/auth/admin/AdminSignInClient';
@@ -60,7 +63,10 @@ describe.each([
     });
 });
 
-it.each([[PortalSignInClient, '/portal/sign-in'], [EspaceSignInClient, '/espace']])('preserves Clerk routing for %s', (Component, path) => {
+it.each([
+    [PortalSignInClient, '/portal/sign-in'],
+    [EspaceSignInClient, '/espace'],
+])('preserves Clerk routing for %s', (Component, path) => {
     state.auth = { isLoaded: true, isSignedIn: false };
     const html = renderToStaticMarkup(createElement(Component));
     expect(html).toContain(`data-path="${path}"`);

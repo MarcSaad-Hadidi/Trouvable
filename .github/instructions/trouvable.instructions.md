@@ -1,5 +1,5 @@
 ---
-applyTo: "src/app/**,src/features/**,src/components/**,src/lib/**,src/proxy.js,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json"
+applyTo: 'src/app/**,src/features/**,src/components/**,src/lib/**,src/proxy.js,scripts/**,supabase/**,sql/**,tests/**,next.config.*,tailwind.config.*,postcss.config.*,vercel.json'
 ---
 
 # Trouvable engineering instructions
@@ -24,6 +24,7 @@ When touching Supabase from `src/lib/` code: inspect affected migrations and que
 ## SEO/GEO truthfulness
 
 When touching metadata, JSON-LD, citations, GEO pages, local business info, expertises, or entity descriptions:
+
 - Only use data that is actually present, verified, or explicitly provided.
 - Do not add placeholder values disguised as real content.
 
@@ -59,6 +60,7 @@ When touching metadata, JSON-LD, citations, GEO pages, local business info, expe
 ## Testing expectations
 
 Use effort proportional to the change:
+
 - Small fix → targeted validation
 - Moderate feature → targeted test coverage + flow check
 - Risky refactor → broader regression suggestions
@@ -68,6 +70,7 @@ Prefer tests that validate actual behavior, not superficial implementation detai
 ## Anti-patterns
 
 Do NOT:
+
 - Make large rewrites for small problems
 - Propose destructive SQL casually
 - Weaken RLS or auth without explicit justification

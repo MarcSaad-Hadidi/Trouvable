@@ -123,11 +123,12 @@ function buildBotRows(crawlerAccess) {
                 reliability: botReliability(entry, crawlerAccess),
                 impact: describeBotImpact(operatorStatus),
                 impactReliability: 'calculated',
-                ruleSource: entry.matchedBy === 'specific'
-                    ? 'Règle dédiée'
-                    : entry.matchedBy === 'wildcard'
-                        ? 'Règle générique'
-                        : 'Aucune règle',
+                ruleSource:
+                    entry.matchedBy === 'specific'
+                        ? 'Règle dédiée'
+                        : entry.matchedBy === 'wildcard'
+                          ? 'Règle générique'
+                          : 'Aucune règle',
                 disallow: uniqueStrings(entry.disallow),
                 allow: uniqueStrings(entry.allow),
                 crawlDelay: entry.crawlDelay ?? null,
@@ -293,7 +294,8 @@ async function fetchHomepageRobotSignals(siteUrl) {
             redirect: 'follow',
             signal: controller.signal,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, TrouvableGeoOps/1.0)',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, TrouvableGeoOps/1.0)',
                 Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             },
         });
@@ -347,9 +349,7 @@ function buildPageSignals({ homepageSignals, audit }) {
     const xRobotsBlocked = ROBOT_BLOCK_REGEX.test(String(homepageSignals?.xRobotsTag || ''));
     items.push({
         label: 'Homepage · X-Robots-Tag',
-        operatorStatus: homepageSignals?.xRobotsTag
-            ? (xRobotsBlocked ? 'bloqué' : 'autorisé')
-            : 'à confirmer',
+        operatorStatus: homepageSignals?.xRobotsTag ? (xRobotsBlocked ? 'bloqué' : 'autorisé') : 'à confirmer',
         tone: homepageSignals?.xRobotsTag ? (xRobotsBlocked ? 'critical' : 'ok') : 'idle',
         evidence: homepageSignals?.xRobotsTag
             ? `Header observé : ${homepageSignals.xRobotsTag}`
@@ -361,21 +361,26 @@ function buildPageSignals({ homepageSignals, audit }) {
     items.push({
         label: 'Homepage · Meta robots',
         operatorStatus: homepageSignals?.metaRobots
-            ? (metaBlocked ? 'bloqué' : 'autorisé')
-            : audit?.extracted_data?.has_noindex === true
+            ? metaBlocked
                 ? 'bloqué'
-                : 'à confirmer',
-        tone: homepageSignals?.metaRobots
-            ? (metaBlocked ? 'critical' : 'ok')
+                : 'autorisé'
             : audit?.extracted_data?.has_noindex === true
+              ? 'bloqué'
+              : 'à confirmer',
+        tone: homepageSignals?.metaRobots
+            ? metaBlocked
                 ? 'critical'
-                : 'idle',
+                : 'ok'
+            : audit?.extracted_data?.has_noindex === true
+              ? 'critical'
+              : 'idle',
         evidence: homepageSignals?.metaRobots
             ? `Balise observée : ${homepageSignals.metaRobots}`
             : audit?.extracted_data?.has_noindex === true
-                ? 'Le dernier audit a observé une instruction noindex sur la page d’entrée.'
-                : 'Aucune balise meta robots exploitable n’a été observée récemment.',
-        reliability: homepageSignals?.metaRobots || audit?.extracted_data?.has_noindex === true ? 'measured' : 'unavailable',
+              ? 'Le dernier audit a observé une instruction noindex sur la page d’entrée.'
+              : 'Aucune balise meta robots exploitable n’a été observée récemment.',
+        reliability:
+            homepageSignals?.metaRobots || audit?.extracted_data?.has_noindex === true ? 'measured' : 'unavailable',
     });
 
     return items;
@@ -387,7 +392,8 @@ function buildRecommendations({ crawlerAccess, restrictionRows, pageSignals, aud
     if (crawlerAccess?.fetchError) {
         recommendations.push({
             title: 'Confirmer la lecture robots.txt',
-            description: 'La preuve live n’a pas pu être relue. Vérifiez la disponibilité publique du domaine avant de conclure bot par bot.',
+            description:
+                'La preuve live n’a pas pu être relue. Vérifiez la disponibilité publique du domaine avant de conclure bot par bot.',
             evidence: 'Sans robots.txt relu en direct, le statut fin des bots reste partiel.',
             reliability: 'unavailable',
         });
@@ -396,7 +402,8 @@ function buildRecommendations({ crawlerAccess, restrictionRows, pageSignals, aud
     if ((crawlerAccess?.blockedCriticalCount || 0) > 0) {
         recommendations.push({
             title: 'Lever le blocage des bots critiques',
-            description: 'Commencer par les bots explicitement bloqués dans robots.txt avant toute autre optimisation GEO.',
+            description:
+                'Commencer par les bots explicitement bloqués dans robots.txt avant toute autre optimisation GEO.',
             evidence: `Bots concernés : ${(crawlerAccess?.blockedCriticalNames || []).join(', ')}.`,
             reliability: 'calculated',
         });
@@ -405,8 +412,13 @@ function buildRecommendations({ crawlerAccess, restrictionRows, pageSignals, aud
     if (restrictionRows.some((item) => item.pattern !== '/')) {
         recommendations.push({
             title: 'Relire les patterns restreints',
-            description: 'Les familles de pages restreintes peuvent couper des pages utiles aux réponses IA sans bloquer tout le site.',
-            evidence: restrictionRows.filter((item) => item.pattern !== '/').slice(0, 3).map((item) => item.pattern).join(' · '),
+            description:
+                'Les familles de pages restreintes peuvent couper des pages utiles aux réponses IA sans bloquer tout le site.',
+            evidence: restrictionRows
+                .filter((item) => item.pattern !== '/')
+                .slice(0, 3)
+                .map((item) => item.pattern)
+                .join(' · '),
             reliability: 'calculated',
         });
     }
@@ -414,8 +426,12 @@ function buildRecommendations({ crawlerAccess, restrictionRows, pageSignals, aud
     if (pageSignals.some((item) => item.operatorStatus === 'bloqué')) {
         recommendations.push({
             title: 'Retirer les blocages d’indexation sur la page d’entrée',
-            description: 'Un `noindex` ou un `X-Robots-Tag` bloquant sur la homepage affaiblit la lisibilité globale du site.',
-            evidence: pageSignals.filter((item) => item.operatorStatus === 'bloqué').map((item) => `${item.label} · ${item.evidence}`).join(' · '),
+            description:
+                'Un `noindex` ou un `X-Robots-Tag` bloquant sur la homepage affaiblit la lisibilité globale du site.',
+            evidence: pageSignals
+                .filter((item) => item.operatorStatus === 'bloqué')
+                .map((item) => `${item.label} · ${item.evidence}`)
+                .join(' · '),
             reliability: 'calculated',
         });
     }
@@ -423,12 +439,14 @@ function buildRecommendations({ crawlerAccess, restrictionRows, pageSignals, aud
     if (auditCrawlerSignal?.item) {
         recommendations.push({
             title: auditCrawlerSignal.kind === 'issue' ? 'Dernière alerte audit' : 'Dernier signal favorable audit',
-            description: localizeAuditCopy(compactString(auditCrawlerSignal.item.recommended_fix))
-                || localizeAuditCopy(compactString(auditCrawlerSignal.item.description))
-                || 'Le dernier audit contient un signal crawlers exploitable.',
-            evidence: localizeAuditCopy(compactString(auditCrawlerSignal.item.evidence_summary))
-                || localizeAuditCopy(compactString(auditCrawlerSignal.item.description))
-                || 'Preuve audit disponible.',
+            description:
+                localizeAuditCopy(compactString(auditCrawlerSignal.item.recommended_fix)) ||
+                localizeAuditCopy(compactString(auditCrawlerSignal.item.description)) ||
+                'Le dernier audit contient un signal crawlers exploitable.',
+            evidence:
+                localizeAuditCopy(compactString(auditCrawlerSignal.item.evidence_summary)) ||
+                localizeAuditCopy(compactString(auditCrawlerSignal.item.description)) ||
+                'Preuve audit disponible.',
             reliability: auditItemReliability(auditCrawlerSignal.item),
         });
     }
@@ -475,7 +493,8 @@ function buildEvidenceLayers({ crawlerAccess, restrictionRows, pageSignals, botR
         },
         unavailable: {
             title: 'Indisponible',
-            description: 'Le repo ne couvre pas encore proprement toutes les restrictions page par page au-delà de la homepage et des patterns robots.',
+            description:
+                'Le repo ne couvre pas encore proprement toutes les restrictions page par page au-delà de la homepage et des patterns robots.',
             reliability: 'unavailable',
             items: ['Pas de preuve exhaustive des X-Robots-Tag sur toutes les URLs du site.'],
         },
@@ -572,13 +591,14 @@ export async function getCrawlerSlice(clientId) {
             createdAt: audit?.created_at || null,
             latestSignal: auditCrawlerSignal?.item
                 ? {
-                    kind: auditCrawlerSignal.kind,
-                    title: localizeAuditCopy(compactString(auditCrawlerSignal.item.title)) || 'Signal audit crawlers',
-                    evidence: localizeAuditCopy(compactString(auditCrawlerSignal.item.evidence_summary))
-                        || localizeAuditCopy(compactString(auditCrawlerSignal.item.description))
-                        || null,
-                    reliability: auditItemReliability(auditCrawlerSignal.item),
-                }
+                      kind: auditCrawlerSignal.kind,
+                      title: localizeAuditCopy(compactString(auditCrawlerSignal.item.title)) || 'Signal audit crawlers',
+                      evidence:
+                          localizeAuditCopy(compactString(auditCrawlerSignal.item.evidence_summary)) ||
+                          localizeAuditCopy(compactString(auditCrawlerSignal.item.description)) ||
+                          null,
+                      reliability: auditItemReliability(auditCrawlerSignal.item),
+                  }
                 : null,
         },
         emptyState: null,

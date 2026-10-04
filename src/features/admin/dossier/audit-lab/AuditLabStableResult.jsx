@@ -18,7 +18,9 @@ function TrouvableHero({ score, llmStatus }) {
                 Score Trouvable final
             </span>
             <div className="flex items-baseline gap-1.5">
-                <span className={`font-['Plus_Jakarta_Sans',sans-serif] text-[56px] font-extrabold leading-none tabular-nums ${toneClass}`}>
+                <span
+                    className={`font-['Plus_Jakarta_Sans',sans-serif] text-[56px] font-extrabold leading-none tabular-nums ${toneClass}`}
+                >
                     {score != null ? score : '–'}
                 </span>
                 {score != null && <span className="text-[14px] text-white/40">/100</span>}

@@ -71,11 +71,23 @@ export function generateMergeSuggestions({ clientId, auditId, client, scanResult
         if (auto.field_key === 'short_desc' && auto.detected_value) {
             suggest('short_desc', auto.detected_value, 'medium', 'Meta description du site', 'observed');
         }
-        if (auto.field_key === 'social_profiles' && Array.isArray(auto.detected_value) && auto.detected_value.length > 0) {
+        if (
+            auto.field_key === 'social_profiles' &&
+            Array.isArray(auto.detected_value) &&
+            auto.detected_value.length > 0
+        ) {
             const currentSocials = existing.social_profiles || [];
-            const newSocials = auto.detected_value.filter(s => !currentSocials.some(cs => cs.url === s || cs === s));
+            const newSocials = auto.detected_value.filter(
+                (s) => !currentSocials.some((cs) => cs.url === s || cs === s),
+            );
             if (newSocials.length > 0) {
-                suggest('social_profiles', newSocials, 'high', `${newSocials.length} profil(s) social(aux) détecté(s) par crawl`, 'observed');
+                suggest(
+                    'social_profiles',
+                    newSocials,
+                    'high',
+                    `${newSocials.length} profil(s) social(aux) détecté(s) par crawl`,
+                    'observed',
+                );
             }
         }
     }
@@ -92,17 +104,41 @@ export function generateMergeSuggestions({ clientId, auditId, client, scanResult
     if (aiAnalysis) {
         for (const ms of aiAnalysis.merge_suggestions || []) {
             if (!ms?.field_name || !ms?.suggested_value) continue;
-            suggest(ms.field_name, ms.suggested_value, ms.confidence || 'medium', ms.rationale || 'Suggestion IA', ms.source || 'recommended');
+            suggest(
+                ms.field_name,
+                ms.suggested_value,
+                ms.confidence || 'medium',
+                ms.rationale || 'Suggestion IA',
+                ms.source || 'recommended',
+            );
         }
 
         if (aiAnalysis.detected_services?.length > 0 && existing.services.length === 0) {
-            suggest('services', aiAnalysis.detected_services, 'medium', 'Services identifiés par analyse IA du contenu', 'inferred');
+            suggest(
+                'services',
+                aiAnalysis.detected_services,
+                'medium',
+                'Services identifiés par analyse IA du contenu',
+                'inferred',
+            );
         }
         if (aiAnalysis.detected_areas?.length > 0 && existing.areas_served.length === 0) {
-            suggest('areas_served', aiAnalysis.detected_areas, 'medium', 'Zones desservies identifiées par analyse IA', 'inferred');
+            suggest(
+                'areas_served',
+                aiAnalysis.detected_areas,
+                'medium',
+                'Zones desservies identifiées par analyse IA',
+                'inferred',
+            );
         }
         if (aiAnalysis.detected_business_name && !client?.client_name) {
-            suggest('client_name', aiAnalysis.detected_business_name, 'medium', 'Nom d\'entreprise détecté par IA', 'inferred');
+            suggest(
+                'client_name',
+                aiAnalysis.detected_business_name,
+                'medium',
+                "Nom d'entreprise détecté par IA",
+                'inferred',
+            );
         }
     }
 

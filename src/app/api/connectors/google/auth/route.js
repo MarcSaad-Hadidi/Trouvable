@@ -13,17 +13,20 @@ export async function GET(request) {
     const clientId = searchParams.get('clientId');
     const fallbackReturnTo = clientId ? `/admin/clients/${clientId}/dossier/connectors` : null;
     const returnTo = normalizeGoogleOAuthReturnTo(searchParams.get('returnTo'), fallbackReturnTo);
-    
+
     if (!clientId) {
         return NextResponse.json({ error: 'Missing clientId' }, { status: 400 });
     }
 
     if (!returnTo) {
-        return NextResponse.json({
-            error: 'invalid_return_to',
-            status: 400,
-            detail: 'Google OAuth return target must be a relative admin, portal, or espace path.',
-        }, { status: 400 });
+        return NextResponse.json(
+            {
+                error: 'invalid_return_to',
+                status: 400,
+                detail: 'Google OAuth return target must be a relative admin, portal, or espace path.',
+            },
+            { status: 400 },
+        );
     }
 
     const access = await authorizeGoogleOAuthClient(clientId);
@@ -32,11 +35,14 @@ export async function GET(request) {
     }
 
     if (!hasGoogleOAuthEnv()) {
-        return NextResponse.json({
-            error: 'missing_google_oauth_env',
-            status: 503,
-            detail: 'Google OAuth is not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET server-side.',
-        }, { status: 503 });
+        return NextResponse.json(
+            {
+                error: 'missing_google_oauth_env',
+                status: 503,
+                detail: 'Google OAuth is not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET server-side.',
+            },
+            { status: 503 },
+        );
     }
 
     // We dynamically use the request origin to avoid redirect_uri mismatches (www vs non-www, Vercel previews, etc.)
@@ -44,13 +50,13 @@ export async function GET(request) {
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_OAUTH_CLIENT_ID,
         process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-        `${appUrl}/api/connectors/google/callback`
+        `${appUrl}/api/connectors/google/callback`,
     );
 
     const scopes = [
         'https://www.googleapis.com/auth/webmasters.readonly',
         'https://www.googleapis.com/auth/analytics.readonly',
-        'https://www.googleapis.com/auth/userinfo.email'
+        'https://www.googleapis.com/auth/userinfo.email',
     ];
 
     let statePayload;
@@ -63,11 +69,14 @@ export async function GET(request) {
         });
     } catch (error) {
         console.error('[Google OAuth] Failed to create signed state:', { code: error?.message || 'state_error' });
-        return NextResponse.json({
-            error: 'google_oauth_state_error',
-            status: 500,
-            detail: 'Google OAuth state could not be created.',
-        }, { status: 500 });
+        return NextResponse.json(
+            {
+                error: 'google_oauth_state_error',
+                status: 500,
+                detail: 'Google OAuth state could not be created.',
+            },
+            { status: 500 },
+        );
     }
 
     const authorizationUrl = oauth2Client.generateAuthUrl({

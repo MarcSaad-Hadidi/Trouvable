@@ -19,7 +19,14 @@ async function fetchWithTimeout(url, options, timeoutMs = DEFAULT_TIMEOUT) {
  * Keep the established three attempts and final 429/5xx backoff; adapters
  * supply provider identity, credentials, model selection and error wording.
  */
-export async function requestChatCompletion({ url, getHeaders, body, errorPrefix, emptyResponseMessage, timeoutMessage }) {
+export async function requestChatCompletion({
+    url,
+    getHeaders,
+    body,
+    errorPrefix,
+    emptyResponseMessage,
+    timeoutMessage,
+}) {
     const model = body.model;
 
     let lastError;
@@ -38,7 +45,7 @@ export async function requestChatCompletion({ url, getHeaders, body, errorPrefix
                     lastError = new Error(msg);
                     const wait = Math.min(2000 * 2 ** attempt, 8000);
                     console.warn(`${errorPrefix} Retry ${attempt + 1}/${MAX_RETRIES} dans ${wait}ms...`);
-                    await new Promise(r => setTimeout(r, wait));
+                    await new Promise((r) => setTimeout(r, wait));
                     continue;
                 }
                 throw new Error(msg);
@@ -61,7 +68,7 @@ export async function requestChatCompletion({ url, getHeaders, body, errorPrefix
             if (attempt < MAX_RETRIES) {
                 const wait = Math.min(2000 * 2 ** attempt, 8000);
                 console.warn(`${errorPrefix} Erreur: ${lastError.message}. Retry ${attempt + 1}...`);
-                await new Promise(r => setTimeout(r, wait));
+                await new Promise((r) => setTimeout(r, wait));
             }
         }
     }

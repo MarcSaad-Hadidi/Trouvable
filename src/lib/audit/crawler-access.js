@@ -39,7 +39,8 @@ async function fetchTextResource(url) {
         const response = await fetchPublicResource(url, {
             timeoutMs: FETCH_TIMEOUT_MS,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, TrouvableAuditBot/3.0)',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, TrouvableAuditBot/3.0)',
                 Accept: 'text/plain, text/html, */*',
             },
         });
@@ -260,8 +261,12 @@ export async function analyzeCrawlerAccess(siteUrl) {
 
     const crawlerAccessScore = scoreCrawlerAccess(crawlerStatuses);
 
-    const blockedCritical = Object.values(crawlerStatuses).filter((c) => c.tier === 'critical' && c.status === CRAWLER_STATUS.BLOCKED);
-    const blockedSecondary = Object.values(crawlerStatuses).filter((c) => c.tier === 'secondary' && c.status === CRAWLER_STATUS.BLOCKED);
+    const blockedCritical = Object.values(crawlerStatuses).filter(
+        (c) => c.tier === 'critical' && c.status === CRAWLER_STATUS.BLOCKED,
+    );
+    const blockedSecondary = Object.values(crawlerStatuses).filter(
+        (c) => c.tier === 'secondary' && c.status === CRAWLER_STATUS.BLOCKED,
+    );
 
     const llmsTxtStatus = {
         found: llmsTxt !== null,
@@ -312,4 +317,12 @@ function createEmptyResult(reason) {
     };
 }
 
-export { AI_CRAWLERS, CRAWLER_STATUS, parseRobotsTxt, getCrawlerRuleEvaluation, getCrawlerStatus, validateLlmsTxt, scoreLlmsTxt };
+export {
+    AI_CRAWLERS,
+    CRAWLER_STATUS,
+    parseRobotsTxt,
+    getCrawlerRuleEvaluation,
+    getCrawlerStatus,
+    validateLlmsTxt,
+    scoreLlmsTxt,
+};

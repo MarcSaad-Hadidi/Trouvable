@@ -47,7 +47,9 @@ describe('active source files', () => {
 
             for (const file of files) {
                 const content = fs.readFileSync(file, 'utf8');
-                const matches = FORBIDDEN_PATTERNS.filter(({ value }) => content.includes(value)).map(({ label }) => label);
+                const matches = FORBIDDEN_PATTERNS.filter(({ value }) => content.includes(value)).map(
+                    ({ label }) => label,
+                );
 
                 if (matches.length > 0) {
                     offenders.push(`${path.relative(ROOT_DIR, file)} -> ${matches.join(', ')}`);

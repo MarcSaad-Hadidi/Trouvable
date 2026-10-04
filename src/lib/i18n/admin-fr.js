@@ -60,7 +60,8 @@ export const ADMIN_GEO_LABELS = {
     },
     benchmark: {
         title: 'Test interne de variantes',
-        disclaimer: 'Compare des variantes internes de prompts et de modèles. Pour comparer un même prompt entre providers, utilisez GEO Compare.',
+        disclaimer:
+            'Compare des variantes internes de prompts et de modèles. Pour comparer un même prompt entre providers, utilisez GEO Compare.',
     },
 };
 

@@ -15,7 +15,7 @@ export function getAdminSupabase() {
         auth: {
             persistSession: false,
             autoRefreshToken: false,
-            detectSessionInUrl: false
-        }
+            detectSessionInUrl: false,
+        },
     });
 }

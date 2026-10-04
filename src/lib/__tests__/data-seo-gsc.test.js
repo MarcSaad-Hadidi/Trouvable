@@ -3,8 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 import {
-    aggregatePageRows, filterRowsSince, getLatestObservedDate, getObservedAgeDays,
-    getSinceDate, normalizeUrl, resolveConnectorStatus, createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics,
+    aggregatePageRows,
+    filterRowsSince,
+    getLatestObservedDate,
+    getObservedAgeDays,
+    getSinceDate,
+    normalizeUrl,
+    resolveConnectorStatus,
+    createSearchMetricBucket,
+    accumulateSearchMetrics,
+    readSearchMetrics,
 } from '../operator-intelligence/seo-gsc';
 
 afterEach(() => vi.useRealTimers());
@@ -17,9 +25,18 @@ describe('persisted GSC page projections', () => {
             { page: 'https://example.test/services#section', clicks: 0, impressions: 30, position: 8 },
             { page: null, clicks: 99, impressions: 99, position: 1 },
         ]);
-        expect([...pages]).toEqual([['https://example.test/services', {
-            url: firstUrl, clicks: 2, impressions: 40, ctr: 0.05, position: 7,
-        }]]);
+        expect([...pages]).toEqual([
+            [
+                'https://example.test/services',
+                {
+                    url: firstUrl,
+                    clicks: 2,
+                    impressions: 40,
+                    ctr: 0.05,
+                    position: 7,
+                },
+            ],
+        ]);
     });
 
     it('keeps observed zero counts while ratios without an observation remain absent', () => {
@@ -66,9 +83,16 @@ describe('persisted GSC page projections', () => {
         expect(getObservedAgeDays('2026-10-01')).toBe(2);
         expect(getObservedAgeDays('invalid')).toBeNull();
         expect(getObservedAgeDays(null)).toBeNull();
-        expect(resolveConnectorStatus([{ provider: 'gsc', status: 'error', last_synced_at: '2026-10-03', last_error: 'sync failed' }], 'gsc'))
-            .toEqual({ status: 'error', lastSyncedAt: '2026-10-03', lastError: 'sync failed' });
-        expect(resolveConnectorStatus([{ provider: 'ga4', status: 'healthy' }], 'gsc'))
-            .toEqual({ status: 'not_connected', lastSyncedAt: null, lastError: null });
+        expect(
+            resolveConnectorStatus(
+                [{ provider: 'gsc', status: 'error', last_synced_at: '2026-10-03', last_error: 'sync failed' }],
+                'gsc',
+            ),
+        ).toEqual({ status: 'error', lastSyncedAt: '2026-10-03', lastError: 'sync failed' });
+        expect(resolveConnectorStatus([{ provider: 'ga4', status: 'healthy' }], 'gsc')).toEqual({
+            status: 'not_connected',
+            lastSyncedAt: null,
+            lastError: null,
+        });
     });
 });

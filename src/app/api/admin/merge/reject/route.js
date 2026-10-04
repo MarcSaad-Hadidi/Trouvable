@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { mergeApplyPayloadSchema } from '@/lib/ai/schemas';
-import { getMergeSuggestionById as dbGetMergeSuggestionById, updateMergeSuggestion as dbUpdateMergeSuggestion } from '@/lib/db/merge-suggestions';
+import {
+    getMergeSuggestionById as dbGetMergeSuggestionById,
+    updateMergeSuggestion as dbUpdateMergeSuggestion,
+} from '@/lib/db/merge-suggestions';
 import { logAction as dbLogAction } from '@/lib/db/actions';
 
 export async function POST(request) {

@@ -14,7 +14,10 @@ import * as openGraph from '@/app/opengraph-image';
 import * as twitter from '@/app/twitter-image';
 
 describe('social image entry points', () => {
-    it.each([['Open Graph', openGraph], ['Twitter', twitter]])('%s preserves metadata and image size', (name, entry) => {
+    it.each([
+        ['Open Graph', openGraph],
+        ['Twitter', twitter],
+    ])('%s preserves metadata and image size', (name, entry) => {
         expect(entry.runtime).toBe('edge');
         expect(entry.alt).toBe('Trouvable | Firme de visibilité Google et réponses IA');
         expect(entry.size).toEqual({ width: 1200, height: 630 });

@@ -14,7 +14,10 @@ function run(failStep, npmConfigured = true) {
     copyFileSync(fileURLToPath(new URL('../verify.mjs', import.meta.url)), path.join(root, 'scripts/verify.mjs'));
     const log = path.join(root, 'steps.log');
     const npmCli = path.join(root, 'npm-fixture.mjs');
-    writeFileSync(npmCli, "import {appendFileSync} from 'node:fs'; const step=process.argv[3]; appendFileSync(process.env.VERIFY_STEPS, step+'\\n'); if(step===process.env.VERIFY_FAIL_STEP) process.exit(7);");
+    writeFileSync(
+        npmCli,
+        "import {appendFileSync} from 'node:fs'; const step=process.argv[3]; appendFileSync(process.env.VERIFY_STEPS, step+'\\n'); if(step===process.env.VERIFY_FAIL_STEP) process.exit(7);",
+    );
     const env = { ...process.env, VERIFY_STEPS: log, VERIFY_FAIL_STEP: failStep };
     if (npmConfigured) env.npm_execpath = npmCli;
     else delete env.npm_execpath;

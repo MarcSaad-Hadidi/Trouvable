@@ -37,7 +37,7 @@ describe('Cron dispatch — bornes des paramètres', () => {
 
     it('accepte des valeurs valides sous le cap', () => {
         const { maxJobsToQueue, maxRunsToExecute } = parseDispatchParams(
-            makeParams({ maxJobsToQueue: '10', maxRunsToExecute: '5' })
+            makeParams({ maxJobsToQueue: '10', maxRunsToExecute: '5' }),
         );
         expect(maxJobsToQueue).toBe(10);
         expect(maxRunsToExecute).toBe(5);
@@ -50,7 +50,7 @@ describe('Cron dispatch — bornes des paramètres', () => {
 
     it('accepte exactement la valeur cap', () => {
         const { maxJobsToQueue, maxRunsToExecute } = parseDispatchParams(
-            makeParams({ maxJobsToQueue: '100', maxRunsToExecute: '50' })
+            makeParams({ maxJobsToQueue: '100', maxRunsToExecute: '50' }),
         );
         expect(maxJobsToQueue).toBe(100);
         expect(maxRunsToExecute).toBe(50);

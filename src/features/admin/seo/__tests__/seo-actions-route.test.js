@@ -21,4 +21,3 @@ describe('seo actions route wiring', () => {
         expect(redirectMock).toHaveBeenCalledWith('/admin/clients/client-123/seo/opportunities');
     });
 });
-

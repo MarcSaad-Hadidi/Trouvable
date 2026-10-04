@@ -1,10 +1,6 @@
 import { buildGeoPromptForMode } from './geo-prompt-templates.js';
 
-export {
-    PROMPT_TEMPLATE_VERSION,
-    getGeoPromptTemplate,
-    buildGeoPromptForMode,
-} from './geo-prompt-templates.js';
+export { PROMPT_TEMPLATE_VERSION, getGeoPromptTemplate, buildGeoPromptForMode } from './geo-prompt-templates.js';
 
 /**
  * Prompts IA pour Trouvable.

@@ -9,9 +9,7 @@ function formatDate(date) {
 
 function resolveDateWindow({ startDate, endDate } = {}) {
     const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate
-        ? new Date(startDate)
-        : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
         throw new Error('Invalid GA4 date window. Expected YYYY-MM-DD compatible dates.');
@@ -54,7 +52,7 @@ export async function fetchGa4TrafficDaily({ propertyId, startDate, endDate, goo
 
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_OAUTH_CLIENT_ID,
-        process.env.GOOGLE_OAUTH_CLIENT_SECRET
+        process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     );
     oauth2Client.setCredentials({ refresh_token: googleRefreshToken });
 
@@ -65,12 +63,7 @@ export async function fetchGa4TrafficDaily({ propertyId, startDate, endDate, goo
         requestBody: {
             dateRanges: [{ startDate: window.startDate, endDate: window.endDate }],
             dimensions: [{ name: 'date' }],
-            metrics: [
-                { name: 'sessions' },
-                { name: 'totalUsers' },
-                { name: 'newUsers' },
-                { name: 'screenPageViews' },
-            ],
+            metrics: [{ name: 'sessions' }, { name: 'totalUsers' }, { name: 'newUsers' }, { name: 'screenPageViews' }],
         },
     });
 
@@ -78,9 +71,7 @@ export async function fetchGa4TrafficDaily({ propertyId, startDate, endDate, goo
 
     return rows.map((row) => {
         const rawDate = row.dimensionValues?.[0]?.value;
-        const [sessions, users, newUsers, pageViews] = (row.metricValues || []).map(
-            (m) => m.value,
-        );
+        const [sessions, users, newUsers, pageViews] = (row.metricValues || []).map((m) => m.value);
         return {
             date: parseGa4Date(rawDate),
             sessions: metricInt(sessions),
@@ -108,7 +99,7 @@ export async function fetchGa4TopPages({ propertyId, startDate, endDate, limit =
 
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_OAUTH_CLIENT_ID,
-        process.env.GOOGLE_OAUTH_CLIENT_SECRET
+        process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     );
     oauth2Client.setCredentials({ refresh_token: googleRefreshToken });
 

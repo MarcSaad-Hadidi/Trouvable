@@ -96,13 +96,16 @@ export default function SeoVisibilityPage() {
     const country = searchParams.get('country') || null;
     const device = searchParams.get('device') || null;
 
-    const requestParams = useMemo(() => ({
-        range,
-        segment,
-        ...(searchType ? { searchType } : {}),
-        ...(country ? { country } : {}),
-        ...(device ? { device } : {}),
-    }), [country, device, range, searchType, segment]);
+    const requestParams = useMemo(
+        () => ({
+            range,
+            segment,
+            ...(searchType ? { searchType } : {}),
+            ...(country ? { country } : {}),
+            ...(device ? { device } : {}),
+        }),
+        [country, device, range, searchType, segment],
+    );
 
     const { data, loading, error } = useSeoWorkspaceSlice('visibility', { params: requestParams });
     const [query, setQuery] = useState('');
@@ -116,16 +119,23 @@ export default function SeoVisibilityPage() {
     const freshness = data?.freshness;
     const gscSource = data?.gscSource || {};
     const querySourceStatus = data?.dataSources?.gscQueries;
-    const querySourceLabel = querySourceStatus === 'unavailable' ? 'indisponible'
-        : querySourceStatus === 'partial' ? 'partiel'
-            : gscSource?.mode === 'live' ? 'GSC brut' : 'indisponible';
+    const querySourceLabel =
+        querySourceStatus === 'unavailable'
+            ? 'indisponible'
+            : querySourceStatus === 'partial'
+              ? 'partiel'
+              : gscSource?.mode === 'live'
+                ? 'GSC brut'
+                : 'indisponible';
     const trendLabel = range === '12m' ? '12m' : range;
     const gscFilterSummary = [
         `type ${gscSource?.filters?.searchType || 'web'}`,
         gscSource?.filters?.country ? `pays ${gscSource.filters.country}` : null,
         gscSource?.filters?.device ? `appareil ${gscSource.filters.device}` : null,
         `segment ${SEGMENT_LABELS[gscSource?.filters?.segment] || SEGMENT_LABELS.all}`,
-    ].filter(Boolean).join(' · ');
+    ]
+        .filter(Boolean)
+        .join(' · ');
 
     function updateSearchParams(nextValues) {
         const params = new URLSearchParams(searchParams.toString());
@@ -154,7 +164,13 @@ export default function SeoVisibilityPage() {
     const filteredQueries = useMemo(() => {
         const needle = query.trim().toLowerCase();
         return topQueries.filter((row) => {
-            if (needle && !String(row.query || '').toLowerCase().includes(needle)) return false;
+            if (
+                needle &&
+                !String(row.query || '')
+                    .toLowerCase()
+                    .includes(needle)
+            )
+                return false;
             return true;
         });
     }, [query, topQueries]);
@@ -185,7 +201,9 @@ export default function SeoVisibilityPage() {
                 row.ctr ?? '',
             ]),
         ];
-        const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const csv = rows
+            .map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+            .join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
@@ -197,10 +215,20 @@ export default function SeoVisibilityPage() {
 
     if (loading) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Visibilité SEO" subtitle="Chargement des métriques organiques, des requêtes et des supports de mesure." />}>
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Visibilité SEO"
+                        subtitle="Chargement des métriques organiques, des requêtes et des supports de mesure."
+                    />
+                }
+            >
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/90">Chargement de la visibilité SEO</div>
-                    <p className="mt-2 text-[13px] text-white/55">Le cockpit attend les données Search Console et GA4 du dossier courant.</p>
+                    <p className="mt-2 text-[13px] text-white/55">
+                        Le cockpit attend les données Search Console et GA4 du dossier courant.
+                    </p>
                 </div>
             </CommandPageShell>
         );
@@ -208,8 +236,24 @@ export default function SeoVisibilityPage() {
 
     if (error) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Visibilité SEO" subtitle="Salle de marche organique du dossier courant." />}>
-                <CommandEmptyState title="Visibilité SEO indisponible" description={error} action={<Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>Voir la santé SEO</Link>} />
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Visibilité SEO"
+                        subtitle="Salle de marche organique du dossier courant."
+                    />
+                }
+            >
+                <CommandEmptyState
+                    title="Visibilité SEO indisponible"
+                    description={error}
+                    action={
+                        <Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>
+                            Voir la santé SEO
+                        </Link>
+                    }
+                />
             </CommandPageShell>
         );
     }
@@ -217,28 +261,38 @@ export default function SeoVisibilityPage() {
     if (!data || data.emptyState) {
         return (
             <CommandPageShell
-                header={(
+                header={
                     <CommandHeader
                         eyebrow="SEO Ops"
                         title="Visibilité SEO"
                         subtitle={`Salle de marche organique pour ${client?.client_name || 'ce dossier'}, sans concurrent ni mot-clé inventé.`}
-                        actions={<Link href={`${baseHref}/dossier/connectors`} className={COMMAND_BUTTONS.primary}>Connecteurs</Link>}
+                        actions={
+                            <Link href={`${baseHref}/dossier/connectors`} className={COMMAND_BUTTONS.primary}>
+                                Connecteurs
+                            </Link>
+                        }
                     />
-                )}
+                }
             >
                 <SourceStatusNotice status={data?.status} errors={data?.errors} />
-                <CommandEmptyState title={data?.emptyState?.title || 'Visibilité SEO indisponible'} description={data?.emptyState?.description || 'Aucune donnée organique exploitable n a été trouvée pour cette période.'} />
+                <CommandEmptyState
+                    title={data?.emptyState?.title || 'Visibilité SEO indisponible'}
+                    description={
+                        data?.emptyState?.description ||
+                        'Aucune donnée organique exploitable n a été trouvée pour cette période.'
+                    }
+                />
             </CommandPageShell>
         );
     }
 
     return (
         <CommandPageShell
-            header={(
+            header={
                 <CommandHeader
                     title="Visibilité SEO"
                     subtitle="Salle de marche organique. Même propriété GSC, même période, mêmes filtres, mêmes chiffres."
-                    actions={(
+                    actions={
                         <div className="flex flex-wrap items-center gap-2">
                             <div className="flex rounded-full border border-white/[0.10] bg-white/[0.04] p-1">
                                 {TIME_RANGES.map((rangeId) => (
@@ -248,7 +302,9 @@ export default function SeoVisibilityPage() {
                                         onClick={() => changeRange(rangeId)}
                                         className={cn(
                                             'rounded-full px-3 py-1 text-[11px] font-medium transition-colors',
-                                            rangeId === range ? 'bg-white/[0.10] text-white' : 'text-white/45 hover:text-white/80',
+                                            rangeId === range
+                                                ? 'bg-white/[0.10] text-white'
+                                                : 'text-white/45 hover:text-white/80',
                                         )}
                                     >
                                         {rangeId}
@@ -261,27 +317,36 @@ export default function SeoVisibilityPage() {
                                 Exporter
                             </button>
                         </div>
-                    )}
+                    }
                 />
-            )}
+            }
         >
             <SourceStatusNotice status={data.status} errors={data.errors} />
             {gscSource?.mode !== 'live' && (
                 <div className="rounded-[18px] border border-amber-300/25 bg-amber-400/[0.08] px-4 py-3 text-[12px] text-amber-100/90">
-                    Données Search Console brutes indisponibles pour cette vue. {gscSource?.reason || 'Aucune raison détaillée fournie.'}
+                    Données Search Console brutes indisponibles pour cette vue.{' '}
+                    {gscSource?.reason || 'Aucune raison détaillée fournie.'}
                 </div>
             )}
             {gscSource?.property && (
                 <div className="rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-[11px] text-white/60">
-                    Propriété GSC: <span className="text-white/86">{gscSource.property}</span>
-                    {' '}· Période: <span className="text-white/86">{gscSource?.period?.currentStartDate || 'n.d.'} → {gscSource?.period?.endDate || 'n.d.'}</span>
-                    {' '}· Filtres: <span className="text-white/86">{gscFilterSummary}</span>
+                    Propriété GSC: <span className="text-white/86">{gscSource.property}</span> · Période:{' '}
+                    <span className="text-white/86">
+                        {gscSource?.period?.currentStartDate || 'n.d.'} → {gscSource?.period?.endDate || 'n.d.'}
+                    </span>{' '}
+                    · Filtres: <span className="text-white/86">{gscFilterSummary}</span>
                 </div>
             )}
 
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                 {chips.map((chip, index) => (
-                    <div key={chip.label} className={cn('flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 transition-colors hover:brightness-110', CHIP_SURFACES[index % CHIP_SURFACES.length])}>
+                    <div
+                        key={chip.label}
+                        className={cn(
+                            'flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 transition-colors hover:brightness-110',
+                            CHIP_SURFACES[index % CHIP_SURFACES.length],
+                        )}
+                    >
                         <div className={cn('h-2 w-2 rounded-full', CHIP_TONES[index % CHIP_TONES.length])} />
                         <span className="text-[12px] font-medium text-white/88">{chip.label}</span>
                         <span className="text-[11px] text-white/56">{chip.detail}</span>
@@ -315,7 +380,9 @@ export default function SeoVisibilityPage() {
                                     <th className="w-28 px-4 py-3 font-medium text-white/42">Position</th>
                                     <th className="w-36 px-4 py-3 font-medium text-white/42">Intention</th>
                                     <th className="w-28 px-4 py-3 text-right font-medium text-white/42">Impressions</th>
-                                    <th className="w-36 px-4 py-3 font-medium text-white/42">Tendance ({trendLabel})</th>
+                                    <th className="w-36 px-4 py-3 font-medium text-white/42">
+                                        Tendance ({trendLabel})
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/[0.03]">
@@ -323,74 +390,138 @@ export default function SeoVisibilityPage() {
                                     <tr>
                                         <td colSpan={5} className="px-4 py-8 text-center text-[12px] text-white/52">
                                             {topQueries.length === 0
-                                                ? (gscSource?.mode !== 'live'
-                                                    ? (gscSource?.reason || 'Données GSC indisponibles pour cette période.')
-                                                    : 'Aucune donnée de suivi réelle disponible pour ce mandat.')
+                                                ? gscSource?.mode !== 'live'
+                                                    ? gscSource?.reason ||
+                                                      'Données GSC indisponibles pour cette période.'
+                                                    : 'Aucune donnée de suivi réelle disponible pour ce mandat.'
                                                 : 'Aucun mot-clé ne correspond au filtre actuel.'}
                                         </td>
                                     </tr>
-                                ) : filteredQueries.map((row) => {
-                                    const posTone = positionTone(row.position);
-                                    const posDelta = Number(row.positionDelta);
-                                    const hasDelta = Number.isFinite(posDelta) && posDelta !== 0;
-                                    const sparkline = row.sparkline || [];
-                                    const sparklineMax = Math.max(...sparkline.slice(-12).map((item) => Number(item.value || 0)), 1);
-                                    return (
-                                        <tr key={row.query} className="group cursor-pointer transition-colors hover:bg-white/[0.03]">
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-white/92">{row.query}</span>
-                                                    <div className="flex gap-1">
-                                                        {Array.from({ length: Math.max(1, Math.min(4, Math.round((Number(row.clicks || 0) + Number(row.impressions || 0)) / 250))) }).map((_, index) => (
-                                                            <span key={`${row.query}-${index}`} className="h-1.5 w-1.5 rounded-full bg-white/20" />
+                                ) : (
+                                    filteredQueries.map((row) => {
+                                        const posTone = positionTone(row.position);
+                                        const posDelta = Number(row.positionDelta);
+                                        const hasDelta = Number.isFinite(posDelta) && posDelta !== 0;
+                                        const sparkline = row.sparkline || [];
+                                        const sparklineMax = Math.max(
+                                            ...sparkline.slice(-12).map((item) => Number(item.value || 0)),
+                                            1,
+                                        );
+                                        return (
+                                            <tr
+                                                key={row.query}
+                                                className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
+                                            >
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-white/92">{row.query}</span>
+                                                        <div className="flex gap-1">
+                                                            {Array.from({
+                                                                length: Math.max(
+                                                                    1,
+                                                                    Math.min(
+                                                                        4,
+                                                                        Math.round(
+                                                                            (Number(row.clicks || 0) +
+                                                                                Number(row.impressions || 0)) /
+                                                                                250,
+                                                                        ),
+                                                                    ),
+                                                                ),
+                                                            }).map((_, index) => (
+                                                                <span
+                                                                    key={`${row.query}-${index}`}
+                                                                    className="h-1.5 w-1.5 rounded-full bg-white/20"
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 tabular-nums">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-white">
+                                                            {formatPosition(row.position)}
+                                                        </span>
+                                                        {hasDelta ? (
+                                                            <span
+                                                                className={cn(
+                                                                    'flex items-center rounded px-1.5 py-0.5 text-[10px]',
+                                                                    posDelta > 0
+                                                                        ? 'bg-emerald-400/12 text-emerald-300'
+                                                                        : 'bg-rose-400/12 text-rose-300',
+                                                                )}
+                                                            >
+                                                                {posDelta > 0 ? (
+                                                                    <ArrowUpIcon className="mr-0.5 h-2.5 w-2.5" />
+                                                                ) : (
+                                                                    <ArrowDownIcon className="mr-0.5 h-2.5 w-2.5" />
+                                                                )}
+                                                                {Math.abs(posDelta)}
+                                                            </span>
+                                                        ) : (
+                                                            <span
+                                                                className={cn(
+                                                                    'rounded px-1.5 py-0.5 text-[10px]',
+                                                                    posTone.className,
+                                                                )}
+                                                            >
+                                                                {posTone.label}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span
+                                                        className={cn(
+                                                            'rounded-full border px-2 py-0.5 text-[10px]',
+                                                            intentTone(row.intent),
+                                                        )}
+                                                    >
+                                                        {row.intent}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums text-white/74">
+                                                    {formatNumber(row.impressions)}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex h-7 w-24 items-end gap-0.5">
+                                                        {sparkline.slice(-12).map((point, index) => (
+                                                            <div
+                                                                key={`${row.query}-${point.date}-${index}`}
+                                                                className="flex-1 rounded-t-[2px] bg-indigo-500/55 transition-colors group-hover:bg-indigo-400"
+                                                                style={{
+                                                                    height: `${Math.max(10, (Number(point.value || 0) / sparklineMax) * 100)}%`,
+                                                                }}
+                                                            />
                                                         ))}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 tabular-nums">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-white">{formatPosition(row.position)}</span>
-                                                    {hasDelta ? (
-                                                        <span className={cn('flex items-center rounded px-1.5 py-0.5 text-[10px]', posDelta > 0 ? 'bg-emerald-400/12 text-emerald-300' : 'bg-rose-400/12 text-rose-300')}>
-                                                            {posDelta > 0 ? <ArrowUpIcon className="mr-0.5 h-2.5 w-2.5" /> : <ArrowDownIcon className="mr-0.5 h-2.5 w-2.5" />}
-                                                            {Math.abs(posDelta)}
-                                                        </span>
-                                                    ) : (
-                                                        <span className={cn('rounded px-1.5 py-0.5 text-[10px]', posTone.className)}>{posTone.label}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={cn('rounded-full border px-2 py-0.5 text-[10px]', intentTone(row.intent))}>{row.intent}</span>
-                                            </td>
-                                            <td className="px-4 py-3 text-right tabular-nums text-white/74">{formatNumber(row.impressions)}</td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex h-7 w-24 items-end gap-0.5">
-                                                    {sparkline.slice(-12).map((point, index) => (
-                                                        <div
-                                                            key={`${row.query}-${point.date}-${index}`}
-                                                            className="flex-1 rounded-t-[2px] bg-indigo-500/55 transition-colors group-hover:bg-indigo-400"
-                                                            style={{ height: `${Math.max(10, (Number(point.value || 0) / sparklineMax) * 100)}%` }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <div className="col-span-1 flex flex-col gap-4 overflow-y-auto pr-2 scrollbar-none">
-                    <div className={cn(COMMAND_PANEL, 'bg-[linear-gradient(180deg,rgba(25,28,39,0.98)_0%,rgba(19,18,31,0.95)_100%)] p-5')}>
-                        <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-white/42">Répartition des recherches par appareil</h3>
+                    <div
+                        className={cn(
+                            COMMAND_PANEL,
+                            'bg-[linear-gradient(180deg,rgba(25,28,39,0.98)_0%,rgba(19,18,31,0.95)_100%)] p-5',
+                        )}
+                    >
+                        <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-white/42">
+                            Répartition des recherches par appareil
+                        </h3>
                         {!deviceSplitAvailable ? (
                             <div className="rounded-[18px] border border-dashed border-white/[0.10] bg-white/[0.03] p-4 text-[12px] text-white/58">
                                 <div className="font-medium text-white/76">Répartition par appareil indisponible</div>
                                 <div className="mt-1 text-white/52">
-                                    {deviceSplit?.detail || deviceSplit?.reason || 'Aucune donnée appareil disponible pour ce mandat.'}
+                                    {deviceSplit?.detail ||
+                                        deviceSplit?.reason ||
+                                        'Aucune donnée appareil disponible pour ce mandat.'}
                                 </div>
                             </div>
                         ) : (
@@ -398,28 +529,54 @@ export default function SeoVisibilityPage() {
                                 <div className="relative flex h-44 items-center justify-center">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
-                                            <Pie data={deviceDonutData} innerRadius={46} outerRadius={72} paddingAngle={2} dataKey="value" stroke="none">
-                                                {deviceDonutData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                                            <Pie
+                                                data={deviceDonutData}
+                                                innerRadius={46}
+                                                outerRadius={72}
+                                                paddingAngle={2}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {deviceDonutData.map((entry) => (
+                                                    <Cell key={entry.name} fill={entry.color} />
+                                                ))}
                                             </Pie>
                                             <RechartsTooltip
-                                                formatter={(value, _name, item) => [`${formatNumber(item?.payload?.count)} impressions (${value}%)`, item?.payload?.name]}
-                                                contentStyle={{ backgroundColor: '#0b0d13', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', fontSize: '12px' }}
+                                                formatter={(value, _name, item) => [
+                                                    `${formatNumber(item?.payload?.count)} impressions (${value}%)`,
+                                                    item?.payload?.name,
+                                                ]}
+                                                contentStyle={{
+                                                    backgroundColor: '#0b0d13',
+                                                    border: '1px solid rgba(255,255,255,0.12)',
+                                                    borderRadius: '12px',
+                                                    fontSize: '12px',
+                                                }}
                                                 itemStyle={{ color: '#fff' }}
                                             />
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                                        <span className="text-[34px] font-semibold tracking-[-0.05em] text-white">{formatNumber(deviceSplit.totalSearches)}</span>
+                                        <span className="text-[34px] font-semibold tracking-[-0.05em] text-white">
+                                            {formatNumber(deviceSplit.totalSearches)}
+                                        </span>
                                         <span className="text-[11px] text-white/42">Impressions</span>
                                     </div>
                                 </div>
                                 <div className="mt-2 flex flex-wrap justify-center gap-4">
                                     {deviceDonutData.map((entry) => (
                                         <div key={entry.name} className="flex items-center gap-1.5">
-                                            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                                            <div
+                                                className="h-2 w-2 rounded-full"
+                                                style={{ backgroundColor: entry.color }}
+                                            />
                                             <span className="text-[11px] text-white/62">{entry.name}</span>
-                                            <span className="text-[11px] font-semibold text-white/92 tabular-nums">{formatNumber(entry.count)}</span>
-                                            <span className="text-[11px] text-white/62 tabular-nums">({entry.value}%)</span>
+                                            <span className="text-[11px] font-semibold text-white/92 tabular-nums">
+                                                {formatNumber(entry.count)}
+                                            </span>
+                                            <span className="text-[11px] text-white/62 tabular-nums">
+                                                ({entry.value}%)
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -432,8 +589,15 @@ export default function SeoVisibilityPage() {
                         )}
                     </div>
 
-                    <div className={cn(COMMAND_PANEL, 'bg-[linear-gradient(180deg,rgba(24,26,37,0.98)_0%,rgba(17,17,28,0.95)_100%)] p-5')}>
-                        <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-white/42">Répartition par intention</h3>
+                    <div
+                        className={cn(
+                            COMMAND_PANEL,
+                            'bg-[linear-gradient(180deg,rgba(24,26,37,0.98)_0%,rgba(17,17,28,0.95)_100%)] p-5',
+                        )}
+                    >
+                        <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-white/42">
+                            Répartition par intention
+                        </h3>
                         {hasIntentData ? (
                             <div className="space-y-3">
                                 {intentBreakdown.map((item) => (
@@ -449,10 +613,10 @@ export default function SeoVisibilityPage() {
                                                     item.name === 'Transactionnel'
                                                         ? 'bg-violet-400'
                                                         : item.name === 'Informationnel'
-                                                            ? 'bg-sky-400'
-                                                            : item.name === 'Commercial'
-                                                                ? 'bg-amber-400'
-                                                                : 'bg-white/35',
+                                                          ? 'bg-sky-400'
+                                                          : item.name === 'Commercial'
+                                                            ? 'bg-amber-400'
+                                                            : 'bg-white/35',
                                                 )}
                                                 style={{ width: `${Math.max(0, item.percent)}%` }}
                                             />
@@ -478,24 +642,40 @@ export default function SeoVisibilityPage() {
                         </div>
                         <div className="flex flex-1 divide-x divide-white/[0.08]">
                             <div className="flex-1 space-y-3 p-3">
-                                {movers.winners.length > 0 ? movers.winners.map((row) => (
-                                    <div key={`winner-${row.query}`} className="flex items-center justify-between gap-2">
-                                        <span className="truncate pr-2 text-[11px] text-white/84">{row.query}</span>
-                                        <span className="flex shrink-0 items-center text-[10px] font-bold tabular-nums text-emerald-400">
-                                            <ArrowUpIcon className="mr-0.5 h-2.5 w-2.5" />{Math.abs(Number(row.positionDelta || 0))}
-                                        </span>
-                                    </div>
-                                )) : <div className="text-[11px] text-white/45">Aucune hausse nette.</div>}
+                                {movers.winners.length > 0 ? (
+                                    movers.winners.map((row) => (
+                                        <div
+                                            key={`winner-${row.query}`}
+                                            className="flex items-center justify-between gap-2"
+                                        >
+                                            <span className="truncate pr-2 text-[11px] text-white/84">{row.query}</span>
+                                            <span className="flex shrink-0 items-center text-[10px] font-bold tabular-nums text-emerald-400">
+                                                <ArrowUpIcon className="mr-0.5 h-2.5 w-2.5" />
+                                                {Math.abs(Number(row.positionDelta || 0))}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-[11px] text-white/45">Aucune hausse nette.</div>
+                                )}
                             </div>
                             <div className="flex-1 space-y-3 p-3">
-                                {movers.losers.length > 0 ? movers.losers.map((row) => (
-                                    <div key={`loser-${row.query}`} className="flex items-center justify-between gap-2">
-                                        <span className="truncate pr-2 text-[11px] text-white/84">{row.query}</span>
-                                        <span className="flex shrink-0 items-center text-[10px] font-bold tabular-nums text-rose-400">
-                                            <ArrowDownIcon className="mr-0.5 h-2.5 w-2.5" />{Math.abs(Number(row.positionDelta || 0))}
-                                        </span>
-                                    </div>
-                                )) : <div className="text-[11px] text-white/45">Aucune baisse nette.</div>}
+                                {movers.losers.length > 0 ? (
+                                    movers.losers.map((row) => (
+                                        <div
+                                            key={`loser-${row.query}`}
+                                            className="flex items-center justify-between gap-2"
+                                        >
+                                            <span className="truncate pr-2 text-[11px] text-white/84">{row.query}</span>
+                                            <span className="flex shrink-0 items-center text-[10px] font-bold tabular-nums text-rose-400">
+                                                <ArrowDownIcon className="mr-0.5 h-2.5 w-2.5" />
+                                                {Math.abs(Number(row.positionDelta || 0))}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-[11px] text-white/45">Aucune baisse nette.</div>
+                                )}
                             </div>
                         </div>
                     </div>

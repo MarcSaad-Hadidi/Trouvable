@@ -11,11 +11,13 @@ const promptSuggestionSchema = z.object({
     is_active: z.boolean().optional(),
     prompt_mode: z.enum(['user_like', 'operator_probe']).optional(),
     intent_family: z.string().max(80).optional(),
-    validation: z.object({
-        status: z.enum(['strong', 'review', 'weak']).optional(),
-        is_valid: z.boolean().optional(),
-        reasons: z.array(z.string().max(240)).max(20).optional(),
-    }).optional(),
+    validation: z
+        .object({
+            status: z.enum(['strong', 'review', 'weak']).optional(),
+            is_valid: z.boolean().optional(),
+            reasons: z.array(z.string().max(240)).max(20).optional(),
+        })
+        .optional(),
     offer_anchor: z.string().max(200).optional(),
     offer_label_normalized: z.string().max(200).optional(),
     user_visible_offering: z.string().max(240).optional(),
@@ -25,39 +27,56 @@ const activateSchema = z.object({
     clientId: z.string().uuid(),
     profile: z.object({
         client_name: z.string().min(2).max(200),
-        client_slug: z.string().min(2).max(120).regex(/^[a-z0-9-]+$/),
+        client_slug: z
+            .string()
+            .min(2)
+            .max(120)
+            .regex(/^[a-z0-9-]+$/),
         business_type: z.string().max(120),
         target_region: z.string().max(160),
         seo_description: z.string().max(500).optional().nullable(),
-        address: z.object({
-            city: z.string().max(120).optional(),
-            region: z.string().max(120).optional(),
-            country: z.string().max(120).optional(),
-        }).optional(),
-        contact_info: z.object({
-            public_email: z.string().email().max(320).optional(),
-            email: z.string().email().max(320).optional(),
-            phone: z.string().max(80).optional(),
-        }).optional(),
+        address: z
+            .object({
+                city: z.string().max(120).optional(),
+                region: z.string().max(120).optional(),
+                country: z.string().max(120).optional(),
+            })
+            .optional(),
+        contact_info: z
+            .object({
+                public_email: z.string().email().max(320).optional(),
+                email: z.string().email().max(320).optional(),
+                phone: z.string().max(80).optional(),
+            })
+            .optional(),
         social_profiles: z.array(z.string().url().max(400)).max(20).optional(),
-        business_details: z.object({
-            short_desc: z.string().max(500).optional(),
-            short_description: z.string().max(500).optional(),
-            services: z.array(z.string().max(200)).max(20).optional(),
-            areas_served: z.array(z.string().max(120)).max(20).optional(),
-        }).optional(),
-        geo_faqs: z.array(z.object({
-            question: z.string().min(3).max(200),
-            answer: z.string().min(3).max(1200),
-        })).max(20).optional(),
+        business_details: z
+            .object({
+                short_desc: z.string().max(500).optional(),
+                short_description: z.string().max(500).optional(),
+                services: z.array(z.string().max(200)).max(20).optional(),
+                areas_served: z.array(z.string().max(120)).max(20).optional(),
+            })
+            .optional(),
+        geo_faqs: z
+            .array(
+                z.object({
+                    question: z.string().min(3).max(200),
+                    answer: z.string().min(3).max(1200),
+                }),
+            )
+            .max(20)
+            .optional(),
     }),
     promptSuggestions: z.array(promptSuggestionSchema).max(30).default([]),
-    portalDraft: z.object({
-        enabled: z.boolean().default(false),
-        contact_email: z.string().email().max(320).optional(),
-        portal_role: z.enum(['owner', 'viewer']).default('viewer'),
-        member_type: z.enum(['client_contact', 'client_staff', 'internal_staff']).default('client_contact'),
-    }).optional(),
+    portalDraft: z
+        .object({
+            enabled: z.boolean().default(false),
+            contact_email: z.string().email().max(320).optional(),
+            portal_role: z.enum(['owner', 'viewer']).default('viewer'),
+            member_type: z.enum(['client_contact', 'client_staff', 'internal_staff']).default('client_contact'),
+        })
+        .optional(),
 });
 
 export async function POST(request) {

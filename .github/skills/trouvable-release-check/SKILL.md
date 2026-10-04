@@ -28,6 +28,7 @@ npm test              # Must pass with zero failures
 ### 2. Domain-specific checklists
 
 #### Auth & Security
+
 - [ ] No secrets or API keys in source code
 - [ ] Clerk request proxy routes are correctly protected
 - [ ] Admin routes gated by email allowlist
@@ -36,6 +37,7 @@ npm test              # Must pass with zero failures
 - [ ] No new `dangerouslySetInnerHTML` without sanitization
 
 #### SEO/GEO
+
 - [ ] New pages have metadata (title, description, OG tags)
 - [ ] JSON-LD structured data is truthful
 - [ ] No fabricated citations, ratings, or business data
@@ -52,12 +54,14 @@ Stripe checkout, subscription persistence, webhooks and entitlement enforcement 
 - [ ] No billing data exposed to unauthorized users
 
 #### Database
+
 - [ ] Schema changes have migration scripts
 - [ ] Structural changes represented by ordered `supabase/migrations/`; historical schema/setup references preserved
 - [ ] RLS not weakened
 - [ ] Queries handle errors explicitly
 
 #### UI/Frontend
+
 - [ ] Responsive at mobile, tablet, and desktop
 - [ ] Interactive states present (hover, focus, loading, error)
 - [ ] No hydration mismatches
@@ -66,15 +70,15 @@ Stripe checkout, subscription persistence, webhooks and entitlement enforcement 
 
 ### 3. Risk assessment
 
-| Factor | Level | Notes |
-|---|---|---|
-| Auth boundary change | 🔴 HIGH | Requires manual verification |
-| RLS policy change | 🔴 HIGH | Requires manual verification |
-| Future billing logic change | 🔴 HIGH | Requires separately authorized Stripe test-mode verification |
-| Schema migration | 🟡 MEDIUM | Verify idempotency |
-| New public page | 🟡 MEDIUM | SEO/metadata check required |
-| Component styling | 🟢 LOW | Visual regression check |
-| Internal refactor | 🟢 LOW | Test suite coverage |
+| Factor                      | Level     | Notes                                                        |
+| --------------------------- | --------- | ------------------------------------------------------------ |
+| Auth boundary change        | 🔴 HIGH   | Requires manual verification                                 |
+| RLS policy change           | 🔴 HIGH   | Requires manual verification                                 |
+| Future billing logic change | 🔴 HIGH   | Requires separately authorized Stripe test-mode verification |
+| Schema migration            | 🟡 MEDIUM | Verify idempotency                                           |
+| New public page             | 🟡 MEDIUM | SEO/metadata check required                                  |
+| Component styling           | 🟢 LOW    | Visual regression check                                      |
+| Internal refactor           | 🟢 LOW    | Test suite coverage                                          |
 
 ### 4. Merge confidence verdict
 
@@ -91,10 +95,13 @@ Based on checks above, assign one of:
 ## Release Check: [Branch/PR]
 
 ### Build: ✅/❌
+
 ### Lint: ✅/❌
+
 ### Tests: ✅/❌
 
 ### Domain Checks:
+
 - Auth: ✅/⚠️/❌
 - SEO/GEO: ✅/⚠️/❌
 - Billing: ✅/⚠️/❌ (or N/A)
@@ -102,9 +109,11 @@ Based on checks above, assign one of:
 - UI: ✅/⚠️/❌
 
 ### Risk Level: LOW / MEDIUM / HIGH
+
 ### Verdict: READY / READY WITH VALIDATIONS / NOT READY / BLOCKED
 
 ### Post-deploy verification (only for a separately authorized deployment):
+
 1. [Specific route or flow to check]
 ```
 

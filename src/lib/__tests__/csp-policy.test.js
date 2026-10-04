@@ -15,15 +15,21 @@ function applicationPolicy() {
 
 function parkingPolicy() {
     const config = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
-    return config.headers.find((entry) => entry.source === '/(.*)').headers
-        .find((header) => header.key === 'Content-Security-Policy').value;
+    return config.headers
+        .find((entry) => entry.source === '/(.*)')
+        .headers.find((header) => header.key === 'Content-Security-Policy').value;
 }
 
 function directives(policy) {
-    return Object.fromEntries(policy.split(';').filter((part) => part.trim()).map((part) => {
-        const [name, ...values] = part.trim().split(/\s+/);
-        return [name, values];
-    }));
+    return Object.fromEntries(
+        policy
+            .split(';')
+            .filter((part) => part.trim())
+            .map((part) => {
+                const [name, ...values] = part.trim().split(/\s+/);
+                return [name, values];
+            }),
+    );
 }
 
 const application = directives(applicationPolicy());

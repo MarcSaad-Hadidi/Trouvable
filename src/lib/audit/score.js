@@ -2,13 +2,7 @@ import { normalizeAuditProblems } from '../truth/problems.js';
 import { classifySiteForAudit } from './site-classification.js';
 import { buildDimensionParts } from './score-indicators.js';
 import { applyScoreRules } from './score-rules.js';
-import {
-    PRIORITY_ORDER,
-    DIMENSION_META,
-    toArray,
-    uniqueStrings,
-    applicabilityLabel,
-} from './score-meta.js';
+import { PRIORITY_ORDER, DIMENSION_META, toArray, uniqueStrings, applicabilityLabel } from './score-meta.js';
 
 function summarizeDimension(key, indicators, applicabilityLevel) {
     const observed = indicators.reduce((sum, indicator) => sum + indicator.score, 0);
@@ -76,15 +70,30 @@ function collectMetrics(scanResults) {
     const appShellPages = Number(extracted.technology_signals?.app_shell_pages || 0);
     const averageWords = successPages.length > 0 ? Math.round(totalWordCount / successPages.length) : 0;
     const citabilityPageCount = citabilityPages.length;
-    const citabilityBlockCount = citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.block_count || 0), 0);
-    const highCitabilityBlockCount = citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.high_citability_count || 0), 0);
-    const lowCitabilityBlockCount = citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.low_citability_count || 0), 0);
-    const averageCitabilityScore = citabilityPageCount > 0
-        ? Math.round(citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.page_score || 0), 0) / citabilityPageCount)
-        : 0;
-    const citabilityHighlights = uniqueStrings(citabilityPages.flatMap((page) =>
-        toArray(page?.citability?.top_blocks).map((block) => block?.heading || block?.text_sample || '')
-    ));
+    const citabilityBlockCount = citabilityPages.reduce(
+        (sum, page) => sum + Number(page?.citability?.block_count || 0),
+        0,
+    );
+    const highCitabilityBlockCount = citabilityPages.reduce(
+        (sum, page) => sum + Number(page?.citability?.high_citability_count || 0),
+        0,
+    );
+    const lowCitabilityBlockCount = citabilityPages.reduce(
+        (sum, page) => sum + Number(page?.citability?.low_citability_count || 0),
+        0,
+    );
+    const averageCitabilityScore =
+        citabilityPageCount > 0
+            ? Math.round(
+                  citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.page_score || 0), 0) /
+                      citabilityPageCount,
+              )
+            : 0;
+    const citabilityHighlights = uniqueStrings(
+        citabilityPages.flatMap((page) =>
+            toArray(page?.citability?.top_blocks).map((block) => block?.heading || block?.text_sample || ''),
+        ),
+    );
 
     return {
         extracted,
@@ -102,7 +111,10 @@ function collectMetrics(scanResults) {
         hasHttps: String(scanResults?.resolved_url || '').startsWith('https://'),
         hasCanonical: toArray(extracted.canonicals).length > 0,
         hasNoindex: extracted.has_noindex === true,
-        hasFaq: extracted.has_faq_schema === true || toArray(extracted.faq_pairs).length > 0 || Number(extracted.page_stats?.faq_pages || 0) > 0,
+        hasFaq:
+            extracted.has_faq_schema === true ||
+            toArray(extracted.faq_pairs).length > 0 ||
+            Number(extracted.page_stats?.faq_pages || 0) > 0,
         hasFaqSchema: extracted.has_faq_schema === true,
         faqCount: toArray(extracted.faq_pairs).length,
         hasLocalBusinessSchema: extracted.has_local_business_schema === true,
@@ -151,17 +163,17 @@ function buildSubsystemScores(truthContext, scanResults) {
 
     const layer2Summary = layer2Bundle
         ? {
-            summary_score: layer2Bundle.summary_score ?? null,
-            module_scores: layer2Bundle.module_scores || null,
-            finding_counts: Array.isArray(layer2Bundle.findings)
-                ? {
-                    total: layer2Bundle.findings.length,
-                    high: layer2Bundle.findings.filter((f) => f.severity === 'high').length,
-                    medium: layer2Bundle.findings.filter((f) => f.severity === 'medium').length,
-                    low: layer2Bundle.findings.filter((f) => f.severity === 'low').length,
-                }
-                : null,
-        }
+              summary_score: layer2Bundle.summary_score ?? null,
+              module_scores: layer2Bundle.module_scores || null,
+              finding_counts: Array.isArray(layer2Bundle.findings)
+                  ? {
+                        total: layer2Bundle.findings.length,
+                        high: layer2Bundle.findings.filter((f) => f.severity === 'high').length,
+                        medium: layer2Bundle.findings.filter((f) => f.severity === 'medium').length,
+                        low: layer2Bundle.findings.filter((f) => f.severity === 'low').length,
+                    }
+                  : null,
+          }
         : null;
 
     return {
@@ -199,11 +211,11 @@ export function scoreAuditV2(scanResults, providedSiteClassification = null, tru
 
     const dimensionByKey = Object.fromEntries(dimensions.map((dimension) => [dimension.key, dimension]));
     const deterministic_score = Math.round(
-        (dimensionByKey.technical_seo.score * siteClassification.weight_profile.technical_seo)
-        + (dimensionByKey.local_readiness.score * siteClassification.weight_profile.local_readiness)
-        + (dimensionByKey.ai_answerability.score * siteClassification.weight_profile.ai_answerability)
-        + (dimensionByKey.trust_signals.score * siteClassification.weight_profile.trust_signals)
-        + (dimensionByKey.identity_completeness.score * siteClassification.weight_profile.identity_completeness)
+        dimensionByKey.technical_seo.score * siteClassification.weight_profile.technical_seo +
+            dimensionByKey.local_readiness.score * siteClassification.weight_profile.local_readiness +
+            dimensionByKey.ai_answerability.score * siteClassification.weight_profile.ai_answerability +
+            dimensionByKey.trust_signals.score * siteClassification.weight_profile.trust_signals +
+            dimensionByKey.identity_completeness.score * siteClassification.weight_profile.identity_completeness,
     );
 
     const subsystemScores = buildSubsystemScores(truthContext, scanResults);

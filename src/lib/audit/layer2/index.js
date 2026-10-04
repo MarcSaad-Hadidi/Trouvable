@@ -38,8 +38,14 @@ async function resolveLlmsTxtBodies(siteUrl, crawlerAccessData) {
     try {
         const origin = new URL(siteUrl).origin;
         const [llmsTxtRes, llmsFullRes] = await Promise.all([
-            fetchPublicResource(`${origin}/llms.txt`, { timeoutMs: 6000, headers: { 'User-Agent': 'TrouvableAuditBot/3.0', Accept: 'text/plain,*/*' } }).catch(() => null),
-            fetchPublicResource(`${origin}/llms-full.txt`, { timeoutMs: 6000, headers: { 'User-Agent': 'TrouvableAuditBot/3.0', Accept: 'text/plain,*/*' } }).catch(() => null),
+            fetchPublicResource(`${origin}/llms.txt`, {
+                timeoutMs: 6000,
+                headers: { 'User-Agent': 'TrouvableAuditBot/3.0', Accept: 'text/plain,*/*' },
+            }).catch(() => null),
+            fetchPublicResource(`${origin}/llms-full.txt`, {
+                timeoutMs: 6000,
+                headers: { 'User-Agent': 'TrouvableAuditBot/3.0', Accept: 'text/plain,*/*' },
+            }).catch(() => null),
         ]);
         const llmsTxtBody = llmsTxtRes && llmsTxtRes.ok ? await llmsTxtRes.text().catch(() => null) : null;
         const llmsFullBody = llmsFullRes && llmsFullRes.ok ? await llmsFullRes.text().catch(() => null) : null;
@@ -71,7 +77,11 @@ export async function runLayer2Expert({ siteUrl, scanResults, crawlerAccessData,
     const llmsDeep = auditLlmsTxtDeep(llmsTxtBody, siteUrl, { llmsFullContent: llmsFullBody });
     const brandEntity = auditBrandEntity({ extracted });
     const trustStack = auditTrustStack({ extracted });
-    const negative = auditNegativeSignals({ extracted, scannedPages: scanResults?.scanned_pages || [], layer1PageChecks });
+    const negative = auditNegativeSignals({
+        extracted,
+        scannedPages: scanResults?.scanned_pages || [],
+        layer1PageChecks,
+    });
 
     const modules = {
         llms_txt_deep: llmsDeep,
@@ -81,18 +91,19 @@ export async function runLayer2Expert({ siteUrl, scanResults, crawlerAccessData,
         negative_signals: negative,
     };
 
-    const scores = Object.fromEntries(Object.entries(modules).map(([key, value]) => [key, safeNumber(value?.score, 0)]));
-    const weightedAverage = (
+    const scores = Object.fromEntries(
+        Object.entries(modules).map(([key, value]) => [key, safeNumber(value?.score, 0)]),
+    );
+    const weightedAverage =
         scores.llms_txt_deep * 0.2 +
         scores.ai_discovery_endpoints * 0.1 +
         scores.brand_entity * 0.3 +
         scores.trust_stack * 0.3 +
-        scores.negative_signals * 0.1
-    );
+        scores.negative_signals * 0.1;
 
-    const findings = Object.entries(modules).flatMap(([moduleKey, moduleResult]) => (
-        (moduleResult?.findings || []).map((finding) => ({ ...finding, module: moduleKey }))
-    ));
+    const findings = Object.entries(modules).flatMap(([moduleKey, moduleResult]) =>
+        (moduleResult?.findings || []).map((finding) => ({ ...finding, module: moduleKey })),
+    );
 
     return {
         summary_score: Math.round(weightedAverage),

@@ -3,7 +3,9 @@ import 'server-only';
 const DISABLED_VALUES = new Set(['0', 'false', 'off', 'no']);
 
 export function isDailyFirstMode() {
-    const raw = String(process.env.CONTINUOUS_DAILY_FIRST_MODE ?? '1').trim().toLowerCase();
+    const raw = String(process.env.CONTINUOUS_DAILY_FIRST_MODE ?? '1')
+        .trim()
+        .toLowerCase();
     return !DISABLED_VALUES.has(raw);
 }
 

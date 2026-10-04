@@ -33,7 +33,10 @@ export function auditBrandEntity({ extracted }) {
     const businessNames = uniqueStrings(extracted?.business_names || []);
     const schemaEntities = Array.isArray(extracted?.schema_entities) ? extracted.schema_entities : [];
     const socialLinks = Array.isArray(extracted?.social_links) ? extracted.social_links : [];
-    const hasOrgSchema = detectOrganizationEntity(schemaEntities) || extracted?.has_organization_schema === true || extracted?.has_local_business_schema === true;
+    const hasOrgSchema =
+        detectOrganizationEntity(schemaEntities) ||
+        extracted?.has_organization_schema === true ||
+        extracted?.has_local_business_schema === true;
     const sameAs = detectSameAsLinks(schemaEntities, socialLinks);
 
     const details = {
@@ -47,18 +50,38 @@ export function auditBrandEntity({ extracted }) {
     };
 
     if (businessNames.length === 0) {
-        findings.push({ id: 'brand.no_business_name', severity: 'high', message: 'No consistent business name cluster detected across pages.' });
+        findings.push({
+            id: 'brand.no_business_name',
+            severity: 'high',
+            message: 'No consistent business name cluster detected across pages.',
+        });
     } else if (businessNames.length > 3) {
-        findings.push({ id: 'brand.name_inconsistency', severity: 'medium', message: `Multiple business name variants detected: ${businessNames.slice(0, 4).join(', ')}` });
+        findings.push({
+            id: 'brand.name_inconsistency',
+            severity: 'medium',
+            message: `Multiple business name variants detected: ${businessNames.slice(0, 4).join(', ')}`,
+        });
     }
     if (!hasOrgSchema) {
-        findings.push({ id: 'brand.no_org_entity', severity: 'high', message: 'No Organization / LocalBusiness / Person schema entity detected.' });
+        findings.push({
+            id: 'brand.no_org_entity',
+            severity: 'high',
+            message: 'No Organization / LocalBusiness / Person schema entity detected.',
+        });
     }
     if (sameAs.length < 2) {
-        findings.push({ id: 'brand.weak_same_as', severity: 'medium', message: 'Fewer than two sameAs / social profile references — brand graph is thin.' });
+        findings.push({
+            id: 'brand.weak_same_as',
+            severity: 'medium',
+            message: 'Fewer than two sameAs / social profile references — brand graph is thin.',
+        });
     }
     if (!details.has_about_page || !details.has_contact_page) {
-        findings.push({ id: 'brand.missing_identity_pages', severity: 'medium', message: 'Missing a dedicated about and/or contact page reduces entity clarity.' });
+        findings.push({
+            id: 'brand.missing_identity_pages',
+            severity: 'medium',
+            message: 'Missing a dedicated about and/or contact page reduces entity clarity.',
+        });
     }
 
     let score = 0;

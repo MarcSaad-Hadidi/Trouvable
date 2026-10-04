@@ -22,7 +22,8 @@ export async function getSeoLocalSlice(clientId, { audit } = {}) {
             available: false,
             emptyState: {
                 title: 'Données de préparation locale non disponibles',
-                description: 'Aucun audit n\'a encore été réalisé pour ce client. Lancez un audit depuis le dossier pour voir les indicateurs locaux.',
+                description:
+                    "Aucun audit n'a encore été réalisé pour ce client. Lancez un audit depuis le dossier pour voir les indicateurs locaux.",
             },
         };
     }
@@ -41,7 +42,8 @@ export async function getSeoLocalSlice(clientId, { audit } = {}) {
         available: true,
         localScore: audit.geo_score ?? null,
         localScoreLabel: 'Aptitude locale',
-        localScoreProvenance: 'Dimension local_readiness : évalue la préparation du site pour la visibilité locale et IA.',
+        localScoreProvenance:
+            'Dimension local_readiness : évalue la préparation du site pour la visibilité locale et IA.',
         siteClassification,
         aiRecommendability: aiAnalysis?.geo_recommendability || null,
         aiRecommendabilityRationale: aiAnalysis?.geo_recommendability_rationale || null,

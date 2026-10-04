@@ -7,7 +7,17 @@ import {
     uniqueTruthyStrings,
 } from './definitions';
 
-function buildFact({ key, label, value, truthClass, confidence, reviewStatus, provenance = [], evidence = [], metadata = {} }) {
+function buildFact({
+    key,
+    label,
+    value,
+    truthClass,
+    confidence,
+    reviewStatus,
+    provenance = [],
+    evidence = [],
+    metadata = {},
+}) {
     return {
         key,
         label,
@@ -89,15 +99,23 @@ function buildLocalityFact({ address = {}, targetRegion = '', localSignals = {} 
 
 function buildBusinessTypeFact({ rawBusinessType, resolvedBusiness, siteClassification }) {
     const rawType = String(rawBusinessType || '').trim();
-    const hasObservedType = rawType.length > 0 && !/^(localbusiness|organization|business|company|service)$/i.test(rawType);
+    const hasObservedType =
+        rawType.length > 0 && !/^(localbusiness|organization|business|company|service)$/i.test(rawType);
     const fallbackValue = String(resolvedBusiness?.offering_anchor || siteClassification?.label || '').trim();
     const value = hasObservedType ? rawType : fallbackValue || null;
     const truthClass = value
-        ? (hasObservedType ? 'observed' : resolvedBusiness?.needs_review ? 'uncertain' : 'inferred')
+        ? hasObservedType
+            ? 'observed'
+            : resolvedBusiness?.needs_review
+              ? 'uncertain'
+              : 'inferred'
         : 'uncertain';
     const confidence = hasObservedType
         ? 'high'
-        : normalizeConfidenceBand(resolvedBusiness?.category_confidence, resolvedBusiness?.needs_review ? 'low' : 'medium');
+        : normalizeConfidenceBand(
+              resolvedBusiness?.category_confidence,
+              resolvedBusiness?.needs_review ? 'low' : 'medium',
+          );
 
     return buildFact({
         key: 'business_type',
@@ -111,7 +129,10 @@ function buildBusinessTypeFact({ rawBusinessType, resolvedBusiness, siteClassifi
                 ? { source_type: 'client_profile', field: 'business_type', truth_class: 'observed' }
                 : { source_type: 'audit_classification', field: 'offering_anchor', truth_class: truthClass },
         ],
-        evidence: uniqueTruthyStrings([rawType, resolvedBusiness?.offering_anchor, siteClassification?.label]).slice(0, 4),
+        evidence: uniqueTruthyStrings([rawType, resolvedBusiness?.offering_anchor, siteClassification?.label]).slice(
+            0,
+            4,
+        ),
         metadata: {
             raw_input: rawType || null,
             site_type: siteClassification?.type || null,
@@ -121,21 +142,27 @@ function buildBusinessTypeFact({ rawBusinessType, resolvedBusiness, siteClassifi
 
 function buildCanonicalCategoryFact({ rawBusinessType, resolvedBusiness, siteClassification }) {
     const rawType = String(rawBusinessType || '').trim();
-    const hasObservedType = rawType.length > 0 && !/^(localbusiness|organization|business|company|service)$/i.test(rawType);
+    const hasObservedType =
+        rawType.length > 0 && !/^(localbusiness|organization|business|company|service)$/i.test(rawType);
     const value = String(resolvedBusiness?.canonical_category || '').trim() || 'unknown';
-    const weakSiteClassification = !siteClassification?.type
-        || siteClassification.type === 'generic_business'
-        || normalizeConfidenceBand(siteClassification?.confidence, 'low') === 'low';
-    const truthClass = value === 'unknown'
-        ? 'uncertain'
-        : resolvedBusiness?.needs_review
+    const weakSiteClassification =
+        !siteClassification?.type ||
+        siteClassification.type === 'generic_business' ||
+        normalizeConfidenceBand(siteClassification?.confidence, 'low') === 'low';
+    const truthClass =
+        value === 'unknown'
             ? 'uncertain'
-            : weakSiteClassification && !hasObservedType
+            : resolvedBusiness?.needs_review
+              ? 'uncertain'
+              : weakSiteClassification && !hasObservedType
                 ? 'uncertain'
-            : hasObservedType
-                ? 'derived'
-                : 'inferred';
-    const confidence = normalizeConfidenceBand(resolvedBusiness?.category_confidence, truthClass === 'uncertain' ? 'low' : 'medium');
+                : hasObservedType
+                  ? 'derived'
+                  : 'inferred';
+    const confidence = normalizeConfidenceBand(
+        resolvedBusiness?.category_confidence,
+        truthClass === 'uncertain' ? 'low' : 'medium',
+    );
 
     return buildFact({
         key: 'canonical_category',
@@ -159,12 +186,20 @@ function buildCanonicalCategoryFact({ rawBusinessType, resolvedBusiness, siteCla
 }
 
 function buildBusinessModelFact({ resolvedBusiness, siteClassification }) {
-    const value = String(resolvedBusiness?.business_model_detected || '').trim() || String(siteClassification?.type || '').trim() || null;
-    const weakSiteClassification = !siteClassification?.type
-        || siteClassification.type === 'generic_business'
-        || normalizeConfidenceBand(siteClassification?.confidence, 'low') === 'low';
+    const value =
+        String(resolvedBusiness?.business_model_detected || '').trim() ||
+        String(siteClassification?.type || '').trim() ||
+        null;
+    const weakSiteClassification =
+        !siteClassification?.type ||
+        siteClassification.type === 'generic_business' ||
+        normalizeConfidenceBand(siteClassification?.confidence, 'low') === 'low';
     const truthClass = value
-        ? (resolvedBusiness?.needs_review || weakSiteClassification ? 'uncertain' : siteClassification?.type ? 'derived' : 'inferred')
+        ? resolvedBusiness?.needs_review || weakSiteClassification
+            ? 'uncertain'
+            : siteClassification?.type
+              ? 'derived'
+              : 'inferred'
         : 'uncertain';
 
     return buildFact({
@@ -172,10 +207,18 @@ function buildBusinessModelFact({ resolvedBusiness, siteClassification }) {
         label: 'Business model',
         value,
         truthClass,
-        confidence: normalizeConfidenceBand(resolvedBusiness?.category_confidence, truthClass === 'uncertain' ? 'low' : 'medium'),
+        confidence: normalizeConfidenceBand(
+            resolvedBusiness?.category_confidence,
+            truthClass === 'uncertain' ? 'low' : 'medium',
+        ),
         reviewStatus: defaultReviewStatusForTruthClass(truthClass),
-        provenance: [{ source_type: 'business_type_resolver', field: 'business_model_detected', truth_class: truthClass }],
-        evidence: uniqueTruthyStrings([resolvedBusiness?.category_resolution_reason, siteClassification?.label]).slice(0, 3),
+        provenance: [
+            { source_type: 'business_type_resolver', field: 'business_model_detected', truth_class: truthClass },
+        ],
+        evidence: uniqueTruthyStrings([resolvedBusiness?.category_resolution_reason, siteClassification?.label]).slice(
+            0,
+            3,
+        ),
     });
 }
 
@@ -194,25 +237,36 @@ export function buildCanonicalBusinessDetection({
     const mergedClassification = {
         ...(siteClassification || {}),
         services_preview: Array.isArray(servicesPreview) ? servicesPreview : [],
-        short_description_preview: String(shortDescription || '').trim().slice(0, 400),
-        seo_teaser: String(seoTeaser || '').trim().slice(0, 220),
+        short_description_preview: String(shortDescription || '')
+            .trim()
+            .slice(0, 400),
+        seo_teaser: String(seoTeaser || '')
+            .trim()
+            .slice(0, 220),
     };
 
-    const resolvedBusiness = resolveBusinessType(String(rawBusinessType || '').trim(), mergedClassification, String(clientName || '').trim());
+    const resolvedBusiness = resolveBusinessType(
+        String(rawBusinessType || '').trim(),
+        mergedClassification,
+        String(clientName || '').trim(),
+    );
     const facts = {
-        business_type: buildBusinessTypeFact({ rawBusinessType, resolvedBusiness, siteClassification: mergedClassification }),
-        canonical_category: buildCanonicalCategoryFact({ rawBusinessType, resolvedBusiness, siteClassification: mergedClassification }),
+        business_type: buildBusinessTypeFact({
+            rawBusinessType,
+            resolvedBusiness,
+            siteClassification: mergedClassification,
+        }),
+        canonical_category: buildCanonicalCategoryFact({
+            rawBusinessType,
+            resolvedBusiness,
+            siteClassification: mergedClassification,
+        }),
         business_model: buildBusinessModelFact({ resolvedBusiness, siteClassification: mergedClassification }),
         locality: buildLocalityFact({ address, targetRegion, localSignals }),
         key_pages: (Array.isArray(pageSummaries) ? pageSummaries : []).slice(0, 6).map(normalizePageFact),
     };
 
-    const reviewQueue = [
-        facts.business_type,
-        facts.canonical_category,
-        facts.business_model,
-        facts.locality,
-    ]
+    const reviewQueue = [facts.business_type, facts.canonical_category, facts.business_model, facts.locality]
         .filter((fact) => fact.review_status !== 'auto_accepted')
         .map((fact) => fact.key);
 

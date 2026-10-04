@@ -16,15 +16,7 @@ const isPublicPortalAuthRoute = createRouteMatcher(['/portal/sign-in(.*)']);
 const isEspacePostLogin = createRouteMatcher(['/espace/apres-connexion(.*)']);
 const HOME_LINK_HEADER_VALUE = HOME_DISCOVERY_LINKS.join(', ');
 const MARKDOWN_BYPASS_HEADER = 'x-trouvable-markdown-source';
-const MARKDOWN_BLOCKED_PREFIXES = [
-    '/api',
-    '/admin',
-    '/portal',
-    '/espace',
-    '/_next',
-    '/.well-known',
-    '/__agent',
-];
+const MARKDOWN_BLOCKED_PREFIXES = ['/api', '/admin', '/portal', '/espace', '/_next', '/.well-known', '/__agent'];
 
 function appendVaryHeader(response, value) {
     const existing = response.headers.get('Vary');
@@ -60,9 +52,7 @@ function shouldRewriteToMarkdown(req) {
 
     if (/\.[a-z0-9]+$/i.test(pathname)) return false;
 
-    return !MARKDOWN_BLOCKED_PREFIXES.some((prefix) => (
-        pathname === prefix || pathname.startsWith(`${prefix}/`)
-    ));
+    return !MARKDOWN_BLOCKED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
 function createMarkdownRewriteResponse(req) {
@@ -121,7 +111,7 @@ const cspHeader = [
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    'upgrade-insecure-requests',
     "worker-src 'self' blob:",
     "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.trouvable.app https://clerk-telemetry.com https://*.clerk-telemetry.com https://va.vercel-scripts.com https://cdn.vercel-insights.com https://*.clarity.ms",
     "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.supabase.co https://*.clerk.accounts.dev https://*.clerk.com https://clerk.trouvable.app wss://*.clerk.accounts.dev wss://clerk-telemetry.com wss://*.clerk-telemetry.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.clarity.ms https://c.bing.com",
@@ -137,10 +127,7 @@ function getRuntimeCspHeader() {
         return cspHeader;
     }
 
-    return cspHeader.replace(
-        "script-src 'self' 'unsafe-inline'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-    );
+    return cspHeader.replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' 'unsafe-eval'");
 }
 
 const clerkProxy = clerkMiddleware(
@@ -159,9 +146,7 @@ const clerkProxy = clerkMiddleware(
             await auth.protect({ unauthenticatedUrl: new URL('/espace', req.url).toString() });
         }
 
-        const response = shouldRewriteToMarkdown(req)
-            ? createMarkdownRewriteResponse(req)
-            : NextResponse.next();
+        const response = shouldRewriteToMarkdown(req) ? createMarkdownRewriteResponse(req) : NextResponse.next();
 
         response.headers.set('Content-Security-Policy', getRuntimeCspHeader());
         addHomeDiscoveryHeaders(req, response);
@@ -170,7 +155,7 @@ const clerkProxy = clerkMiddleware(
     {
         signInUrl: '/espace',
         signUpUrl: '/espace',
-    }
+    },
 );
 
 export default async function proxy(req) {
@@ -185,9 +170,7 @@ export default async function proxy(req) {
     }
 
     if (isDevAdminAuthBypass) {
-        const response = shouldRewriteToMarkdown(req)
-            ? createMarkdownRewriteResponse(req)
-            : NextResponse.next();
+        const response = shouldRewriteToMarkdown(req) ? createMarkdownRewriteResponse(req) : NextResponse.next();
         response.headers.set('Content-Security-Policy', getRuntimeCspHeader());
         response.headers.set('x-trouvable-dev-auth-bypass', '1');
         addHomeDiscoveryHeaders(req, response);
@@ -198,7 +181,5 @@ export default async function proxy(req) {
 }
 
 export const config = {
-    matcher: [
-        '/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    ],
+    matcher: ['/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };

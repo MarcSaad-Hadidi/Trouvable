@@ -1,15 +1,12 @@
-import {
-    SITE_ABOUT_URL,
-    SITE_AUTHOR_NAME,
-    SITE_DESCRIPTION,
-    SITE_NAME,
-} from '@/lib/site-config';
+import { SITE_ABOUT_URL, SITE_AUTHOR_NAME, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site-config';
 
 export const META_DESCRIPTION_MIN = 120;
 export const META_DESCRIPTION_MAX = 158;
 
 function normalizeWhitespace(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
+    return String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function truncateAtWordBoundary(value, maxLength = META_DESCRIPTION_MAX) {
@@ -45,14 +42,7 @@ export function withPublicAuthor(metadata = {}) {
     };
 }
 
-export function buildPublicMetadata({
-    title,
-    description,
-    canonical,
-    openGraph = {},
-    twitter = {},
-    robots,
-}) {
+export function buildPublicMetadata({ title, description, canonical, openGraph = {}, twitter = {}, robots }) {
     const normalizedDescription = fitMetaDescription(description);
 
     return withPublicAuthor({

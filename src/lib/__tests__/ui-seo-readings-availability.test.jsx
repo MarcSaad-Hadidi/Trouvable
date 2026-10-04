@@ -23,8 +23,18 @@ import SeoOpportunitiesView from '@/features/admin/seo/SeoOpportunitiesView';
 const views = [SeoContentView, SeoCannibalizationView, SeoHealthView, SeoOnPageView, SeoOpportunitiesView];
 
 describe.each(views)('source availability in %s', (Component) => {
-    it.each([['partial', 'Données SEO partielles'], ['unavailable', 'Sources SEO indisponibles']])('keeps source %s explicit even in an empty-state layout', (status, title) => {
-        fixture.data = { status, errors: [{ source: 'audit', message: 'Lecture temporairement indisponible.' }], emptyState: { title: 'Lecture sans données', description: 'Les données indépendantes restent accessibles.' } };
+    it.each([
+        ['partial', 'Données SEO partielles'],
+        ['unavailable', 'Sources SEO indisponibles'],
+    ])('keeps source %s explicit even in an empty-state layout', (status, title) => {
+        fixture.data = {
+            status,
+            errors: [{ source: 'audit', message: 'Lecture temporairement indisponible.' }],
+            emptyState: {
+                title: 'Lecture sans données',
+                description: 'Les données indépendantes restent accessibles.',
+            },
+        };
         const html = renderToStaticMarkup(createElement(Component));
         expect(html).toContain(title);
         expect(html).toContain('Lecture temporairement indisponible.');
@@ -32,11 +42,19 @@ describe.each(views)('source availability in %s', (Component) => {
         expect(html).not.toContain('private database');
     });
 
-    it.each(['empty', 'not_connected', 'not_observed'])('does not invent an incident for successful source state %s', (state) => {
-        fixture.data = { status: 'available', dataSources: { gscRows: state }, errors: [], emptyState: { title: 'Lecture sans données', description: 'Aucune mesure stockée.' } };
-        const html = renderToStaticMarkup(createElement(Component));
-        expect(html).not.toContain('Sources SEO indisponibles');
-        expect(html).not.toContain('Données SEO partielles');
-        expect(html).toContain('Lecture sans données');
-    });
+    it.each(['empty', 'not_connected', 'not_observed'])(
+        'does not invent an incident for successful source state %s',
+        (state) => {
+            fixture.data = {
+                status: 'available',
+                dataSources: { gscRows: state },
+                errors: [],
+                emptyState: { title: 'Lecture sans données', description: 'Aucune mesure stockée.' },
+            };
+            const html = renderToStaticMarkup(createElement(Component));
+            expect(html).not.toContain('Sources SEO indisponibles');
+            expect(html).not.toContain('Données SEO partielles');
+            expect(html).toContain('Lecture sans données');
+        },
+    );
 });

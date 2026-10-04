@@ -8,7 +8,12 @@ import {
     AgentPageFrame,
     pageActionLink,
 } from '@/features/admin/agent/agent-page-primitives';
-import { AgentStrengthMessage, AgentFixMessage, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
+import {
+    AgentStrengthMessage,
+    AgentFixMessage,
+    AgentDimensionGrid,
+    AgentMessageList,
+} from '@/features/admin/agent/agent-shared';
 import { scoreTone, formatAgentReliability } from '@/features/admin/agent/agent-copy';
 
 export default function AgentActionabilityPage() {
@@ -19,10 +24,14 @@ export default function AgentActionabilityPage() {
     const summary = data?.summary || {};
     const dimensions = data?.dimensions || [];
     const coveredDimensions = dimensions.filter((item) => Number(item?.score) >= 70).length;
-    const emptyState = data?.emptyState || (!data?.available ? {
-        title: 'Actionnabilité AGENT indisponible',
-        description: 'Le backend ne remonte pas encore de lecture actionnable pour ce dossier.',
-    } : null);
+    const emptyState =
+        data?.emptyState ||
+        (!data?.available
+            ? {
+                  title: 'Actionnabilité AGENT indisponible',
+                  description: 'Le backend ne remonte pas encore de lecture actionnable pour ce dossier.',
+              }
+            : null);
 
     return (
         <AgentPageFrame
@@ -33,7 +42,11 @@ export default function AgentActionabilityPage() {
                 <>
                     {pageActionLink(data?.links?.profile || `${baseHref}/dossier`, 'Dossier client')}
                     {pageActionLink(data?.links?.audit || `${baseHref}/dossier/audit`, 'Audit dossier')}
-                    {pageActionLink(data?.links?.opportunities || `${baseHref}/geo/opportunities`, 'File d’actions', 'primary')}
+                    {pageActionLink(
+                        data?.links?.opportunities || `${baseHref}/geo/opportunities`,
+                        'File d’actions',
+                        'primary',
+                    )}
                 </>
             }
             loading={loading}

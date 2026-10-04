@@ -7,7 +7,9 @@ function rawAdminList() {
     const admin = process.env.CLERK_ADMIN_EMAIL || process.env.ADMIN_PANEL_EMAIL;
     if (!admin) {
         if (process.env.NODE_ENV === 'development') {
-            console.warn('[AdminEmail] CLERK_ADMIN_EMAIL non definie en developpement. Aucun acces admin Clerk ne sera accorde sans DEV_BYPASS_AUTH=1.');
+            console.warn(
+                '[AdminEmail] CLERK_ADMIN_EMAIL non definie en developpement. Aucun acces admin Clerk ne sera accorde sans DEV_BYPASS_AUTH=1.',
+            );
             return '';
         }
 

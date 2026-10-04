@@ -59,7 +59,10 @@ function buildUserMessage(data) {
     if (data.seo_description) parts.push(`Description : ${data.seo_description}`);
     if (data.services) parts.push(`Services : ${data.services}`);
     if (data.intent_family) parts.push(`Intention : ${data.intent_family}`);
-    if (data.prompt_mode) parts.push(`Mode : ${data.prompt_mode === 'operator_probe' ? 'sonde opérateur (plus technique)' : 'question utilisateur naturelle'}`);
+    if (data.prompt_mode)
+        parts.push(
+            `Mode : ${data.prompt_mode === 'operator_probe' ? 'sonde opérateur (plus technique)' : 'question utilisateur naturelle'}`,
+        );
     if (data.current_query) parts.push(`\nPrompt actuel (à améliorer) : ${data.current_query}`);
     else parts.push(`\nGénère un nouveau prompt de recherche pour cette entreprise.`);
     return parts.join('\n');

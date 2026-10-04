@@ -27,14 +27,8 @@ export async function getAgentReachSnapshotFromDb({ connection, clientId }) {
         const supabase = getAdminSupabase();
 
         const [docsResult, clustersResult, opportunitiesResult, lastRunResult] = await Promise.all([
-            supabase
-                .from('community_documents')
-                .select('id', { count: 'exact', head: true })
-                .eq('client_id', clientId),
-            supabase
-                .from('community_clusters')
-                .select('id', { count: 'exact', head: true })
-                .eq('client_id', clientId),
+            supabase.from('community_documents').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
+            supabase.from('community_clusters').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
             supabase
                 .from('community_opportunities')
                 .select('id', { count: 'exact', head: true })

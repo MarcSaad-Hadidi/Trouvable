@@ -3,21 +3,24 @@ export const RELIABILITY_META = {
         key: 'measured',
         label: 'Mesurée',
         shortLabel: 'Mesurée',
-        description: 'Observation directe issue d’une source réelle, d’un audit, d’une exécution, d’un connecteur ou d’une donnée mandatée stockée.',
+        description:
+            'Observation directe issue d’une source réelle, d’un audit, d’une exécution, d’un connecteur ou d’une donnée mandatée stockée.',
         tone: 'emerald',
     },
     calculated: {
         key: 'calculated',
         label: 'Calculée',
         shortLabel: 'Calculée',
-        description: 'Résultat calculé de manière déterministe à partir de données observées déjà présentes dans Trouvable.',
+        description:
+            'Résultat calculé de manière déterministe à partir de données observées déjà présentes dans Trouvable.',
         tone: 'blue',
     },
     ai_analysis: {
         key: 'ai_analysis',
         label: 'Analyse IA',
         shortLabel: 'Analyse IA',
-        description: 'Interprétation ou priorisation formulée par IA à partir de données réelles, sans faire autorité seule sur la vérité.',
+        description:
+            'Interprétation ou priorisation formulée par IA à partir de données réelles, sans faire autorité seule sur la vérité.',
         tone: 'amber',
     },
     unavailable: {

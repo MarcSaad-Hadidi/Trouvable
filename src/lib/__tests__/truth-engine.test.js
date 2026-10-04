@@ -57,21 +57,24 @@ describe('buildCanonicalBusinessDetection', () => {
 
 describe('normalizeAuditProblem', () => {
     it('adds canonical problem metadata while preserving legacy text fields', () => {
-        const problem = normalizeAuditProblem({
-            title: 'Homepage title is missing or too weak',
-            description: 'The homepage title is missing or too short.',
-            severity: 'medium',
-            priority: 'high',
-            category: 'technical',
-            dimension: 'technical_seo',
-            provenance: 'observed',
-            evidence_summary: 'No title tag was observed on the homepage.',
-            recommended_fix: 'Add a stronger title.',
-        }, {
-            auditId: 'audit_123',
-            clientId: 'client_123',
-            sourceUrl: 'https://example.com',
-        });
+        const problem = normalizeAuditProblem(
+            {
+                title: 'Homepage title is missing or too weak',
+                description: 'The homepage title is missing or too short.',
+                severity: 'medium',
+                priority: 'high',
+                category: 'technical',
+                dimension: 'technical_seo',
+                provenance: 'observed',
+                evidence_summary: 'No title tag was observed on the homepage.',
+                recommended_fix: 'Add a stronger title.',
+            },
+            {
+                auditId: 'audit_123',
+                clientId: 'client_123',
+                sourceUrl: 'https://example.com',
+            },
+        );
 
         expect(problem.type).toContain('technical_seo');
         expect(problem.family).toBe('technical_seo');
@@ -94,7 +97,9 @@ describe('scoreAuditV2', () => {
             scanned_pages: [{ success: true }],
             extracted_data: {
                 titles: ['ABC Plumbing Montreal'],
-                descriptions: ['Plombier a Montreal pour urgences, debouchage, inspection et reparation residentielle.'],
+                descriptions: [
+                    'Plombier a Montreal pour urgences, debouchage, inspection et reparation residentielle.',
+                ],
                 h1s: ['Plombier a Montreal'],
                 canonicals: ['https://example.com'],
                 has_noindex: false,
@@ -120,7 +125,11 @@ describe('scoreAuditV2', () => {
                 social_links: ['https://facebook.com/abcplumbing'],
                 schema_entities: [{ '@type': 'Organization' }],
                 page_summaries: [
-                    { page_type: 'homepage', title: 'ABC Plumbing Montreal', description: 'Service de plomberie a Montreal' },
+                    {
+                        page_type: 'homepage',
+                        title: 'ABC Plumbing Montreal',
+                        description: 'Service de plomberie a Montreal',
+                    },
                     { page_type: 'contact', title: 'Contact', url: 'https://example.com/contact' },
                 ],
                 page_stats: {

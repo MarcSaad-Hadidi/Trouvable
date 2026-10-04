@@ -24,15 +24,18 @@ const SOURCE_WEIGHT = { opportunity: 30, audit_issue: 20, completeness_gap: 10 }
 const PRIORITY_COPY = {
     contact_completeness: {
         title: 'Completer les coordonnees publiques',
-        description: 'Ajoutez un telephone et un courriel publics pour faciliter les recommandations et la prise de contact.',
+        description:
+            'Ajoutez un telephone et un courriel publics pour faciliter les recommandations et la prise de contact.',
     },
     service_clarity: {
         title: "Clarifier l'offre principale",
-        description: 'Precisez les services et la proposition de valeur pour aider les moteurs IA a bien presenter le business.',
+        description:
+            'Precisez les services et la proposition de valeur pour aider les moteurs IA a bien presenter le business.',
     },
     local_coverage: {
         title: 'Renforcer la couverture locale',
-        description: 'Mettez en avant les villes, quartiers ou zones desservies pour mieux capter les recherches locales.',
+        description:
+            'Mettez en avant les villes, quartiers ou zones desservies pour mieux capter les recherches locales.',
     },
     structured_data: {
         title: 'Structurer les informations locales',
@@ -171,7 +174,7 @@ function deriveNextPriorities({ opportunities, latestIssues, completeness }) {
                 priority: opportunity.priority || 'medium',
                 category: opportunity.category || '',
                 text: `${opportunity.title || ''} ${opportunity.description || ''}`,
-            })
+            }),
         );
     }
 
@@ -181,7 +184,7 @@ function deriveNextPriorities({ opportunities, latestIssues, completeness }) {
                 source: 'audit_issue',
                 priority: 'medium',
                 text: getIssueText(issue),
-            })
+            }),
         );
     }
 
@@ -191,7 +194,7 @@ function deriveNextPriorities({ opportunities, latestIssues, completeness }) {
                 source: 'completeness_gap',
                 priority: 'medium',
                 bucket: gap.key,
-            })
+            }),
         );
     }
 
@@ -241,7 +244,9 @@ function mapActionWorkItems(actions = []) {
                     id: `action-${action.id}`,
                     created_at: action.created_at,
                     title: 'Page publique mise a jour',
-                    description: isPublished ? 'Le profil public est maintenant publie.' : 'Le profil public a ete remis en brouillon.',
+                    description: isPublished
+                        ? 'Le profil public est maintenant publie.'
+                        : 'Le profil public a ete remis en brouillon.',
                 };
             }
 
@@ -304,18 +309,21 @@ export async function getPortalDashboardData(clientId) {
         }
     }
 
-    const { data: auditRows, error: auditError } = await loadRows('audits', () => supabase
-        .from('client_site_audits')
-        .select('id, created_at, scan_status, seo_score, geo_score, issues, strengths, extracted_data')
-        .eq('client_id', clientId)
-        .order('created_at', { ascending: false })
-        .limit(6));
+    const { data: auditRows, error: auditError } = await loadRows('audits', () =>
+        supabase
+            .from('client_site_audits')
+            .select('id, created_at, scan_status, seo_score, geo_score, issues, strengths, extracted_data')
+            .eq('client_id', clientId)
+            .order('created_at', { ascending: false })
+            .limit(6),
+    );
 
     if (auditError) unavailable('audits');
     else sources.audits = auditRows?.length ? 'available' : 'empty';
 
     const recentAudits = auditError ? [] : auditRows || [];
-    const latestAudit = recentAudits.find((audit) => audit.scan_status === 'success' || audit.scan_status === 'partial_error') || null;
+    const latestAudit =
+        recentAudits.find((audit) => audit.scan_status === 'success' || audit.scan_status === 'partial_error') || null;
 
     const [ws, latestRunMap, opportunitiesResult, actionsResult, snapshotsResult, readinessSlice] = await Promise.all([
         getGeoWorkspaceSnapshot(clientId).catch(() => {
@@ -326,33 +334,45 @@ export async function getPortalDashboardData(clientId) {
             unavailable('lastRuns');
             return null;
         }),
-        loadRows('opportunities', () => supabase
-            .from('opportunities')
-            .select('id, title, description, priority, category, status, created_at')
-            .eq('client_id', clientId)
-            .eq('status', 'open')
-            .order('created_at', { ascending: false })
-            .limit(12)),
-        loadRows('actions', () => supabase
-            .from('actions')
-            .select('id, action_type, details, created_at')
-            .eq('client_id', clientId)
-            .in('action_type', ['geo_queries_run', 'publication_state_changed'])
-            .order('created_at', { ascending: false })
-            .limit(12)),
-        loadRows('history', () => supabase
-            .from('visibility_metric_snapshots')
-            .select('snapshot_date, seo_score, geo_score, visibility_proxy_percent, citation_coverage_percent, mention_rate_percent')
-            .eq('client_id', clientId)
-            .order('snapshot_date', { ascending: true })
-            .limit(120)),
+        loadRows('opportunities', () =>
+            supabase
+                .from('opportunities')
+                .select('id, title, description, priority, category, status, created_at')
+                .eq('client_id', clientId)
+                .eq('status', 'open')
+                .order('created_at', { ascending: false })
+                .limit(12),
+        ),
+        loadRows('actions', () =>
+            supabase
+                .from('actions')
+                .select('id, action_type, details, created_at')
+                .eq('client_id', clientId)
+                .in('action_type', ['geo_queries_run', 'publication_state_changed'])
+                .order('created_at', { ascending: false })
+                .limit(12),
+        ),
+        loadRows('history', () =>
+            supabase
+                .from('visibility_metric_snapshots')
+                .select(
+                    'snapshot_date, seo_score, geo_score, visibility_proxy_percent, citation_coverage_percent, mention_rate_percent',
+                )
+                .eq('client_id', clientId)
+                .order('snapshot_date', { ascending: true })
+                .limit(120),
+        ),
         getReadinessSlice(clientId).catch(() => {
             unavailable('readiness');
             return null;
         }),
     ]);
 
-    for (const [source, result] of [['opportunities', opportunitiesResult], ['actions', actionsResult], ['history', snapshotsResult]]) {
+    for (const [source, result] of [
+        ['opportunities', opportunitiesResult],
+        ['actions', actionsResult],
+        ['history', snapshotsResult],
+    ]) {
         if (result.error) {
             unavailable(source);
             result.data = null;
@@ -362,7 +382,8 @@ export async function getPortalDashboardData(clientId) {
         sources.workspace = ws.snapshot.status;
         errors.push(...ws.snapshot.errors);
     }
-    if (sources.readiness !== 'unavailable') sources.readiness = readinessSlice?.available === false || !readinessSlice ? 'empty' : 'available';
+    if (sources.readiness !== 'unavailable')
+        sources.readiness = readinessSlice?.available === false || !readinessSlice ? 'empty' : 'available';
     const trackedQueries = ws?.trackedQueries || [];
     if (sources.lastRuns !== 'unavailable') sources.lastRuns = latestRunMap?.size ? 'available' : 'empty';
     const lastRunMap = latestRunMap || new Map();
@@ -371,11 +392,11 @@ export async function getPortalDashboardData(clientId) {
     if (ws) metrics.modelPerformance = ws.modelPerformance;
 
     const completeness = getProfileCompletenessSummary(client);
-    const topTrackedPrompts = buildTopTrackedPrompts(trackedQueries, lastRunMap instanceof Map ? lastRunMap : new Map(Object.entries(lastRunMap || {})));
-    const recentWorkItems = [
-        ...mapAuditWorkItems(recentAudits),
-        ...mapActionWorkItems(actionsResult.data || []),
-    ]
+    const topTrackedPrompts = buildTopTrackedPrompts(
+        trackedQueries,
+        lastRunMap instanceof Map ? lastRunMap : new Map(Object.entries(lastRunMap || {})),
+    );
+    const recentWorkItems = [...mapAuditWorkItems(recentAudits), ...mapActionWorkItems(actionsResult.data || [])]
         .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
         .slice(0, 6);
 
@@ -397,7 +418,9 @@ export async function getPortalDashboardData(clientId) {
     const lastAuditDate = latestAudit?.created_at ? new Date(latestAudit.created_at) : null;
     const lastClientUpdate = client.updated_at ? new Date(client.updated_at) : null;
     const auditFreshness = lastAuditDate
-        ? (lastClientUpdate && lastClientUpdate > lastAuditDate ? 'outdated' : 'recent')
+        ? lastClientUpdate && lastClientUpdate > lastAuditDate
+            ? 'outdated'
+            : 'recent'
         : 'none';
 
     // TODO: connecter un champ texte editable par l equipe (notes de mandat) et l injecter ici en priorite.
@@ -409,27 +432,33 @@ export async function getPortalDashboardData(clientId) {
         { value: metrics?.citationCoveragePercent, weight: 0.2 },
     ].filter((c) => typeof c.value === 'number' && Number.isFinite(c.value));
 
-    const visibilitySourcesFailed = !ws || ['runs', 'mentions', 'trackedQueries', 'totalQueryRuns', 'brandRecommendations'].some(source => ws.snapshot.sources[source] === 'unavailable');
-    const visibilityScore = !visibilitySourcesFailed && visibilityComponents.length > 0
-        ? Math.round(
-            visibilityComponents.reduce((acc, c) => acc + c.value * c.weight, 0)
-            / visibilityComponents.reduce((acc, c) => acc + c.weight, 0),
-        )
-        : null;
+    const visibilitySourcesFailed =
+        !ws ||
+        ['runs', 'mentions', 'trackedQueries', 'totalQueryRuns', 'brandRecommendations'].some(
+            (source) => ws.snapshot.sources[source] === 'unavailable',
+        );
+    const visibilityScore =
+        !visibilitySourcesFailed && visibilityComponents.length > 0
+            ? Math.round(
+                  visibilityComponents.reduce((acc, c) => acc + c.value * c.weight, 0) /
+                      visibilityComponents.reduce((acc, c) => acc + c.weight, 0),
+              )
+            : null;
 
-    const readinessScore = readinessSlice && readinessSlice.available !== false
-        ? (readinessSlice?.summary?.globalScore ?? null)
-        : null;
+    const readinessScore =
+        readinessSlice && readinessSlice.available !== false ? (readinessSlice?.summary?.globalScore ?? null) : null;
 
     const actionabilityReport = buildActionabilityReport({ client, audit: latestAudit });
-    const actionabilityInput = actionabilityReport.available && Number.isFinite(actionabilityReport?.summary?.globalScore)
-        ? { score: actionabilityReport.summary.globalScore, reliability: actionabilityReport.reliability }
-        : null;
+    const actionabilityInput =
+        actionabilityReport.available && Number.isFinite(actionabilityReport?.summary?.globalScore)
+            ? { score: actionabilityReport.summary.globalScore, reliability: actionabilityReport.reliability }
+            : null;
 
     const protocolsReport = buildProtocolsReport({ audit: latestAudit });
-    const protocolsInput = protocolsReport.available && Number.isFinite(protocolsReport?.summary?.globalScore)
-        ? { score: protocolsReport.summary.globalScore, reliability: protocolsReport.reliability }
-        : null;
+    const protocolsInput =
+        protocolsReport.available && Number.isFinite(protocolsReport?.summary?.globalScore)
+            ? { score: protocolsReport.summary.globalScore, reliability: protocolsReport.reliability }
+            : null;
 
     const agentScorePayload = computeAgentScore({
         visibility: visibilityScore !== null ? { score: visibilityScore, reliability: 'medium' } : null,
@@ -492,4 +521,3 @@ export async function getPortalDashboardData(clientId) {
         },
     };
 }
-

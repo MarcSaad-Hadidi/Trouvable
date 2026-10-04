@@ -12,9 +12,9 @@ export async function authorizeGoogleOAuthClient(clientId) {
         if (!access.userId || !access.user) {
             return { error: 'google_oauth_authentication_required', status: 401 };
         }
-        const allowed = access.memberships.some((membership) => (
-            membership.client_id === clientId && membership.status === 'active'
-        ));
+        const allowed = access.memberships.some(
+            (membership) => membership.client_id === clientId && membership.status === 'active',
+        );
         if (!allowed) return { error: 'google_oauth_forbidden', status: 403 };
 
         return { authorized: true };

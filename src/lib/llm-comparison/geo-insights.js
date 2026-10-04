@@ -1,4 +1,10 @@
-import { classifySourceType, computeSourceConfidence, extractUrlsFromText, hostnameFromUrl, normalizeDomainHost } from '@/lib/geo-query-utils';
+import {
+    classifySourceType,
+    computeSourceConfidence,
+    extractUrlsFromText,
+    hostnameFromUrl,
+    normalizeDomainHost,
+} from '@/lib/geo-query-utils';
 
 function safeText(value) {
     return String(value || '').trim();
@@ -67,7 +73,11 @@ function isLikelyCompetitorName(name, blocked = new Set()) {
     if (normalized.length < 2 || normalized.length > 60) return false;
     const lower = normalized.toLowerCase();
     if (blocked.has(lower)) return false;
-    if (/^(crit[eè]re|synth[eè]se|diff[eé]renciation|technologie|cible principale|pourquoi|option|concurrent|alternatives?)$/.test(lower)) {
+    if (
+        /^(crit[eè]re|synth[eè]se|diff[eé]renciation|technologie|cible principale|pourquoi|option|concurrent|alternatives?)$/.test(
+            lower,
+        )
+    ) {
         return false;
     }
     if (!/[a-z]/i.test(normalized)) return false;
@@ -79,7 +89,8 @@ function isLikelyCompetitorName(name, blocked = new Set()) {
         return /^[A-Z][\p{L}\p{N}-]*$/u.test(clean) || /[A-Z].*[A-Z]/.test(clean);
     }).length;
     if (strongBrandLikeWords === 0) return false;
-    const genericBusinessTerms = /(entreprise|visibilit[eé]|solution|secteur|service|optimisation|diagnostic|r[eé]sum[eé]|cas d[' ]usage|prochaine [eé]tape|besoin)/i;
+    const genericBusinessTerms =
+        /(entreprise|visibilit[eé]|solution|secteur|service|optimisation|diagnostic|r[eé]sum[eé]|cas d[' ]usage|prochaine [eé]tape|besoin)/i;
     if (genericBusinessTerms.test(lower)) return false;
     return true;
 }
@@ -127,12 +138,12 @@ export function buildProviderGeoInsight(result, context = {}) {
     });
 
     const score =
-        (result?.ok ? 20 : 0)
-        + Math.min(20, citations.length * 6)
-        + Math.min(20, competitorMatches * 5)
-        + (hasBrandMention ? 10 : 0)
-        + Math.min(15, Math.floor(content.length / 250))
-        - (result?.error ? 10 : 0);
+        (result?.ok ? 20 : 0) +
+        Math.min(20, citations.length * 6) +
+        Math.min(20, competitorMatches * 5) +
+        (hasBrandMention ? 10 : 0) +
+        Math.min(15, Math.floor(content.length / 250)) -
+        (result?.error ? 10 : 0);
 
     return {
         ...result,
@@ -156,8 +167,11 @@ export function buildComparativeSummary(enrichedResults = []) {
     const sortedByScore = [...enrichedResults].sort((a, b) => (b.geo?.score || 0) - (a.geo?.score || 0));
     const top = sortedByScore[0] || null;
 
-    const bestCitations = [...enrichedResults].sort((a, b) => (b.geo?.citations_count || 0) - (a.geo?.citations_count || 0))[0] || null;
-    const bestCompetitors = [...enrichedResults].sort((a, b) => (b.geo?.competitors_count || 0) - (a.geo?.competitors_count || 0))[0] || null;
+    const bestCitations =
+        [...enrichedResults].sort((a, b) => (b.geo?.citations_count || 0) - (a.geo?.citations_count || 0))[0] || null;
+    const bestCompetitors =
+        [...enrichedResults].sort((a, b) => (b.geo?.competitors_count || 0) - (a.geo?.competitors_count || 0))[0] ||
+        null;
     const brandMentions = enrichedResults.filter((item) => item.geo?.has_brand_mention).map((item) => item.provider);
 
     return {
@@ -167,7 +181,9 @@ export function buildComparativeSummary(enrichedResults = []) {
         most_citations_provider: bestCitations?.provider || null,
         most_competitors_provider: bestCompetitors?.provider || null,
         providers_with_brand_mention: brandMentions,
-        weak_providers: enrichedResults.filter((item) => ['low_yield', 'weak', 'failed'].includes(item.geo?.signal_tier)).map((item) => item.provider),
+        weak_providers: enrichedResults
+            .filter((item) => ['low_yield', 'weak', 'failed'].includes(item.geo?.signal_tier))
+            .map((item) => item.provider),
     };
 }
 
@@ -181,12 +197,16 @@ export function buildPromptCalibrationHints(enrichedResults = [], summary = null
     }
 
     if ((summary?.providers_with_brand_mention || []).length === 0) {
-        hints.push('Aucun modèle ne mentionne la marque cible: ajoutez explicitement le nom de marque et le contexte métier.');
+        hints.push(
+            'Aucun modèle ne mentionne la marque cible: ajoutez explicitement le nom de marque et le contexte métier.',
+        );
     }
 
     const citationSpread = enrichedResults.map((item) => item.geo?.citations_count || 0);
     if (Math.max(...citationSpread) - Math.min(...citationSpread) >= 2) {
-        hints.push('Forte variance des citations entre providers: ce prompt est sensible au modèle, utile pour calibration benchmark.');
+        hints.push(
+            'Forte variance des citations entre providers: ce prompt est sensible au modèle, utile pour calibration benchmark.',
+        );
     }
 
     const hasProviderErrors = enrichedResults.some((item) => !item.ok);

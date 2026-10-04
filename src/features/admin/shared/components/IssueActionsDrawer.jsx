@@ -206,12 +206,16 @@ export default function IssueActionsDrawer() {
                 <div className="geo-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-4 pr-4 space-y-4 [scrollbar-gutter:stable]">
                     {ref && (
                         <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">Référence</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">
+                                Référence
+                            </div>
                             <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                                 {ref.pageUrl && (
                                     <>
                                         <dt className="text-white/50">Page</dt>
-                                        <dd className="truncate text-white/85" title={ref.pageUrl}>{ref.pageUrl}</dd>
+                                        <dd className="truncate text-white/85" title={ref.pageUrl}>
+                                            {ref.pageUrl}
+                                        </dd>
                                     </>
                                 )}
                                 {ref.dimension && (
@@ -241,7 +245,9 @@ export default function IssueActionsDrawer() {
                                 {ref.issueId && (
                                     <>
                                         <dt className="text-white/50">Issue</dt>
-                                        <dd className="truncate text-white/85" title={ref.issueId}>{ref.issueId}</dd>
+                                        <dd className="truncate text-white/85" title={ref.issueId}>
+                                            {ref.issueId}
+                                        </dd>
                                     </>
                                 )}
                             </dl>
@@ -250,7 +256,9 @@ export default function IssueActionsDrawer() {
 
                     <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
                         <div className="flex items-center justify-between gap-2">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">Variante</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/40">
+                                Variante
+                            </div>
                             <div className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-black/20 p-0.5">
                                 {VARIANTS.map((v) => (
                                     <button

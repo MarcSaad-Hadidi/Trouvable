@@ -13,18 +13,34 @@ describe.each([
     it('preserves every canonical URL, title, author and social image contract', async () => {
         expect(page.generateStaticParams()).toEqual(entries.map((entry) => ({ [param]: entry.slug })));
         for (const entry of entries) {
-            const title = route === 'villes' ? `Visibilité IA à ${entry.name} | Trouvable` : `${entry.name} | Visibilité IA | Trouvable`;
-            const description = fitMetaDescription(route === 'villes' ? resolveVilleComposition(entry)?.metaDescription || entry.description : entry.description);
+            const title =
+                route === 'villes'
+                    ? `Visibilité IA à ${entry.name} | Trouvable`
+                    : `${entry.name} | Visibilité IA | Trouvable`;
+            const description = fitMetaDescription(
+                route === 'villes'
+                    ? resolveVilleComposition(entry)?.metaDescription || entry.description
+                    : entry.description,
+            );
             const url = `${SITE_URL}/${route}/${entry.slug}`;
             const metadata = await page.generateMetadata({ params: Promise.resolve({ [param]: entry.slug }) });
-            expect(metadata).toEqual(withPublicAuthor({
-                title,
-                description,
-                alternates: { canonical: url },
-                openGraph: { title, description, url, siteName: 'Trouvable', type: 'website', images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: title }] },
-                twitter: { card: 'summary_large_image', title, description, images: [`${SITE_URL}/twitter-image`] },
-                robots: { index: true, follow: true },
-            }));
+            expect(metadata).toEqual(
+                withPublicAuthor({
+                    title,
+                    description,
+                    alternates: { canonical: url },
+                    openGraph: {
+                        title,
+                        description,
+                        url,
+                        siteName: 'Trouvable',
+                        type: 'website',
+                        images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: title }],
+                    },
+                    twitter: { card: 'summary_large_image', title, description, images: [`${SITE_URL}/twitter-image`] },
+                    robots: { index: true, follow: true },
+                }),
+            );
         }
     });
     it('keeps unknown slug metadata empty', async () => {

@@ -4,7 +4,10 @@ import { getBusinessShortDescription } from '@/lib/client-profile';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getTrackedQueriesAll as dbGetTrackedQueriesAll } from '@/lib/db/tracked-queries';
-import { getLastRunPerTrackedQuery as dbGetLastRunPerTrackedQuery, getQueryRunsHistory as dbGetQueryRunsHistory } from '@/lib/db/query-runs';
+import {
+    getLastRunPerTrackedQuery as dbGetLastRunPerTrackedQuery,
+    getQueryRunsHistory as dbGetQueryRunsHistory,
+} from '@/lib/db/query-runs';
 import {
     getTrackedQueryCategoryMeta,
     getTrackedQueryCategoryOptions,
@@ -18,7 +21,11 @@ import {
 } from '@/lib/operator-intelligence/prompt-taxonomy';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 import { loadIndependentSources, getSourceStatus } from '@/lib/operator-intelligence/source-availability';
-import { isRunFailureStatus, isRunSuccessStatus, normalizeRunParseStatus } from '@/lib/operator-intelligence/run-lifecycle';
+import {
+    isRunFailureStatus,
+    isRunSuccessStatus,
+    normalizeRunParseStatus,
+} from '@/lib/operator-intelligence/run-lifecycle';
 import {
     buildPromptMetadata,
     getPromptIntentFamilies,
@@ -39,23 +46,25 @@ function sortPrompts(a, b) {
 
 function inferSiteType(latestAudit) {
     return (
-        latestAudit?.geo_breakdown?.site_classification?.type
-        || latestAudit?.seo_breakdown?.site_classification?.type
-        || 'generic_business'
+        latestAudit?.geo_breakdown?.site_classification?.type ||
+        latestAudit?.seo_breakdown?.site_classification?.type ||
+        'generic_business'
     );
 }
 
 function inferSiteTypeLabel(latestAudit) {
     return (
-        latestAudit?.geo_breakdown?.site_classification?.label
-        || latestAudit?.seo_breakdown?.site_classification?.label
-        || 'Entreprise generaliste'
+        latestAudit?.geo_breakdown?.site_classification?.label ||
+        latestAudit?.seo_breakdown?.site_classification?.label ||
+        'Entreprise generaliste'
     );
 }
 
 function extractKnownCompetitors(client = {}) {
     if (Array.isArray(client?.business_details?.competitors)) {
-        return [...new Set(client.business_details.competitors.map((value) => String(value || '').trim()).filter(Boolean))];
+        return [
+            ...new Set(client.business_details.competitors.map((value) => String(value || '').trim()).filter(Boolean)),
+        ];
     }
     return [];
 }
@@ -68,9 +77,16 @@ function humanizeSlug(slug) {
 }
 
 function isWeakAnchorText(value) {
-    const t = String(value || '').trim().toLowerCase();
+    const t = String(value || '')
+        .trim()
+        .toLowerCase();
     if (t.length < 4) return true;
-    if (/^(service local|general|entreprise|business|saas|saas product|logiciel|plateforme|notre activite|activite)$/.test(t)) return true;
+    if (
+        /^(service local|general|entreprise|business|saas|saas product|logiciel|plateforme|notre activite|activite)$/.test(
+            t,
+        )
+    )
+        return true;
     if (/^https?:\/\/schema\.org\//i.test(String(value || ''))) return true;
     return false;
 }
@@ -90,7 +106,15 @@ function resolveOfferAnchor({ services, categoryLabel, resolvedBusiness }) {
     return '';
 }
 
-function buildPromptBlueprints({ clientName, categoryLabel, city, locale, services, knownCompetitors, resolvedBusiness }) {
+function buildPromptBlueprints({
+    clientName,
+    categoryLabel,
+    city,
+    locale,
+    services,
+    knownCompetitors,
+    resolvedBusiness,
+}) {
     const canonicalCategory = resolvedBusiness?.canonical_category;
     const businessModel = resolvedBusiness?.business_model_detected;
     const isSaas = businessModel === 'saas' || canonicalCategory === 'ai_visibility_software';
@@ -98,9 +122,17 @@ function buildPromptBlueprints({ clientName, categoryLabel, city, locale, servic
     const anchor = resolveOfferAnchor({ services, categoryLabel, resolvedBusiness });
     const primaryService = String(services[0] || '').trim() || anchor;
     const declaredCompetitor = knownCompetitors[0]?.trim() || '';
-    const useCaseHint = String(resolvedBusiness?.primary_use_case || '').replace(/^Livrer \/ réaliser : /i, '').trim() || anchor || `les besoins couverts par ${clientName}`;
-    const normalizedOfferLabel = String(anchor || primaryService || '').replace(/^\d+\.\s*/, '').trim();
-    const userVisibleOffering = normalizedOfferLabel || (isSaas ? 'visibilite IA locale' : `service ${cityTextWithPreposition}`);
+    const useCaseHint =
+        String(resolvedBusiness?.primary_use_case || '')
+            .replace(/^Livrer \/ réaliser : /i, '')
+            .trim() ||
+        anchor ||
+        `les besoins couverts par ${clientName}`;
+    const normalizedOfferLabel = String(anchor || primaryService || '')
+        .replace(/^\d+\.\s*/, '')
+        .trim();
+    const userVisibleOffering =
+        normalizedOfferLabel || (isSaas ? 'visibilite IA locale' : `service ${cityTextWithPreposition}`);
     const offerAnchor = normalizedOfferLabel || String(categoryLabel || '').trim();
     const shortlistCompetitorsPrompt = `Quelles alternatives a ${clientName} existent pour ${userVisibleOffering}${city ? ` ${cityTextWithPreposition}` : ''} ?`;
     const dualChoicePrompt = declaredCompetitor
@@ -108,221 +140,226 @@ function buildPromptBlueprints({ clientName, categoryLabel, city, locale, servic
         : shortlistCompetitorsPrompt;
 
     const softwareLabel = isSaas
-        ? (canonicalCategory === 'ai_visibility_software'
+        ? canonicalCategory === 'ai_visibility_software'
             ? 'visibilite dans les reponses IA pour commerces locaux'
-            : (anchor || humanizeSlug(canonicalCategory) || 'logiciel metier'))
+            : anchor || humanizeSlug(canonicalCategory) || 'logiciel metier'
         : '';
 
     // Shared metadata shape for all blueprints
-    const shared = { locale, offer_anchor: offerAnchor, offer_label_normalized: normalizedOfferLabel, user_visible_offering: userVisibleOffering };
+    const shared = {
+        locale,
+        offer_anchor: offerAnchor,
+        offer_label_normalized: normalizedOfferLabel,
+        user_visible_offering: userVisibleOffering,
+    };
 
     // --- Blind discovery prompts (NO client name, NO competitor names) ---
     // These measure spontaneous visibility: the generation prompt is target-blind.
     // visibility_eligible: true — these are the only runs that can count toward spontaneous visibility KPIs.
     const blindDiscoveryPrompts = isSaas
         ? [
-            {
-                id: 'blind-market-discovery',
-                query_text: `Quel est le meilleur outil de ${userVisibleOffering} pour un commerce local ?`,
-                intent_family: 'discovery',
-                category: 'discovery',
-                prompt_mode: 'user_like',
-                discovery_mode: 'blind_discovery',
-                visibility_eligible: true,
-                rationale: 'Question marche spontanee sans nom de marque, mesure la visibilite reelle.',
-                ...shared,
-            },
-            {
-                id: 'blind-service-discovery',
-                query_text: `Comment ameliorer sa visibilite dans les reponses IA quand on est un commerce local ?`,
-                intent_family: 'discovery',
-                category: 'service_intent',
-                prompt_mode: 'user_like',
-                discovery_mode: 'blind_discovery',
-                visibility_eligible: true,
-                rationale: 'Question service generique, teste si la marque emerge spontanement.',
-                ...shared,
-            },
-        ]
+              {
+                  id: 'blind-market-discovery',
+                  query_text: `Quel est le meilleur outil de ${userVisibleOffering} pour un commerce local ?`,
+                  intent_family: 'discovery',
+                  category: 'discovery',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'blind_discovery',
+                  visibility_eligible: true,
+                  rationale: 'Question marche spontanee sans nom de marque, mesure la visibilite reelle.',
+                  ...shared,
+              },
+              {
+                  id: 'blind-service-discovery',
+                  query_text: `Comment ameliorer sa visibilite dans les reponses IA quand on est un commerce local ?`,
+                  intent_family: 'discovery',
+                  category: 'service_intent',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'blind_discovery',
+                  visibility_eligible: true,
+                  rationale: 'Question service generique, teste si la marque emerge spontanement.',
+                  ...shared,
+              },
+          ]
         : [
-            {
-                id: 'blind-local-discovery',
-                query_text: city
-                    ? `Quel est le meilleur ${offerAnchor || categoryLabel} ${cityTextWithPreposition} ?`
-                    : `Comment trouver un bon ${offerAnchor || categoryLabel} pres de chez moi ?`,
-                intent_family: 'local_recommendation',
-                category: city ? 'local_intent' : 'service_intent',
-                prompt_mode: 'user_like',
-                discovery_mode: 'blind_discovery',
-                visibility_eligible: true,
-                rationale: 'Recommandation locale spontanee sans marque, mesure la visibilite reelle.',
-                ...shared,
-            },
-            {
-                id: 'blind-service-discovery',
-                query_text: `Quels criteres pour choisir un bon ${offerAnchor || categoryLabel}${city ? ` ${cityTextWithPreposition}` : ''} ?`,
-                intent_family: 'discovery',
-                category: 'service_intent',
-                prompt_mode: 'user_like',
-                discovery_mode: 'blind_discovery',
-                visibility_eligible: true,
-                rationale: 'Question service generique sans marque, teste si la cible emerge spontanement.',
-                ...shared,
-            },
-        ];
+              {
+                  id: 'blind-local-discovery',
+                  query_text: city
+                      ? `Quel est le meilleur ${offerAnchor || categoryLabel} ${cityTextWithPreposition} ?`
+                      : `Comment trouver un bon ${offerAnchor || categoryLabel} pres de chez moi ?`,
+                  intent_family: 'local_recommendation',
+                  category: city ? 'local_intent' : 'service_intent',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'blind_discovery',
+                  visibility_eligible: true,
+                  rationale: 'Recommandation locale spontanee sans marque, mesure la visibilite reelle.',
+                  ...shared,
+              },
+              {
+                  id: 'blind-service-discovery',
+                  query_text: `Quels criteres pour choisir un bon ${offerAnchor || categoryLabel}${city ? ` ${cityTextWithPreposition}` : ''} ?`,
+                  intent_family: 'discovery',
+                  category: 'service_intent',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'blind_discovery',
+                  visibility_eligible: true,
+                  rationale: 'Question service generique sans marque, teste si la cible emerge spontanement.',
+                  ...shared,
+              },
+          ];
 
     // --- Brand-aware prompts (existing, with client name) ---
     // visibility_eligible: false — these are intentionally biased and must not inflate spontaneous visibility.
     const brandAwarePrompts = isSaas
         ? [
-            {
-                id: 'brand-visibility',
-                query_text: `Pour quels types d'entreprises ${clientName} est-il pertinent ?`,
-                intent_family: 'brand',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'neutral_brand_check',
-                visibility_eligible: false,
-                rationale: 'Question utilisateur naturelle orientee positionnement.',
-                ...shared,
-            },
-            {
-                id: 'brand-use-cases',
-                query_text: `Dans quels cas d'usage une entreprise locale choisirait ${clientName} ?`,
-                intent_family: 'brand',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'neutral_brand_check',
-                visibility_eligible: false,
-                rationale: 'Clarifie la promesse en situation reelle.',
-                ...shared,
-            },
-            {
-                id: 'competitor-alternatives',
-                query_text: `Quelles alternatives a ${clientName} sont citees pour ${softwareLabel} et pourquoi ?`,
-                intent_family: 'competitor',
-                category: 'competitor_comparison',
-                prompt_mode: 'user_like',
-                discovery_mode: 'competitor_discovery',
-                visibility_eligible: false,
-                rationale: 'Detection d alternatives directes cote marche.',
-                ...shared,
-            },
-            {
-                id: 'competitor-probe',
-                query_text: declaredCompetitor
-                    ? `${clientName} vs ${declaredCompetitor} : compare 3 criteres et justifie chaque ecart.`
-                    : `Liste 3 options concurrentes a ${clientName}, avec un critere de differentiation par option.`,
-                intent_family: 'competitor',
-                category: 'competitor_comparison',
-                prompt_mode: 'operator_probe',
-                discovery_mode: 'competitor_discovery',
-                visibility_eligible: false,
-                rationale: 'Probe operateur pour shortlist et justification.',
-                ...shared,
-            },
-            {
-                id: 'pricing',
-                query_text: `Que comprend une offre de ${softwareLabel}, et quels frais caches ou delais verifier ?`,
-                intent_family: 'pricing',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'neutral_brand_check',
-                visibility_eligible: false,
-                rationale: 'Demande prix/inclusions/delais en une seule intention claire.',
-                ...shared,
-            },
-            {
-                id: 'buyer-guidance',
-                query_text: `Quels criteres et quelles preuves demander avant de choisir ${clientName} ?`,
-                intent_family: 'buyer_guidance',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'skeptical_brand_evaluation',
-                visibility_eligible: false,
-                rationale: 'Guide d achat actionnable.',
-                ...shared,
-            },
-            {
-                id: 'implementation',
-                query_text: `Quels prerequis techniques et indicateurs suivre dans les 30 premiers jours avec ${clientName} ?`,
-                intent_family: 'implementation',
-                category: 'brand',
-                prompt_mode: 'operator_probe',
-                discovery_mode: 'controlled_context_answer',
-                visibility_eligible: false,
-                rationale: 'Qualification post-signature (etapes + KPI).',
-                ...shared,
-            },
-        ]
+              {
+                  id: 'brand-visibility',
+                  query_text: `Pour quels types d'entreprises ${clientName} est-il pertinent ?`,
+                  intent_family: 'brand',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'neutral_brand_check',
+                  visibility_eligible: false,
+                  rationale: 'Question utilisateur naturelle orientee positionnement.',
+                  ...shared,
+              },
+              {
+                  id: 'brand-use-cases',
+                  query_text: `Dans quels cas d'usage une entreprise locale choisirait ${clientName} ?`,
+                  intent_family: 'brand',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'neutral_brand_check',
+                  visibility_eligible: false,
+                  rationale: 'Clarifie la promesse en situation reelle.',
+                  ...shared,
+              },
+              {
+                  id: 'competitor-alternatives',
+                  query_text: `Quelles alternatives a ${clientName} sont citees pour ${softwareLabel} et pourquoi ?`,
+                  intent_family: 'competitor',
+                  category: 'competitor_comparison',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'competitor_discovery',
+                  visibility_eligible: false,
+                  rationale: 'Detection d alternatives directes cote marche.',
+                  ...shared,
+              },
+              {
+                  id: 'competitor-probe',
+                  query_text: declaredCompetitor
+                      ? `${clientName} vs ${declaredCompetitor} : compare 3 criteres et justifie chaque ecart.`
+                      : `Liste 3 options concurrentes a ${clientName}, avec un critere de differentiation par option.`,
+                  intent_family: 'competitor',
+                  category: 'competitor_comparison',
+                  prompt_mode: 'operator_probe',
+                  discovery_mode: 'competitor_discovery',
+                  visibility_eligible: false,
+                  rationale: 'Probe operateur pour shortlist et justification.',
+                  ...shared,
+              },
+              {
+                  id: 'pricing',
+                  query_text: `Que comprend une offre de ${softwareLabel}, et quels frais caches ou delais verifier ?`,
+                  intent_family: 'pricing',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'neutral_brand_check',
+                  visibility_eligible: false,
+                  rationale: 'Demande prix/inclusions/delais en une seule intention claire.',
+                  ...shared,
+              },
+              {
+                  id: 'buyer-guidance',
+                  query_text: `Quels criteres et quelles preuves demander avant de choisir ${clientName} ?`,
+                  intent_family: 'buyer_guidance',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'skeptical_brand_evaluation',
+                  visibility_eligible: false,
+                  rationale: 'Guide d achat actionnable.',
+                  ...shared,
+              },
+              {
+                  id: 'implementation',
+                  query_text: `Quels prerequis techniques et indicateurs suivre dans les 30 premiers jours avec ${clientName} ?`,
+                  intent_family: 'implementation',
+                  category: 'brand',
+                  prompt_mode: 'operator_probe',
+                  discovery_mode: 'controlled_context_answer',
+                  visibility_eligible: false,
+                  rationale: 'Qualification post-signature (etapes + KPI).',
+                  ...shared,
+              },
+          ]
         : [
-            {
-                id: 'brand-visibility',
-                query_text: `Pour quels besoins ${clientName} est-il le plus pertinent ${city ? cityTextWithPreposition : ''} ?`,
-                intent_family: 'brand',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'neutral_brand_check',
-                visibility_eligible: false,
-                rationale: 'Positionnement marque orienté besoin.',
-                ...shared,
-            },
-            {
-                id: 'competitor-alternatives',
-                query_text: shortlistCompetitorsPrompt,
-                intent_family: 'competitor',
-                category: 'competitor_comparison',
-                prompt_mode: 'user_like',
-                discovery_mode: 'competitor_discovery',
-                visibility_eligible: false,
-                rationale: 'Expose alternatives reelles cote utilisateur.',
-                ...shared,
-            },
-            {
-                id: 'competitor-comparison',
-                query_text: dualChoicePrompt,
-                intent_family: 'competitor',
-                category: 'competitor_comparison',
-                prompt_mode: 'operator_probe',
-                discovery_mode: 'competitor_discovery',
-                visibility_eligible: false,
-                rationale: 'Probe comparatif structuré.',
-                ...shared,
-            },
-            {
-                id: 'pricing',
-                query_text: `Quels prix, inclusions et delais faut-il verifier pour ${userVisibleOffering} ${cityTextWithPreposition} ?`,
-                intent_family: 'pricing',
-                category: 'brand',
-                prompt_mode: 'user_like',
-                discovery_mode: 'neutral_brand_check',
-                visibility_eligible: false,
-                rationale: 'Pricing concret et non vague.',
-                ...shared,
-            },
-            {
-                id: 'objections',
-                query_text: `Quelles questions, risques et preuves verifier avant de choisir ${clientName} ?`,
-                intent_family: 'buyer_guidance',
-                category: 'brand',
-                prompt_mode: 'operator_probe',
-                discovery_mode: 'skeptical_brand_evaluation',
-                visibility_eligible: false,
-                rationale: 'Buyer guidance exploitable.',
-                ...shared,
-            },
-            {
-                id: 'implementation',
-                query_text: `Quelles etapes, prerequis et indicateurs suivre apres signature pour ${userVisibleOffering} ?`,
-                intent_family: 'implementation',
-                category: 'brand',
-                prompt_mode: 'operator_probe',
-                discovery_mode: 'controlled_context_answer',
-                visibility_eligible: false,
-                rationale: 'Cadre implementation court et structuré.',
-                ...shared,
-            },
-        ];
+              {
+                  id: 'brand-visibility',
+                  query_text: `Pour quels besoins ${clientName} est-il le plus pertinent ${city ? cityTextWithPreposition : ''} ?`,
+                  intent_family: 'brand',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'neutral_brand_check',
+                  visibility_eligible: false,
+                  rationale: 'Positionnement marque orienté besoin.',
+                  ...shared,
+              },
+              {
+                  id: 'competitor-alternatives',
+                  query_text: shortlistCompetitorsPrompt,
+                  intent_family: 'competitor',
+                  category: 'competitor_comparison',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'competitor_discovery',
+                  visibility_eligible: false,
+                  rationale: 'Expose alternatives reelles cote utilisateur.',
+                  ...shared,
+              },
+              {
+                  id: 'competitor-comparison',
+                  query_text: dualChoicePrompt,
+                  intent_family: 'competitor',
+                  category: 'competitor_comparison',
+                  prompt_mode: 'operator_probe',
+                  discovery_mode: 'competitor_discovery',
+                  visibility_eligible: false,
+                  rationale: 'Probe comparatif structuré.',
+                  ...shared,
+              },
+              {
+                  id: 'pricing',
+                  query_text: `Quels prix, inclusions et delais faut-il verifier pour ${userVisibleOffering} ${cityTextWithPreposition} ?`,
+                  intent_family: 'pricing',
+                  category: 'brand',
+                  prompt_mode: 'user_like',
+                  discovery_mode: 'neutral_brand_check',
+                  visibility_eligible: false,
+                  rationale: 'Pricing concret et non vague.',
+                  ...shared,
+              },
+              {
+                  id: 'objections',
+                  query_text: `Quelles questions, risques et preuves verifier avant de choisir ${clientName} ?`,
+                  intent_family: 'buyer_guidance',
+                  category: 'brand',
+                  prompt_mode: 'operator_probe',
+                  discovery_mode: 'skeptical_brand_evaluation',
+                  visibility_eligible: false,
+                  rationale: 'Buyer guidance exploitable.',
+                  ...shared,
+              },
+              {
+                  id: 'implementation',
+                  query_text: `Quelles etapes, prerequis et indicateurs suivre apres signature pour ${userVisibleOffering} ?`,
+                  intent_family: 'implementation',
+                  category: 'brand',
+                  prompt_mode: 'operator_probe',
+                  discovery_mode: 'controlled_context_answer',
+                  visibility_eligible: false,
+                  rationale: 'Cadre implementation court et structuré.',
+                  ...shared,
+              },
+          ];
 
     // Blind discovery first, then brand-aware — discovery prompts are the primary visibility metric
     return [...blindDiscoveryPrompts, ...brandAwarePrompts];
@@ -331,8 +368,12 @@ function buildPromptBlueprints({ clientName, categoryLabel, city, locale, servic
 export function buildStarterPromptPack({ client, siteType, siteClassification, locale, existingPrompts }) {
     const existing = new Set(
         (existingPrompts || [])
-            .map((prompt) => String(prompt?.query_text || '').trim().toLowerCase())
-            .filter(Boolean)
+            .map((prompt) =>
+                String(prompt?.query_text || '')
+                    .trim()
+                    .toLowerCase(),
+            )
+            .filter(Boolean),
     );
 
     const clientName = String(client?.client_name || '').trim() || 'votre marque';
@@ -347,7 +388,9 @@ export function buildStarterPromptPack({ client, siteType, siteClassification, l
         siteClassification,
         servicesPreview: Array.isArray(client?.business_details?.services) ? client.business_details.services : [],
         shortDescription: getBusinessShortDescription(client?.business_details || {}).slice(0, 400),
-        seoTeaser: String(client?.seo_description || '').trim().slice(0, 220),
+        seoTeaser: String(client?.seo_description || '')
+            .trim()
+            .slice(0, 220),
         address: client?.address || {},
         targetRegion: String(client?.target_region || '').trim(),
     });
@@ -360,7 +403,7 @@ export function buildStarterPromptPack({ client, siteType, siteClassification, l
         locale: locale || 'fr-CA',
         services,
         knownCompetitors,
-        resolvedBusiness
+        resolvedBusiness,
     });
 
     const prompts = blueprints
@@ -395,12 +438,19 @@ export function buildStarterPromptPack({ client, siteType, siteClassification, l
                 offer_label_normalized: item.offer_label_normalized || null,
                 user_visible_offering: item.user_visible_offering || null,
                 evidence: 'inferred',
-                confidence: metadata.quality_status === 'strong' ? 'high' : metadata.quality_status === 'review' ? 'medium' : 'low',
+                confidence:
+                    metadata.quality_status === 'strong'
+                        ? 'high'
+                        : metadata.quality_status === 'review'
+                          ? 'medium'
+                          : 'low',
                 activation_blocked: shouldSoftBlockPromptActivation(metadata),
                 validation: {
                     status: metadata.validation_status || metadata.quality_status,
                     is_valid: metadata.quality_status !== 'weak',
-                    reasons: Array.isArray(metadata.validation_reasons) ? metadata.validation_reasons : metadata.quality_reasons,
+                    reasons: Array.isArray(metadata.validation_reasons)
+                        ? metadata.validation_reasons
+                        : metadata.quality_reasons,
                 },
                 is_selected_default: metadata.quality_status === 'strong',
             };
@@ -410,9 +460,10 @@ export function buildStarterPromptPack({ client, siteType, siteClassification, l
     const weakCount = prompts.filter((item) => item.quality_status === 'weak').length;
     return {
         title: prompts.length > 0 ? 'Pack de prompts suggeres' : 'Pack de demarrage deja couvert',
-        description: prompts.length > 0
-            ? 'Suggestions inferees depuis le contexte client. Les prompts faibles sont marques pour revue operateur.'
-            : 'Les prompts suivis existants couvrent deja le pack de demarrage recommande.',
+        description:
+            prompts.length > 0
+                ? 'Suggestions inferees depuis le contexte client. Les prompts faibles sont marques pour revue operateur.'
+                : 'Les prompts suivis existants couvrent deja le pack de demarrage recommande.',
         prompts,
         weakPromptCount: weakCount,
         supportedIntentFamilies: getPromptIntentFamilies(),
@@ -469,9 +520,9 @@ export async function getPromptSlice(clientId) {
         const mentions = await loadIndependentSources({
             mentions: async () => {
                 const { data, error } = await supabase
-            .from('query_mentions')
-            .select('query_run_id, entity_type, is_target')
-            .in('query_run_id', latestRunIds);
+                    .from('query_mentions')
+                    .select('query_run_id, entity_type, is_target')
+                    .in('query_run_id', latestRunIds);
                 if (error) throw error;
                 return data;
             },
@@ -521,8 +572,8 @@ export async function getPromptSlice(clientId) {
                 dataSources.mentions === 'unavailable'
                     ? null
                     : lastRun
-                ? (mentionCountsByRunId.get(lastRun.id) || emptyMentionCounts())
-                : emptyMentionCounts();
+                      ? mentionCountsByRunId.get(lastRun.id) || emptyMentionCounts()
+                      : emptyMentionCounts();
             const responseText = String(lastRun?.response_text || '').trim();
 
             // Resolve discovery mode: explicit stored > inferred from metadata
@@ -533,11 +584,11 @@ export async function getPromptSlice(clientId) {
                 : clientUnavailable
                   ? null
                   : inferDiscoveryMode({
-                    category: categoryMeta.key,
-                    intentFamily: query.intent_family,
-                    queryText: query.query_text,
-                    clientName: client?.client_name || '',
-                });
+                        category: categoryMeta.key,
+                        intentFamily: query.intent_family,
+                        queryText: query.query_text,
+                        clientName: client?.client_name || '',
+                    });
             const storedVisibilityEligible = query.visibility_eligible ?? query.prompt_metadata?.visibility_eligible;
             const promptVisibilityEligible = resolvedDiscoveryMode
                 ? isVisibilityEligible(resolvedDiscoveryMode)
@@ -553,23 +604,25 @@ export async function getPromptSlice(clientId) {
                       validation_status: null,
                   }
                 : buildPromptMetadata({
-                queryText: query.query_text,
-                clientName: client?.client_name || '',
-                city,
-                region,
-                locale: query.locale || 'fr-CA',
-                category: client?.business_type || '',
-                services,
-                knownCompetitors,
-                promptOrigin: query.prompt_origin || 'manual_operator',
-                intentFamily: query.intent_family || null,
-                promptMode: query.prompt_mode || query.prompt_metadata?.prompt_mode || 'user_like',
-                offerAnchor: query.offer_anchor || query.prompt_metadata?.offer_anchor || '',
-                userVisibleOffering: query.user_visible_offering || query.prompt_metadata?.user_visible_offering || '',
-                targetAudience: query.target_audience || query.prompt_metadata?.target_audience || '',
-                primaryUseCase: query.primary_use_case || query.prompt_metadata?.primary_use_case || '',
-                differentiationAngle: query.differentiation_angle || query.prompt_metadata?.differentiation_angle || '',
-            });
+                      queryText: query.query_text,
+                      clientName: client?.client_name || '',
+                      city,
+                      region,
+                      locale: query.locale || 'fr-CA',
+                      category: client?.business_type || '',
+                      services,
+                      knownCompetitors,
+                      promptOrigin: query.prompt_origin || 'manual_operator',
+                      intentFamily: query.intent_family || null,
+                      promptMode: query.prompt_mode || query.prompt_metadata?.prompt_mode || 'user_like',
+                      offerAnchor: query.offer_anchor || query.prompt_metadata?.offer_anchor || '',
+                      userVisibleOffering:
+                          query.user_visible_offering || query.prompt_metadata?.user_visible_offering || '',
+                      targetAudience: query.target_audience || query.prompt_metadata?.target_audience || '',
+                      primaryUseCase: query.primary_use_case || query.prompt_metadata?.primary_use_case || '',
+                      differentiationAngle:
+                          query.differentiation_angle || query.prompt_metadata?.differentiation_angle || '',
+                  });
 
             const contract = deserializePromptContractFromRow({
                 row: query,
@@ -629,16 +682,32 @@ export async function getPromptSlice(clientId) {
                           target_position: lastRun.target_position ?? lastRun.parsed_response?.target_position ?? null,
                           total_mentioned: Number(lastRun.total_mentioned || 0),
                           run_signal_tier: lastRun.parsed_response?.run_signal_tier || null,
-                          discovery_mode: lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode,
-                          answer_generation_mode: lastRun.parsed_response?.answer_generation_mode || lastRun.prompt_payload?.answer_generation_mode || null,
-                          context_injected: lastRun.parsed_response?.context_injected === true || lastRun.prompt_payload?.context_injected === true,
-                          source_grounded: lastRun.parsed_response?.source_grounded === true || lastRun.prompt_payload?.source_grounded === true,
+                          discovery_mode:
+                              lastRun.discovery_mode ||
+                              lastRun.parsed_response?.discovery_mode ||
+                              resolvedDiscoveryMode,
+                          answer_generation_mode:
+                              lastRun.parsed_response?.answer_generation_mode ||
+                              lastRun.prompt_payload?.answer_generation_mode ||
+                              null,
+                          context_injected:
+                              lastRun.parsed_response?.context_injected === true ||
+                              lastRun.prompt_payload?.context_injected === true,
+                          source_grounded:
+                              lastRun.parsed_response?.source_grounded === true ||
+                              lastRun.prompt_payload?.source_grounded === true,
                           bias_risk: lastRun.parsed_response?.bias_risk || lastRun.prompt_payload?.bias_risk || null,
-                          evidence_level: lastRun.parsed_response?.evidence_level || lastRun.prompt_payload?.evidence_level || null,
-                          prompt_version: lastRun.parsed_response?.prompt_version || lastRun.prompt_payload?.prompt_version || null,
+                          evidence_level:
+                              lastRun.parsed_response?.evidence_level || lastRun.prompt_payload?.evidence_level || null,
+                          prompt_version:
+                              lastRun.parsed_response?.prompt_version || lastRun.prompt_payload?.prompt_version || null,
                           visibility_eligible:
                               lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode
-                                  ? isVisibilityEligible(lastRun.discovery_mode || lastRun.parsed_response?.discovery_mode || resolvedDiscoveryMode)
+                                  ? isVisibilityEligible(
+                                        lastRun.discovery_mode ||
+                                            lastRun.parsed_response?.discovery_mode ||
+                                            resolvedDiscoveryMode,
+                                    )
                                   : null,
                           measurement_outcome: lastRun.parsed_response?.measurement_outcome || null,
                           mention_counts: mentionCounts,
@@ -660,7 +729,9 @@ export async function getPromptSlice(clientId) {
     const modesUnavailable = trackedUnavailable || prompts.some((prompt) => prompt.discovery_mode == null);
 
     const withTargetFound = prompts.filter((prompt) => prompt.last_run?.target_found === true).length;
-    const withRunNoTarget = prompts.filter((prompt) => prompt.last_run && prompt.last_run.target_found === false).length;
+    const withRunNoTarget = prompts.filter(
+        (prompt) => prompt.last_run && prompt.last_run.target_found === false,
+    ).length;
     const noRunYet = prompts.filter((prompt) => !prompt.last_run).length;
     const weakPromptCount = prompts.filter((prompt) => prompt.quality_status === 'weak').length;
     const total = prompts.length;
@@ -677,7 +748,9 @@ export async function getPromptSlice(clientId) {
         ...option,
         count: trackedUnavailable
             ? null
-            : prompts.filter((prompt) => normalizeTrackedQueryCategory(prompt.category, prompt.query_text) === option.key).length,
+            : prompts.filter(
+                  (prompt) => normalizeTrackedQueryCategory(prompt.category, prompt.query_text) === option.key,
+              ).length,
         active_count: trackedUnavailable
             ? null
             : prompts.filter((prompt) => prompt.category === option.key && prompt.is_active).length,
@@ -685,22 +758,27 @@ export async function getPromptSlice(clientId) {
 
     const siteType = dataSources.latestAudit === 'unavailable' ? null : inferSiteType(latestAudit);
     const siteTypeLabel = dataSources.latestAudit === 'unavailable' ? null : inferSiteTypeLabel(latestAudit);
-    const siteClassification = latestAudit?.geo_breakdown?.site_classification || latestAudit?.seo_breakdown?.site_classification || {};
+    const siteClassification =
+        latestAudit?.geo_breakdown?.site_classification || latestAudit?.seo_breakdown?.site_classification || {};
     const locale = 'fr-CA';
     const canonicalDetection = contextUnavailable
         ? null
         : buildCanonicalBusinessDetection({
-        clientName: client?.client_name || '',
-        rawBusinessType: String(client?.business_type || '').trim(),
-        siteClassification,
-        servicesPreview: Array.isArray(client?.business_details?.services) ? client.business_details.services : [],
-        shortDescription: getBusinessShortDescription(client?.business_details || {}).slice(0, 400),
-        seoTeaser: String(client?.seo_description || '').trim().slice(0, 220),
-        address: client?.address || {},
-        targetRegion: client?.target_region || '',
-        localSignals: latestAudit?.extracted_data?.local_signals || {},
-        pageSummaries: latestAudit?.extracted_data?.page_summaries || [],
-    });
+              clientName: client?.client_name || '',
+              rawBusinessType: String(client?.business_type || '').trim(),
+              siteClassification,
+              servicesPreview: Array.isArray(client?.business_details?.services)
+                  ? client.business_details.services
+                  : [],
+              shortDescription: getBusinessShortDescription(client?.business_details || {}).slice(0, 400),
+              seoTeaser: String(client?.seo_description || '')
+                  .trim()
+                  .slice(0, 220),
+              address: client?.address || {},
+              targetRegion: client?.target_region || '',
+              localSignals: latestAudit?.extracted_data?.local_signals || {},
+              pageSummaries: latestAudit?.extracted_data?.page_summaries || [],
+          });
     const starterPack =
         contextUnavailable || dataSources.trackedQueries === 'unavailable'
             ? {
@@ -712,18 +790,23 @@ export async function getPromptSlice(clientId) {
                   status: 'unavailable',
               }
             : buildStarterPromptPack({
-        client,
-        siteType,
-        siteClassification,
-        locale,
-        existingPrompts: prompts,
-    });
+                  client,
+                  siteType,
+                  siteClassification,
+                  locale,
+                  existingPrompts: prompts,
+              });
 
     // --- Mode-split visibility metrics ---
     // Uses measurement_outcome taxonomy as source of truth, NOT raw target_found.
     const blindPrompts = prompts.filter((p) => p.discovery_mode === 'blind_discovery');
     const assistedPrompts = prompts.filter((p) => p.discovery_mode && p.discovery_mode !== 'blind_discovery');
-    const contextInjectedPrompts = prompts.filter((p) => p.context_injected === true || p.discovery_mode === 'brand_aware' || p.discovery_mode === 'controlled_context_answer');
+    const contextInjectedPrompts = prompts.filter(
+        (p) =>
+            p.context_injected === true ||
+            p.discovery_mode === 'brand_aware' ||
+            p.discovery_mode === 'controlled_context_answer',
+    );
 
     const blindWithRun = blindPrompts.filter((p) => p.last_run);
     const assistedWithRun = assistedPrompts.filter((p) => p.last_run);
@@ -741,7 +824,9 @@ export async function getPromptSlice(clientId) {
     }, {});
 
     // Spontaneous visibility: only runs whose measurement_outcome counts_as_visibility
-    const spontaneousVisibilityCount = blindWithRun.filter((p) => countsAsVisibilityOutcome(p.last_run.measurement_outcome)).length;
+    const spontaneousVisibilityCount = blindWithRun.filter((p) =>
+        countsAsVisibilityOutcome(p.last_run.measurement_outcome),
+    ).length;
     const spontaneousTotal = blindWithRun.length;
     // Assisted: raw target_found (honestly labeled — not a spontaneous metric)
     const assistedTargetFound = assistedWithRun.filter((p) => p.last_run.target_found === true).length;
@@ -815,8 +900,9 @@ export async function getPromptSlice(clientId) {
                       description: 'Les données des prompts suivis sont temporairement indisponibles.',
                   }
                 : {
-            title: 'Aucun prompt suivi pour le moment',
-            description: 'Ajoutez des prompts suivis pour alimenter les exécutions, citations et signaux concurrents.',
-        },
+                      title: 'Aucun prompt suivi pour le moment',
+                      description:
+                          'Ajoutez des prompts suivis pour alimenter les exécutions, citations et signaux concurrents.',
+                  },
     };
 }

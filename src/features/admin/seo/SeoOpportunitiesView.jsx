@@ -32,9 +32,9 @@ const PRIORITY_TONE_CLASSES = {
 };
 
 const ACTION_TONE_CLASSES = {
-    'Fusionner': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    'Repositionner': 'border-sky-400/20 bg-sky-400/10 text-sky-100',
-    'Différencier': 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+    Fusionner: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
+    Repositionner: 'border-sky-400/20 bg-sky-400/10 text-sky-100',
+    Différencier: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
     'Conserver séparé': 'border-white/10 bg-white/[0.05] text-white/70',
 };
 
@@ -48,7 +48,9 @@ function formatSiteTypeLabel(label) {
 
 function PriorityBadge({ tone, label }) {
     return (
-        <span className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${PRIORITY_TONE_CLASSES[tone] || PRIORITY_TONE_CLASSES.default}`}>
+        <span
+            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${PRIORITY_TONE_CLASSES[tone] || PRIORITY_TONE_CLASSES.default}`}
+        >
             {label}
         </span>
     );
@@ -58,7 +60,9 @@ function ActionBadge({ label }) {
     if (!label) return null;
 
     return (
-        <span className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${ACTION_TONE_CLASSES[label] || ACTION_TONE_CLASSES['Conserver séparé']}`}>
+        <span
+            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${ACTION_TONE_CLASSES[label] || ACTION_TONE_CLASSES['Conserver séparé']}`}
+        >
             {label}
         </span>
     );
@@ -116,18 +120,19 @@ function ReliabilityLayerCard({ item }) {
 }
 
 function OpportunityCard({ item, clientId }) {
-    const problemRef = clientId && item?.id
-        ? {
-            source: 'seo_opportunity',
-            clientId,
-            opportunityId: String(item.id),
-            issueId: item.issueId || null,
-            pageUrl: item.pages?.[0]?.url || null,
-            category: item.category || null,
-            label: item.title,
-            taskType: 'seo_improvement',
-        }
-        : null;
+    const problemRef =
+        clientId && item?.id
+            ? {
+                  source: 'seo_opportunity',
+                  clientId,
+                  opportunityId: String(item.id),
+                  issueId: item.issueId || null,
+                  pageUrl: item.pages?.[0]?.url || null,
+                  category: item.category || null,
+                  label: item.title,
+                  taskType: 'seo_improvement',
+              }
+            : null;
 
     return (
         <div className="rounded-[26px] border border-white/[0.08] bg-black/22 p-4 sm:p-5">
@@ -137,7 +142,13 @@ function OpportunityCard({ item, clientId }) {
                 <PriorityBadge tone={item.priorityTone} label={item.priorityLabel} />
                 <ActionBadge label={item.actionLabel} />
                 {problemRef ? (
-                    <IssueQuickAction problemRef={problemRef} label="Prompt IA" size="xs" variant="primary" className="ml-auto" />
+                    <IssueQuickAction
+                        problemRef={problemRef}
+                        label="Prompt IA"
+                        size="xs"
+                        variant="primary"
+                        className="ml-auto"
+                    />
                 ) : null}
             </div>
 
@@ -158,7 +169,9 @@ function OpportunityCard({ item, clientId }) {
                 </div>
 
                 <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/35">Impact attendu</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/35">
+                        Impact attendu
+                    </div>
                     <div className="mt-2 text-[12px] leading-relaxed text-white/78">{item.impact}</div>
                 </div>
             </div>
@@ -174,9 +187,14 @@ function OpportunityCard({ item, clientId }) {
             {item.pages?.length ? (
                 <div className="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                     {item.pages.map((page, index) => (
-                        <div key={`${item.id}_page_${index}`} className="rounded-2xl border border-white/[0.08] bg-black/18 p-3">
+                        <div
+                            key={`${item.id}_page_${index}`}
+                            className="rounded-2xl border border-white/[0.08] bg-black/18 p-3"
+                        >
                             <div className="flex flex-wrap items-center gap-2">
-                                <div className="text-[12px] font-semibold text-white/88">{page.role || 'Page concernée'}</div>
+                                <div className="text-[12px] font-semibold text-white/88">
+                                    {page.role || 'Page concernée'}
+                                </div>
                             </div>
                             {page.url ? (
                                 <a
@@ -240,7 +258,11 @@ function HookCard({ item }) {
         </div>
     );
 
-    return <Link href={item.href} className="block text-white">{body}</Link>;
+    return (
+        <Link href={item.href} className="block text-white">
+            {body}
+        </Link>
+    );
 }
 
 export default function SeoOpportunitiesView() {
@@ -250,7 +272,12 @@ export default function SeoOpportunitiesView() {
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
 
     if (loading) {
-        return <SeoLoadingState title="Chargement des opportunités SEO…" description="Assemblage des actions rapides Search Console, des retravails audités et des relais SEO réellement fondés." />;
+        return (
+            <SeoLoadingState
+                title="Chargement des opportunités SEO…"
+                description="Assemblage des actions rapides Search Console, des retravails audités et des relais SEO réellement fondés."
+            />
+        );
     }
 
     if (error) {
@@ -273,13 +300,19 @@ export default function SeoOpportunitiesView() {
                     eyebrow="SEO Ops"
                     title="Opportunités SEO"
                     subtitle={`File opérateur SEO pour ${client?.client_name || 'ce mandat'}, basée uniquement sur les signaux réellement stockés.`}
-                    actions={(
+                    actions={
                         <>
-                            <SeoActionLink href={`${baseHref}/seo/visibility`} variant="secondary">Visibilité SEO</SeoActionLink>
-                            <SeoActionLink href={`${baseHref}/seo/health`} variant="secondary">Santé SEO</SeoActionLink>
-                            <SeoActionLink href={`${baseHref}/dossier/connectors`} variant="primary">Connecteurs</SeoActionLink>
+                            <SeoActionLink href={`${baseHref}/seo/visibility`} variant="secondary">
+                                Visibilité SEO
+                            </SeoActionLink>
+                            <SeoActionLink href={`${baseHref}/seo/health`} variant="secondary">
+                                Santé SEO
+                            </SeoActionLink>
+                            <SeoActionLink href={`${baseHref}/dossier/connectors`} variant="primary">
+                                Connecteurs
+                            </SeoActionLink>
                         </>
-                    )}
+                    }
                 />
                 <SeoEmptyState title={data.emptyState.title} description={data.emptyState.description} />
             </SeoPageShell>
@@ -288,18 +321,24 @@ export default function SeoOpportunitiesView() {
 
     return (
         <SeoPageShell>
-                <SourceStatusNotice status={data?.status} errors={data?.errors} />
+            <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <SeoPageHeader
                 eyebrow="SEO Ops"
                 title="Opportunités SEO"
                 subtitle={`Backlog opérateur pour ${client?.client_name || 'ce mandat'}: actions rapides, pages 4–20, reprises metadata, retravails éditoriaux et arbitrages de consolidation, sans glisser vers une lecture GEO.`}
-                actions={(
+                actions={
                     <>
-                        <SeoActionLink href={`${baseHref}/seo/visibility`} variant="secondary">Visibilité SEO</SeoActionLink>
-                        <SeoActionLink href={`${baseHref}/seo/content`} variant="secondary">Contenu SEO</SeoActionLink>
-                        <SeoActionLink href={`${baseHref}/seo/health`} variant="primary">Santé SEO</SeoActionLink>
+                        <SeoActionLink href={`${baseHref}/seo/visibility`} variant="secondary">
+                            Visibilité SEO
+                        </SeoActionLink>
+                        <SeoActionLink href={`${baseHref}/seo/content`} variant="secondary">
+                            Contenu SEO
+                        </SeoActionLink>
+                        <SeoActionLink href={`${baseHref}/seo/health`} variant="primary">
+                            Santé SEO
+                        </SeoActionLink>
                     </>
-                )}
+                }
             />
 
             <SeoSectionNav
@@ -335,7 +374,13 @@ export default function SeoOpportunitiesView() {
                 ))}
             </div>
 
-            <SeoPanel id="overview" title="Vue d’ensemble backlog" subtitle="Résumé opérateur, fraîcheur des signaux et rappel explicite du cadre de vérité appliqué à cette file SEO." reliability="calculated" tone="info">
+            <SeoPanel
+                id="overview"
+                title="Vue d’ensemble backlog"
+                subtitle="Résumé opérateur, fraîcheur des signaux et rappel explicite du cadre de vérité appliqué à cette file SEO."
+                reliability="calculated"
+                tone="info"
+            >
                 <div className="grid gap-4 lg:grid-cols-2">
                     <div className="space-y-4">
                         <div className="rounded-[24px] border border-white/[0.08] bg-black/20 p-4 sm:p-5">
@@ -343,22 +388,32 @@ export default function SeoOpportunitiesView() {
                                 <div className="text-sm font-semibold text-white/92">Résumé opérateur</div>
                                 <ReliabilityPill value={data.operatorSummary.reliability} />
                             </div>
-                            <p className="mt-3 text-[14px] leading-relaxed text-white/72">{data.operatorSummary.text}</p>
-                            <div className="mt-3 text-[12px] leading-relaxed text-white/44">{data.operatorSummary.note}</div>
+                            <p className="mt-3 text-[14px] leading-relaxed text-white/72">
+                                {data.operatorSummary.text}
+                            </p>
+                            <div className="mt-3 text-[12px] leading-relaxed text-white/44">
+                                {data.operatorSummary.note}
+                            </div>
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-3">
                             <FreshnessCard item={data.freshness.audit} />
-                            <FreshnessCard item={{
-                                ...data.freshness.gsc,
-                                value: data.freshness.gsc.lastObservedDate ? formatDateLabel(data.freshness.gsc.lastObservedDate) : 'Indisponible',
-                            }} />
+                            <FreshnessCard
+                                item={{
+                                    ...data.freshness.gsc,
+                                    value: data.freshness.gsc.lastObservedDate
+                                        ? formatDateLabel(data.freshness.gsc.lastObservedDate)
+                                        : 'Indisponible',
+                                }}
+                            />
                             <FreshnessCard item={data.freshness.backlog} />
                         </div>
                     </div>
 
                     <div className="space-y-3">
-                        <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/42">Cadre de vérité</div>
+                        <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/42">
+                            Cadre de vérité
+                        </div>
                         <div className="grid gap-3 sm:grid-cols-2">
                             {(data.reliabilityBreakdown || []).map((item) => (
                                 <ReliabilityLayerCard key={item.id} item={item} />
@@ -367,9 +422,13 @@ export default function SeoOpportunitiesView() {
 
                         {data.auditMeta?.sourceUrl || data.auditMeta?.siteTypeLabel ? (
                             <div className="rounded-[24px] border border-white/[0.08] bg-black/20 p-4 sm:p-5">
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/35">Référence active</div>
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/35">
+                                    Référence active
+                                </div>
                                 <div className="mt-3 text-[12px] leading-relaxed text-white/70">
-                                    {formatSiteTypeLabel(data.auditMeta?.siteTypeLabel) ? `${formatSiteTypeLabel(data.auditMeta?.siteTypeLabel)} · ` : ''}
+                                    {formatSiteTypeLabel(data.auditMeta?.siteTypeLabel)
+                                        ? `${formatSiteTypeLabel(data.auditMeta?.siteTypeLabel)} · `
+                                        : ''}
                                     {data.auditMeta?.sourceUrl || 'URL source indisponible'}
                                 </div>
                             </div>
@@ -378,39 +437,125 @@ export default function SeoOpportunitiesView() {
                 </div>
             </SeoPanel>
 
-            <SeoPanel id="quick-wins" title="Actions rapides SEO" subtitle="Sous-ensemble des actions les plus rapides à activer quand la visibilité ou l’audit donnent déjà une direction claire." reliability={data.quickWins.reliability} tone={getPanelToneFromStatus(data.quickWins.status)} action={<SeoStatusBadge status={data.quickWins.status} />}>
-                <SectionBlock section={data.quickWins} emptyTitle="Aucune action rapide dominante" clientId={clientId} />
+            <SeoPanel
+                id="quick-wins"
+                title="Actions rapides SEO"
+                subtitle="Sous-ensemble des actions les plus rapides à activer quand la visibilité ou l’audit donnent déjà une direction claire."
+                reliability={data.quickWins.reliability}
+                tone={getPanelToneFromStatus(data.quickWins.status)}
+                action={<SeoStatusBadge status={data.quickWins.status} />}
+            >
+                <SectionBlock
+                    section={data.quickWins}
+                    emptyTitle="Aucune action rapide dominante"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="click-gap" title="Écart de clic exploitable" subtitle="Pages déjà visibles où l’objectif prioritaire est d’abord de récupérer plus de clics avant de produire davantage." reliability={data.clickGap.reliability} tone={getPanelToneFromStatus(data.clickGap.status)} action={<SeoStatusBadge status={data.clickGap.status} />}>
+            <SeoPanel
+                id="click-gap"
+                title="Écart de clic exploitable"
+                subtitle="Pages déjà visibles où l’objectif prioritaire est d’abord de récupérer plus de clics avant de produire davantage."
+                reliability={data.clickGap.reliability}
+                tone={getPanelToneFromStatus(data.clickGap.status)}
+                action={<SeoStatusBadge status={data.clickGap.status} />}
+            >
                 <SectionBlock section={data.clickGap} emptyTitle="Aucun écart de clic dominant" clientId={clientId} />
             </SeoPanel>
 
-            <SeoPanel id="positions" title="Pages en positions 4 à 20" subtitle="Pages déjà présentes dans la zone de visibilité organique qui peuvent encore progresser avec un travail ciblé." reliability={data.positionBand.reliability} tone={getPanelToneFromStatus(data.positionBand.status)} action={<SeoStatusBadge status={data.positionBand.status} />}>
-                <SectionBlock section={data.positionBand} emptyTitle="Aucune page prioritaire en positions 4 à 20" clientId={clientId} />
+            <SeoPanel
+                id="positions"
+                title="Pages en positions 4 à 20"
+                subtitle="Pages déjà présentes dans la zone de visibilité organique qui peuvent encore progresser avec un travail ciblé."
+                reliability={data.positionBand.reliability}
+                tone={getPanelToneFromStatus(data.positionBand.status)}
+                action={<SeoStatusBadge status={data.positionBand.status} />}
+            >
+                <SectionBlock
+                    section={data.positionBand}
+                    emptyTitle="Aucune page prioritaire en positions 4 à 20"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="metadata" title="Opportunités metadata" subtitle="Titles, metas et H1 à reprendre d’abord sur les surfaces déjà critiques ou déjà visibles." reliability={data.metadata.reliability} tone={getPanelToneFromStatus(data.metadata.status)} action={<SeoStatusBadge status={data.metadata.status} />}>
-                <SectionBlock section={data.metadata} emptyTitle="Aucune reprise metadata prioritaire" clientId={clientId} />
+            <SeoPanel
+                id="metadata"
+                title="Opportunités metadata"
+                subtitle="Titles, metas et H1 à reprendre d’abord sur les surfaces déjà critiques ou déjà visibles."
+                reliability={data.metadata.reliability}
+                tone={getPanelToneFromStatus(data.metadata.status)}
+                action={<SeoStatusBadge status={data.metadata.status} />}
+            >
+                <SectionBlock
+                    section={data.metadata}
+                    emptyTitle="Aucune reprise metadata prioritaire"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="refresh" title="Retravail et actualisation" subtitle="Pages en recul ou trop faibles éditorialement pour soutenir la progression SEO actuelle." reliability={data.refresh.reliability} tone={getPanelToneFromStatus(data.refresh.status)} action={<SeoStatusBadge status={data.refresh.status} />}>
+            <SeoPanel
+                id="refresh"
+                title="Retravail et actualisation"
+                subtitle="Pages en recul ou trop faibles éditorialement pour soutenir la progression SEO actuelle."
+                reliability={data.refresh.reliability}
+                tone={getPanelToneFromStatus(data.refresh.status)}
+                action={<SeoStatusBadge status={data.refresh.status} />}
+            >
                 <SectionBlock section={data.refresh} emptyTitle="Aucun retravail prioritaire" clientId={clientId} />
             </SeoPanel>
 
-            <SeoPanel id="coverage" title="Couverture et nouvelles pages" subtitle="Manques structurels réellement visibles dans l’audit, sans inventer des pages non justifiées par les signaux actuels." reliability={data.coverage.reliability} tone={getPanelToneFromStatus(data.coverage.status)} action={<SeoStatusBadge status={data.coverage.status} />}>
-                <SectionBlock section={data.coverage} emptyTitle="Aucun manque de couverture dominant" clientId={clientId} />
+            <SeoPanel
+                id="coverage"
+                title="Couverture et nouvelles pages"
+                subtitle="Manques structurels réellement visibles dans l’audit, sans inventer des pages non justifiées par les signaux actuels."
+                reliability={data.coverage.reliability}
+                tone={getPanelToneFromStatus(data.coverage.status)}
+                action={<SeoStatusBadge status={data.coverage.status} />}
+            >
+                <SectionBlock
+                    section={data.coverage}
+                    emptyTitle="Aucun manque de couverture dominant"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="internal-linking" title="Maillage interne si fondé" subtitle="Pistes de structure seulement quand un hub et des pages support existent déjà. Aucun défaut de maillage n’est inventé sans graphe de liens." reliability={data.internalLinking.reliability} tone={getPanelToneFromStatus(data.internalLinking.status)} action={<SeoStatusBadge status={data.internalLinking.status} />}>
-                <SectionBlock section={data.internalLinking} emptyTitle="Maillage interne non qualifiable proprement" clientId={clientId} />
+            <SeoPanel
+                id="internal-linking"
+                title="Maillage interne si fondé"
+                subtitle="Pistes de structure seulement quand un hub et des pages support existent déjà. Aucun défaut de maillage n’est inventé sans graphe de liens."
+                reliability={data.internalLinking.reliability}
+                tone={getPanelToneFromStatus(data.internalLinking.status)}
+                action={<SeoStatusBadge status={data.internalLinking.status} />}
+            >
+                <SectionBlock
+                    section={data.internalLinking}
+                    emptyTitle="Maillage interne non qualifiable proprement"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="consolidation" title="Arbitrages de consolidation" subtitle="Fusions, repositionnements ou différenciations à instruire depuis la surface cannibalisation déjà en place." reliability={data.consolidation.reliability} tone={getPanelToneFromStatus(data.consolidation.status)} action={<SeoStatusBadge status={data.consolidation.status} />}>
-                <SectionBlock section={data.consolidation} emptyTitle="Aucun arbitrage de consolidation prioritaire" clientId={clientId} />
+            <SeoPanel
+                id="consolidation"
+                title="Arbitrages de consolidation"
+                subtitle="Fusions, repositionnements ou différenciations à instruire depuis la surface cannibalisation déjà en place."
+                reliability={data.consolidation.reliability}
+                tone={getPanelToneFromStatus(data.consolidation.status)}
+                action={<SeoStatusBadge status={data.consolidation.status} />}
+            >
+                <SectionBlock
+                    section={data.consolidation}
+                    emptyTitle="Aucun arbitrage de consolidation prioritaire"
+                    clientId={clientId}
+                />
             </SeoPanel>
 
-            <SeoPanel id="hooks" title="Relais opérateur" subtitle="Entrées utiles vers les surfaces SEO existantes pour exécuter, confirmer ou détailler les opportunités listées ici." reliability="calculated" tone="default">
+            <SeoPanel
+                id="hooks"
+                title="Relais opérateur"
+                subtitle="Entrées utiles vers les surfaces SEO existantes pour exécuter, confirmer ou détailler les opportunités listées ici."
+                reliability="calculated"
+                tone="default"
+            >
                 <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
                     {(data.actionHooks || []).map((item) => (
                         <HookCard key={item.id} item={item} />

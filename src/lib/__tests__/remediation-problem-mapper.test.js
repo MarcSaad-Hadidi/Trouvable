@@ -79,9 +79,27 @@ describe('problemsFromGeoRun()', () => {
 describe('problemsFromGeoRuns()', () => {
     it('creates target_never_found after consecutive misses', () => {
         const runs = [
-            { id: 'r1', tracked_query_id: 'tq-1', query_text: 'q1', target_found: false, created_at: '2026-03-25T10:00:00.000Z' },
-            { id: 'r2', tracked_query_id: 'tq-1', query_text: 'q1', target_found: false, created_at: '2026-03-24T10:00:00.000Z' },
-            { id: 'r3', tracked_query_id: 'tq-1', query_text: 'q1', target_found: false, created_at: '2026-03-23T10:00:00.000Z' },
+            {
+                id: 'r1',
+                tracked_query_id: 'tq-1',
+                query_text: 'q1',
+                target_found: false,
+                created_at: '2026-03-25T10:00:00.000Z',
+            },
+            {
+                id: 'r2',
+                tracked_query_id: 'tq-1',
+                query_text: 'q1',
+                target_found: false,
+                created_at: '2026-03-24T10:00:00.000Z',
+            },
+            {
+                id: 'r3',
+                tracked_query_id: 'tq-1',
+                query_text: 'q1',
+                target_found: false,
+                created_at: '2026-03-23T10:00:00.000Z',
+            },
         ];
 
         const problems = problemsFromGeoRuns(runs, 'client-1');
@@ -99,7 +117,13 @@ describe('problemsFromJobRun()', () => {
     });
 
     it('maps inactive prompt rerun jobs', () => {
-        const job = { id: 'job-2', job_type: 'prompt_rerun', is_active: false, status: 'cancelled', updated_at: '2026-03-25T10:00:00.000Z' };
+        const job = {
+            id: 'job-2',
+            job_type: 'prompt_rerun',
+            is_active: false,
+            status: 'cancelled',
+            updated_at: '2026-03-25T10:00:00.000Z',
+        };
 
         const problems = problemsFromJobRun(null, job, 'client-1');
         expect(problems.some((item) => item.type === 'job_prompt_rerun_inactive')).toBe(true);
@@ -109,9 +133,7 @@ describe('problemsFromJobRun()', () => {
 describe('problemsFromTrendSlice()', () => {
     it('maps visibility decline signals', () => {
         const trendSlice = {
-            actionCenter: [
-                { id: 'score_drop_geo_score', title: 'Score GEO en baisse', priority: 'high' },
-            ],
+            actionCenter: [{ id: 'score_drop_geo_score', title: 'Score GEO en baisse', priority: 'high' }],
         };
 
         const problems = problemsFromTrendSlice(trendSlice, 'client-1');

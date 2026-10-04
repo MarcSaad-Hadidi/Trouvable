@@ -101,19 +101,19 @@ export function buildLayeredAuditObject(params) {
 
     const layer1Summary = siteLevelRawScores
         ? {
-            overall: siteLevelRawScores.overall,
-            categories: siteLevelRawScores.categories,
-            totals: siteLevelRawScores.totals,
-            distinct_check_ids: siteLevelRawScores.distinct_check_ids,
-        }
+              overall: siteLevelRawScores.overall,
+              categories: siteLevelRawScores.categories,
+              totals: siteLevelRawScores.totals,
+              distinct_check_ids: siteLevelRawScores.distinct_check_ids,
+          }
         : null;
 
     const layer2Summary = layer2Expert
         ? {
-            summary_score: layer2Expert.summary_score,
-            module_scores: layer2Expert.module_scores,
-            finding_counts: summarizeFindings(layer2Expert.findings || []),
-        }
+              summary_score: layer2Expert.summary_score,
+              module_scores: layer2Expert.module_scores,
+              finding_counts: summarizeFindings(layer2Expert.findings || []),
+          }
         : null;
 
     const finalScore = {
@@ -158,12 +158,12 @@ export function buildLayeredAuditObject(params) {
         site_level_raw_scores: layer1Summary,
         site_level_expert: layer2Expert
             ? {
-                llms_txt_deep: layer2Expert.modules?.llms_txt_deep || null,
-                ai_discovery_endpoints: layer2Expert.modules?.ai_discovery_endpoints || null,
-                brand_entity: layer2Expert.modules?.brand_entity || null,
-                trust_stack: layer2Expert.modules?.trust_stack || null,
-                negative_signals: layer2Expert.modules?.negative_signals || null,
-            }
+                  llms_txt_deep: layer2Expert.modules?.llms_txt_deep || null,
+                  ai_discovery_endpoints: layer2Expert.modules?.ai_discovery_endpoints || null,
+                  brand_entity: layer2Expert.modules?.brand_entity || null,
+                  trust_stack: layer2Expert.modules?.trust_stack || null,
+                  negative_signals: layer2Expert.modules?.negative_signals || null,
+              }
             : null,
         normalized_evidence: {
             business_names: coerceArray(extracted.business_names),

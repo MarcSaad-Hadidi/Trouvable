@@ -12,34 +12,18 @@ describe('renderCorrectionPromptVariant', () => {
             mission: 'Corriger un probleme technique SEO reel.',
             contexte: 'Le probleme vient du dernier audit stocke dans Trouvable.',
             problemeDetecte: 'Le schema JSON-LD attendu est absent.',
-            preuveDisponible: [
-                'Aucune entite Schema.org persistente n a ete detectee sur la page auditee.',
-            ],
+            preuveDisponible: ['Aucune entite Schema.org persistente n a ete detectee sur la page auditee.'],
             impactAttendu: 'Ameliorer la lisibilite machine de la page et la coherence SEO technique.',
-            fichiersOuSurfacesAInspecter: [
-                'app/layout.jsx',
-                'features/public/shared/GeoSeoInjector.jsx',
-            ],
-            contraintesAbsolues: [
-                'Ne pas inventer de donnees.',
-                'Faire un fix minimal.',
-            ],
+            fichiersOuSurfacesAInspecter: ['app/layout.jsx', 'features/public/shared/GeoSeoInjector.jsx'],
+            contraintesAbsolues: ['Ne pas inventer de donnees.', 'Faire un fix minimal.'],
             ceQueLiaDoitFaire: [
                 'Inspecter les surfaces existantes avant de modifier le code.',
                 'Corriger seulement la generation de schema concernee.',
             ],
-            ceQueLiaNeDoitPasFaire: [
-                'Ne pas refondre le SEO global.',
-            ],
-            validationAttendue: [
-                'Verifier la presence du JSON-LD apres correction.',
-            ],
-            formatDuLivrableFinal: [
-                'Resume bref des changements.',
-            ],
-            donneesManquantes: [
-                'Le fichier exact n est pas confirme par la preuve actuelle.',
-            ],
+            ceQueLiaNeDoitPasFaire: ['Ne pas refondre le SEO global.'],
+            validationAttendue: ['Verifier la presence du JSON-LD apres correction.'],
+            formatDuLivrableFinal: ['Resume bref des changements.'],
+            donneesManquantes: ['Le fichier exact n est pas confirme par la preuve actuelle.'],
         });
 
         expect(text).toContain('Mission');
@@ -146,79 +130,70 @@ describe('finalizeCorrectionPromptPayload', () => {
             recommendedFix: 'Review robots.txt directives for GPTBot and ClaudeBot.',
             sourceUrl: 'https://pulsefolio.app/',
         },
-        inspectionTargets: [
-            'app/robots.txt/route.js',
-            'app/sitemap.js',
-            'URL observee: https://pulsefolio.app/',
-        ],
-        verifiedPaths: [
-            'app/robots.txt/route.js',
-            'app/sitemap.js',
-        ],
+        inspectionTargets: ['app/robots.txt/route.js', 'app/sitemap.js', 'URL observee: https://pulsefolio.app/'],
+        verifiedPaths: ['app/robots.txt/route.js', 'app/sitemap.js'],
         repoFacts: [
             'Chemin verifie present dans le repo: app/robots.txt/route.js.',
             'Aucun fichier public/robots.txt n a ete detecte dans le repo au moment de la generation.',
         ],
-        validationTargets: [
-            'Verifier la reponse generee sur /robots.txt apres correction.',
-            'Lancer npm run lint.',
-        ],
-        missingFields: [
-            'Fichier exact a modifier non confirme par les donnees detectees.',
-        ],
+        validationTargets: ['Verifier la reponse generee sur /robots.txt apres correction.', 'Lancer npm run lint.'],
+        missingFields: ['Fichier exact a modifier non confirme par les donnees detectees.'],
         constraints: {
             absolute: [
                 'Ne pas inventer de preuve, de fichier ou de donnees manquantes.',
                 'Inspect-first: comprendre les surfaces existantes avant de modifier le code.',
             ],
-            categoryInstruction: 'Verifier d abord les regles robots et les routes techniques qui conditionnent l acces des crawlers.',
+            categoryInstruction:
+                'Verifier d abord les regles robots et les routes techniques qui conditionnent l acces des crawlers.',
         },
     };
 
     it('rescues partial AI output with deterministic repo-backed sections', () => {
-        const payload = finalizeCorrectionPromptPayload({
-            standard: {
-                mission: 'Corriger le blocage des crawlers IA.',
-                contexte: 'Contexte.',
-                problemeDetecte: 'Probleme.',
-                preuveDisponible: {
-                    crawlersBloques: ['GPTBot', 'ClaudeBot'],
-                    sourceUrl: 'https://pulsefolio.app/',
+        const payload = finalizeCorrectionPromptPayload(
+            {
+                standard: {
+                    mission: 'Corriger le blocage des crawlers IA.',
+                    contexte: 'Contexte.',
+                    problemeDetecte: 'Probleme.',
+                    preuveDisponible: {
+                        crawlersBloques: ['GPTBot', 'ClaudeBot'],
+                        sourceUrl: 'https://pulsefolio.app/',
+                    },
+                    impactAttendu: 'Impact.',
+                    fichiersOuSurfacesAInspecter: ['public/robots.txt'],
+                    contraintesAbsolues: ['Fix minimal.'],
+                    ceQueLiaDoitFaire: ['Inspecter public/robots.txt avant toute modification.'],
+                    ceQueLiaNeDoitPasFaire: ['Ne pas refondre.'],
+                    validationAttendue: ['Tester via https://technicalseo.com/tools/robots-txt/.'],
+                    formatDuLivrableFinal: {
+                        type: 'rapport',
+                        sectionsObligatoires: ['fichiers_modifies'],
+                    },
+                    donneesManquantes: ['Le contenu exact du fichier n est pas fourni.'],
                 },
-                impactAttendu: 'Impact.',
-                fichiersOuSurfacesAInspecter: ['public/robots.txt'],
-                contraintesAbsolues: ['Fix minimal.'],
-                ceQueLiaDoitFaire: ['Inspecter public/robots.txt avant toute modification.'],
-                ceQueLiaNeDoitPasFaire: ['Ne pas refondre.'],
-                validationAttendue: ['Tester via https://technicalseo.com/tools/robots-txt/.'],
-                formatDuLivrableFinal: {
-                    type: 'rapport',
-                    sectionsObligatoires: ['fichiers_modifies'],
+                strict: {
+                    mission: 'Corriger strictement le blocage des crawlers IA.',
+                    contexte: 'Contexte strict.',
+                    problemeDetecte: 'Probleme strict.',
+                    preuveDisponible: 'Blocked: GPTBot, ClaudeBot.',
+                    impactAttendu: 'Impact strict.',
+                    fichiersOuSurfacesAInspecter: ['public/robots.txt'],
+                    contraintesAbsolues: ['Fix minimal.'],
+                    ceQueLiaDoitFaire: ['Inspecter public/robots.txt avant toute modification.'],
+                    ceQueLiaNeDoitPasFaire: ['Ne pas refondre.'],
+                    validationAttendue: ['Tester via https://technicalseo.com/tools/robots-txt/.'],
+                    formatDuLivrableFinal: {
+                        type: 'rapport',
+                    },
+                    donneesManquantes: [],
                 },
-                donneesManquantes: ['Le contenu exact du fichier n est pas fourni.'],
             },
-            strict: {
-                mission: 'Corriger strictement le blocage des crawlers IA.',
-                contexte: 'Contexte strict.',
-                problemeDetecte: 'Probleme strict.',
-                preuveDisponible: 'Blocked: GPTBot, ClaudeBot.',
-                impactAttendu: 'Impact strict.',
-                fichiersOuSurfacesAInspecter: ['public/robots.txt'],
-                contraintesAbsolues: ['Fix minimal.'],
-                ceQueLiaDoitFaire: ['Inspecter public/robots.txt avant toute modification.'],
-                ceQueLiaNeDoitPasFaire: ['Ne pas refondre.'],
-                validationAttendue: ['Tester via https://technicalseo.com/tools/robots-txt/.'],
-                formatDuLivrableFinal: {
-                    type: 'rapport',
-                },
-                donneesManquantes: [],
-            },
-        }, context);
+            context,
+        );
 
-        expect(payload.standard.fichiersOuSurfacesAInspecter).toEqual(expect.arrayContaining([
-            'app/robots.txt/route.js',
-            'app/sitemap.js',
-        ]));
+        expect(payload.standard.fichiersOuSurfacesAInspecter).toEqual(
+            expect.arrayContaining(['app/robots.txt/route.js', 'app/sitemap.js']),
+        );
         expect(payload.standard.fichiersOuSurfacesAInspecter).not.toContain('public/robots.txt');
         expect(payload.standard.ceQueLiaDoitFaire.some((item) => item.includes('public/robots.txt'))).toBe(false);
         expect(payload.standard.validationAttendue.some((item) => item.includes('/robots.txt'))).toBe(true);

@@ -9,34 +9,50 @@ import { LIFECYCLE_SERVICEABLE_STATES } from '@/lib/lifecycle';
 
 const clientProfileSchema = z.object({
     id: z.string().uuid().optional().nullable(),
-    client_name: z.string().min(2, "Le nom du client est requis (min 2 caractères)"),
-    client_slug: z.string().min(2, "Le slug est requis").regex(/^[a-z0-9-]+$/, "Le slug ne doit contenir que des minuscules, chiffres et tirets"),
-    website_url: z.union([
-        z.string().url("L'URL du site web est invalide"),
-        z.literal(''),
-        z.null(),
-        z.undefined()
-    ]).transform(e => (e === null || e === undefined) ? '' : e),
-    business_type: z.string().max(50, "Le type d'entreprise est trop long").optional().transform(e => e?.trim() || ''),
-    seo_title: z.string().max(70, "Le titre SEO est trop long (max 70)").optional().nullable(),
-    seo_description: z.string().max(200, "La description SEO est trop longue (max 200)").optional().nullable(),
+    client_name: z.string().min(2, 'Le nom du client est requis (min 2 caractères)'),
+    client_slug: z
+        .string()
+        .min(2, 'Le slug est requis')
+        .regex(/^[a-z0-9-]+$/, 'Le slug ne doit contenir que des minuscules, chiffres et tirets'),
+    website_url: z
+        .union([z.string().url("L'URL du site web est invalide"), z.literal(''), z.null(), z.undefined()])
+        .transform((e) => (e === null || e === undefined ? '' : e)),
+    business_type: z
+        .string()
+        .max(50, "Le type d'entreprise est trop long")
+        .optional()
+        .transform((e) => e?.trim() || ''),
+    seo_title: z.string().max(70, 'Le titre SEO est trop long (max 70)').optional().nullable(),
+    seo_description: z.string().max(200, 'La description SEO est trop longue (max 200)').optional().nullable(),
     is_published: z.boolean().default(false),
-    social_profiles: z.array(
-        z.string().url("URL de profil social invalide")
-    ).max(10, "Maximum 10 profils sociaux autorisés").default([]),
-    address: z.object({
-        street: z.string().max(100).optional().nullable(),
-        city: z.string().max(60).optional().nullable(),
-        region: z.string().max(60).optional().nullable(),
-        postalCode: z.string().max(20).optional().nullable(),
-        country: z.string().max(60).optional().nullable()
-    }).default({}),
-    geo_faqs: z.array(
-        z.object({
-            question: z.string().min(5, "Question FAQ trop courte (min 5 chars)").max(200, "Question FAQ trop longue"),
-            answer: z.string().min(10, "Réponse FAQ trop courte (min 10 chars)").max(1000, "Réponse FAQ trop longue")
+    social_profiles: z
+        .array(z.string().url('URL de profil social invalide'))
+        .max(10, 'Maximum 10 profils sociaux autorisés')
+        .default([]),
+    address: z
+        .object({
+            street: z.string().max(100).optional().nullable(),
+            city: z.string().max(60).optional().nullable(),
+            region: z.string().max(60).optional().nullable(),
+            postalCode: z.string().max(20).optional().nullable(),
+            country: z.string().max(60).optional().nullable(),
         })
-    ).max(20, "Maximum 20 FAQs autorisées").default([])
+        .default({}),
+    geo_faqs: z
+        .array(
+            z.object({
+                question: z
+                    .string()
+                    .min(5, 'Question FAQ trop courte (min 5 chars)')
+                    .max(200, 'Question FAQ trop longue'),
+                answer: z
+                    .string()
+                    .min(10, 'Réponse FAQ trop courte (min 10 chars)')
+                    .max(1000, 'Réponse FAQ trop longue'),
+            }),
+        )
+        .max(20, 'Maximum 20 FAQs autorisées')
+        .default([]),
 });
 
 export async function saveClientProfileAction(formDataObject) {
@@ -83,20 +99,21 @@ export async function saveClientProfileAction(formDataObject) {
                 }
             }
 
-            existingPublicationStatus = existingProfile?.publication_status
-                || (existingProfile?.is_published ? 'published' : 'draft');
+            existingPublicationStatus =
+                existingProfile?.publication_status || (existingProfile?.is_published ? 'published' : 'draft');
         }
 
         const cleanAddress = Object.fromEntries(
-            Object.entries(validatedData.address || {})
-                .filter(([, v]) => v !== null && v !== undefined && v.toString().trim() !== '')
+            Object.entries(validatedData.address || {}).filter(
+                ([, v]) => v !== null && v !== undefined && v.toString().trim() !== '',
+            ),
         );
 
         const nextPublicationStatus = validatedData.is_published
             ? 'published'
             : existingPublicationStatus === 'published'
-                ? 'draft'
-                : existingPublicationStatus || 'draft';
+              ? 'draft'
+              : existingPublicationStatus || 'draft';
 
         const payload = syncClientProfileCompatibilityFields({
             client_name: validatedData.client_name,
@@ -121,9 +138,7 @@ export async function saveClientProfileAction(formDataObject) {
                 .eq('id', validatedData.id);
             resultError = updateError;
         } else {
-            const { error: insertError } = await supabase
-                .from('client_geo_profiles')
-                .insert([payload]);
+            const { error: insertError } = await supabase.from('client_geo_profiles').insert([payload]);
             resultError = insertError;
         }
 
@@ -131,10 +146,9 @@ export async function saveClientProfileAction(formDataObject) {
             console.error('[SaveClient] DB error:', resultError);
             return { error: 'Erreur lors de la sauvegarde en base de données.' };
         }
-
     } catch (err) {
         if (err?.issues && Array.isArray(err.issues) && err.issues.length > 0) {
-            const messages = err.issues.map(i => i.message).join(' | ');
+            const messages = err.issues.map((i) => i.message).join(' | ');
             return { error: messages };
         }
         console.error('[SaveClient] Error:', err);

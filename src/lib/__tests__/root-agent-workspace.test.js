@@ -1,6 +1,12 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
-const io = vi.hoisted(() => ({ overview: vi.fn(), readiness: vi.fn(), opportunities: vi.fn(), client: vi.fn(), audit: vi.fn() }));
+const io = vi.hoisted(() => ({
+    overview: vi.fn(),
+    readiness: vi.fn(),
+    opportunities: vi.fn(),
+    client: vi.fn(),
+    audit: vi.fn(),
+}));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/operator-intelligence/overview', () => ({ getOverviewSlice: io.overview }));
 vi.mock('@/lib/operator-intelligence/geo-readiness', () => ({ getReadinessSlice: io.readiness }));
@@ -15,21 +21,40 @@ beforeEach(() => {
     vi.resetAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-03T12:00:00Z'));
-    io.overview.mockResolvedValue({ status: 'available', dataSources: { audit: 'empty' }, errors: [],
-        kpis: { trackedPromptsTotal: 0, completedRunsTotal: 0 }, visibility: {} });
+    io.overview.mockResolvedValue({
+        status: 'available',
+        dataSources: { audit: 'empty' },
+        errors: [],
+        kpis: { trackedPromptsTotal: 0, completedRunsTotal: 0 },
+        visibility: {},
+    });
     io.readiness.mockResolvedValue({ available: false, topBlockers: [] });
-    io.opportunities.mockResolvedValue({ status: 'available', summary: { open: 0, pendingMergeCount: 0, reviewQueueCount: 0, remediationDraftCount: 0 }, items: [] });
+    io.opportunities.mockResolvedValue({
+        status: 'available',
+        summary: { open: 0, pendingMergeCount: 0, reviewQueueCount: 0, remediationDraftCount: 0 },
+        items: [],
+    });
     io.client.mockResolvedValue({ id: 'client-a', client_name: 'A' });
     io.audit.mockResolvedValue(null);
 });
 afterEach(() => vi.useRealTimers());
 
-describe.each([['overview', getAgentSlice], ['fixes', getAgentFixesSlice]])('%s workspace projection', (_name, load) => {
+describe.each([
+    ['overview', getAgentSlice],
+    ['fixes', getAgentFixesSlice],
+])('%s workspace projection', (_name, load) => {
     it('loads the same five sources once and preserves measured zero versus missing audit', async () => {
         const slice = await load('client-a');
         for (const source of Object.values(io)) expect(source.mock.calls).toEqual([['client-a']]);
         expect(slice.status).toBe('available');
-        expect(slice.dataSources).toEqual({ audit: 'empty', overview: 'available', readiness: 'available', opportunities: 'available', client: 'available', latestAudit: 'empty' });
+        expect(slice.dataSources).toEqual({
+            audit: 'empty',
+            overview: 'available',
+            readiness: 'available',
+            opportunities: 'available',
+            client: 'available',
+            latestAudit: 'empty',
+        });
         expect(slice.errors).toEqual([]);
         expect(slice.topFixes.map((fix) => fix.id)).toContain('visibility-no-prompts');
         if (slice.snapshot) {
@@ -55,15 +80,31 @@ describe.each([['overview', getAgentSlice], ['fixes', getAgentFixesSlice]])('%s 
     });
 
     it('preserves nested source prefixes, error ordering and unknown counts', async () => {
-        io.overview.mockResolvedValue({ status: 'partial', dataSources: { totalQueryRuns: 'unavailable' },
-            errors: [{ source: 'totalQueryRuns', message: 'safe overview message' }], kpis: { completedRunsTotal: null, trackedPromptsTotal: null } });
-        io.readiness.mockResolvedValue({ status: 'unavailable', available: false,
-            dataSources: { audit: 'unavailable' }, errors: [{ source: 'audit', message: 'private nested SQL' }] });
-        io.opportunities.mockResolvedValue({ status: 'partial', dataSources: { merges: 'unavailable' },
-            errors: [{ source: 'merges', message: 'private opportunity SQL' }], summary: { open: null, reviewQueueCount: null, pendingMergeCount: null } });
+        io.overview.mockResolvedValue({
+            status: 'partial',
+            dataSources: { totalQueryRuns: 'unavailable' },
+            errors: [{ source: 'totalQueryRuns', message: 'safe overview message' }],
+            kpis: { completedRunsTotal: null, trackedPromptsTotal: null },
+        });
+        io.readiness.mockResolvedValue({
+            status: 'unavailable',
+            available: false,
+            dataSources: { audit: 'unavailable' },
+            errors: [{ source: 'audit', message: 'private nested SQL' }],
+        });
+        io.opportunities.mockResolvedValue({
+            status: 'partial',
+            dataSources: { merges: 'unavailable' },
+            errors: [{ source: 'merges', message: 'private opportunity SQL' }],
+            summary: { open: null, reviewQueueCount: null, pendingMergeCount: null },
+        });
         const slice = await load('client-a');
         expect(slice.status).toBe('partial');
-        expect(slice.dataSources).toMatchObject({ totalQueryRuns: 'unavailable', 'readiness.audit': 'unavailable', 'opportunities.merges': 'unavailable' });
+        expect(slice.dataSources).toMatchObject({
+            totalQueryRuns: 'unavailable',
+            'readiness.audit': 'unavailable',
+            'opportunities.merges': 'unavailable',
+        });
         expect(slice.errors).toEqual([
             { source: 'totalQueryRuns', message: 'safe overview message' },
             { source: 'readiness', message: 'Données temporairement indisponibles.' },
@@ -80,15 +121,29 @@ describe.each([['overview', getAgentSlice], ['fixes', getAgentFixesSlice]])('%s 
         const slice = await load('client-a');
         expect(slice.status).toBe('unavailable');
         expect(Object.values(slice.dataSources)).toEqual(Array(5).fill('unavailable'));
-        expect(slice.errors.map((error) => error.source)).toEqual(['overview', 'readiness', 'opportunities', 'client', 'latestAudit']);
+        expect(slice.errors.map((error) => error.source)).toEqual([
+            'overview',
+            'readiness',
+            'opportunities',
+            'client',
+            'latestAudit',
+        ]);
         expect(slice.topFixes).toEqual([]);
     });
 
     it('waits for a late source without rerunning any load', async () => {
         let release;
-        io.audit.mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+        io.audit.mockImplementation(
+            () =>
+                new Promise((resolve) => {
+                    release = resolve;
+                }),
+        );
         let completed = false;
-        const pending = load('client-a').then((slice) => { completed = true; return slice; });
+        const pending = load('client-a').then((slice) => {
+            completed = true;
+            return slice;
+        });
         await Promise.resolve();
         expect(completed).toBe(false);
         for (const source of Object.values(io)) expect(source).toHaveBeenCalledOnce();

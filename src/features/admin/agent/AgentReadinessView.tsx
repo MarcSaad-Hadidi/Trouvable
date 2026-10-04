@@ -18,10 +18,15 @@ export default function AgentReadinessPage() {
     const summary = data?.summary || {};
     const dimensions = data?.dimensions || [];
     const blockers = data?.topBlockers || [];
-    const emptyState = data?.emptyState || (!data?.available ? {
-        title: 'Préparation AGENT indisponible',
-        description: 'Aucun audit exploitable ne permet encore de calculer la préparation AGENT pour ce dossier.',
-    } : null);
+    const emptyState =
+        data?.emptyState ||
+        (!data?.available
+            ? {
+                  title: 'Préparation AGENT indisponible',
+                  description:
+                      'Aucun audit exploitable ne permet encore de calculer la préparation AGENT pour ce dossier.',
+              }
+            : null);
 
     return (
         <AgentPageFrame
@@ -80,7 +85,10 @@ export default function AgentReadinessPage() {
                     entries={[
                         { label: 'Signal global', value: summary.globalSignalLabel || summary.globalStatus },
                         { label: 'Dimensions', value: dimensions.length },
-                        { label: 'Dernier audit', value: data?.freshness?.auditCreatedAt || data?.provenance?.observed?.label },
+                        {
+                            label: 'Dernier audit',
+                            value: data?.freshness?.auditCreatedAt || data?.provenance?.observed?.label,
+                        },
                         { label: 'Statut scan', value: data?.freshness?.scanStatus },
                     ]}
                 />
@@ -94,9 +102,15 @@ export default function AgentReadinessPage() {
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.title}</span>
-                                {item.status ? <AgentChip tone={toneForStatus(item.status)}>{formatAgentStatus(item.status)}</AgentChip> : null}
+                                {item.status ? (
+                                    <AgentChip tone={toneForStatus(item.status)}>
+                                        {formatAgentStatus(item.status)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
-                            {item.detail ? <div className="text-[12px] leading-relaxed text-white/60">{item.detail}</div> : null}
+                            {item.detail ? (
+                                <div className="text-[12px] leading-relaxed text-white/60">{item.detail}</div>
+                            ) : null}
                         </div>
                     )}
                 />
@@ -110,4 +124,3 @@ export default function AgentReadinessPage() {
         </AgentPageFrame>
     );
 }
-

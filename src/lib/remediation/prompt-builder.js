@@ -80,9 +80,7 @@ function buildWeakLocalClarityPrompt(problem) {
 }
 
 function buildVisibilityDecliningPrompt(problem) {
-    const signals = Array.isArray(problem?.context?.action_center_signals)
-        ? problem.context.action_center_signals
-        : [];
+    const signals = Array.isArray(problem?.context?.action_center_signals) ? problem.context.action_center_signals : [];
 
     return {
         system: buildSystemPrompt(),
@@ -126,7 +124,7 @@ function buildJobAuditFlakyPrompt(problem) {
 function buildLlmsTxtMissingPrompt(problem) {
     return {
         system: [
-            'Tu es un expert SEO/GEO specialise dans l\'optimisation de visibilite IA.',
+            "Tu es un expert SEO/GEO specialise dans l'optimisation de visibilite IA.",
             'Tu generes directement le contenu du fichier llms.txt au format Markdown.',
             'Le fichier doit etre complet, pret a deployer, en francais professionnel.',
             'N invente aucun fait: base-toi uniquement sur le contexte fourni.',
@@ -135,10 +133,10 @@ function buildLlmsTxtMissingPrompt(problem) {
             fallbackBusinessSummary(problem),
             '',
             'Instruction:',
-            'Genere le contenu COMPLET d\'un fichier llms.txt au format Markdown.',
+            "Genere le contenu COMPLET d'un fichier llms.txt au format Markdown.",
             'Le fichier doit suivre la specification llms.txt:',
-            '- H1 avec le nom de l\'entreprise',
-            '- Blockquote avec une description courte de l\'activite',
+            "- H1 avec le nom de l'entreprise",
+            "- Blockquote avec une description courte de l'activite",
             '- Section "## Services" avec les services cles',
             '- Section "## Zone desservie" avec la ville/region',
             '- Section "## Contact" avec les coordonnees disponibles',
@@ -169,9 +167,9 @@ function buildAiCrawlersBlockedPrompt(problem) {
             '- PerplexityBot (Perplexity AI)',
             '',
             'Fournis:',
-            '1) L\'extrait robots.txt corrige (User-agent / Allow)',
+            "1) L'extrait robots.txt corrige (User-agent / Allow)",
             '2) Une courte explication du risque actuel (2-3 phrases)',
-            '3) Les crawlers optionnels qu\'on pourrait aussi autoriser (Google-Extended, Bytespider)',
+            "3) Les crawlers optionnels qu'on pourrait aussi autoriser (Google-Extended, Bytespider)",
             '',
             'Format: texte structure, pas de JSON. Francais professionnel.',
         ].join('\n'),

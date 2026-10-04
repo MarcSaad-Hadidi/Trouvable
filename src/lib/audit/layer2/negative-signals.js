@@ -68,7 +68,11 @@ export function auditNegativeSignals({ extracted, scannedPages = [], layer1PageC
                 const directives = check.data?.directives || [];
                 for (const directive of directives) {
                     if (/(noai|noindex|none)/i.test(directive.content || '')) {
-                        blockingDirectives.push({ page: pageResult.page_url, name: directive.name, content: directive.content });
+                        blockingDirectives.push({
+                            page: pageResult.page_url,
+                            name: directive.name,
+                            content: directive.content,
+                        });
                     }
                 }
             }
@@ -125,7 +129,9 @@ function detectBoilerplateDuplication(pageSummaries, pageCount) {
     }
     const fingerprintCounts = new Map();
     for (const page of pageSummaries) {
-        const chunk = normalizeText(page?.description || page?.title || '').slice(0, 140).toLowerCase();
+        const chunk = normalizeText(page?.description || page?.title || '')
+            .slice(0, 140)
+            .toLowerCase();
         if (!chunk) continue;
         fingerprintCounts.set(chunk, (fingerprintCounts.get(chunk) || 0) + 1);
     }

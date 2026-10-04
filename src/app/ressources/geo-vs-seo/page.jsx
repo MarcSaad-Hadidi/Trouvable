@@ -8,4 +8,3 @@ export const metadata = buildSeoGrowthMetadata(page);
 export default function GeoVsSeoPage() {
     return <SeoGrowthPage page={page} />;
 }
-

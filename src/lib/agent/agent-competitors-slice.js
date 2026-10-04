@@ -15,7 +15,8 @@ function buildEmptyState({ runs, competitors }) {
         return {
             key: 'no_competitors',
             title: 'Aucun concurrent confirmé',
-            description: 'Aucune mention hors cible n’a atteint le seuil concurrent confirmé. Enrichissez le profil avec des concurrents nommés et utilisez des prompts « vs / shortlist ».',
+            description:
+                'Aucune mention hors cible n’a atteint le seuil concurrent confirmé. Enrichissez le profil avec des concurrents nommés et utilisez des prompts « vs / shortlist ».',
         };
     }
     return null;
@@ -58,8 +59,11 @@ export async function getAgentCompetitorsSlice(clientId) {
 
     const promptsLost = (base.promptsWithCompetitors || [])
         .slice()
-        .sort((a, b) => (b.recommended_competitors || 0) - (a.recommended_competitors || 0)
-            || (b.competitor_mentions || 0) - (a.competitor_mentions || 0))
+        .sort(
+            (a, b) =>
+                (b.recommended_competitors || 0) - (a.recommended_competitors || 0) ||
+                (b.competitor_mentions || 0) - (a.competitor_mentions || 0),
+        )
         .slice(0, 8)
         .map((prompt) => ({
             id: prompt.id,
@@ -68,7 +72,12 @@ export async function getAgentCompetitorsSlice(clientId) {
             competitorMentions: prompt.competitor_mentions || 0,
             recommendedCompetitors: prompt.recommended_competitors || 0,
             latestRunAt: prompt.latest_run_at || null,
-            severity: (prompt.recommended_competitors || 0) > 0 ? 'high' : (prompt.competitor_mentions || 0) > 1 ? 'medium' : 'low',
+            severity:
+                (prompt.recommended_competitors || 0) > 0
+                    ? 'high'
+                    : (prompt.competitor_mentions || 0) > 1
+                      ? 'medium'
+                      : 'low',
         }));
 
     return {
@@ -102,4 +111,3 @@ export async function getAgentCompetitorsSlice(clientId) {
         emptyState,
     };
 }
-

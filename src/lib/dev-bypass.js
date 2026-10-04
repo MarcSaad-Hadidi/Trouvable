@@ -39,7 +39,9 @@ export function normalizeHostname(value) {
         // Ignore invalid URL-like values and keep parsing as a raw host header.
     }
 
-    return stripPort(firstValue).replace(/^\[|\]$/g, '').toLowerCase();
+    return stripPort(firstValue)
+        .replace(/^\[|\]$/g, '')
+        .toLowerCase();
 }
 
 export function isLocalDevelopmentHost(hostname) {
@@ -48,7 +50,11 @@ export function isLocalDevelopmentHost(hostname) {
 
 function isTruthyFlag(flagName) {
     const val = process.env[flagName];
-    return TRUE_VALUES.has(String(val || '').trim().toLowerCase());
+    return TRUE_VALUES.has(
+        String(val || '')
+            .trim()
+            .toLowerCase(),
+    );
 }
 
 function isDevelopmentMode() {
@@ -59,10 +65,7 @@ export function getHostFromHeaders(headersLike) {
     if (!headersLike || typeof headersLike.get !== 'function') return '';
 
     return normalizeHostname(
-        headersLike.get('x-forwarded-host')
-        || headersLike.get('host')
-        || headersLike.get('origin')
-        || ''
+        headersLike.get('x-forwarded-host') || headersLike.get('host') || headersLike.get('origin') || '',
     );
 }
 
@@ -70,19 +73,17 @@ export function getHostFromRequest(req) {
     if (!req) return '';
 
     return normalizeHostname(
-        req.nextUrl?.hostname
-        || req.nextUrl?.host
-        || req.headers?.get?.('x-forwarded-host')
-        || req.headers?.get?.('host')
-        || req.headers?.get?.('origin')
-        || ''
+        req.nextUrl?.hostname ||
+            req.nextUrl?.host ||
+            req.headers?.get?.('x-forwarded-host') ||
+            req.headers?.get?.('host') ||
+            req.headers?.get?.('origin') ||
+            '',
     );
 }
 
 function isBypassEnabledForHost(flagName, hostname) {
-    return isDevelopmentMode()
-        && isTruthyFlag(flagName)
-        && isLocalDevelopmentHost(hostname);
+    return isDevelopmentMode() && isTruthyFlag(flagName) && isLocalDevelopmentHost(hostname);
 }
 
 export function isDevAuthBypassConfigured() {

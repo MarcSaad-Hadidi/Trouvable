@@ -17,8 +17,8 @@
  */
 
 export const AGENT_SCORE_WEIGHTS = Object.freeze({
-    visibility: 0.40,
-    readiness: 0.30,
+    visibility: 0.4,
+    readiness: 0.3,
     actionability: 0.25,
     advanced_protocols: 0.05,
 });
@@ -64,12 +64,7 @@ function verdictForScore(score) {
     return 'a_reprendre';
 }
 
-function deriveConfidence({
-    visibility,
-    readiness,
-    visibilityReliability,
-    lastAuditAt,
-}) {
+function deriveConfidence({ visibility, readiness, visibilityReliability, lastAuditAt }) {
     const visibilityAvailable = Boolean(visibility && isFiniteNumber(visibility.score));
     const readinessAvailable = Boolean(readiness && isFiniteNumber(readiness.score));
 
@@ -188,7 +183,11 @@ function deriveVisibilityFromOverview(overviewSlice) {
 
     const kpis = overviewSlice.kpis || {};
     const sourceStates = overviewSlice.dataSources || {};
-    if (['runs', 'mentions', 'trackedQueries', 'totalQueryRuns', 'brandRecommendations'].some(source => sourceStates[source] === 'unavailable')) {
+    if (
+        ['runs', 'mentions', 'trackedQueries', 'totalQueryRuns', 'brandRecommendations'].some(
+            (source) => sourceStates[source] === 'unavailable',
+        )
+    ) {
         return { score: null, reliability: 'unavailable', components: {} };
     }
     const components = {
@@ -247,12 +246,7 @@ function deriveFromReport(report) {
  * Derive AGENT sub-score inputs from existing slice payloads.
  * Phase 3: all four inputs are live when their upstream reports are available.
  */
-export function deriveAgentInputs({
-    overviewSlice,
-    readinessSlice,
-    actionabilityReport,
-    protocolsReport,
-} = {}) {
+export function deriveAgentInputs({ overviewSlice, readinessSlice, actionabilityReport, protocolsReport } = {}) {
     return {
         visibility: deriveVisibilityFromOverview(overviewSlice),
         readiness: deriveReadinessFromSlice(readinessSlice),

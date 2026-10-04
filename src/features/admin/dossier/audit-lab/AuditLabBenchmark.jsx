@@ -2,23 +2,22 @@
 
 import { useState } from 'react';
 
-import {
-    JsonInspect,
-    LabCollapsible,
-    LabDebugSection,
-    LabMetric,
-    LabPill,
-    LabSectionHeader,
-} from './LabPrimitives';
+import { JsonInspect, LabCollapsible, LabDebugSection, LabMetric, LabPill, LabSectionHeader } from './LabPrimitives';
 import { formatDate, formatMs, getBenchmarkViewModel } from './audit-lab-model';
 import { scanStatusFr } from './audit-lab-copy';
 
 function TimingRow({ timing }) {
     const isError = timing?.status === 'error';
     return (
-        <div className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1 ${isError ? 'border-red-400/15 bg-red-400/[0.03]' : 'border-white/[0.04] bg-white/[0.015]'}`}>
-            <span className={`truncate font-mono text-[11px] ${isError ? 'text-red-300/80' : 'text-white/60'}`}>{timing.step || 'étape'}</span>
-            <span className="shrink-0 font-mono text-[11px] tabular-nums text-white/80">{formatMs(timing.duration_ms ?? timing.ms ?? timing.duration)}</span>
+        <div
+            className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1 ${isError ? 'border-red-400/15 bg-red-400/[0.03]' : 'border-white/[0.04] bg-white/[0.015]'}`}
+        >
+            <span className={`truncate font-mono text-[11px] ${isError ? 'text-red-300/80' : 'text-white/60'}`}>
+                {timing.step || 'étape'}
+            </span>
+            <span className="shrink-0 font-mono text-[11px] tabular-nums text-white/80">
+                {formatMs(timing.duration_ms ?? timing.ms ?? timing.duration)}
+            </span>
         </div>
     );
 }
@@ -55,7 +54,11 @@ export default function AuditLabBenchmark({ audit }) {
                         variant="debug"
                     />
                 </div>
-                <span className={`mt-1 shrink-0 text-sm text-white/40 transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+                <span
+                    className={`mt-1 shrink-0 text-sm text-white/40 transition-transform ${open ? 'rotate-180' : ''}`}
+                >
+                    ▾
+                </span>
             </button>
 
             {open && (
@@ -74,8 +77,12 @@ export default function AuditLabBenchmark({ audit }) {
 
                     {(model.sourceUrl || model.resolvedUrl) && (
                         <div className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-3 text-[11px] text-white/60">
-                            <div className="truncate font-mono" title={model.sourceUrl}>URL source : {model.sourceUrl || '—'}</div>
-                            <div className="truncate font-mono" title={model.resolvedUrl}>URL résolue : {model.resolvedUrl || '—'}</div>
+                            <div className="truncate font-mono" title={model.sourceUrl}>
+                                URL source : {model.sourceUrl || '—'}
+                            </div>
+                            <div className="truncate font-mono" title={model.resolvedUrl}>
+                                URL résolue : {model.resolvedUrl || '—'}
+                            </div>
                         </div>
                     )}
 
@@ -87,7 +94,9 @@ export default function AuditLabBenchmark({ audit }) {
 
                     {Array.isArray(model.timings) && model.timings.length > 0 && (
                         <div className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-3">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Durée par étape (enregistrée)</div>
+                            <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                                Durée par étape (enregistrée)
+                            </div>
                             <div className="mt-2 grid grid-cols-1 gap-1 md:grid-cols-2 lg:grid-cols-3">
                                 {model.timings.map((timing, idx) => (
                                     <TimingRow key={`${timing.step || 'step'}-${idx}`} timing={timing} />
@@ -96,7 +105,10 @@ export default function AuditLabBenchmark({ audit }) {
                         </div>
                     )}
 
-                    <LabCollapsible label="Données brutes de l'audit (base de données)" hint="Réservé à la validation opérateur">
+                    <LabCollapsible
+                        label="Données brutes de l'audit (base de données)"
+                        hint="Réservé à la validation opérateur"
+                    >
                         <JsonInspect value={audit} maxHeight={520} />
                     </LabCollapsible>
                 </div>

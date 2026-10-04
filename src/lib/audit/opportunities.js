@@ -44,7 +44,11 @@ function coerceIssue(issue) {
 }
 
 function buildOpportunityDescription(base, evidenceSummary, recommendedFix) {
-    return [base, evidenceSummary ? `Evidence: ${evidenceSummary}` : '', recommendedFix ? `Fix direction: ${recommendedFix}` : '']
+    return [
+        base,
+        evidenceSummary ? `Evidence: ${evidenceSummary}` : '',
+        recommendedFix ? `Fix direction: ${recommendedFix}` : '',
+    ]
         .filter(Boolean)
         .join(' ');
 }
@@ -80,10 +84,13 @@ export function generateOpportunities({ clientId, auditId, deterministicIssues, 
             description: buildOpportunityDescription(
                 rawOpportunity.description,
                 rawOpportunity.evidence_summary || '',
-                rawOpportunity.recommended_fix || ''
+                rawOpportunity.recommended_fix || '',
             ),
             priority: normalizePriority(rawOpportunity.priority),
-            category: normalizeCategory(rawOpportunity.category, `${rawOpportunity.title} ${rawOpportunity.description}`),
+            category: normalizeCategory(
+                rawOpportunity.category,
+                `${rawOpportunity.title} ${rawOpportunity.description}`,
+            ),
             source: aiSource,
             truth_class: aiTruthClass,
             review_status: defaultReviewStatusForTruthClass(aiTruthClass),

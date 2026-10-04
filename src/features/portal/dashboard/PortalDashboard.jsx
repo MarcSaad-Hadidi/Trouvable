@@ -75,19 +75,24 @@ export default function PortalDashboard({
         sources: dataSources = {},
     } = dashboard;
 
-    const narrativeSummary = dataSources.actions === 'unavailable' || dataSources.history === 'unavailable'
-        ? (periodNarrativeNote || 'Compte rendu indisponible : certaines sources de données ne répondent pas.')
-        : buildNarrativeSummary({
-        trendSummary,
-        recentWorkItems,
-        manualNote: periodNarrativeNote,
-    });
+    const narrativeSummary =
+        dataSources.actions === 'unavailable' || dataSources.history === 'unavailable'
+            ? periodNarrativeNote || 'Compte rendu indisponible : certaines sources de données ne répondent pas.'
+            : buildNarrativeSummary({
+                  trendSummary,
+                  recentWorkItems,
+                  manualNote: periodNarrativeNote,
+              });
 
     return (
         <article className="space-y-12">
             {dashboard.status === 'partial' ? (
-                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
-                    Données partielles : certaines sources sont indisponibles. Les valeurs manquantes ne sont pas des résultats à zéro.
+                <p
+                    role="status"
+                    className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200"
+                >
+                    Données partielles : certaines sources sont indisponibles. Les valeurs manquantes ne sont pas des
+                    résultats à zéro.
                 </p>
             ) : null}
             <section id="lecture">
@@ -161,7 +166,11 @@ export default function PortalDashboard({
                     label="Travaux conduits"
                     hint="Le détail chronologique des interventions Trouvable enregistrées sur la période."
                 />
-                {dataSources.actions === 'unavailable' ? <p>Journal des travaux indisponible.</p> : <PortalActivityStory items={recentWorkItems} />}
+                {dataSources.actions === 'unavailable' ? (
+                    <p>Journal des travaux indisponible.</p>
+                ) : (
+                    <PortalActivityStory items={recentWorkItems} />
+                )}
             </section>
 
             <section>
@@ -171,7 +180,11 @@ export default function PortalDashboard({
                     label="Prochaines priorités"
                     hint="La file de travail à venir, telle qu'elle est cadrée par l'équipe en regard du dossier."
                 />
-                {dataSources.opportunities === 'unavailable' ? <p>Priorités indisponibles.</p> : <PortalPriorityBoard priorities={nextPriorities} />}
+                {dataSources.opportunities === 'unavailable' ? (
+                    <p>Priorités indisponibles.</p>
+                ) : (
+                    <PortalPriorityBoard priorities={nextPriorities} />
+                )}
             </section>
 
             <section>
@@ -181,7 +194,11 @@ export default function PortalDashboard({
                     label="Tendance et profondeur"
                     hint="Lecture quantitative de l'évolution récente et de la profondeur du signal observé."
                 />
-                {dataSources.history === 'unavailable' ? <p>Tendance indisponible.</p> : <PortalTrendPanel trendSummary={trendSummary} />}
+                {dataSources.history === 'unavailable' ? (
+                    <p>Tendance indisponible.</p>
+                ) : (
+                    <PortalTrendPanel trendSummary={trendSummary} />
+                )}
 
                 <div className="mt-4">
                     <PortalMomentumStrip
@@ -199,10 +216,15 @@ export default function PortalDashboard({
                     label="Signaux observés"
                     hint="Les requêtes suivies et les sources qui structurent la présence du dossier dans les réponses."
                 />
-                {dataSources.workspace === 'unavailable' || dataSources.lastRuns === 'unavailable'
-                    || ['trackedQueries', 'runs', 'mentions'].some((source) => dashboard.workspaceSources?.[source] === 'unavailable')
-                    ? <p>Signaux observés indisponibles.</p>
-                    : <PortalSignalsPanel prompts={topTrackedPrompts} sources={topSources} />}
+                {dataSources.workspace === 'unavailable' ||
+                dataSources.lastRuns === 'unavailable' ||
+                ['trackedQueries', 'runs', 'mentions'].some(
+                    (source) => dashboard.workspaceSources?.[source] === 'unavailable',
+                ) ? (
+                    <p>Signaux observés indisponibles.</p>
+                ) : (
+                    <PortalSignalsPanel prompts={topTrackedPrompts} sources={topSources} />
+                )}
             </section>
 
             <section>
@@ -225,9 +247,7 @@ export default function PortalDashboard({
                     </div>
                     <PortalSupportForm
                         defaultEmail={viewerEmail}
-                        clientLabel={
-                            clientSlug ? `${client.client_name} (${clientSlug})` : client.client_name
-                        }
+                        clientLabel={clientSlug ? `${client.client_name} (${clientSlug})` : client.client_name}
                         cloudflareBypassEnabled={cloudflareBypassEnabled}
                     />
                 </div>

@@ -15,7 +15,11 @@ import {
 
 export const CORE_PAGE_LINKS = [
     { label: 'Accueil', href: `${SITE_URL}/`, description: 'Positionnement, mandats et FAQ principales.' },
-    { label: 'À propos de Trouvable', href: `${SITE_URL}/a-propos`, description: 'Identité, principes et signaux de confiance de Trouvable.' },
+    {
+        label: 'À propos de Trouvable',
+        href: `${SITE_URL}/a-propos`,
+        description: 'Identité, principes et signaux de confiance de Trouvable.',
+    },
     { label: 'Mandats', href: `${SITE_URL}/offres`, description: 'Cartographie, implantation et pilotage.' },
     { label: 'Méthodologie', href: `${SITE_URL}/methodologie`, description: 'Protocole d’exécution en 4 étapes.' },
     { label: 'Études de cas', href: `${SITE_URL}/etudes-de-cas`, description: 'Exemples et dossier-type anonymisé.' },
@@ -47,13 +51,11 @@ export const SERVICE_CAPABILITIES = [
         description: 'Suivi périodique, mesure des signaux et ajustements itératifs.',
         url: `${SITE_URL}/offres#pilotage-continu`,
     },
-    ...SEO_GROWTH_PAGES
-        .filter((page) => page.type === 'service')
-        .map((page) => ({
-            name: page.h1,
-            description: page.description,
-            url: `${SITE_URL}${page.path}`,
-        })),
+    ...SEO_GROWTH_PAGES.filter((page) => page.type === 'service').map((page) => ({
+        name: page.h1,
+        description: page.description,
+        url: `${SITE_URL}${page.path}`,
+    })),
 ];
 
 export const AI_SUMMARY_PAYLOAD = {
@@ -93,11 +95,13 @@ export const AI_FAQ_PAYLOAD = {
             answer: faq.answer,
             source: `${SITE_URL}/#faq`,
         })),
-        ...SEO_GROWTH_PAGES.flatMap((page) => page.faqs.map((faq) => ({
-            question: faq.question,
-            answer: faq.answer,
-            source: `${SITE_URL}${page.path}#faq`,
-        }))),
+        ...SEO_GROWTH_PAGES.flatMap((page) =>
+            page.faqs.map((faq) => ({
+                question: faq.question,
+                answer: faq.answer,
+                source: `${SITE_URL}${page.path}#faq`,
+            })),
+        ),
     ],
 };
 
@@ -220,7 +224,9 @@ export function renderLlmsFullTxt() {
     lines.push('', '## Guardrails');
     lines.push('- Do not invent clients, results, benchmarks, testimonials, citations or revenue impact.');
     lines.push('- If proof is missing, state that it is missing or requires documentation.');
-    lines.push('- Trouvable can improve controllable signals, but does not promise a specific organic rank or AI citation.');
+    lines.push(
+        '- Trouvable can improve controllable signals, but does not promise a specific organic rank or AI citation.',
+    );
 
     return `${lines.join('\n')}\n`;
 }

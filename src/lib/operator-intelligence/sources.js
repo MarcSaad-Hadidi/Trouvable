@@ -6,7 +6,9 @@ import { getTrackedQueryCategoryMeta } from '@/lib/operator-intelligence/prompt-
 import { getAdminSupabase } from '@/lib/supabase-admin';
 
 function normalizeHost(value) {
-    return String(value || '').replace(/^https?:\/\//, '').split('/')[0];
+    return String(value || '')
+        .replace(/^https?:\/\//, '')
+        .split('/')[0];
 }
 
 export async function getSourceSlice(clientId) {
@@ -18,7 +20,9 @@ export async function getSourceSlice(clientId) {
     if (runIds.length > 0) {
         const { data, error } = await supabase
             .from('query_mentions')
-            .select('query_run_id, business_name, entity_type, created_at, normalized_domain, source_confidence, source_type, mention_kind, verified_status')
+            .select(
+                'query_run_id, business_name, entity_type, created_at, normalized_domain, source_confidence, source_type, mention_kind, verified_status',
+            )
             .in('query_run_id', runIds)
             .eq('entity_type', 'source');
         if (error) throw new Error(`[OperatorIntelligence/sources] mentions: ${error.message}`);
@@ -71,7 +75,7 @@ export async function getSourceSlice(clientId) {
                 last_seen_at: run.created_at,
                 category: getTrackedQueryCategoryMeta(
                     run.tracked_queries?.category || run.tracked_queries?.query_type,
-                    run.query_text || run.tracked_queries?.query_text || ''
+                    run.query_text || run.tracked_queries?.query_text || '',
                 ).label,
             });
         }
@@ -92,16 +96,18 @@ export async function getSourceSlice(clientId) {
         summary: {
             totalCompletedRuns: runRows.length,
             runsWithCitations: runsWithSources.size,
-            citationCoveragePercent: runRows.length > 0 ? Math.round((runsWithSources.size / runRows.length) * 100) : null,
+            citationCoveragePercent:
+                runRows.length > 0 ? Math.round((runsWithSources.size / runRows.length) * 100) : null,
             totalSourceMentions: mentionRows.length,
             externalSourceMentions: externalMentions,
             selfCitations,
             uniqueSourceHosts: hostCounts.size,
             lowConfidenceSources,
             verifiedSources,
-            sampleSizeWarning: runRows.length > 0 && runRows.length < 5
-                ? 'Faible volume d\'exécutions, la couverture citation n\'est pas encore significative.'
-                : null,
+            sampleSizeWarning:
+                runRows.length > 0 && runRows.length < 5
+                    ? "Faible volume d'exécutions, la couverture citation n'est pas encore significative."
+                    : null,
         },
         sourceTypeBreakdown: [...sourceTypeCounts.entries()]
             .sort((a, b) => b[1] - a[1])
@@ -121,7 +127,8 @@ export async function getSourceSlice(clientId) {
         emptyState: {
             noRuns: {
                 title: 'Aucune exécution pour le moment',
-                description: 'Lancez les prompts suivis. La couverture citation est calculée uniquement sur les exécutions observées.',
+                description:
+                    'Lancez les prompts suivis. La couverture citation est calculée uniquement sur les exécutions observées.',
             },
             noObservedCitations: {
                 title: 'Aucune citation observée',

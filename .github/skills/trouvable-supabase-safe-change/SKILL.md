@@ -18,6 +18,7 @@ Production currently serves static `parking/`; the application and services are 
 ## Pre-flight checklist
 
 Before making any change, answer:
+
 1. What is the current state? (Read ordered migrations and affected historical SQL; do not infer the remote catalogue)
 2. What exactly will change? (Exact SQL statements)
 3. What could break? (Downstream consumers, RLS, auth boundaries)
@@ -43,6 +44,7 @@ src/lib/actions/                # Server actions
 ### 2. Write migration SQL
 
 **Template:**
+
 ```sql
 -- Migration: [description]
 -- Date: [YYYY-MM-DD]
@@ -66,20 +68,21 @@ CREATE INDEX IF NOT EXISTS idx_<table>_<column> ON public.<table> (<column>);
 
 ### 3. Risk classification
 
-| Change type | Risk | Requires |
-|---|---|---|
-| ADD COLUMN (nullable) | LOW | Schema update + migration script |
-| ADD COLUMN (NOT NULL) | MEDIUM | Default value + backfill plan |
-| ADD INDEX | LOW | Performance check for large tables |
-| ADD POLICY | MEDIUM | Verify doesn't conflict with existing policies |
-| ALTER COLUMN type | HIGH | Data compatibility check + rollback SQL |
-| DROP COLUMN | HIGH | Verify no downstream consumers + rollback SQL |
-| DROP POLICY | HIGH | Security impact assessment + rollback SQL |
-| DROP TABLE | CRITICAL | Human approval required |
+| Change type           | Risk     | Requires                                       |
+| --------------------- | -------- | ---------------------------------------------- |
+| ADD COLUMN (nullable) | LOW      | Schema update + migration script               |
+| ADD COLUMN (NOT NULL) | MEDIUM   | Default value + backfill plan                  |
+| ADD INDEX             | LOW      | Performance check for large tables             |
+| ADD POLICY            | MEDIUM   | Verify doesn't conflict with existing policies |
+| ALTER COLUMN type     | HIGH     | Data compatibility check + rollback SQL        |
+| DROP COLUMN           | HIGH     | Verify no downstream consumers + rollback SQL  |
+| DROP POLICY           | HIGH     | Security impact assessment + rollback SQL      |
+| DROP TABLE            | CRITICAL | Human approval required                        |
 
 ### 4. Preserve ordered migration history
 
 After validating the proposed migration on a disposable local database:
+
 - Add an ordered migration in `supabase/migrations/`; do not create a second setup history
 - Preserve historical `supabase/schema.sql` and `supabase/setup_*.sql` until reconstruction equivalence is proved locally
 - Update targeted `src/lib/db/` or `src/lib/queries/` when query patterns change

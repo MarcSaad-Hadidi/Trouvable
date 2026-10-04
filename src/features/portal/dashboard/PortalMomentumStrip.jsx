@@ -30,9 +30,7 @@ export default function PortalMomentumStrip({ visibility, openOpportunitiesCount
                 <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#7b8fff]/45">
                     Couverture du mandat
                 </div>
-                <h2 className="mb-8 text-[20px] font-bold tracking-[-0.03em] text-white">
-                    Profondeur de signal
-                </h2>
+                <h2 className="mb-8 text-[20px] font-bold tracking-[-0.03em] text-white">Profondeur de signal</h2>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {visProxy != null && (
@@ -103,11 +101,7 @@ export default function PortalMomentumStrip({ visibility, openOpportunitiesCount
                         className="rounded-xl border border-white/[0.04] bg-white/[0.01] p-5"
                     >
                         {mentionRate != null && (
-                            <CoverageMeter
-                                label="Taux de mention"
-                                value={mentionRate}
-                                color="#34d399"
-                            />
+                            <CoverageMeter label="Taux de mention" value={mentionRate} color="#34d399" />
                         )}
                         <div className="mt-4 flex items-end justify-between gap-6 border-t border-white/[0.03] pt-4">
                             <div>

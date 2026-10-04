@@ -20,11 +20,11 @@ function isHostnameAllowed(hostname) {
     if (!hostname) return false;
     if (AUDIT_COMPARE_ALLOWED_HOSTS.length === 0) return true;
     const normalized = hostname.toLowerCase();
-    return AUDIT_COMPARE_ALLOWED_HOSTS.some((allowed) => (
+    return AUDIT_COMPARE_ALLOWED_HOSTS.some((allowed) =>
         allowed.startsWith('.')
             ? normalized === allowed.slice(1) || normalized.endsWith(allowed)
-            : normalized === allowed
-    ));
+            : normalized === allowed,
+    );
 }
 
 /**
@@ -74,12 +74,17 @@ function summarizeLayer2(expert) {
         modules[key] = {
             score: typeof moduleData.score === 'number' ? moduleData.score : null,
             findings_total: findings.length,
-            findings_high: findings.filter((f) => ['high', 'critical'].includes(String(f?.severity || '').toLowerCase())).length,
+            findings_high: findings.filter((f) =>
+                ['high', 'critical'].includes(String(f?.severity || '').toLowerCase()),
+            ).length,
             top_findings: findings
                 .slice()
                 .sort((a, b) => {
                     const rank = { high: 3, critical: 3, medium: 2, low: 1, info: 0 };
-                    return (rank[String(b?.severity || '').toLowerCase()] ?? 0) - (rank[String(a?.severity || '').toLowerCase()] ?? 0);
+                    return (
+                        (rank[String(b?.severity || '').toLowerCase()] ?? 0) -
+                        (rank[String(a?.severity || '').toLowerCase()] ?? 0)
+                    );
                 })
                 .slice(0, 3)
                 .map((finding) => ({
@@ -228,15 +233,15 @@ export async function POST(request) {
     }
 
     if (urlA === urlB) {
-        return NextResponse.json({ error: 'Les deux URL sont identiques — la comparaison ne serait pas significative.' }, { status: 400 });
+        return NextResponse.json(
+            { error: 'Les deux URL sont identiques — la comparaison ne serait pas significative.' },
+            { status: 400 },
+        );
     }
 
     const startedAt = Date.now();
     try {
-        const [siteA, siteB] = await Promise.all([
-            auditSiteForCompare(urlA),
-            auditSiteForCompare(urlB),
-        ]);
+        const [siteA, siteB] = await Promise.all([auditSiteForCompare(urlA), auditSiteForCompare(urlB)]);
 
         return NextResponse.json({
             generatedAt: new Date().toISOString(),

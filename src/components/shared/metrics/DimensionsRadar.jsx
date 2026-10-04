@@ -76,9 +76,10 @@ export default function DimensionsRadar({
 
     const colors = ACCENT_STROKES[accent] || ACCENT_STROKES.violet;
     const currentPoints = buildPoints(cx, cy, maxRadius, dimensions);
-    const previousPoints = Array.isArray(previousDimensions) && previousDimensions.length === dimensions.length
-        ? buildPoints(cx, cy, maxRadius, previousDimensions)
-        : null;
+    const previousPoints =
+        Array.isArray(previousDimensions) && previousDimensions.length === dimensions.length
+            ? buildPoints(cx, cy, maxRadius, previousDimensions)
+            : null;
 
     const rings = [0.25, 0.5, 0.75, 1.0].map((ratio) => ratio * maxRadius);
 
@@ -154,43 +155,43 @@ export default function DimensionsRadar({
 
                 {showLabels
                     ? currentPoints.map((p) => {
-                        const align = labelAlignment(p.labelPoint.x, cx);
-                        const style = {
-                            top: p.labelPoint.y,
-                            transform: 'translateY(-50%)',
-                        };
-                        if (align === 'center') {
-                            style.left = p.labelPoint.x;
-                            style.transform = 'translate(-50%, -50%)';
-                            style.textAlign = 'center';
-                        } else if (align === 'left') {
-                            style.left = p.labelPoint.x + 4;
-                            style.maxWidth = `${horizontalPadding - 12}px`;
-                        } else {
-                            style.right = containerWidth - p.labelPoint.x + 4;
-                            style.maxWidth = `${horizontalPadding - 12}px`;
-                        }
-                        return (
-                            <div
-                                key={`lbl-${p.key || p.label}`}
-                                className="pointer-events-none absolute text-[11px] leading-tight"
-                                style={style}
-                            >
-                                <div
-                                    className="font-semibold text-white/80"
-                                    style={{ textAlign: align === 'center' ? 'center' : align }}
-                                >
-                                    {p.label}
-                                </div>
-                                <div
-                                    className="mt-0.5 font-bold tabular-nums text-white/95"
-                                    style={{ textAlign: align === 'center' ? 'center' : align }}
-                                >
-                                    {p.score != null ? Math.round(p.score) : '–'}
-                                </div>
-                            </div>
-                        );
-                    })
+                          const align = labelAlignment(p.labelPoint.x, cx);
+                          const style = {
+                              top: p.labelPoint.y,
+                              transform: 'translateY(-50%)',
+                          };
+                          if (align === 'center') {
+                              style.left = p.labelPoint.x;
+                              style.transform = 'translate(-50%, -50%)';
+                              style.textAlign = 'center';
+                          } else if (align === 'left') {
+                              style.left = p.labelPoint.x + 4;
+                              style.maxWidth = `${horizontalPadding - 12}px`;
+                          } else {
+                              style.right = containerWidth - p.labelPoint.x + 4;
+                              style.maxWidth = `${horizontalPadding - 12}px`;
+                          }
+                          return (
+                              <div
+                                  key={`lbl-${p.key || p.label}`}
+                                  className="pointer-events-none absolute text-[11px] leading-tight"
+                                  style={style}
+                              >
+                                  <div
+                                      className="font-semibold text-white/80"
+                                      style={{ textAlign: align === 'center' ? 'center' : align }}
+                                  >
+                                      {p.label}
+                                  </div>
+                                  <div
+                                      className="mt-0.5 font-bold tabular-nums text-white/95"
+                                      style={{ textAlign: align === 'center' ? 'center' : align }}
+                                  >
+                                      {p.score != null ? Math.round(p.score) : '–'}
+                                  </div>
+                              </div>
+                          );
+                      })
                     : null}
             </div>
         </div>

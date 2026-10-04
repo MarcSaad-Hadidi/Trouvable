@@ -56,20 +56,27 @@ function sortOpportunities(a, b) {
 
 export async function getOpportunitySlice(clientId) {
     const results = await Promise.allSettled([
-        dbGetLatestOpportunities(clientId), dbGetMergeSuggestions(clientId, 'pending'),
-        dbGetLatestAudit(clientId), listRemediationSuggestionsForClient(clientId),
+        dbGetLatestOpportunities(clientId),
+        dbGetMergeSuggestions(clientId, 'pending'),
+        dbGetLatestAudit(clientId),
+        listRemediationSuggestionsForClient(clientId),
     ]);
-    const loaded = results.map(result => result.status === 'fulfilled' ? result.value : null);
+    const loaded = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
     const [latestOpportunities, mergeSuggestions, latestAudit, remediationSuggestions] = loaded;
     const activeRaw = latestOpportunities?.active || [];
     const staleRaw = latestOpportunities?.stale || [];
     const dataSources = {};
     const errors = [];
     ['opportunities', 'merges', 'audit', 'remediation'].forEach((source, index) => {
-        const empty = source === 'opportunities' ? !activeRaw.length && !staleRaw.length
-            : source === 'audit' ? !latestAudit : !loaded[index]?.length;
+        const empty =
+            source === 'opportunities'
+                ? !activeRaw.length && !staleRaw.length
+                : source === 'audit'
+                  ? !latestAudit
+                  : !loaded[index]?.length;
         dataSources[source] = results[index].status === 'rejected' ? 'unavailable' : empty ? 'empty' : 'available';
-        if (dataSources[source] === 'unavailable') errors.push({ source, message: 'Données temporairement indisponibles.' });
+        if (dataSources[source] === 'unavailable')
+            errors.push({ source, message: 'Données temporairement indisponibles.' });
     });
     const status = errors.length === 4 ? 'unavailable' : errors.length ? 'partial' : 'available';
     const activeOpportunities = (activeRaw || []).map((o) => ({
@@ -93,10 +100,12 @@ export async function getOpportunitySlice(clientId) {
         review_item: normalizeRemediationSuggestionReviewItem(item),
     }));
 
-    const byStatus = Object.fromEntries(STATUS_ORDER.map((status) => [
-        status,
-        activeOpportunities.filter((item) => item.status === status).sort(sortOpportunities),
-    ]));
+    const byStatus = Object.fromEntries(
+        STATUS_ORDER.map((status) => [
+            status,
+            activeOpportunities.filter((item) => item.status === status).sort(sortOpportunities),
+        ]),
+    );
 
     const byCategory = [...new Set(activeOpportunities.map((item) => item.category).filter(Boolean))]
         .sort((a, b) => a.localeCompare(b, 'fr-CA'))
@@ -119,7 +128,9 @@ export async function getOpportunitySlice(clientId) {
     ].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
 
     return {
-        status, dataSources, errors,
+        status,
+        dataSources,
+        errors,
         provenance: {
             observation: getProvenanceMeta('observed'),
             summary: getProvenanceMeta('derived'),
@@ -130,11 +141,19 @@ export async function getOpportunitySlice(clientId) {
             in_progress: dataSources.opportunities === 'unavailable' ? null : byStatus.in_progress.length,
             done: dataSources.opportunities === 'unavailable' ? null : byStatus.done.length,
             dismissed: dataSources.opportunities === 'unavailable' ? null : byStatus.dismissed.length,
-            highPriorityOpen: dataSources.opportunities === 'unavailable' ? null : byStatus.open.filter((item) => item.priority === 'high').length,
+            highPriorityOpen:
+                dataSources.opportunities === 'unavailable'
+                    ? null
+                    : byStatus.open.filter((item) => item.priority === 'high').length,
             pendingMergeCount: dataSources.merges === 'unavailable' ? null : normalizedMergeSuggestions.length,
             staleOpportunitiesCount: dataSources.opportunities === 'unavailable' ? null : staleOpportunities.length,
-            remediationDraftCount: dataSources.remediation === 'unavailable' ? null : normalizedRemediationSuggestions.filter((item) => item.status === 'draft').length,
-            reviewQueueCount: ['audit', 'merges', 'remediation'].some(source => dataSources[source] === 'unavailable') ? null : reviewQueue.length,
+            remediationDraftCount:
+                dataSources.remediation === 'unavailable'
+                    ? null
+                    : normalizedRemediationSuggestions.filter((item) => item.status === 'draft').length,
+            reviewQueueCount: ['audit', 'merges', 'remediation'].some((source) => dataSources[source] === 'unavailable')
+                ? null
+                : reviewQueue.length,
         },
         byStatus,
         byCategory,
@@ -143,12 +162,16 @@ export async function getOpportunitySlice(clientId) {
         remediationSuggestions: normalizedRemediationSuggestions.slice(0, 12),
         auditIssues: auditIssues.slice(0, 8),
         reviewQueue: reviewQueue.slice(0, 20),
-        staleWarning: staleOpportunities.length > 0
-            ? `${staleOpportunities.length} opportunité(s) liée(s) à un audit précédent, relancer un audit pour actualiser.`
-            : null,
+        staleWarning:
+            staleOpportunities.length > 0
+                ? `${staleOpportunities.length} opportunité(s) liée(s) à un audit précédent, relancer un audit pour actualiser.`
+                : null,
         emptyState: {
             noOpen: {
-                title: dataSources.opportunities === 'unavailable' ? 'Opportunités temporairement indisponibles' : 'Aucune opportunite ouverte',
+                title:
+                    dataSources.opportunities === 'unavailable'
+                        ? 'Opportunités temporairement indisponibles'
+                        : 'Aucune opportunite ouverte',
                 description: 'Les opportunites apparaissent ici apres audit ou analyse des exécutions.',
             },
         },

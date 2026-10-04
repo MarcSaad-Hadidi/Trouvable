@@ -83,7 +83,7 @@ export function normalizeModelLabel(model) {
     // Humanise separators
     m = m
         .replace(/-/g, ' ')
-        .replace(/\b(\d+)b\b/i, (_, n) => `${n}B`)  // 70b → 70B
+        .replace(/\b(\d+)b\b/i, (_, n) => `${n}B`) // 70b → 70B
         .replace(/\bgpt\b/i, 'GPT')
         .replace(/\bllama\b/i, 'Llama')
         .replace(/\bgemini\b/i, 'Gemini')
@@ -100,10 +100,15 @@ export function normalizeModelLabel(model) {
 /** Signal-tier label for operator reading. */
 export function signalTierLabel(tier) {
     switch (tier) {
-        case 'useful': return 'Exploitable';
-        case 'weak': return 'Faible';
-        case 'low_yield': return 'Peu exploitable';
-        case 'failed': return 'Échec';
-        default: return tier || 'n.d.';
+        case 'useful':
+            return 'Exploitable';
+        case 'weak':
+            return 'Faible';
+        case 'low_yield':
+            return 'Peu exploitable';
+        case 'failed':
+            return 'Échec';
+        default:
+            return tier || 'n.d.';
     }
 }

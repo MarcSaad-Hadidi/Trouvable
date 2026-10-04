@@ -8,7 +8,10 @@ import { GeoEmptyPanel, GeoPremiumCard } from '@/features/admin/geo/components/G
 
 export const EASE = [0.16, 1, 0.3, 1];
 export const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05 } } };
-export const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } } };
+export const fadeUp = {
+    hidden: { opacity: 0, y: 12 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+};
 
 const ACCENT_CLASSES = {
     default: 'text-white/90',
@@ -78,7 +81,9 @@ export function DossierLoadingState({ label = 'Chargement du dossier partagé…
         <div className="p-5 md:p-7 max-w-[1600px] mx-auto">
             <GeoPremiumCard className="min-h-[220px] px-6 py-8 flex flex-col items-center justify-center text-center">
                 <div className="w-5 h-5 border-2 border-white/10 border-t-[#5b73ff] rounded-full geo-spin" />
-                <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25 mt-4">État du dossier</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25 mt-4">
+                    État du dossier
+                </div>
                 <div className="text-[12px] text-white/45 mt-2">{label}</div>
             </GeoPremiumCard>
         </div>
@@ -94,7 +99,9 @@ export function DossierErrorState({ message }) {
                 <div className="text-[12px] text-red-100/75 mt-2 leading-relaxed">
                     Le dossier partagé n&#39;a pas pu être chargé proprement.
                 </div>
-                {message ? <div className="text-[11px] text-red-100/60 mt-3 break-words">Dernier signal : {message}</div> : null}
+                {message ? (
+                    <div className="text-[11px] text-red-100/60 mt-3 break-words">Dernier signal : {message}</div>
+                ) : null}
             </GeoPremiumCard>
         </div>
     );
@@ -102,7 +109,12 @@ export function DossierErrorState({ message }) {
 
 export function DossierPageShell({ children }) {
     return (
-        <motion.div initial="hidden" animate="visible" variants={stagger} className="p-5 md:p-7 space-y-4 max-w-[1600px] mx-auto">
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="p-5 md:p-7 space-y-4 max-w-[1600px] mx-auto"
+        >
             {children}
         </motion.div>
     );
@@ -164,7 +176,11 @@ export function DossierSectionHeading({ eyebrow, title, subtitle, action }) {
     return (
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <div>
-                {eyebrow ? <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/25 mb-1">{eyebrow}</div> : null}
+                {eyebrow ? (
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/25 mb-1">
+                        {eyebrow}
+                    </div>
+                ) : null}
                 <div className="text-[18px] font-bold tracking-[-0.02em] text-white/92">{title}</div>
                 {subtitle ? <div className="text-[12px] text-white/40 mt-1 max-w-3xl">{subtitle}</div> : null}
             </div>
@@ -182,8 +198,12 @@ export function DossierSummaryCard({ item }) {
                 <ReliabilityPill value={item?.reliability} />
             </div>
             <div>
-                <div className={`text-[28px] font-bold tracking-[-0.03em] tabular-nums ${accent}`}>{item?.value ?? 'n.d.'}</div>
-                {item?.detail ? <div className="text-[11px] text-white/35 mt-1 leading-relaxed">{item.detail}</div> : null}
+                <div className={`text-[28px] font-bold tracking-[-0.03em] tabular-nums ${accent}`}>
+                    {item?.value ?? 'n.d.'}
+                </div>
+                {item?.detail ? (
+                    <div className="text-[11px] text-white/35 mt-1 leading-relaxed">{item.detail}</div>
+                ) : null}
             </div>
         </div>
     );
@@ -225,7 +245,11 @@ function TimelineItemBody({ item }) {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                        {item?.category ? <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25">{item.category}</span> : null}
+                        {item?.category ? (
+                            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25">
+                                {item.category}
+                            </span>
+                        ) : null}
                         {item?.statusLabel ? (
                             <span className="inline-flex rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-white/55">
                                 {item.statusLabel}
@@ -233,7 +257,9 @@ function TimelineItemBody({ item }) {
                         ) : null}
                     </div>
                     <div className="text-[14px] font-semibold text-white/90 mt-2">{item?.title}</div>
-                    {item?.description ? <div className="text-[11px] text-white/40 mt-1 leading-relaxed">{item.description}</div> : null}
+                    {item?.description ? (
+                        <div className="text-[11px] text-white/40 mt-1 leading-relaxed">{item.description}</div>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
@@ -269,7 +295,9 @@ export function DossierRailTimelineItem({ item, isLast = false }) {
         <div className="relative flex gap-4">
             <div className="relative flex w-5 shrink-0 flex-col items-center pt-1">
                 <span className="z-[1] h-2.5 w-2.5 rounded-full border-2 border-[#5b73ff] bg-[#000000] shadow-[0_0_14px_rgba(91,115,255,0.45)]" />
-                {!isLast ? <span className="mt-1 w-px flex-1 min-h-[24px] bg-gradient-to-b from-[#5b73ff]/35 to-white/[0.06]" /> : null}
+                {!isLast ? (
+                    <span className="mt-1 w-px flex-1 min-h-[24px] bg-gradient-to-b from-[#5b73ff]/35 to-white/[0.06]" />
+                ) : null}
             </div>
             <div className="min-w-0 flex-1 pb-6">{body}</div>
         </div>
@@ -315,7 +343,9 @@ export function DossierConnectorCard({ item }) {
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="text-[15px] font-semibold text-white/92">{item?.label}</div>
-                        <span className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${connectorStatusTone(item?.status)}`}>
+                        <span
+                            className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${connectorStatusTone(item?.status)}`}
+                        >
                             {connectorStatusLabel(item?.status)}
                         </span>
                     </div>
@@ -343,21 +373,34 @@ export function DossierConnectorCard({ item }) {
                         </span>
                     </div>
                     <div className="text-[12px] text-white/80 mt-2">{item.latestRun.detail}</div>
-                    {item.latestRun.timestamp ? <div className="text-[10px] text-white/35 mt-1">{formatDateTime(item.latestRun.timestamp)}</div> : null}
+                    {item.latestRun.timestamp ? (
+                        <div className="text-[10px] text-white/35 mt-1">{formatDateTime(item.latestRun.timestamp)}</div>
+                    ) : null}
                 </div>
             ) : null}
 
             {item?.incidents?.length ? (
                 <div className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25">Incidents récents</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/25">
+                        Incidents récents
+                    </div>
                     {item.incidents.slice(0, 3).map((incident) => (
-                        <div key={incident.id} className="rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 py-3">
+                        <div
+                            key={incident.id}
+                            className="rounded-xl border border-red-400/15 bg-red-400/[0.05] px-4 py-3"
+                        >
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="text-[12px] font-semibold text-red-100">{incident.label}</div>
                                 <ReliabilityPill value={incident.reliability} />
                             </div>
-                            <div className="text-[11px] text-red-100/80 mt-1 leading-relaxed">{incident.description}</div>
-                            {incident.timestamp ? <div className="text-[10px] text-red-100/55 mt-1">{formatDateTime(incident.timestamp)}</div> : null}
+                            <div className="text-[11px] text-red-100/80 mt-1 leading-relaxed">
+                                {incident.description}
+                            </div>
+                            {incident.timestamp ? (
+                                <div className="text-[10px] text-red-100/55 mt-1">
+                                    {formatDateTime(incident.timestamp)}
+                                </div>
+                            ) : null}
                         </div>
                     ))}
                 </div>
@@ -365,7 +408,10 @@ export function DossierConnectorCard({ item }) {
 
             {item?.href ? (
                 <div className="pt-1">
-                    <Link href={item.href} className="text-[11px] font-semibold text-[#7b8fff]/70 hover:text-[#7b8fff] transition-colors">
+                    <Link
+                        href={item.href}
+                        className="text-[11px] font-semibold text-[#7b8fff]/70 hover:text-[#7b8fff] transition-colors"
+                    >
                         Ouvrir la source
                     </Link>
                 </div>

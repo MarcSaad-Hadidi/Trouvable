@@ -6,12 +6,12 @@ Trouvable aide un opérateur à comprendre et améliorer la visibilité d'entrep
 
 ## Le produit conservé
 
-| Surface | Parcours implémentés |
-|---|---|
-| Site public | Offres, villes et expertises, ressources SEO/GEO, profils publiés et découverte machine. |
-| `/admin` | Portefeuille, onboarding, dossier client, laboratoire d'audit et espaces SEO, GEO et Agent. |
-| `/portal` | Synthèses et tendances en lecture seule, limitées aux memberships résolus côté serveur. |
-| `/espace` | Connexion et orientation vers l'espace autorisé. |
+| Surface     | Parcours implémentés                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| Site public | Offres, villes et expertises, ressources SEO/GEO, profils publiés et découverte machine.    |
+| `/admin`    | Portefeuille, onboarding, dossier client, laboratoire d'audit et espaces SEO, GEO et Agent. |
+| `/portal`   | Synthèses et tendances en lecture seule, limitées aux memberships résolus côté serveur.     |
+| `/espace`   | Connexion et orientation vers l'espace autorisé.                                            |
 
 Les audits combinent crawl borné, scoring déterministe et analyse IA avec replis. Les prompts suivis conservent réponses, parsing et provenance ; les comparaisons ponctuelles servent à la calibration. Google OAuth/GA4/GSC, Mistral, Groq et Gemini possèdent des adaptateurs dans le dépôt. Leur présence ne prouve aucune connexion distante active ni résultat client. Les métriques décrivent les observations stockées : absence, erreur et vrai zéro restent distincts.
 
@@ -52,14 +52,14 @@ node --test scripts/__tests__/hibernation.test.mjs
 
 ## Mécanismes à lire dans le code
 
-| Mécanisme | Implémentation | Tests locaux |
-|---|---|---|
-| Audit et crawl borné | [Route autorisée](src/app/api/admin/audits/run/route.js), [lancement et finalisation](src/lib/audit/run-audit.js), [scanner](src/lib/audit/scanner.js) | [Frontière de crawl](src/lib/__tests__/site-audit-crawler-frontier.test.js) ; les tests de crawl ne valident pas les écritures d'une base réelle. |
-| Score absent, zéro et provenance | [Lecture des scores](src/lib/audit/scores-facade.js), [snapshot métier](src/lib/operator-intelligence/snapshot.js) | [Formats historiques](src/lib/__tests__/score-readings.test.js), [sources partielles ou en erreur](src/lib/__tests__/workspace-snapshot.test.js). |
-| Veille sociale par étapes | [Orchestrateur](src/lib/agent-reach/pipeline.js) : contexte, collecte, enrichissement, signaux et persistance | [Cycle de collecte et finalisation](src/lib/__tests__/engine-community-pipeline.test.js), [replis et limites de collecte](src/lib/__tests__/engine-community-collection.test.js). |
-| Autorisation portail | [Membership serveur](src/features/portal/server/access.js), [page client](src/features/portal/PortalClientPage.jsx) | [Accès anonyme, identité vérifiée et isolation client](src/lib/__tests__/portal-access.test.js). |
-| Chargement d'une vue métier | [Vue GEO](src/features/admin/geo/GeoOverviewView.tsx), [sélection des slices](src/lib/operator-intelligence/geo-slice-loaders.js) | [Chargement à la demande](src/lib/__tests__/geo-slice-loaders.test.js), [réponses tardives et contexte client](src/features/admin/shared/layout/__tests__/client-workspace-freshness.test.jsx). |
-| Hibernation | [Validateur du contrat statique](scripts/validate-hibernation.mjs), [configuration Vercel](vercel.json) | [Configurations permises et interdites](scripts/__tests__/hibernation.test.mjs). |
+| Mécanisme                        | Implémentation                                                                                                                                         | Tests locaux                                                                                                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audit et crawl borné             | [Route autorisée](src/app/api/admin/audits/run/route.js), [lancement et finalisation](src/lib/audit/run-audit.js), [scanner](src/lib/audit/scanner.js) | [Frontière de crawl](src/lib/__tests__/site-audit-crawler-frontier.test.js) ; les tests de crawl ne valident pas les écritures d'une base réelle.                                               |
+| Score absent, zéro et provenance | [Lecture des scores](src/lib/audit/scores-facade.js), [snapshot métier](src/lib/operator-intelligence/snapshot.js)                                     | [Formats historiques](src/lib/__tests__/score-readings.test.js), [sources partielles ou en erreur](src/lib/__tests__/workspace-snapshot.test.js).                                               |
+| Veille sociale par étapes        | [Orchestrateur](src/lib/agent-reach/pipeline.js) : contexte, collecte, enrichissement, signaux et persistance                                          | [Cycle de collecte et finalisation](src/lib/__tests__/engine-community-pipeline.test.js), [replis et limites de collecte](src/lib/__tests__/engine-community-collection.test.js).               |
+| Autorisation portail             | [Membership serveur](src/features/portal/server/access.js), [page client](src/features/portal/PortalClientPage.jsx)                                    | [Accès anonyme, identité vérifiée et isolation client](src/lib/__tests__/portal-access.test.js).                                                                                                |
+| Chargement d'une vue métier      | [Vue GEO](src/features/admin/geo/GeoOverviewView.tsx), [sélection des slices](src/lib/operator-intelligence/geo-slice-loaders.js)                      | [Chargement à la demande](src/lib/__tests__/geo-slice-loaders.test.js), [réponses tardives et contexte client](src/features/admin/shared/layout/__tests__/client-workspace-freshness.test.jsx). |
+| Hibernation                      | [Validateur du contrat statique](scripts/validate-hibernation.mjs), [configuration Vercel](vercel.json)                                                | [Configurations permises et interdites](scripts/__tests__/hibernation.test.mjs).                                                                                                                |
 
 Ces tests utilisent des fixtures et IO simulées. Ils ne prouvent pas les sessions Clerk réelles, les politiques d'une base distante ou le fonctionnement des fournisseurs. Le Hibernation Gate automatique protège le parking ; la validation applicative de la CI est manuelle et ne déploie rien.
 

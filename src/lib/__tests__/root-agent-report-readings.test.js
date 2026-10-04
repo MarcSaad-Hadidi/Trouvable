@@ -4,10 +4,17 @@ import { __internal__ as protocols, buildProtocolsReport } from '../agent/protoc
 
 afterEach(() => vi.useRealTimers());
 
-describe.each([['actionability', actionability, buildActionabilityReport], ['protocols', protocols, buildProtocolsReport]])('%s report readings', (_name, internals, report) => {
+describe.each([
+    ['actionability', actionability, buildActionabilityReport],
+    ['protocols', protocols, buildProtocolsReport],
+])('%s report readings', (_name, internals, report) => {
     it.each([
-        [0, 'calculated'], [24 * 60, 'calculated'], [24 * 60 + 1, 'stale'],
-        [24 * 180, 'stale'], [24 * 180 + 1, 'low'], [-1, 'calculated'],
+        [0, 'calculated'],
+        [24 * 60, 'calculated'],
+        [24 * 60 + 1, 'stale'],
+        [24 * 180, 'stale'],
+        [24 * 180 + 1, 'low'],
+        [-1, 'calculated'],
     ])('preserves the reliability threshold at %s hours', (hours, reliability) => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date('2026-10-03T12:00:00Z'));
@@ -15,9 +22,12 @@ describe.each([['actionability', actionability, buildActionabilityReport], ['pro
         expect(internals.deriveReliability(audit)).toBe(reliability);
         expect(report({ audit }).summary.auditFreshnessHours).toBe(hours);
     });
-    it.each([null, {}, { created_at: 'invalid' }, { created_at: '' }])('preserves unavailable reliability for %j', (audit) => {
-        expect(internals.deriveReliability(audit)).toBe('unavailable');
-    });
+    it.each([null, {}, { created_at: 'invalid' }, { created_at: '' }])(
+        'preserves unavailable reliability for %j',
+        (audit) => {
+            expect(internals.deriveReliability(audit)).toBe('unavailable');
+        },
+    );
     it('keeps report clamp semantics for non-finite and out-of-range inputs', () => {
         expect(internals.clamp(null)).toBe(0);
         expect(internals.clamp(Infinity, 10, 90)).toBe(10);

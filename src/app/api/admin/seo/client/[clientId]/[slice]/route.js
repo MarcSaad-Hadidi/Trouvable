@@ -52,8 +52,6 @@ const LOADERS = {
     },
 };
 
-
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
@@ -88,4 +86,3 @@ export async function GET(request, { params }) {
         return noStoreJson({ error: 'Erreur chargement tranche SEO' }, { status: 500 });
     }
 }
-

@@ -249,10 +249,7 @@ describe('playwright-renderer remote browser strategy', () => {
         expect(renderer.available).toBe(true);
         expect(renderer.reason).toBe('remote_browser');
         expect(connectSpy).toHaveBeenCalledOnce();
-        expect(connectSpy).toHaveBeenCalledWith(
-            'wss://cloud.browserless.io/?token=placeholder',
-            { timeout: 10_000 }
-        );
+        expect(connectSpy).toHaveBeenCalledWith('wss://cloud.browserless.io/?token=placeholder', { timeout: 10_000 });
     });
 
     it('reports clear error when remote endpoint is configured but connection fails', async () => {
@@ -384,9 +381,11 @@ describe('playwright-renderer remote browser strategy', () => {
         vi.doMock('playwright-core', () => ({
             chromium: {
                 launch: vi.fn(),
-                connect: vi.fn().mockRejectedValue(
-                    new Error(`browserType.connect: WebSocket error: connect ECONNREFUSED ${secretEndpoint}`)
-                ),
+                connect: vi
+                    .fn()
+                    .mockRejectedValue(
+                        new Error(`browserType.connect: WebSocket error: connect ECONNREFUSED ${secretEndpoint}`),
+                    ),
             },
         }));
 
@@ -414,9 +413,7 @@ describe('playwright-renderer remote browser strategy', () => {
         vi.doMock('playwright-core', () => ({
             chromium: {
                 launch: vi.fn(),
-                connect: vi.fn().mockRejectedValue(
-                    new Error('auth failed for query ?token=PARTIAL_SECRET_42')
-                ),
+                connect: vi.fn().mockRejectedValue(new Error('auth failed for query ?token=PARTIAL_SECRET_42')),
             },
         }));
 

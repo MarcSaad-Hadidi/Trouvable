@@ -15,14 +15,17 @@ description: Review and improve UI components for premium visual quality, consis
 ## Design system reference
 
 ### Typography scale
+
 - Headings: `text-4xl`/`text-3xl`/`text-2xl`/`text-xl` with `font-bold` or `font-semibold`
 - Body: `text-base` or `text-sm` with `text-gray-600` for secondary
 - Labels: `text-xs` or `text-sm` with `uppercase tracking-wider` for badges/tags
 
 ### Color palette
+
 Use the existing surface's palette: operator discipline CSS variables in `src/features/admin/shared/admin-shell.css`, canonical `src/lib/design/tokens.ts`, and `tailwind.config.mjs`. Public pages keep the styles of neighboring `src/features/public/` components. Do not replace these with a generic palette.
 
 ### Spacing rhythm
+
 - Section padding: `py-16` or `py-20`
 - Card padding: `p-6` or `p-8`
 - Element gaps: `gap-4`, `gap-6`, `gap-8`
@@ -41,6 +44,7 @@ Use the existing surface's palette: operator discipline CSS variables in `src/fe
 ### 2. Interactive states check
 
 Every interactive element must have:
+
 - [ ] Default state
 - [ ] Hover state (`hover:`)
 - [ ] Focus state (`focus:ring-2 focus:ring-offset-2`)
@@ -78,12 +82,17 @@ Every interactive element must have:
 ## UI Review: [Component/Page]
 
 ### Visual Hierarchy: ✅/⚠️/❌
+
 ### Interactive States: ✅/⚠️/❌
+
 ### Responsive: ✅/⚠️/❌
+
 ### Animation: ✅/⚠️/❌
+
 ### Component Quality: ✅/⚠️/❌
 
 ### Issues Found:
+
 1. [Issue + fix suggestion]
 
 ### Verdict: PREMIUM / ACCEPTABLE / NEEDS WORK

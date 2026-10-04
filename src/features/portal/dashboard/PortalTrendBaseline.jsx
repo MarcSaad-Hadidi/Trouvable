@@ -65,10 +65,9 @@ export function TrendBaselineNarrativeBlock({ points }) {
             className="mb-6 rounded-xl border border-white/[0.05] bg-white/[0.02] px-5 py-4"
         >
             <p className="text-[13px] leading-[1.75] text-white/42">
-                <span className="font-semibold text-white/55">Lecture initiale.</span>{' '}
-                Cette première photographie de vos indicateurs sert de point de départ. La base de comparaison
-                se construit au fil des prochains cycles. Les tendances se préciseront dès que plusieurs mesures
-                seront disponibles.
+                <span className="font-semibold text-white/55">Lecture initiale.</span> Cette première photographie de
+                vos indicateurs sert de point de départ. La base de comparaison se construit au fil des prochains
+                cycles. Les tendances se préciseront dès que plusieurs mesures seront disponibles.
             </p>
         </motion.div>
     );
@@ -117,12 +116,8 @@ export function TrendDualBaselineScores({ metrics }) {
                     <span className="text-[10px] text-white/22">Courbes après 2e mesure</span>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {seoM?.latest != null && (
-                        <BaselineScorePillar label="SEO" value={seoM.latest} accent="#34d399" />
-                    )}
-                    {geoM?.latest != null && (
-                        <BaselineScorePillar label="GEO" value={geoM.latest} accent="#7b8fff" />
-                    )}
+                    {seoM?.latest != null && <BaselineScorePillar label="SEO" value={seoM.latest} accent="#34d399" />}
+                    {geoM?.latest != null && <BaselineScorePillar label="GEO" value={geoM.latest} accent="#7b8fff" />}
                 </div>
                 <div className="mt-4 flex items-center gap-2 border-t border-white/[0.04] pt-4">
                     <span className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />

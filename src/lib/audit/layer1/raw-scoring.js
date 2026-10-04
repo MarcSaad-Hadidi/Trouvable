@@ -12,10 +12,14 @@ import { PAGE_CHECK_STATUS } from './page-checks.js';
 
 function weightedStatusScore(status) {
     switch (status) {
-        case PAGE_CHECK_STATUS.PASS: return 1;
-        case PAGE_CHECK_STATUS.WARN: return 0.4;
-        case PAGE_CHECK_STATUS.FAIL: return 0;
-        default: return null;
+        case PAGE_CHECK_STATUS.PASS:
+            return 1;
+        case PAGE_CHECK_STATUS.WARN:
+            return 0.4;
+        case PAGE_CHECK_STATUS.FAIL:
+            return 0;
+        default:
+            return null;
     }
 }
 
@@ -71,9 +75,7 @@ export function aggregateRawScores(pageResults = []) {
 
     const categoryScores = {};
     for (const [category, bucket] of Object.entries(categories)) {
-        const score = bucket.weighted_total > 0
-            ? (bucket.weighted_achieved / bucket.weighted_total) * 100
-            : 0;
+        const score = bucket.weighted_total > 0 ? (bucket.weighted_achieved / bucket.weighted_total) * 100 : 0;
         categoryScores[category] = {
             score: roundScore(score),
             pass: bucket.pass,

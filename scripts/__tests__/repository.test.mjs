@@ -25,7 +25,7 @@ afterEach(() => {
 
 test('resolves static, reexport, dynamic and mock imports with exact tracked casing', () => {
     const report = fixture({
-        'src/lib/a.js': "export const a = 1;",
+        'src/lib/a.js': 'export const a = 1;',
         'src/lib/b.js': "export { a } from './a';",
         'src/app/page.jsx': "import { a } from '@/lib/b'; export default () => a; import('@/lib/a');",
         'src/lib/__tests__/a.test.js': "vi.mock('@/lib/a', () => ({}));",
@@ -36,7 +36,7 @@ test('resolves static, reexport, dynamic and mock imports with exact tracked cas
 
 test('fails on imports that work only on a case-insensitive filesystem', () => {
     const report = fixture({
-        'src/lib/Metric.js': "export const metric = 0;",
+        'src/lib/Metric.js': 'export const metric = 0;',
         'src/app/page.js': "import { metric } from '@/lib/metric'; export default metric;",
     });
     assert.equal(report.errors[0].kind, 'import-case');
@@ -60,7 +60,10 @@ test('checks relative documentation targets and duplicate heading anchors, exclu
     assert.equal(report.docLinks, 1);
     assert.deepEqual(report.errors, []);
     const broken = fixture({ 'README.md': '[missing](no.md) [anchor](#absent)\n' });
-    assert.deepEqual(broken.errors.map((error) => error.kind), ['missing-doc-link', 'missing-doc-anchor']);
+    assert.deepEqual(
+        broken.errors.map((error) => error.kind),
+        ['missing-doc-link', 'missing-doc-anchor'],
+    );
 });
 
 test('checks literal JSX assets and rejects tracked generated browser output', () => {
@@ -70,7 +73,10 @@ test('checks literal JSX assets and rejects tracked generated browser output', (
         'test-results/trace.zip': '',
     });
     assert.equal(report.assetReferences, 1);
-    assert.deepEqual(report.errors.map((error) => error.kind), ['generated-artifact']);
+    assert.deepEqual(
+        report.errors.map((error) => error.kind),
+        ['generated-artifact'],
+    );
 });
 
 test('reports computed imports as a coverage limit instead of pretending to resolve them', () => {

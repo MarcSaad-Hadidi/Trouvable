@@ -45,21 +45,28 @@ export default function DossierActivityView() {
             eyebrow="console.mission.log"
             title="Centre de lecture événements"
             subtitle="Triptyque : filtres et métriques à gauche, fil principal au centre, inspection sémantique à droite — sans chronologie latérale classique."
-            actions={(
+            actions={
                 <>
-                    <Link href={`${base}/dossier`} className={COMMAND_BUTTONS.secondary}>Dossier</Link>
+                    <Link href={`${base}/dossier`} className={COMMAND_BUTTONS.secondary}>
+                        Dossier
+                    </Link>
                     <Link href={`${base}/geo/continuous`} className={cn(COMMAND_BUTTONS.primary, 'gap-2')}>
                         <Activity className="h-4 w-4" />
                         Suivi continu
                     </Link>
                 </>
-            )}
+            }
         />
     );
 
     return (
         <CommandPageShell header={header} className="text-white">
-            <motion.div initial="hidden" animate="visible" variants={stagger} className="mx-auto grid max-w-[1900px] gap-0 lg:grid-cols-[280px_minmax(0,1fr)_340px] lg:min-h-[calc(100vh-200px)]">
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={stagger}
+                className="mx-auto grid max-w-[1900px] gap-0 lg:grid-cols-[280px_minmax(0,1fr)_340px] lg:min-h-[calc(100vh-200px)]"
+            >
                 {/* Colonne A — métriques & raccourcis */}
                 <aside className="border-b border-white/[0.05] bg-[#060708] p-6 lg:border-b-0 lg:border-r lg:border-white/[0.05]">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30 mb-6">
@@ -69,10 +76,21 @@ export default function DossierActivityView() {
                     <div className="space-y-3">
                         {Array.isArray(data.summaryCards) && data.summaryCards.length > 0 ? (
                             data.summaryCards.map((item) => (
-                                <div key={item.id || item.label} className="rounded-xl border border-white/[0.05] bg-white/[0.01] px-4 py-4 group hover:bg-white/[0.02] transition-colors">
-                                    <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/20 group-hover:text-white/40 transition-colors">{item.label}</div>
-                                    <div className="mt-1 text-2xl font-bold tabular-nums text-white/90">{item.value ?? '—'}</div>
-                                    {item.detail ? <div className="mt-1 text-[10px] text-white/20 italic">&quot;{item.detail}&quot;</div> : null}
+                                <div
+                                    key={item.id || item.label}
+                                    className="rounded-xl border border-white/[0.05] bg-white/[0.01] px-4 py-4 group hover:bg-white/[0.02] transition-colors"
+                                >
+                                    <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/20 group-hover:text-white/40 transition-colors">
+                                        {item.label}
+                                    </div>
+                                    <div className="mt-1 text-2xl font-bold tabular-nums text-white/90">
+                                        {item.value ?? '—'}
+                                    </div>
+                                    {item.detail ? (
+                                        <div className="mt-1 text-[10px] text-white/20 italic">
+                                            &quot;{item.detail}&quot;
+                                        </div>
+                                    ) : null}
                                 </div>
                             ))
                         ) : (
@@ -116,11 +134,15 @@ export default function DossierActivityView() {
                                             type="button"
                                             onClick={() => setFocusId(item.id)}
                                             className={`w-full text-left px-6 py-6 transition-all border-b border-white/[0.03] last:border-0 ${
-                                                active ? 'bg-emerald-500/[0.03] border-l-2 border-l-emerald-500' : 'hover:bg-white/[0.01]'
+                                                active
+                                                    ? 'bg-emerald-500/[0.03] border-l-2 border-l-emerald-500'
+                                                    : 'hover:bg-white/[0.01]'
                                             }`}
                                         >
                                             <div className="flex flex-wrap items-center gap-3">
-                                                <span className="font-mono text-[10px] text-white/10">{String(index + 1).padStart(3, '0')}</span>
+                                                <span className="font-mono text-[10px] text-white/10">
+                                                    {String(index + 1).padStart(3, '0')}
+                                                </span>
                                                 {item.category ? (
                                                     <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] bg-[#7c6aef]/10 text-[#7c6aef] border border-[#7c6aef]/20">
                                                         {item.category}
@@ -134,10 +156,14 @@ export default function DossierActivityView() {
                                             </div>
                                             <div className="mt-3 text-[15px] font-bold text-white/90">{item.title}</div>
                                             {item.description ? (
-                                                <p className="mt-1 text-[12px] leading-relaxed text-white/30 line-clamp-2 italic">&quot;{item.description}&quot;</p>
+                                                <p className="mt-1 text-[12px] leading-relaxed text-white/30 line-clamp-2 italic">
+                                                    &quot;{item.description}&quot;
+                                                </p>
                                             ) : null}
                                             {item.timestamp ? (
-                                                <div className="mt-4 text-[10px] font-mono text-white/10 uppercase tracking-widest">{formatDateTime(item.timestamp)}</div>
+                                                <div className="mt-4 text-[10px] font-mono text-white/10 uppercase tracking-widest">
+                                                    {formatDateTime(item.timestamp)}
+                                                </div>
                                             ) : null}
                                         </button>
                                     );
@@ -168,10 +194,16 @@ export default function DossierActivityView() {
                                 className="space-y-6"
                             >
                                 <div className="rounded-2xl border border-white/[0.05] bg-white/[0.01] p-6">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7c6aef] mb-4">Payload</div>
-                                    <h2 className="text-[18px] font-bold leading-snug text-white/90">{focused.title}</h2>
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7c6aef] mb-4">
+                                        Payload
+                                    </div>
+                                    <h2 className="text-[18px] font-bold leading-snug text-white/90">
+                                        {focused.title}
+                                    </h2>
                                     {focused.description ? (
-                                        <p className="mt-4 text-[13px] leading-relaxed text-white/40 italic">&quot;{focused.description}&quot;</p>
+                                        <p className="mt-4 text-[13px] leading-relaxed text-white/40 italic">
+                                            &quot;{focused.description}&quot;
+                                        </p>
                                     ) : null}
                                     {focused.timestamp ? (
                                         <div className="mt-6 rounded-xl border border-white/[0.05] bg-black/40 px-4 py-3 text-[11px] font-mono text-white/20 uppercase tracking-widest">
@@ -197,7 +229,9 @@ export default function DossierActivityView() {
 
                     {quickLinks.length > 5 ? (
                         <div className="mt-8 space-y-3 border-t border-white/[0.06] pt-6">
-                            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/28">Cartes larges</div>
+                            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/28">
+                                Cartes larges
+                            </div>
                             <div className="space-y-2">
                                 {quickLinks.map((item) => (
                                     <DossierQuickLinkCard key={item.id} item={item} />
@@ -206,7 +240,7 @@ export default function DossierActivityView() {
                         </div>
                     ) : null}
                 </aside>
-        </motion.div>
+            </motion.div>
         </CommandPageShell>
     );
 }

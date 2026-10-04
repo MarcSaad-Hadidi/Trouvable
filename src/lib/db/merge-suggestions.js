@@ -11,8 +11,6 @@ export async function getMergeSuggestions(clientId, status = null) {
     return data || [];
 }
 
-
-
 export async function archiveOldMergeSuggestionsExceptAudit(clientId, auditId) {
     let query = sb()
         .from('merge_suggestions')
@@ -34,7 +32,9 @@ export async function createMergeSuggestions(suggestions) {
     const { data, error } = await sb().from('merge_suggestions').insert(suggestions).select();
     if (error) {
         if (error.code === '23503' && typeof error.details === 'string' && error.details.includes('table "clients"')) {
-            throw new Error('[DB] createMergeSuggestions: live merge_suggestions.client_id foreign key still points to legacy table "clients". Apply the foreign-key repair migration before rerunning the audit.');
+            throw new Error(
+                '[DB] createMergeSuggestions: live merge_suggestions.client_id foreign key still points to legacy table "clients". Apply the foreign-key repair migration before rerunning the audit.',
+            );
         }
         throw new Error(`[DB] createMergeSuggestions: ${error.message}`);
     }

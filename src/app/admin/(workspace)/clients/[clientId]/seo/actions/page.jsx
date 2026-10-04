@@ -9,4 +9,3 @@ export default async function SeoActionsPage({ params }) {
     const { clientId } = await params;
     redirect(`/admin/clients/${clientId}/seo/opportunities`);
 }
-

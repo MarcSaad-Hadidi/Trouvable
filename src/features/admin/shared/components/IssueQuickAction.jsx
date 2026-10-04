@@ -22,7 +22,8 @@ import { normalizeProblemRef } from '@/lib/correction-prompts/problem-ref';
  */
 
 const VARIANT_CLASSES = {
-    primary: 'border-violet-400/30 bg-gradient-to-r from-violet-500/20 to-violet-500/10 text-violet-100 hover:from-violet-500/30 hover:to-violet-500/20',
+    primary:
+        'border-violet-400/30 bg-gradient-to-r from-violet-500/20 to-violet-500/10 text-violet-100 hover:from-violet-500/30 hover:to-violet-500/20',
     ghost: 'border-white/[0.08] bg-white/[0.03] text-white/72 hover:border-white/[0.16] hover:bg-white/[0.08] hover:text-white/92',
     inline: 'border-transparent bg-transparent text-violet-300 hover:text-violet-200 px-0',
 };

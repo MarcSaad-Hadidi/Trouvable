@@ -20,7 +20,10 @@ export async function sendPortalInvitationEmail({ contactEmail, clientName, clie
     }
 
     const resend = new Resend(resendApiKey);
-    const appUrl = process.env.NODE_ENV === 'production' ? 'https://trouvable.app' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+    const appUrl =
+        process.env.NODE_ENV === 'production'
+            ? 'https://trouvable.app'
+            : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const portalUrl = `${appUrl}/espace`;
     const displayName = clientName || 'votre dossier';
 
@@ -105,7 +108,9 @@ export async function sendPortalInvitationEmail({ contactEmail, clientName, clie
                             </a>
                         </div>
 
-                        ${clientId && clientSlug ? `
+                        ${
+                            clientId && clientSlug
+                                ? `
                         <!-- Connect GSC button -->
                         <div style="text-align: center; margin: 0 0 32px 0;">
                             <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin: 0 0 12px 0;">
@@ -115,7 +120,9 @@ export async function sendPortalInvitationEmail({ contactEmail, clientName, clie
                                 Connecter Google Search Console
                             </a>
                         </div>
-                        ` : ''}
+                        `
+                                : ''
+                        }
 
                         <!-- Next steps -->
                         <div style="background-color: #1a1a1e; border: 1px solid #27272a; border-radius: 12px; padding: 18px 22px; margin: 0 0 24px 0;">
@@ -162,9 +169,5 @@ export async function sendPortalInvitationEmail({ contactEmail, clientName, clie
 
 function escapeHtml(str) {
     if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

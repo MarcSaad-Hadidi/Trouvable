@@ -48,7 +48,7 @@ describe('assertCronAuthorized', () => {
         expect(() => assertCronAuthorized(req)).toThrow();
     });
 
-    it('set le code CRON_UNAUTHORIZED sur l\'erreur de refus', () => {
+    it("set le code CRON_UNAUTHORIZED sur l'erreur de refus", () => {
         const req = makeRequest({ authorization: 'Bearer mauvais' });
         try {
             assertCronAuthorized(req);

@@ -32,4 +32,3 @@ export const PROVENANCE_META = {
 export function getProvenanceMeta(value) {
     return PROVENANCE_META[value] || PROVENANCE_META.derived;
 }
-

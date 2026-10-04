@@ -36,7 +36,7 @@ function measurementInstructions(discoveryMode) {
     /** @type {Record<string, string>} */
     const rules = {
         blind_discovery:
-            'Ne jamais inclure le nom de l\'entreprise cliente ni un pitch sur elle. Questions de marché pures ; le but est de mesurer une mention spontanee eventuelle.',
+            "Ne jamais inclure le nom de l'entreprise cliente ni un pitch sur elle. Questions de marché pures ; le but est de mesurer une mention spontanee eventuelle.",
         neutral_brand_check:
             'Le nom de la marque peut apparaitre comme sujet neutre (« X a Montreal », verification factuelle courte). Pas de reformulation marketing du mandat.',
         skeptical_brand_evaluation:
@@ -44,9 +44,9 @@ function measurementInstructions(discoveryMode) {
         competitor_discovery:
             'Ne pas cadrer la reponse sur la marque cliente comme sujet principal. Alternatives, « meilleurs choix », comparaisons de segment avec ancrage geo.',
         source_grounded_evaluation:
-            'Formuler comme une demande d\'evaluation ou de synthese basee sur des sources, avis ou faits verifiables (sans inventer de sources).',
+            "Formuler comme une demande d'evaluation ou de synthese basee sur des sources, avis ou faits verifiables (sans inventer de sources).",
         controlled_context_answer:
-            'Questions qui supposent un contexte connu sur l\'entreprise ou son offre (tests internes, QA). Peuvent etre plus directes sur le positionnement.',
+            "Questions qui supposent un contexte connu sur l'entreprise ou son offre (tests internes, QA). Peuvent etre plus directes sur le positionnement.",
         brand_aware:
             'Le nom de la marque et le contexte metier peuvent etre presupposes dans la question, comme en mode marque explicite historique.',
     };
@@ -96,9 +96,13 @@ Chaque prompt inclut un scénario ou besoin concret, pas de questions génériqu
 ## RÈGLE #7 — QUALITÉ
 Chaque prompt doit être immédiatement utilisable. Pas de placeholder, pas de [X].
 
-${discoveryMode ? '' : `## RÈGLE #8 — NOM D'ENTREPRISE (si aucun type de mesure impose)
+${
+    discoveryMode
+        ? ''
+        : `## RÈGLE #8 — NOM D'ENTREPRISE (si aucun type de mesure impose)
 - Par defaut : ne pas mentionner le nom de l'entreprise cliente dans le texte du prompt, sauf consigne explicite de l'operateur.
-`}
+`
+}
 
 ## FORMAT DE SORTIE — JSON STRICT
 
@@ -131,13 +135,17 @@ function buildUserMessage(data) {
         parts.push(data.intent.trim());
     } else if (hasMandate) {
         parts.push(`\n## Objectif`);
-        parts.push(`Génère des prompts de recherche naturels pour améliorer la visibilité GEO de cette entreprise dans sa région.`);
+        parts.push(
+            `Génère des prompts de recherche naturels pour améliorer la visibilité GEO de cette entreprise dans sa région.`,
+        );
     }
 
     if (data.category) parts.push(`\nCatégorie/famille souhaitée : ${data.category}`);
     if (data.locale) parts.push(`Locale : ${data.locale}`);
     if (data.prompt_mode) {
-        parts.push(`Mode souhaité : ${data.prompt_mode === 'operator_probe' ? 'sonde opérateur (verbe d\'action)' : 'question utilisateur naturelle'}`);
+        parts.push(
+            `Mode souhaité : ${data.prompt_mode === 'operator_probe' ? "sonde opérateur (verbe d'action)" : 'question utilisateur naturelle'}`,
+        );
     }
     if (data.discovery_mode) {
         const meta = DISCOVERY_MODE_META[data.discovery_mode];
@@ -181,7 +189,10 @@ export async function POST(request) {
     const hasIntent = parsed.data.intent && parsed.data.intent.trim().length > 0;
     const hasMandate = parsed.data.business_name || parsed.data.business_type || parsed.data.target_region;
     if (!hasIntent && !hasMandate) {
-        return NextResponse.json({ error: 'Contexte insuffisant : fournissez le contexte du mandat ou une consigne.' }, { status: 400 });
+        return NextResponse.json(
+            { error: 'Contexte insuffisant : fournissez le contexte du mandat ou une consigne.' },
+            { status: 400 },
+        );
     }
 
     const count = parsed.data.count || 4;
@@ -191,7 +202,10 @@ export async function POST(request) {
     if (rawDiscovery) {
         resolvedDiscovery = normalizeDiscoveryMode(rawDiscovery);
         if (GENERATION_BLOCKED_DISCOVERY.has(resolvedDiscovery)) {
-            return NextResponse.json({ error: 'Type de mesure non pris en charge pour la generation.' }, { status: 400 });
+            return NextResponse.json(
+                { error: 'Type de mesure non pris en charge pour la generation.' },
+                { status: 400 },
+            );
         }
     }
 
@@ -199,7 +213,10 @@ export async function POST(request) {
         const result = await callAiJson({
             messages: [
                 { role: 'system', content: buildSystemPrompt(count, resolvedDiscovery) },
-                { role: 'user', content: buildUserMessage({ ...parsed.data, count, discovery_mode: resolvedDiscovery }) },
+                {
+                    role: 'user',
+                    content: buildUserMessage({ ...parsed.data, count, discovery_mode: resolvedDiscovery }),
+                },
             ],
             purpose: 'onboarding',
             temperature: 0.7,

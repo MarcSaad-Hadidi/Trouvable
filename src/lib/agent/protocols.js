@@ -22,9 +22,9 @@ import { clamp, toArray, hoursSince, deriveReliability } from './report-readings
 
 export const PROTOCOL_DIMENSION_WEIGHTS = Object.freeze({
     llms_txt: 0.35,
-    ai_discovery: 0.20,
+    ai_discovery: 0.2,
     schema_entity: 0.25,
-    crawler_access: 0.20,
+    crawler_access: 0.2,
 });
 
 const DIMENSION_LABELS = Object.freeze({
@@ -66,7 +66,9 @@ function buildLlmsTxtDimension({ expert }) {
         score = clamp(Number(deep?.score) || 0);
         const sections = deep.details.sections_detected || {};
         const sectionCount = Object.values(sections).filter(Boolean).length;
-        evidence.push(`llms.txt détecté (${deep.details.h2_count || 0} sections, ${deep.details.internal_links || 0} liens internes).`);
+        evidence.push(
+            `llms.txt détecté (${deep.details.h2_count || 0} sections, ${deep.details.internal_links || 0} liens internes).`,
+        );
         if (deep.details.full_variant_found) evidence.push('llms-full.txt également servi.');
         if (sectionCount >= 3) evidence.push(`${sectionCount} sections recommandées couvertes.`);
         else gaps.push('Moins de 3 sections standard (overview / products / docs / contact / policies).');
@@ -156,7 +158,8 @@ function buildAiDiscoveryDimension({ expert }) {
 function buildSchemaEntityDimension({ extracted, expert }) {
     const brand = expert?.brand_entity || null;
     const hasOrg = extracted?.has_organization_schema === true || brand?.details?.has_organization_schema === true;
-    const hasLocal = extracted?.has_local_business_schema === true || brand?.details?.has_local_business_schema === true;
+    const hasLocal =
+        extracted?.has_local_business_schema === true || brand?.details?.has_local_business_schema === true;
     const hasFaq = extracted?.has_faq_schema === true;
     const evidence = [];
     const gaps = [];
@@ -231,7 +234,10 @@ function buildCrawlerAccessDimension({ layered }) {
         if (rawScore >= 90) evidence.push('Aucun crawler IA critique bloqué dans robots.txt.');
         else if (rawScore >= 70) evidence.push('robots.txt majoritairement ouvert aux crawlers IA.');
         else if (rawScore >= 40) gaps.push('robots.txt limite partiellement les crawlers IA critiques.');
-        else gaps.push('robots.txt bloque des crawlers IA critiques (GPTBot, ClaudeBot, Google-Extended, PerplexityBot).');
+        else
+            gaps.push(
+                'robots.txt bloque des crawlers IA critiques (GPTBot, ClaudeBot, Google-Extended, PerplexityBot).',
+            );
     } else {
         gaps.push('Score crawler access indisponible — audit trop ancien ou erreur de fetch.');
     }
@@ -331,17 +337,10 @@ export function buildProtocolsReport({ audit = null } = {}) {
     const rawGlobal = weightSum > 0 ? weighted / weightSum : null;
 
     const anyObserved = dimensions.some((dim) => dim.score > 0);
-    const globalScore = rawGlobal === null
-        ? null
-        : Math.round(anyObserved ? rawGlobal : Math.min(rawGlobal, 40));
+    const globalScore = rawGlobal === null ? null : Math.round(anyObserved ? rawGlobal : Math.min(rawGlobal, 40));
 
-    const globalStatus = globalScore === null
-        ? 'unavailable'
-        : globalScore >= 70
-            ? 'couvert'
-            : globalScore >= 40
-                ? 'partiel'
-                : 'bloqué';
+    const globalStatus =
+        globalScore === null ? 'unavailable' : globalScore >= 70 ? 'couvert' : globalScore >= 40 ? 'partiel' : 'bloqué';
 
     return {
         available: true,

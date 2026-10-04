@@ -3,11 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import ClientForm from '@/features/admin/portfolio/ClientForm';
-import {
-    COMMAND_BUTTONS,
-    CommandHeader,
-    CommandPageShell,
-} from '@/features/admin/shared/components/command';
+import { COMMAND_BUTTONS, CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +17,9 @@ export default async function EditClientPage({ params }) {
 
     const { data: client, error } = await supabase
         .from('client_geo_profiles')
-        .select('id, client_name, client_slug, website_url, business_type, seo_title, seo_description, is_published, social_profiles, address, geo_faqs')
+        .select(
+            'id, client_name, client_slug, website_url, business_type, seo_title, seo_description, is_published, social_profiles, address, geo_faqs',
+        )
         .eq('id', clientId)
         .single();
 
@@ -32,7 +30,7 @@ export default async function EditClientPage({ params }) {
             eyebrow="Paramètres mandat · Édition"
             title={`Éditer : ${client.client_name}`}
             subtitle="Profil SEO/GEO du mandat. Les changements ici sont appliqués au site public et à l’ensemble des analyses."
-            actions={(
+            actions={
                 <>
                     <Link href={`/admin/clients/${clientId}/dossier`} className={COMMAND_BUTTONS.secondary}>
                         Retour au dossier
@@ -41,7 +39,7 @@ export default async function EditClientPage({ params }) {
                         Paramètres
                     </Link>
                 </>
-            )}
+            }
         />
     );
 
@@ -51,4 +49,3 @@ export default async function EditClientPage({ params }) {
         </CommandPageShell>
     );
 }
-

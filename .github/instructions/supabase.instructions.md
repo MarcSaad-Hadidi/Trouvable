@@ -1,5 +1,5 @@
 ---
-applyTo: "supabase/**,sql/**,src/lib/db/**,src/lib/supabase-admin.js,src/lib/supabase/**,src/lib/queries/**,src/lib/actions/**,src/lib/data/**,src/features/portal/server/**"
+applyTo: 'supabase/**,sql/**,src/lib/db/**,src/lib/supabase-admin.js,src/lib/supabase/**,src/lib/queries/**,src/lib/actions/**,src/lib/data/**,src/features/portal/server/**'
 ---
 
 # Supabase safety workflow
@@ -18,6 +18,7 @@ Every schema, policy, auth, or query change follows the relevant steps below. A 
 ## 2. Assess impact
 
 Before proposing SQL:
+
 - **RLS impact** — Does this change weaken, remove, or bypass existing row-level security?
 - **Data loss risk** — Does this DROP, TRUNCATE, or ALTER columns with existing data?
 - **Auth boundary** — Does this affect which users/roles can read or write?
@@ -65,6 +66,7 @@ const { data, error } = await getAdminSupabase().from('table').select('id');
 ## 7. Validation checklist
 
 After any Supabase change:
+
 - [ ] Proposed SQL is idempotent when applicable; a query-only change requires no migration
 - [ ] RLS is not weakened without explicit justification
 - [ ] Ordered migration represents the structural change; historical reconstruction sources preserved

@@ -9,4 +9,3 @@ export default async function VisibilityPage({ params }) {
     const { clientId } = await params;
     redirect(`/admin/clients/${clientId}/seo/visibility`);
 }
-

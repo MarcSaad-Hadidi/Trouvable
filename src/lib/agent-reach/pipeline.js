@@ -1,11 +1,25 @@
 import 'server-only';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
-import { insertCollectionRun, updateCollectionRun, upsertDocuments, listDocuments, deleteMentionsForDocuments, insertMentions, markDocumentsProcessed, clearClusters, upsertClusters } from '@/lib/db/community';
+import {
+    insertCollectionRun,
+    updateCollectionRun,
+    upsertDocuments,
+    listDocuments,
+    deleteMentionsForDocuments,
+    insertMentions,
+    markDocumentsProcessed,
+    clearClusters,
+    upsertClusters,
+} from '@/lib/db/community';
 import { getSocialWatchConfig, buildSeedQueries, buildRelevanceAnchors } from './community-context';
 import { collectCommunityPosts, buildCollectionDiagnosis } from './community-collection';
 import { isWebSearchAvailable } from './web-search-collector';
 import { toDocumentRows, aggregateMentionsToClusters } from './community-signals';
-import { enrichCommunityDocuments, normalizeCommunityClusterLabels, synthesizeCommunityOpportunities } from './community-enrichment';
+import {
+    enrichCommunityDocuments,
+    normalizeCommunityClusterLabels,
+    synthesizeCommunityOpportunities,
+} from './community-enrichment';
 import { listMentionsForClustering, persistCommunityOpportunities } from './community-persistence';
 
 // ──────────────────────────────────────────────────────────────
@@ -22,9 +36,7 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
     const seedQueries = buildSeedQueries(client);
 
     // Serialize seeds for the collection run record (store query + strategy)
-    const seedQueriesForRecord = seedQueries.map((s) =>
-        typeof s === 'string' ? s : `[${s.strategy}] ${s.query}`
-    );
+    const seedQueriesForRecord = seedQueries.map((s) => (typeof s === 'string' ? s : `[${s.strategy}] ${s.query}`));
 
     // Create collection run record
     const run = await insertCollectionRun({
@@ -48,7 +60,9 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
             const webSearchStatus = isWebSearchAvailable()
                 ? 'Web search fallback was attempted but returned no results.'
                 : 'No web search fallback available (configure TAVILY_API_KEY or GOOGLE_SEARCH_API_KEY).';
-            console.warn(`[Community] Collection blocked: ${collectionOutcome.failureClass} — ${collectionOutcome.summary.error}/${collectionOutcome.summary.total} seeds failed. ${webSearchStatus}`);
+            console.warn(
+                `[Community] Collection blocked: ${collectionOutcome.failureClass} — ${collectionOutcome.summary.error}/${collectionOutcome.summary.total} seeds failed. ${webSearchStatus}`,
+            );
 
             await updateCollectionRun(run.id, {
                 status: 'partial',
@@ -65,7 +79,9 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
                     collection_source: collectionSource,
                     web_search_available: isWebSearchAvailable(),
                     web_search_provider: webSearchProvider,
-                    seed_strategies_used: [...new Set(seedQueries.map((s) => typeof s === 'string' ? 'legacy' : s.strategy))],
+                    seed_strategies_used: [
+                        ...new Set(seedQueries.map((s) => (typeof s === 'string' ? 'legacy' : s.strategy))),
+                    ],
                     mandate_configured: mandate.goals.length > 0 || mandate.known_competitors.length > 0,
                 },
             });
@@ -93,7 +109,9 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
         // Stage 3: Normalize & persist
         // For web search results, each post has _source_platform (reddit, quora, web, etc.)
         // which takes precedence. The sourceLabel is only the fallback for untagged posts.
-        const documentRows = toDocumentRows(rawPosts, clientId, run.id, { sourceLabel: collectionSource === 'web_search' ? 'web_search' : 'reddit' });
+        const documentRows = toDocumentRows(rawPosts, clientId, run.id, {
+            sourceLabel: collectionSource === 'web_search' ? 'web_search' : 'reddit',
+        });
         const { persisted, skipped } = await upsertDocuments(documentRows);
 
         await updateCollectionRun(run.id, {
@@ -111,8 +129,12 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
         // and web_search sources. The mention extraction and clustering logic is
         // source-agnostic — it operates on title/body text regardless of origin.
         const unprocessed = await listDocuments(clientId, { unprocessedOnly: true });
-        const { mentions, enrichmentMethod } =
-            await enrichCommunityDocuments(unprocessed, clientId, client, relevanceAnchors);
+        const { mentions, enrichmentMethod } = await enrichCommunityDocuments(
+            unprocessed,
+            clientId,
+            client,
+            relevanceAnchors,
+        );
 
         if (mentions.length > 0) {
             // Clear old mentions for these documents before re-inserting
@@ -143,14 +165,24 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
 
         // Stage 6: derive opportunities, preserving the rule-based fallback.
         const opportunities = await synthesizeCommunityOpportunities(
-            persistedClusters, clientId, client, relevanceAnchors, scoringContext,
+            persistedClusters,
+            clientId,
+            client,
+            relevanceAnchors,
+            scoringContext,
         );
 
         await persistCommunityOpportunities(opportunities, clientId);
 
         // Finalize run — include collection outcome classification
         const finalOutcome = collectionOutcome.failureClass
-            ? { failure_class: collectionOutcome.failureClass, collection_diagnosis: buildCollectionDiagnosis(collectionOutcome.failureClass, collectionOutcome.summary) }
+            ? {
+                  failure_class: collectionOutcome.failureClass,
+                  collection_diagnosis: buildCollectionDiagnosis(
+                      collectionOutcome.failureClass,
+                      collectionOutcome.summary,
+                  ),
+              }
             : {};
         await updateCollectionRun(run.id, {
             status: 'completed',
@@ -164,7 +196,9 @@ export async function runCommunityPipeline(clientId, { triggerSource = 'system' 
                 web_search_provider: webSearchProvider,
                 seed_diagnostics: seedDiagnostics,
                 mandate_configured: mandate.goals.length > 0 || mandate.known_competitors.length > 0,
-                seed_strategies_used: [...new Set(seedQueries.map((s) => typeof s === 'string' ? 'legacy' : s.strategy))],
+                seed_strategies_used: [
+                    ...new Set(seedQueries.map((s) => (typeof s === 'string' ? 'legacy' : s.strategy))),
+                ],
                 ...finalOutcome,
             },
         });

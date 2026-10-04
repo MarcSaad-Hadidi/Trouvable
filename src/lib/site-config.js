@@ -8,11 +8,11 @@ export const SITE_NAME = 'Trouvable';
 export const SITE_AUTHOR_NAME = 'Trouvable';
 export const SITE_ABOUT_PATH = '/a-propos';
 export const SITE_ABOUT_URL = `${SITE_URL}${SITE_ABOUT_PATH}`;
-export const SITE_DESCRIPTION = 'Trouvable exécute vos mandats de visibilité Google, SEO local et réponses IA au Québec : cartographie, implantation et pilotage continu.';
-export const SITE_AI_DESCRIPTION = 'Firme québécoise d’exécution en visibilité locale Google, SEO local et cohérence des réponses IA pour entreprises au Québec.';
-export const SITE_SAME_AS = [
-    'https://www.linkedin.com/company/trouvable',
-];
+export const SITE_DESCRIPTION =
+    'Trouvable exécute vos mandats de visibilité Google, SEO local et réponses IA au Québec : cartographie, implantation et pilotage continu.';
+export const SITE_AI_DESCRIPTION =
+    'Firme québécoise d’exécution en visibilité locale Google, SEO local et cohérence des réponses IA pour entreprises au Québec.';
+export const SITE_SAME_AS = ['https://www.linkedin.com/company/trouvable'];
 export const SITE_AI_DISCOVERY_PATHS = {
     aiTxt: '/ai.txt',
     llmsTxt: '/llms.txt',

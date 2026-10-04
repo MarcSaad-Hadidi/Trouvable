@@ -7,8 +7,14 @@ import { execFile, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import {
-    CLIENT_ID, assertNoNextEnvFiles, classifyAnonymous, fixtureResponse,
-    missingClerkConfiguration, resolveArtifacts, safeEnvironment, startFixture,
+    CLIENT_ID,
+    assertNoNextEnvFiles,
+    classifyAnonymous,
+    fixtureResponse,
+    missingClerkConfiguration,
+    resolveArtifacts,
+    safeEnvironment,
+    startFixture,
 } from '../qa/local-fixture.mjs';
 
 const guard = fileURLToPath(new URL('../qa/deny-network.cjs', import.meta.url));
@@ -28,19 +34,41 @@ afterEach(() => {
 
 function environment(mode, artifacts = temporary()) {
     const inherited = {
-        PATH: process.env.PATH, SystemRoot: process.env.SystemRoot,
-        SUPABASE_SERVICE_ROLE_KEY: 'do-not-inherit', NEXT_PUBLIC_SUPABASE_URL: 'https://remote.invalid',
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'do-not-inherit', CLERK_SECRET_KEY: 'do-not-inherit',
-        DEV_BYPASS_AUTH: '1', DEV_BYPASS_CLOUDFLARE: '1', DEV_BYPASS_ADMIN_USER_ID: 'real-user',
-        MISTRAL_API_KEY: 'do-not-inherit', GROQ_API_KEY: 'do-not-inherit', GEMINI_API_KEY: 'do-not-inherit',
-        OPENROUTER_API_KEY: 'do-not-inherit', GOOGLE_API_KEY: 'do-not-inherit', GOOGLE_SEARCH_API_KEY: 'do-not-inherit',
-        GOOGLE_SC_PRIVATE_KEY: 'do-not-inherit', GOOGLE_OAUTH_CLIENT_SECRET: 'do-not-inherit',
-        TAVILY_API_KEY: 'do-not-inherit', RESEND_API_KEY: 'do-not-inherit', STRIPE_SECRET_KEY: 'do-not-inherit',
-        CRON_SECRET: 'do-not-inherit', TURNSTILE_SECRET_KEY: 'do-not-inherit', VERCEL_TOKEN: 'do-not-inherit',
-        SLACK_ALERT_WEBHOOK_URL: 'do-not-inherit', UNKNOWN_PROVIDER_SECRET: 'do-not-inherit',
-        NODE_OPTIONS: '--require remote-script', HTTPS_PROXY: 'https://remote.invalid',
+        PATH: process.env.PATH,
+        SystemRoot: process.env.SystemRoot,
+        SUPABASE_SERVICE_ROLE_KEY: 'do-not-inherit',
+        NEXT_PUBLIC_SUPABASE_URL: 'https://remote.invalid',
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'do-not-inherit',
+        CLERK_SECRET_KEY: 'do-not-inherit',
+        DEV_BYPASS_AUTH: '1',
+        DEV_BYPASS_CLOUDFLARE: '1',
+        DEV_BYPASS_ADMIN_USER_ID: 'real-user',
+        MISTRAL_API_KEY: 'do-not-inherit',
+        GROQ_API_KEY: 'do-not-inherit',
+        GEMINI_API_KEY: 'do-not-inherit',
+        OPENROUTER_API_KEY: 'do-not-inherit',
+        GOOGLE_API_KEY: 'do-not-inherit',
+        GOOGLE_SEARCH_API_KEY: 'do-not-inherit',
+        GOOGLE_SC_PRIVATE_KEY: 'do-not-inherit',
+        GOOGLE_OAUTH_CLIENT_SECRET: 'do-not-inherit',
+        TAVILY_API_KEY: 'do-not-inherit',
+        RESEND_API_KEY: 'do-not-inherit',
+        STRIPE_SECRET_KEY: 'do-not-inherit',
+        CRON_SECRET: 'do-not-inherit',
+        TURNSTILE_SECRET_KEY: 'do-not-inherit',
+        VERCEL_TOKEN: 'do-not-inherit',
+        SLACK_ALERT_WEBHOOK_URL: 'do-not-inherit',
+        UNKNOWN_PROVIDER_SECRET: 'do-not-inherit',
+        NODE_OPTIONS: '--require remote-script',
+        HTTPS_PROXY: 'https://remote.invalid',
     };
-    return safeEnvironment(inherited, { mode, port: 3417, fixturePort: mode === 'fixture' ? 3419 : undefined, artifacts, guard });
+    return safeEnvironment(inherited, {
+        mode,
+        port: 3417,
+        fixturePort: mode === 'fixture' ? 3419 : undefined,
+        artifacts,
+        guard,
+    });
 }
 test('production removes all service credentials, public keys, bypass flags and inherited Node hooks', () => {
     const env = environment('production');
@@ -74,7 +102,14 @@ test('Next environment files are refused before contents are read; .env.example 
     const root = temporary();
     fs.writeFileSync(path.join(root, '.env.example'), 'EXAMPLE=example');
     assert.doesNotThrow(() => assertNoNextEnvFiles(root));
-    for (const name of ['.env', '.env.local', '.env.production', '.env.production.local', '.env.development', '.env.development.local']) {
+    for (const name of [
+        '.env',
+        '.env.local',
+        '.env.production',
+        '.env.production.local',
+        '.env.development',
+        '.env.development.local',
+    ]) {
         fs.writeFileSync(path.join(root, name), 'SECRET=must-not-load');
         assert.throws(() => assertNoNextEnvFiles(root), /QA refuses Next-loaded environment files/);
         fs.unlinkSync(path.join(root, name));
@@ -96,10 +131,20 @@ test('fixture cannot publish a client, resolve real identifiers, or serve non-RE
     assert.equal(list.status, 200);
     assert.equal(list.data[0].id, CLIENT_ID);
     assert.equal(list.data[0].is_published, false);
-    for (const query of ['is_published=eq.true', 'id=eq.real-client', 'client_slug=eq.customer', 'offset=1', 'limit=0']) {
+    for (const query of [
+        'is_published=eq.true',
+        'id=eq.real-client',
+        'client_slug=eq.customer',
+        'offset=1',
+        'limit=0',
+    ]) {
         assert.deepEqual(fixtureResponse('GET', `/rest/v1/client_geo_profiles?${query}`).data, []);
     }
-    assert.equal(fixtureResponse('GET', '/rest/v1/client_geo_profiles?is_published=eq.true', 'application/vnd.pgrst.object+json').status, 406);
+    assert.equal(
+        fixtureResponse('GET', '/rest/v1/client_geo_profiles?is_published=eq.true', 'application/vnd.pgrst.object+json')
+            .status,
+        406,
+    );
     assert.deepEqual(fixtureResponse('GET', '/rest/v1/geo_runs').data, []);
     assert.equal(fixtureResponse('GET', '/auth/v1/user').status, 404);
 });
@@ -126,8 +171,14 @@ test('HTTP fixture responds to HEAD and rejects every write method without creat
 test('anonymous classification requires a denial or local sign-in redirect, never a missing configuration', () => {
     const base = 'http://localhost:3417';
     for (const status of [401, 403]) assert.equal(classifyAnonymous({ status, base }), 'access-denied');
-    assert.equal(classifyAnonymous({ status: 307, location: '/espace?redirect_url=local', base }), 'access-denied-redirect');
-    assert.equal(classifyAnonymous({ status: 307, location: 'https://accounts.invalid/sign-in', base }), 'failed-unexpected-redirect');
+    assert.equal(
+        classifyAnonymous({ status: 307, location: '/espace?redirect_url=local', base }),
+        'access-denied-redirect',
+    );
+    assert.equal(
+        classifyAnonymous({ status: 307, location: 'https://accounts.invalid/sign-in', base }),
+        'failed-unexpected-redirect',
+    );
     assert.equal(classifyAnonymous({ status: 307, location: '/admin/clients', base }), 'failed-unexpected-redirect');
     assert.equal(classifyAnonymous({ status: 200, base }), 'failed-unprotected-or-error');
     assert.equal(classifyAnonymous({ status: 500, base }), 'failed-unprotected-or-error');
@@ -156,16 +207,31 @@ test('server preload blocks fetch, HTTP overrides, DNS and direct sockets before
         assert.throws(() => new net.Socket().connect({ host: 'provider.invalid', port: 443 }), { code: 'QA_NETWORK_BLOCKED' });
         assert.throws(() => tls.connect({ host: 'provider.invalid', port: 443 }), { code: 'QA_NETWORK_BLOCKED' });
     `;
-    const child = spawnSync(process.execPath, ['--input-type=module', '--eval', probe], { env, encoding: 'utf8', windowsHide: true, timeout: 10000 });
+    const child = spawnSync(process.execPath, ['--input-type=module', '--eval', probe], {
+        env,
+        encoding: 'utf8',
+        windowsHide: true,
+        timeout: 10000,
+    });
     assert.equal(child.status, 0, child.stderr || child.error?.message);
-    assert.ok(fs.readFileSync(path.join(env.TROUVABLE_QA_ARTIFACTS, 'server-network-blocked.log'), 'utf8').includes('provider.invalid'));
+    assert.ok(
+        fs
+            .readFileSync(path.join(env.TROUVABLE_QA_ARTIFACTS, 'server-network-blocked.log'), 'utf8')
+            .includes('provider.invalid'),
+    );
 });
 
 // This tests allowed networking end to end, without Playwright or Next dependencies.
 test('preload permits only the declared local fixture port through fetch and HTTP', async () => {
     const artifacts = temporary();
     const fixture = await startFixture(0, artifacts);
-    const env = safeEnvironment(process.env, { mode: 'fixture', port: 3417, fixturePort: fixture.port, artifacts, guard });
+    const env = safeEnvironment(process.env, {
+        mode: 'fixture',
+        port: 3417,
+        fixturePort: fixture.port,
+        artifacts,
+        guard,
+    });
     const probe = `
         import assert from 'node:assert/strict';
         import http from 'node:http';
@@ -179,7 +245,11 @@ test('preload permits only the declared local fixture port through fetch and HTT
         }).once('error', reject));
     `;
     try {
-        await promisify(execFile)(process.execPath, ['--input-type=module', '--eval', probe], { env, windowsHide: true, timeout: 10000 });
+        await promisify(execFile)(process.execPath, ['--input-type=module', '--eval', probe], {
+            env,
+            windowsHide: true,
+            timeout: 10000,
+        });
         assert.equal(fixture.requests.length, 2);
     } finally {
         fixture.server.closeAllConnections();

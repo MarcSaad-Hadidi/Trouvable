@@ -79,9 +79,7 @@ function getRunStatus({ completedRunsTotal, trackedPromptsTotal, latestRunAt, pa
     if ((completedRunsTotal ?? 0) === 0 && (trackedPromptsTotal ?? 0) > 0) return 'critical';
     if ((completedRunsTotal ?? 0) === 0) return 'unavailable';
 
-    const hoursSinceRun = latestRunAt
-        ? Math.floor((Date.now() - new Date(latestRunAt).getTime()) / 3600000)
-        : null;
+    const hoursSinceRun = latestRunAt ? Math.floor((Date.now() - new Date(latestRunAt).getTime()) / 3600000) : null;
     const parseRate = Number(parseFailureRate ?? 0);
 
     if ((hoursSinceRun !== null && hoursSinceRun > 72) || parseRate > 15) return 'critical';
@@ -91,9 +89,7 @@ function getRunStatus({ completedRunsTotal, trackedPromptsTotal, latestRunAt, pa
 
 function getAuditStatus(lastAuditAt, score) {
     if (!lastAuditAt && !isFiniteNumber(score)) return 'unavailable';
-    const hoursSinceAudit = lastAuditAt
-        ? Math.floor((Date.now() - new Date(lastAuditAt).getTime()) / 3600000)
-        : null;
+    const hoursSinceAudit = lastAuditAt ? Math.floor((Date.now() - new Date(lastAuditAt).getTime()) / 3600000) : null;
     if (hoursSinceAudit !== null && hoursSinceAudit > 24 * 60) return 'critical';
     if (hoursSinceAudit !== null && hoursSinceAudit > 24 * 30) return 'warning';
     return scoreStatus(score) === 'critical' ? 'warning' : 'ok';
@@ -107,7 +103,16 @@ function getGeoStatus(geoScore, mentionRatePercent, reliability) {
     return scoreStatus(geoScore);
 }
 
-function getGlobalStatus({ criticalWarnings, activeWarnings, noRunsYet, trackedPromptsTotal, runStatus, seoStatus, geoStatus, dataStatus }) {
+function getGlobalStatus({
+    criticalWarnings,
+    activeWarnings,
+    noRunsYet,
+    trackedPromptsTotal,
+    runStatus,
+    seoStatus,
+    geoStatus,
+    dataStatus,
+}) {
     const coreStatuses = [runStatus, seoStatus, geoStatus];
     const missingCoreSignals = coreStatuses.filter((status) => status === 'unavailable').length;
     const hasUnavailableSources = missingCoreSignals > 0 || dataStatus === 'partial' || dataStatus === 'unavailable';
@@ -131,7 +136,12 @@ function getGlobalStatus({ criticalWarnings, activeWarnings, noRunsYet, trackedP
             label: 'Mandat à stabiliser',
             summary: 'Un signal cœur du mandat est dégradé et mérite une reprise rapide.',
         };
-    } else if (activeWarnings.length > 0 || runStatus === 'warning' || seoStatus === 'warning' || geoStatus === 'warning') {
+    } else if (
+        activeWarnings.length > 0 ||
+        runStatus === 'warning' ||
+        seoStatus === 'warning' ||
+        geoStatus === 'warning'
+    ) {
         observedStatus = {
             tone: 'warning',
             label: 'Mandat sous surveillance',
@@ -154,9 +164,10 @@ function getGlobalStatus({ criticalWarnings, activeWarnings, noRunsYet, trackedP
 
     if (!hasUnavailableSources) return observedStatus;
 
-    const availabilitySummary = missingCoreSignals > 0
-        ? 'Certains signaux principaux sont indisponibles.'
-        : 'Certaines sources de données ne répondent pas.';
+    const availabilitySummary =
+        missingCoreSignals > 0
+            ? 'Certains signaux principaux sont indisponibles.'
+            : 'Certaines sources de données ne répondent pas.';
     if (observedStatus.tone === 'ok') {
         return {
             tone: 'warning',
@@ -204,10 +215,9 @@ function buildTrend(recentAudits = [], recentQueryRuns = []) {
         runBuckets.set(key, bucket);
     }
 
-    const dayKeys = Array.from(new Set([
-        ...auditEntries.map((entry) => entry.key),
-        ...runBuckets.keys(),
-    ])).sort((left, right) => left.localeCompare(right));
+    const dayKeys = Array.from(new Set([...auditEntries.map((entry) => entry.key), ...runBuckets.keys()])).sort(
+        (left, right) => left.localeCompare(right),
+    );
 
     if (dayKeys.length < 2) {
         return {
@@ -239,7 +249,10 @@ function buildTrend(recentAudits = [], recentQueryRuns = []) {
         { id: 'visibility', label: 'Visibilité', color: toSeriesColor('Visibilité'), values: visibilityValues },
     ].filter((entry) => entry.values.some((value) => isFiniteNumber(value)));
 
-    if (series.length === 0 || series.every((entry) => entry.values.filter((value) => isFiniteNumber(value)).length < 2)) {
+    if (
+        series.length === 0 ||
+        series.every((entry) => entry.values.filter((value) => isFiniteNumber(value)).length < 2)
+    ) {
         return {
             state: 'empty',
             title: 'Évolution du mandat',
@@ -284,7 +297,8 @@ function buildTimeline(recentActivity = [], geoBase, seoBase, dossierBase) {
         items,
         empty: {
             title: 'Aucune activité récente partageable',
-            description: 'Les audits, runs et changements opérateur visibles apparaîtront ici dès qu’ils seront observés.',
+            description:
+                'Les audits, runs et changements opérateur visibles apparaîtront ici dès qu’ils seront observés.',
         },
     };
 }
@@ -347,7 +361,8 @@ function buildEvidence({ guardrails, opportunities, sources, competitors, visibi
         items.push({
             id: 'model-top',
             title: `Moteur dominant: ${toProviderLabel(topModel)}`,
-            summary: 'Le workspace overview expose déjà les modèles les plus utilisés et leur taux de présence de marque.',
+            summary:
+                'Le workspace overview expose déjà les modèles les plus utilisés et leur taux de présence de marque.',
             detail: `${topModel.totalRuns ?? 0} run(s) · ${topModel.targetFoundRatePercent ?? 'n.d.'}% de détection.`,
             href: `${geoBase}/models`,
             tone: 'info',
@@ -374,7 +389,18 @@ function buildEvidence({ guardrails, opportunities, sources, competitors, visibi
     };
 }
 
-function buildPriorityActions({ criticalWarnings, activeWarnings, noRunsYet, trackedPromptsTotal, parseFailureRate, visibilityReliability, opportunities, geoBase, seoBase, workspace }) {
+function buildPriorityActions({
+    criticalWarnings,
+    activeWarnings,
+    noRunsYet,
+    trackedPromptsTotal,
+    parseFailureRate,
+    visibilityReliability,
+    opportunities,
+    geoBase,
+    seoBase,
+    workspace,
+}) {
     const actions = [];
 
     if ((criticalWarnings || []).length > 0) {
@@ -472,7 +498,20 @@ function buildPriorityActions({ criticalWarnings, activeWarnings, noRunsYet, tra
         .slice(0, 3);
 }
 
-function buildRiskItems({ seoScore, geoScore, mentionRatePercent, visibilityReliability, trackedPromptsTotal, completedRunsTotal, latestRunAt, parseFailureRate, lastAuditAt, geoBase, seoBase, dossierBase }) {
+function buildRiskItems({
+    seoScore,
+    geoScore,
+    mentionRatePercent,
+    visibilityReliability,
+    trackedPromptsTotal,
+    completedRunsTotal,
+    latestRunAt,
+    parseFailureRate,
+    lastAuditAt,
+    geoBase,
+    seoBase,
+    dossierBase,
+}) {
     const seo = scoreStatus(seoScore);
     const geo = getGeoStatus(geoScore, mentionRatePercent, visibilityReliability);
     const runs = getRunStatus({
@@ -497,7 +536,11 @@ function buildRiskItems({ seoScore, geoScore, mentionRatePercent, visibilityReli
             label: 'GEO',
             status: geo,
             statusLabel: labelForStatus(geo),
-            metric: isFiniteNumber(mentionRatePercent) ? `${Math.round(mentionRatePercent)}%` : (isFiniteNumber(geoScore) ? `${Math.round(geoScore)}/100` : 'n.d.'),
+            metric: isFiniteNumber(mentionRatePercent)
+                ? `${Math.round(mentionRatePercent)}%`
+                : isFiniteNumber(geoScore)
+                  ? `${Math.round(geoScore)}/100`
+                  : 'n.d.',
             detail: visibilityReliability ? `Fiabilité ${visibilityReliability}` : 'Fiabilité non exposée',
             href: `${geoBase}/signals`,
         },
@@ -531,7 +574,17 @@ function buildRiskItems({ seoScore, geoScore, mentionRatePercent, visibilityReli
     ];
 }
 
-function buildConnectorItems({ gscStatus = 'unavailable', ga4Status = 'unavailable', auditStatus, runStatus, lastAuditAt, latestRunAt, geoBase, seoBase, dossierBase }) {
+function buildConnectorItems({
+    gscStatus = 'unavailable',
+    ga4Status = 'unavailable',
+    auditStatus,
+    runStatus,
+    lastAuditAt,
+    latestRunAt,
+    geoBase,
+    seoBase,
+    dossierBase,
+}) {
     return [
         {
             id: 'gsc',
@@ -571,7 +624,13 @@ function buildConnectorItems({ gscStatus = 'unavailable', ga4Status = 'unavailab
     ];
 }
 
-function buildHeroMetrics({ trackedPromptsTotal, completedRunsTotal, openOpportunitiesCount, visibilityProxyPercent, citationCoveragePercent }) {
+function buildHeroMetrics({
+    trackedPromptsTotal,
+    completedRunsTotal,
+    openOpportunitiesCount,
+    visibilityProxyPercent,
+    citationCoveragePercent,
+}) {
     return [
         {
             id: 'tracked-prompts',
@@ -620,13 +679,23 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
     const recentQueryRuns = Array.isArray(data?.recentQueryRuns) ? data.recentQueryRuns : [];
 
     const dataSources = data?.dataSources || workspace?.sources || {};
-    const observedCount = (source, value, fallback) => dataSources[source] === 'unavailable' || value === null
-        ? null : Number(value ?? fallback ?? 0);
-    const trackedPromptsTotal = observedCount('trackedQueries', kpis.trackedPromptsTotal, workspace?.trackedPromptCount);
+    const observedCount = (source, value, fallback) =>
+        dataSources[source] === 'unavailable' || value === null ? null : Number(value ?? fallback ?? 0);
+    const trackedPromptsTotal = observedCount(
+        'trackedQueries',
+        kpis.trackedPromptsTotal,
+        workspace?.trackedPromptCount,
+    );
     const completedRunsTotal = observedCount('totalQueryRuns', kpis.completedRunsTotal, workspace?.completedRunCount);
-    const openOpportunitiesCount = observedCount('opportunities', opportunities?.summary?.open ?? kpis.openOpportunitiesCount, workspace?.openOpportunityCount);
-    const seoScore = dataSources.audit === 'unavailable' ? null : (isFiniteNumber(audit?.seo_score) ? audit.seo_score : kpis.seoScore);
-    const geoScore = dataSources.audit === 'unavailable' ? null : (isFiniteNumber(audit?.geo_score) ? audit.geo_score : kpis.geoScore);
+    const openOpportunitiesCount = observedCount(
+        'opportunities',
+        opportunities?.summary?.open ?? kpis.openOpportunitiesCount,
+        workspace?.openOpportunityCount,
+    );
+    const seoScore =
+        dataSources.audit === 'unavailable' ? null : isFiniteNumber(audit?.seo_score) ? audit.seo_score : kpis.seoScore;
+    const geoScore =
+        dataSources.audit === 'unavailable' ? null : isFiniteNumber(audit?.geo_score) ? audit.geo_score : kpis.geoScore;
     const mentionRatePercent = kpis.mentionRatePercent;
     const visibilityProxyPercent = kpis.visibilityProxyPercent;
     const citationCoveragePercent = kpis.citationCoveragePercent;
@@ -673,16 +742,16 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
     });
     const heroScoreValue = isFiniteNumber(geoScore)
         ? Math.round(geoScore)
-        : (isFiniteNumber(seoScore) ? Math.round(seoScore) : null);
-    const heroScoreLabel = isFiniteNumber(geoScore)
-        ? 'Score GEO'
-        : (isFiniteNumber(seoScore) ? 'Score SEO' : 'Score');
+        : isFiniteNumber(seoScore)
+          ? Math.round(seoScore)
+          : null;
+    const heroScoreLabel = isFiniteNumber(geoScore) ? 'Score GEO' : isFiniteNumber(seoScore) ? 'Score SEO' : 'Score';
     const heroScoreTone = heroScoreValue === null ? 'unavailable' : scoreStatus(heroScoreValue);
     const heroScoreCaption = isFiniteNumber(geoScore)
         ? 'Référence audit utilisée dans GEO Ops et SEO Ops.'
-        : (isFiniteNumber(seoScore)
-            ? 'Référence SEO disponible dans le mandat.'
-            : 'Aucun score de référence disponible.');
+        : isFiniteNumber(seoScore)
+          ? 'Référence SEO disponible dans le mandat.'
+          : 'Aucun score de référence disponible.';
     const scorePool = heroScoreValue === null ? [] : [heroScoreValue];
 
     const riskItems = buildRiskItems({
@@ -700,7 +769,10 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
         dossierBase,
     });
 
-    const highestRisk = riskItems.reduce((current, item) => (toneRank(item.status) > toneRank(current.status) ? item : current), riskItems[0]);
+    const highestRisk = riskItems.reduce(
+        (current, item) => (toneRank(item.status) > toneRank(current.status) ? item : current),
+        riskItems[0],
+    );
 
     return {
         hero: {
@@ -714,11 +786,16 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
                 label: heroScoreLabel,
                 captionFinal: heroScoreCaption,
                 tone: heroScoreTone,
-                caption: scorePool.length > 0 ? `${scorePool.length} signal${scorePool.length > 1 ? 'aux' : ''} agrégé${scorePool.length > 1 ? 's' : ''}` : 'Aucun score agrégable',
+                caption:
+                    scorePool.length > 0
+                        ? `${scorePool.length} signal${scorePool.length > 1 ? 'aux' : ''} agrégé${scorePool.length > 1 ? 's' : ''}`
+                        : 'Aucun score agrégable',
             },
             freshness: {
                 label: latestRunAt ? `Dernier run ${formatRelativeTime(latestRunAt)}` : 'Aucun run récent',
-                detail: latestRunAt ? formatDateTime(latestRunAt) : 'Le workspace overview ne remonte encore aucun run récent.',
+                detail: latestRunAt
+                    ? formatDateTime(latestRunAt)
+                    : 'Le workspace overview ne remonte encore aucun run récent.',
                 status: runStatus,
             },
             priorityAction: topActions[0] || {
@@ -736,7 +813,9 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
                 visibilityProxyPercent,
                 citationCoveragePercent,
             }),
-            headline: highestRisk ? `${highestRisk.label} ${highestRisk.statusLabel.toLowerCase()}` : 'Mandat pilotable',
+            headline: highestRisk
+                ? `${highestRisk.label} ${highestRisk.statusLabel.toLowerCase()}`
+                : 'Mandat pilotable',
         },
         riskMap: {
             title: 'Carte des risques',
@@ -747,7 +826,8 @@ export function buildGeoOverviewCommandModel({ clientId, client, workspace, audi
         trend: buildTrend(recentAudits, recentQueryRuns),
         connectorHealth: {
             title: 'Santé des sources et connecteurs',
-            description: 'Les statuts détaillés ne sont affichés que lorsqu’ils sont déjà présents dans overview ou dans le shell du client.',
+            description:
+                'Les statuts détaillés ne sont affichés que lorsqu’ils sont déjà présents dans overview ou dans le shell du client.',
             items: buildConnectorItems({
                 auditStatus,
                 runStatus,

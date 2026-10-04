@@ -172,8 +172,7 @@ export default function PortalTrendPanel({ trendSummary }) {
                     <div className="grid divide-y divide-white/[0.03] sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
                         {metrics.map((metric, i) => {
                             const d = deltaPresentation(metric.delta, metric.unit, points);
-                            const sparkColor =
-                                metric.delta > 0 ? '#34d399' : metric.delta < 0 ? '#f87171' : '#94a3b8';
+                            const sparkColor = metric.delta > 0 ? '#34d399' : metric.delta < 0 ? '#f87171' : '#94a3b8';
                             const sparkData = sparklines[metric.key] || [];
 
                             return (

@@ -10,10 +10,7 @@ import { getRecentSafeActivity } from '@/lib/operator-intelligence/activity';
 import { getRecurringJobHealthSlice } from '@/lib/continuous/jobs';
 import { LIFECYCLE_META } from '@/lib/lifecycle';
 import { finiteNumberOrNull } from '@/lib/numbers';
-import {
-    mapOpportunitySourceToReliability,
-    mapProvenanceToReliability,
-} from '@/lib/operator-intelligence/reliability';
+import { mapOpportunitySourceToReliability, mapProvenanceToReliability } from '@/lib/operator-intelligence/reliability';
 import { getSocialSlice } from '@/lib/operator-intelligence/social';
 import { getVisibilitySlice } from '@/lib/operator-intelligence/visibility';
 
@@ -83,10 +80,24 @@ const DEFAULT_CONNECTOR_MESSAGES = {
 };
 
 function uniqueStrings(values) {
-    return [...new Set(toArray(values).map((value) => compactString(value)).filter(Boolean))];
+    return [
+        ...new Set(
+            toArray(values)
+                .map((value) => compactString(value))
+                .filter(Boolean),
+        ),
+    ];
 }
 
-function buildMetric({ id, label, value, detail = null, reliability = 'unavailable', href = null, accent = 'default' }) {
+function buildMetric({
+    id,
+    label,
+    value,
+    detail = null,
+    reliability = 'unavailable',
+    href = null,
+    accent = 'default',
+}) {
     return {
         id,
         label,
@@ -142,15 +153,12 @@ function getTerritorySummary(client) {
     const business = client?.business_details || {};
     const seoData = client?.seo_data || {};
 
-    const primary = compactString(address.city)
-        || compactString(client?.target_region)
-        || compactString(address.region)
-        || null;
+    const primary =
+        compactString(address.city) || compactString(client?.target_region) || compactString(address.region) || null;
 
-    const secondary = uniqueStrings([
-        ...toArray(business.areas_served),
-        ...toArray(seoData.target_cities),
-    ]).filter((value) => String(value).toLowerCase() !== String(primary || '').toLowerCase());
+    const secondary = uniqueStrings([...toArray(business.areas_served), ...toArray(seoData.target_cities)]).filter(
+        (value) => String(value).toLowerCase() !== String(primary || '').toLowerCase(),
+    );
 
     return {
         primary,
@@ -164,7 +172,8 @@ function getServiceSummary(client) {
     if (services.length > 0) {
         return {
             value: services.slice(0, 3).join(' · '),
-            detail: services.length > 3 ? `${services.length} services renseignés` : 'Services renseignés dans le mandat',
+            detail:
+                services.length > 3 ? `${services.length} services renseignés` : 'Services renseignés dans le mandat',
         };
     }
 
@@ -200,7 +209,8 @@ function getHeader(client, workspace) {
 function mapActivityHref(type, baseHref) {
     if (type === 'audit') return `${baseHref}/seo/health`;
     if (String(type || '').startsWith('tracked_query')) return `${baseHref}/prompts`;
-    if (type === 'publication_state_changed' || String(type || '').startsWith('client_onboarding')) return `${baseHref}/settings`;
+    if (type === 'publication_state_changed' || String(type || '').startsWith('client_onboarding'))
+        return `${baseHref}/settings`;
     if (String(type || '').startsWith('geo_')) return `${baseHref}/runs`;
     return `${baseHref}/dossier/activity`;
 }
@@ -287,7 +297,9 @@ function shouldExposeCommunityRun(communityRun, recentRuns) {
     const latestCommunityJob = toArray(recentRuns).find((run) => run.job_type === 'community_sync');
     if (!latestCommunityJob) return true;
 
-    const runStamp = new Date(latestCommunityJob.finished_at || latestCommunityJob.started_at || latestCommunityJob.created_at || 0).getTime();
+    const runStamp = new Date(
+        latestCommunityJob.finished_at || latestCommunityJob.started_at || latestCommunityJob.created_at || 0,
+    ).getTime();
     const collectionStamp = new Date(communityRun.finished_at || communityRun.started_at || 0).getTime();
 
     if (!Number.isFinite(runStamp) || !Number.isFinite(collectionStamp)) return true;
@@ -317,9 +329,12 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
                 id: 'sessions_28d',
                 label: 'Sessions 28j',
                 value: hasData ? visibility.kpis.sessions : 'n.d.',
-                detail: hasData ? `${visibility.kpis.daysWithTraffic ?? 'n.d.'} jour(s) alimentés`
-                    : visibility?.dataSources?.ga4Traffic === 'unavailable' ? 'Données GA4 temporairement indisponibles' : 'Aucune donnée GA4 synchronisée',
-                reliability: hasData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
+                detail: hasData
+                    ? `${visibility.kpis.daysWithTraffic ?? 'n.d.'} jour(s) alimentés`
+                    : visibility?.dataSources?.ga4Traffic === 'unavailable'
+                      ? 'Données GA4 temporairement indisponibles'
+                      : 'Aucune donnée GA4 synchronisée',
+                reliability: hasData ? 'measured' : isUnavailable ? 'unavailable' : 'unavailable',
                 accent: 'blue',
             }),
             buildMetric({
@@ -327,7 +342,7 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
                 label: 'Pages suivies',
                 value: snapshot?.hasRealData ? toArray(snapshot.landingPages).length : 'n.d.',
                 detail: snapshot?.hasRealData ? 'Top pages observées en base' : 'En attente de pages de destination',
-                reliability: snapshot?.hasRealData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
+                reliability: snapshot?.hasRealData ? 'measured' : isUnavailable ? 'unavailable' : 'unavailable',
                 accent: 'blue',
             }),
         ];
@@ -340,9 +355,12 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
                 id: 'clicks_28d',
                 label: 'Clics 28j',
                 value: hasData ? visibility.kpis.totalClicks : 'n.d.',
-                detail: hasData ? `${visibility.kpis.totalImpressions ?? 'n.d.'} impressions cumulées`
-                    : visibility?.dataSources?.gscQueries === 'unavailable' ? 'Données Search Console temporairement indisponibles' : 'Aucune requête Search Console synchronisée',
-                reliability: hasData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
+                detail: hasData
+                    ? `${visibility.kpis.totalImpressions ?? 'n.d.'} impressions cumulées`
+                    : visibility?.dataSources?.gscQueries === 'unavailable'
+                      ? 'Données Search Console temporairement indisponibles'
+                      : 'Aucune requête Search Console synchronisée',
+                reliability: hasData ? 'measured' : isUnavailable ? 'unavailable' : 'unavailable',
                 accent: 'emerald',
             }),
             buildMetric({
@@ -350,7 +368,7 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
                 label: 'Requêtes visibles',
                 value: hasData ? visibility.kpis.gscQueryCount : 'n.d.',
                 detail: hasData ? 'Fenêtre 28 jours consolidée' : 'En attente de première synchro',
-                reliability: hasData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
+                reliability: hasData ? 'measured' : isUnavailable ? 'unavailable' : 'unavailable',
                 accent: 'emerald',
             }),
         ];
@@ -371,7 +389,9 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
         buildMetric({
             id: 'community_opportunities',
             label: 'Opportunités',
-            value: hasCommunityState ? (social?.summary?.opportunities_count ?? snapshot?.opportunities_count ?? 0) : 'n.d.',
+            value: hasCommunityState
+                ? (social?.summary?.opportunities_count ?? snapshot?.opportunities_count ?? 0)
+                : 'n.d.',
             detail: hasCommunityState
                 ? `${social?.summary?.mentions_count ?? 0} mention(s) cumulée(s)`
                 : 'En attente de première collecte',
@@ -427,21 +447,24 @@ function buildConnectorItems({ connectors, visibility, social, jobHealth, baseHr
             });
         }
 
-        const latestRun = provider === 'agent_reach'
-            ? (social?.summary?.last_run || snapshot?.last_run || null)
-            : (relatedRuns[0] || null);
+        const latestRun =
+            provider === 'agent_reach'
+                ? social?.summary?.last_run || snapshot?.last_run || null
+                : relatedRuns[0] || null;
 
-        const lastSyncedAt = snapshot?.lastSyncedAt
-            || connection?.last_synced_at
-            || latestRun?.finished_at
-            || latestRun?.started_at
-            || null;
+        const lastSyncedAt =
+            snapshot?.lastSyncedAt ||
+            connection?.last_synced_at ||
+            latestRun?.finished_at ||
+            latestRun?.started_at ||
+            null;
 
-        const detail = status === 'not_connected'
-            ? 'Aucune source active pour ce mandat.'
-            : lastSyncedAt
-                ? `Dernière synchro ${timeSince(lastSyncedAt)}`
-                : 'En attente de première synchronisation.';
+        const detail =
+            status === 'not_connected'
+                ? 'Aucune source active pour ce mandat.'
+                : lastSyncedAt
+                  ? `Dernière synchro ${timeSince(lastSyncedAt)}`
+                  : 'En attente de première synchronisation.';
 
         return {
             id: provider,
@@ -456,12 +479,14 @@ function buildConnectorItems({ connectors, visibility, social, jobHealth, baseHr
             lastSyncedAt,
             latestRun: latestRun
                 ? {
-                    statusLabel: provider === 'agent_reach'
-                        ? (COMMUNITY_RUN_STATUS_LABELS[latestRun.status] || latestRun.status)
-                        : (JOB_STATUS_LABELS[latestRun.status] || latestRun.status),
-                    timestamp: latestRun.finished_at || latestRun.started_at || latestRun.created_at || null,
-                    detail: provider === 'agent_reach' ? summarizeCommunityRun(latestRun) : summarizeJobRun(latestRun),
-                }
+                      statusLabel:
+                          provider === 'agent_reach'
+                              ? COMMUNITY_RUN_STATUS_LABELS[latestRun.status] || latestRun.status
+                              : JOB_STATUS_LABELS[latestRun.status] || latestRun.status,
+                      timestamp: latestRun.finished_at || latestRun.started_at || latestRun.created_at || null,
+                      detail:
+                          provider === 'agent_reach' ? summarizeCommunityRun(latestRun) : summarizeJobRun(latestRun),
+                  }
                 : null,
             metrics: getConnectorMetricRows(provider, visibility, social, snapshot, status),
             incidents,
@@ -470,7 +495,9 @@ function buildConnectorItems({ connectors, visibility, social, jobHealth, baseHr
 }
 
 function sortByMostRecent(items) {
-    return toArray(items).sort((left, right) => String(right.timestamp || '').localeCompare(String(left.timestamp || '')));
+    return toArray(items).sort((left, right) =>
+        String(right.timestamp || '').localeCompare(String(left.timestamp || '')),
+    );
 }
 
 async function getSharedDossierContract(clientId) {
@@ -488,23 +515,26 @@ async function getSharedDossierContract(clientId) {
 
     const client = shell.client;
     const workspace = shell.workspace || {};
-    const completedRunCount = shell.dataSources?.totalQueryRuns === 'unavailable'
-        ? null : finiteNumberOrNull(workspace.completedRunCount);
+    const completedRunCount =
+        shell.dataSources?.totalQueryRuns === 'unavailable' ? null : finiteNumberOrNull(workspace.completedRunCount);
     const latestRunAge = timeSince(workspace.latestRunAt);
     let geoRunSummary;
     let geoRunFreshness;
     if (completedRunCount === null) {
-        geoRunSummary = 'Nombre d’exécutions terminées indisponible'
-            + (latestRunAge ? ` · Dernière exécution ${latestRunAge}` : '');
+        geoRunSummary =
+            'Nombre d’exécutions terminées indisponible' +
+            (latestRunAge ? ` · Dernière exécution ${latestRunAge}` : '');
         geoRunFreshness = 'Nombre d’exécutions terminées indisponible';
     } else {
-        geoRunSummary = completedRunCount > 0
-            ? `${completedRunCount} exécution(s) terminée(s) · ${latestRunAge || 'Date indisponible'}`
-            : 'Aucune exécution IA finalisée';
-        geoRunFreshness = completedRunCount === 0 && !latestRunAge && shell.dataSources?.lastRun !== 'unavailable'
-            ? 'Aucune exécution terminée à date'
-            : `${completedRunCount} exécution(s) terminée(s) au total`
-                + (latestRunAge ? '' : ' · Date de dernière exécution indisponible');
+        geoRunSummary =
+            completedRunCount > 0
+                ? `${completedRunCount} exécution(s) terminée(s) · ${latestRunAge || 'Date indisponible'}`
+                : 'Aucune exécution IA finalisée';
+        geoRunFreshness =
+            completedRunCount === 0 && !latestRunAge && shell.dataSources?.lastRun !== 'unavailable'
+                ? 'Aucune exécution terminée à date'
+                : `${completedRunCount} exécution(s) terminée(s) au total` +
+                  (latestRunAge ? '' : ' · Date de dernière exécution indisponible');
     }
     const baseHref = `/admin/clients/${clientId}`;
     const completeness = getProfileCompletenessSummary(client);
@@ -529,7 +559,9 @@ async function getSharedDossierContract(clientId) {
 
     const activityFeed = sortByMostRecent([
         ...toArray(safeActivity?.items).map((item) => mapSafeActivityItem(item, baseHref)),
-        ...toArray(jobHealth?.runs).slice(0, 10).map((run) => mapJobRunItem(run, baseHref)),
+        ...toArray(jobHealth?.runs)
+            .slice(0, 10)
+            .map((run) => mapJobRunItem(run, baseHref)),
         ...(shouldExposeCommunityRun(social?.summary?.last_run, jobHealth?.runs)
             ? [mapCommunityRunItem(social.summary.last_run, baseHref)]
             : []),
@@ -545,13 +577,15 @@ async function getSharedDossierContract(clientId) {
     }));
 
     const connectorSummary = {
-        configuredCount: connectorItems.filter((item) => item.status !== 'not_connected' && item.status !== 'disabled').length,
+        configuredCount: connectorItems.filter((item) => item.status !== 'not_connected' && item.status !== 'disabled')
+            .length,
         withDataCount: connectorItems.filter((item) => item.hasRealData).length,
         alertCount: connectorItems.filter((item) => item.status === 'error' || item.incidents.length > 0).length,
     };
 
-    const technicalIncidentCount = connectorItems.filter((item) => item.status === 'error' || item.incidents.length > 0).length
-        + Number(jobHealth?.summary?.statusCounts?.failed || 0);
+    const technicalIncidentCount =
+        connectorItems.filter((item) => item.status === 'error' || item.incidents.length > 0).length +
+        Number(jobHealth?.summary?.statusCounts?.failed || 0);
 
     return {
         generatedAt: new Date().toISOString(),
@@ -561,7 +595,9 @@ async function getSharedDossierContract(clientId) {
                 id: 'business_type',
                 label: 'Marché',
                 value: compactString(client.business_type) || 'Indisponible',
-                detail: compactString(client.business_details?.short_desc || client.business_details?.short_description) || 'Type d’activité principal du mandat',
+                detail:
+                    compactString(client.business_details?.short_desc || client.business_details?.short_description) ||
+                    'Type d’activité principal du mandat',
                 reliability: compactString(client.business_type) ? 'measured' : 'unavailable',
                 accent: 'violet',
             }),
@@ -569,7 +605,10 @@ async function getSharedDossierContract(clientId) {
                 id: 'territory',
                 label: 'Territoire',
                 value: territory.primary || 'Indisponible',
-                detail: territory.secondary.length > 0 ? `${territory.secondary.length} zone(s) secondaire(s)` : 'Aucune zone secondaire renseignée',
+                detail:
+                    territory.secondary.length > 0
+                        ? `${territory.secondary.length} zone(s) secondaire(s)`
+                        : 'Aucune zone secondaire renseignée',
                 reliability: territory.primary ? 'measured' : 'unavailable',
                 accent: 'blue',
             }),
@@ -606,8 +645,11 @@ async function getSharedDossierContract(clientId) {
                 value: workspace.seoScore ?? 'n.d.',
                 detail: visibility?.kpis
                     ? `${visibility.kpis.totalClicks ?? 'n.d.'} clic(s) GSC · ${visibility.kpis.sessions ?? 'n.d.'} session(s) GA4`
-                    : (workspace.latestAuditAt ? `Dernier audit ${timeSince(workspace.latestAuditAt)}` : 'Aucun audit finalisé'),
-                reliability: workspace.seoScore !== null && workspace.seoScore !== undefined ? 'measured' : 'unavailable',
+                    : workspace.latestAuditAt
+                      ? `Dernier audit ${timeSince(workspace.latestAuditAt)}`
+                      : 'Aucun audit finalisé',
+                reliability:
+                    workspace.seoScore !== null && workspace.seoScore !== undefined ? 'measured' : 'unavailable',
                 href: `${baseHref}/seo/health`,
                 accent: 'emerald',
             }),
@@ -616,7 +658,8 @@ async function getSharedDossierContract(clientId) {
                 label: 'Visibilité IA',
                 value: workspace.geoScore ?? 'n.d.',
                 detail: geoRunSummary,
-                reliability: workspace.geoScore !== null && workspace.geoScore !== undefined ? 'measured' : 'unavailable',
+                reliability:
+                    workspace.geoScore !== null && workspace.geoScore !== undefined ? 'measured' : 'unavailable',
                 href: `${baseHref}/geo`,
                 accent: 'violet',
             }),
@@ -644,7 +687,9 @@ async function getSharedDossierContract(clientId) {
                 id: 'latest_workspace_activity',
                 label: 'Dernière activité opérateur',
                 value: timeSince(workspace.latestActivityAt) || 'Indisponible',
-                detail: workspace.latestActivityAt ? 'Dernière action tracée dans le mandat' : 'Aucune activité partageable récente',
+                detail: workspace.latestActivityAt
+                    ? 'Dernière action tracée dans le mandat'
+                    : 'Aucune activité partageable récente',
                 reliability: workspace.latestActivityAt ? 'measured' : 'unavailable',
                 href: `${baseHref}/dossier/activity`,
                 accent: 'amber',
@@ -665,7 +710,8 @@ async function getSharedDossierContract(clientId) {
             })),
             emptyState: {
                 title: 'Aucune action ouverte visible',
-                description: "La file d'actions se remplira à partir des audits, des opportunités détectées et des priorisations manuelles.",
+                description:
+                    "La file d'actions se remplira à partir des audits, des opportunités détectées et des priorisations manuelles.",
             },
         },
         activity: {
@@ -682,7 +728,10 @@ async function getSharedDossierContract(clientId) {
                     id: 'technical_incidents',
                     label: 'Incidents techniques',
                     value: technicalIncidentCount,
-                    detail: technicalIncidentCount > 0 ? 'Échecs d’automatisations ou de connecteurs à revoir' : 'Aucun incident récent remonté',
+                    detail:
+                        technicalIncidentCount > 0
+                            ? 'Échecs d’automatisations ou de connecteurs à revoir'
+                            : 'Aucun incident récent remonté',
                     reliability: 'calculated',
                     accent: technicalIncidentCount > 0 ? 'amber' : 'emerald',
                 }),
@@ -690,9 +739,10 @@ async function getSharedDossierContract(clientId) {
                     id: 'open_actions',
                     label: 'Actions ouvertes',
                     value: openItems.length,
-                    detail: Number(latestOpportunities?.stale?.length || 0) > 0
-                        ? `${Number(latestOpportunities.stale.length)} action(s) héritée(s) d’un audit précédent`
-                        : "File d'actions courante",
+                    detail:
+                        Number(latestOpportunities?.stale?.length || 0) > 0
+                            ? `${Number(latestOpportunities.stale.length)} action(s) héritée(s) d’un audit précédent`
+                            : "File d'actions courante",
                     reliability: 'calculated',
                     accent: 'amber',
                 }),
@@ -700,7 +750,8 @@ async function getSharedDossierContract(clientId) {
             items: activityFeed,
             emptyState: safeActivity?.emptyState || {
                 title: 'Aucune activité récente partageable',
-                description: 'Les audits, synchronisations et actions opérateur apparaîtront ici dès qu’ils sont tracés proprement.',
+                description:
+                    'Les audits, synchronisations et actions opérateur apparaîtront ici dès qu’ils sont tracés proprement.',
             },
         },
         connectors: {
@@ -725,7 +776,10 @@ async function getSharedDossierContract(clientId) {
                     id: 'connector_alerts',
                     label: 'Sources à surveiller',
                     value: connectorSummary.alertCount,
-                    detail: connectorSummary.alertCount > 0 ? 'Erreur ou incident récent détecté' : 'Aucun signal critique actif',
+                    detail:
+                        connectorSummary.alertCount > 0
+                            ? 'Erreur ou incident récent détecté'
+                            : 'Aucun signal critique actif',
                     reliability: 'calculated',
                     accent: connectorSummary.alertCount > 0 ? 'amber' : 'emerald',
                 }),
@@ -734,7 +788,8 @@ async function getSharedDossierContract(clientId) {
             preview: connectorPreview,
             emptyState: {
                 title: 'Aucun connecteur actif',
-                description: 'GA4, Search Console et Intelligence communautaire apparaîtront ici dès qu’une source est configurée.',
+                description:
+                    'GA4, Search Console et Intelligence communautaire apparaîtront ici dès qu’une source est configurée.',
             },
         },
         quickLinks: {
@@ -772,7 +827,8 @@ async function getSharedDossierContract(clientId) {
                 buildQuickLink({
                     id: 'seo-health',
                     label: 'Santé SEO',
-                    description: 'Relire les preuves d’audit, l’indexation, canonical, robots et les problèmes prioritaires.',
+                    description:
+                        'Relire les preuves d’audit, l’indexation, canonical, robots et les problèmes prioritaires.',
                     href: `${baseHref}/seo/health`,
                     section: 'Visibilité Google',
                 }),

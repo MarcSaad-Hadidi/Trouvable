@@ -10,10 +10,12 @@ const STATE_ISSUER = 'trouvable';
 const STATE_AUDIENCE = 'google-oauth';
 
 function getStateSecret() {
-    return process.env.GOOGLE_OAUTH_STATE_SECRET
-        || process.env.GOOGLE_OAUTH_CLIENT_SECRET
-        || process.env.CLERK_SECRET_KEY
-        || '';
+    return (
+        process.env.GOOGLE_OAUTH_STATE_SECRET ||
+        process.env.GOOGLE_OAUTH_CLIENT_SECRET ||
+        process.env.CLERK_SECRET_KEY ||
+        ''
+    );
 }
 
 function getStateKey(secret) {
@@ -36,7 +38,9 @@ export function normalizeGoogleOAuthReturnTo(value, fallback = null) {
     }
 
     const pathname = parsed.pathname || '/';
-    const isAllowed = SAFE_RETURN_PREFIXES.some((prefix) => pathname === prefix.slice(0, -1) || pathname.startsWith(prefix));
+    const isAllowed = SAFE_RETURN_PREFIXES.some(
+        (prefix) => pathname === prefix.slice(0, -1) || pathname.startsWith(prefix),
+    );
     if (!isAllowed) return null;
 
     return `${pathname}${parsed.search || ''}${parsed.hash || ''}`;
@@ -139,5 +143,7 @@ export async function verifyGoogleOAuthState(state, { nowMs = Date.now() } = {})
 }
 
 export function hasGoogleOAuthEnv(env = process.env) {
-    return Boolean(String(env.GOOGLE_OAUTH_CLIENT_ID || '').trim() && String(env.GOOGLE_OAUTH_CLIENT_SECRET || '').trim());
+    return Boolean(
+        String(env.GOOGLE_OAUTH_CLIENT_ID || '').trim() && String(env.GOOGLE_OAUTH_CLIENT_SECRET || '').trim(),
+    );
 }

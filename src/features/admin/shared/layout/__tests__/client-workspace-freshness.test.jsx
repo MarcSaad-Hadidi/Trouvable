@@ -5,7 +5,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const fixture = vi.hoisted(() => ({ latestRunAt: null }));
 vi.mock('@/features/admin/shared/context/ClientContext', () => ({
     ClientProvider: ({ children }) => children,
-    useGeoClient: () => ({ client: { id: 'fixture', client_name: 'Fixture' }, workspace: { latestRunAt: fixture.latestRunAt }, invalidateWorkspace() {} }),
+    useGeoClient: () => ({
+        client: { id: 'fixture', client_name: 'Fixture' },
+        workspace: { latestRunAt: fixture.latestRunAt },
+        invalidateWorkspace() {},
+    }),
 }));
 vi.mock('@/features/admin/shared/components/AdminTray', () => ({ default: () => null }));
 vi.mock('@/features/admin/shared/components/CommandStrip', () => ({ default: () => null }));
@@ -24,7 +28,11 @@ describe('workspace hourly freshness', () => {
         expect(html).toContain('bg-white/20');
     });
 
-    it.each([[6, 'récente'], [25, 'à surveiller'], [73, 'ancienne']])('preserves the valid %s hour threshold', (hours, label) => {
+    it.each([
+        [6, 'récente'],
+        [25, 'à surveiller'],
+        [73, 'ancienne'],
+    ])('preserves the valid %s hour threshold', (hours, label) => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date('2026-10-03T12:00:00Z'));
         fixture.latestRunAt = new Date(Date.now() - hours * 3600000).toISOString();

@@ -40,9 +40,32 @@ const LAYER1_ENGINE_ID = 'trouvable.scanner.v1';
    pages already in the queue (frontier-exhaustion stop). */
 
 const KEYWORD_PAGES = [
-    'contact', 'about', 'a-propos', 'propos', 'service', 'services', 'prestation', 'solution',
-    'faq', 'question', 'questions', 'zone', 'ville', 'region', 'secteur', 'pricing', 'tarif',
-    'features', 'feature', 'product', 'produit', 'blog', 'article', 'guide', 'docs', 'documentation',
+    'contact',
+    'about',
+    'a-propos',
+    'propos',
+    'service',
+    'services',
+    'prestation',
+    'solution',
+    'faq',
+    'question',
+    'questions',
+    'zone',
+    'ville',
+    'region',
+    'secteur',
+    'pricing',
+    'tarif',
+    'features',
+    'feature',
+    'product',
+    'produit',
+    'blog',
+    'article',
+    'guide',
+    'docs',
+    'documentation',
 ];
 
 async function fetchWithTimeout(url) {
@@ -50,7 +73,7 @@ async function fetchWithTimeout(url) {
         timeoutMs: FETCH_TIMEOUT_MS,
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, TrouvableAuditBot/3.0)',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         },
     });
 }
@@ -209,9 +232,10 @@ export async function runSiteAudit(startUrl) {
         results.extracted_data.render_stats.audit_strategy_message = `Browser rendering enabled (${renderer.reason || 'default'}): hybrid static + browser rendering mode.`;
     } else {
         results.extracted_data.render_stats.audit_strategy = 'static_only';
-        results.extracted_data.render_stats.audit_strategy_message = renderer.reason === 'disabled_by_config'
-            ? 'Playwright rendering disabled by configuration. Audit runs in static-only mode.'
-            : `Playwright unavailable (${renderer.reason || 'unknown_reason'}). Audit runs in static-only mode.`;
+        results.extracted_data.render_stats.audit_strategy_message =
+            renderer.reason === 'disabled_by_config'
+                ? 'Playwright rendering disabled by configuration. Audit runs in static-only mode.'
+                : `Playwright unavailable (${renderer.reason || 'unknown_reason'}). Audit runs in static-only mode.`;
     }
 
     const safety = getCrawlerRuntimeConfig();
@@ -247,7 +271,8 @@ export async function runSiteAudit(startUrl) {
             layer1Block.crawl_metadata.robots_present = sitemapDiscovery.robots_present;
             layer1Block.crawl_metadata.sitemap_sources = sitemapDiscovery.sitemap_sources || [];
             if (sitemapDiscovery.discovered_urls.length > 0) {
-                layer1Block.crawl_metadata.strategy = sitemapDiscovery.strategy === 'robots_sitemap' ? 'sitemap_first' : 'sitemap_first';
+                layer1Block.crawl_metadata.strategy =
+                    sitemapDiscovery.strategy === 'robots_sitemap' ? 'sitemap_first' : 'sitemap_first';
                 let seeded = 0;
                 for (const url of sitemapDiscovery.discovered_urls) {
                     if (seeded >= safety.sitemapSeedLimit) break;
@@ -318,7 +343,7 @@ export async function runSiteAudit(startUrl) {
                 let staticHtml = '';
                 let staticHydrationHints = [];
                 let staticWordCount = 0;
-                
+
                 try {
                     const response = await fetchWithTimeout(targetUrl);
                     pageRecord.status_code = response.status;
@@ -360,7 +385,7 @@ export async function runSiteAudit(startUrl) {
                 let finalHydrationHints = [...staticHydrationHints];
 
                 let shouldRender = false;
-                
+
                 if (fetchFailed) {
                     if (renderer.available === true && renderAttempts < safety.renderFetchFailureAttemptLimit) {
                         shouldRender = true;
@@ -385,9 +410,11 @@ export async function runSiteAudit(startUrl) {
                     const rendered = await renderer.render(pageRecord.final_url || targetUrl);
                     if (rendered.ok && rendered.html) {
                         const renderedWordCount = Number(rendered.visibleWordCount || 0);
-                        const staticLooksThin = staticWordCount < STATIC_WORD_CONFIDENCE_THRESHOLD || staticHydrationHints.length > 0;
-                        const renderImprovesCoverage = renderedWordCount >= (staticWordCount + 80);
-                        const preferRendered = pageRecord.page_type === 'homepage' || staticLooksThin || renderImprovesCoverage;
+                        const staticLooksThin =
+                            staticWordCount < STATIC_WORD_CONFIDENCE_THRESHOLD || staticHydrationHints.length > 0;
+                        const renderImprovesCoverage = renderedWordCount >= staticWordCount + 80;
+                        const preferRendered =
+                            pageRecord.page_type === 'homepage' || staticLooksThin || renderImprovesCoverage;
 
                         if (preferRendered) {
                             finalHtml = rendered.html;
@@ -428,7 +455,11 @@ export async function runSiteAudit(startUrl) {
                     $('meta[name="twitter:description"]').attr('content'),
                 );
                 const h1 = normalizeWhitespace($('h1').first().text());
-                const h2s = uniqueStrings($('h2').map((_, el) => $(el).text()).get()).slice(0, 12);
+                const h2s = uniqueStrings(
+                    $('h2')
+                        .map((_, el) => $(el).text())
+                        .get(),
+                ).slice(0, 12);
                 const canonical = firstNonEmpty($('link[rel="canonical"]').attr('href'));
                 const robots = firstNonEmpty($('meta[name="robots"]').attr('content')).toLowerCase();
                 const bodyText = normalizeWhitespace($('body').text()).toLowerCase();
@@ -446,7 +477,10 @@ export async function runSiteAudit(startUrl) {
                 const citability = scorePageCitability(contentBlocks);
 
                 const schemaData = collectSchemaData($, pageRecord.final_url || targetUrl);
-                const faqPairs = [...schemaData.faqPairs, ...extractFaqPairsFromDom($, pageRecord.final_url || targetUrl)];
+                const faqPairs = [
+                    ...schemaData.faqPairs,
+                    ...extractFaqPairsFromDom($, pageRecord.final_url || targetUrl),
+                ];
                 const contacts = extractPhonesAndEmails($);
                 const socialLinks = extractSocialLinks($);
                 const businessNames = extractBusinessNames($, schemaData.schemaEntities);
@@ -457,7 +491,7 @@ export async function runSiteAudit(startUrl) {
                 results.extracted_data.technology_signals.has_next_data ||= finalHtml.includes('__NEXT_DATA__');
                 results.extracted_data.technology_signals.hydration_hints = mergeUnique(
                     results.extracted_data.technology_signals.hydration_hints,
-                    finalHydrationHints
+                    finalHydrationHints,
                 );
                 if (wordCount < 120 && finalHydrationHints.length > 0) {
                     results.extracted_data.technology_signals.app_shell_pages += 1;
@@ -468,7 +502,8 @@ export async function runSiteAudit(startUrl) {
                 if (h1) results.extracted_data.h1s.push(h1);
                 if (h2s.length > 0) results.extracted_data.h2_clusters.push(h2s);
                 if (canonical && pageRecord.page_type === 'homepage') results.extracted_data.canonicals.push(canonical);
-                if (robots.includes('noindex') && pageRecord.page_type === 'homepage') results.extracted_data.has_noindex = true;
+                if (robots.includes('noindex') && pageRecord.page_type === 'homepage')
+                    results.extracted_data.has_noindex = true;
 
                 results.extracted_data.structured_data.push(...schemaData.structuredData);
                 results.extracted_data.schema_entities.push(...schemaData.schemaEntities);
@@ -476,8 +511,14 @@ export async function runSiteAudit(startUrl) {
                 results.extracted_data.has_local_business_schema ||= schemaData.hasLocalBusinessSchema;
                 results.extracted_data.has_organization_schema ||= schemaData.hasOrganizationSchema;
                 results.extracted_data.faq_pairs.push(...faqPairs);
-                results.extracted_data.business_names = mergeUnique(results.extracted_data.business_names, businessNames);
-                results.extracted_data.text_chunks = appendTextChunks(results.extracted_data.text_chunks, pageTextChunks);
+                results.extracted_data.business_names = mergeUnique(
+                    results.extracted_data.business_names,
+                    businessNames,
+                );
+                results.extracted_data.text_chunks = appendTextChunks(
+                    results.extracted_data.text_chunks,
+                    pageTextChunks,
+                );
 
                 contacts.phones.forEach((phone) => results.extracted_data.phones.add(phone));
                 contacts.emails.forEach((email) => results.extracted_data.emails.add(email));
@@ -486,7 +527,18 @@ export async function runSiteAudit(startUrl) {
                 for (const entity of schemaData.schemaEntities) {
                     if (Array.isArray(entity.sameAs)) {
                         entity.sameAs.forEach((url) => {
-                            if (typeof url === 'string' && ['facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com', 'x.com', 'tiktok.com', 'youtube.com'].some((domain) => inputMatchesHostname(url, domain))) {
+                            if (
+                                typeof url === 'string' &&
+                                [
+                                    'facebook.com',
+                                    'instagram.com',
+                                    'linkedin.com',
+                                    'twitter.com',
+                                    'x.com',
+                                    'tiktok.com',
+                                    'youtube.com',
+                                ].some((domain) => inputMatchesHostname(url, domain))
+                            ) {
                                 results.extracted_data.social_links.add(url);
                             }
                         });
@@ -496,10 +548,19 @@ export async function runSiteAudit(startUrl) {
                 results.extracted_data.local_signals = {
                     cities: mergeUnique(results.extracted_data.local_signals.cities, localSignals.cities),
                     regions: mergeUnique(results.extracted_data.local_signals.regions, localSignals.regions),
-                    area_served: mergeUnique(results.extracted_data.local_signals.area_served, localSignals.area_served),
-                    address_lines: mergeUnique(results.extracted_data.local_signals.address_lines, localSignals.address_lines),
+                    area_served: mergeUnique(
+                        results.extracted_data.local_signals.area_served,
+                        localSignals.area_served,
+                    ),
+                    address_lines: mergeUnique(
+                        results.extracted_data.local_signals.address_lines,
+                        localSignals.address_lines,
+                    ),
                     maps_links: mergeUnique(results.extracted_data.local_signals.maps_links, localSignals.maps_links),
-                    local_terms: mergeUnique(results.extracted_data.local_signals.local_terms, localSignals.local_terms),
+                    local_terms: mergeUnique(
+                        results.extracted_data.local_signals.local_terms,
+                        localSignals.local_terms,
+                    ),
                 };
 
                 results.extracted_data.service_signals = {
@@ -508,14 +569,24 @@ export async function runSiteAudit(startUrl) {
                 };
 
                 results.extracted_data.trust_signals = {
-                    proof_terms: mergeUnique(results.extracted_data.trust_signals.proof_terms, trustSignals.proof_terms),
-                    review_terms: mergeUnique(results.extracted_data.trust_signals.review_terms, trustSignals.review_terms),
-                    social_networks: mergeUnique(results.extracted_data.trust_signals.social_networks, trustSignals.social_networks),
+                    proof_terms: mergeUnique(
+                        results.extracted_data.trust_signals.proof_terms,
+                        trustSignals.proof_terms,
+                    ),
+                    review_terms: mergeUnique(
+                        results.extracted_data.trust_signals.review_terms,
+                        trustSignals.review_terms,
+                    ),
+                    social_networks: mergeUnique(
+                        results.extracted_data.trust_signals.social_networks,
+                        trustSignals.social_networks,
+                    ),
                 };
 
                 results.extracted_data.page_stats.successful_pages += 1;
                 results.extracted_data.page_stats.total_word_count += wordCount;
-                if (pageRecord.page_type === 'faq' || faqPairs.length > 0) results.extracted_data.page_stats.faq_pages += 1;
+                if (pageRecord.page_type === 'faq' || faqPairs.length > 0)
+                    results.extracted_data.page_stats.faq_pages += 1;
                 if (pageRecord.page_type === 'services') results.extracted_data.page_stats.service_pages += 1;
                 if (pageRecord.page_type === 'about') results.extracted_data.page_stats.about_pages += 1;
                 if (pageRecord.page_type === 'contact') results.extracted_data.page_stats.contact_pages += 1;
@@ -533,7 +604,11 @@ export async function runSiteAudit(startUrl) {
                     h1,
                     word_count: wordCount,
                     faq_pairs_count: faqPairs.length,
-                    local_signal_count: localSignals.cities.length + localSignals.regions.length + localSignals.area_served.length + localSignals.address_lines.length,
+                    local_signal_count:
+                        localSignals.cities.length +
+                        localSignals.regions.length +
+                        localSignals.area_served.length +
+                        localSignals.address_lines.length,
                     service_signal_count: serviceSignals.services.length,
                     citability: {
                         page_score: citability.page_score,
@@ -546,7 +621,7 @@ export async function runSiteAudit(startUrl) {
                             .slice(0, 3)
                             .map((block) => ({
                                 block_id: block.block_id,
-                                page_url: block.page_url || (pageRecord.final_url || targetUrl),
+                                page_url: block.page_url || pageRecord.final_url || targetUrl,
                                 heading: block.heading || null,
                                 heading_level: block.heading_level || null,
                                 block_type: block.block_type,
@@ -563,7 +638,13 @@ export async function runSiteAudit(startUrl) {
                 if (visitedPages.size <= safety.linkExtractionDepth) {
                     $('a[href]').each((_, link) => {
                         const href = $(link).attr('href');
-                        if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#') || hasBlockedNavigationScheme(href)) {
+                        if (
+                            !href ||
+                            href.startsWith('mailto:') ||
+                            href.startsWith('tel:') ||
+                            href.startsWith('#') ||
+                            hasBlockedNavigationScheme(href)
+                        ) {
                             recordSkipped(href, 'blocked_navigation');
                             return;
                         }
@@ -622,7 +703,10 @@ export async function runSiteAudit(startUrl) {
                         checks: pageChecks,
                     });
                 } catch (checkErr) {
-                    console.warn('[AuditScanner] page_checks_failed', { url: pageRecord.final_url || targetUrl, error: checkErr?.message });
+                    console.warn('[AuditScanner] page_checks_failed', {
+                        url: pageRecord.final_url || targetUrl,
+                        error: checkErr?.message,
+                    });
                 }
 
                 results.scanned_pages.push(pageRecord);
@@ -632,7 +716,7 @@ export async function runSiteAudit(startUrl) {
             }
         }
     } finally {
-        await renderer.close().catch(() => { });
+        await renderer.close().catch(() => {});
     }
 
     results.extracted_data.emails = uniqueStrings([...results.extracted_data.emails]);

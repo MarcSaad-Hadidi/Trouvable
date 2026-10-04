@@ -73,12 +73,11 @@ async function fetchUpstreamHtml(targetUrl) {
         if (!upstream.ok) return null;
 
         const contentType = String(upstream.headers.get('content-type') || '').toLowerCase();
-        const isLikelyHtml = (
-            !contentType
-            || contentType.includes('text/html')
-            || contentType.includes('application/xhtml+xml')
-            || contentType.startsWith('text/')
-        );
+        const isLikelyHtml =
+            !contentType ||
+            contentType.includes('text/html') ||
+            contentType.includes('application/xhtml+xml') ||
+            contentType.startsWith('text/');
 
         if (!isLikelyHtml) {
             return null;
@@ -118,10 +117,7 @@ function buildStaticHtmlCandidates(safePath) {
     }
 
     const joined = path.join(...decodedSegments);
-    return [
-        path.join(appDir, `${joined}.html`),
-        path.join(appDir, joined, 'index.html'),
-    ];
+    return [path.join(appDir, `${joined}.html`), path.join(appDir, joined, 'index.html')];
 }
 
 async function readStaticHtmlSnapshot(safePath) {
@@ -161,7 +157,7 @@ export async function GET(request) {
     const { safePath, targetUrl } = resolveTarget(request);
 
     const upstreamHtml = await fetchUpstreamHtml(targetUrl);
-    const html = upstreamHtml || await readStaticHtmlSnapshot(safePath);
+    const html = upstreamHtml || (await readStaticHtmlSnapshot(safePath));
 
     if (!html) {
         const fallback = fallbackMarkdown(targetUrl, safePath);

@@ -12,7 +12,8 @@ describe('geo readiness route wiring', () => {
     });
 
     it('wires the client GEO readiness route to the readiness view', async () => {
-        const { default: GeoReadinessPage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo/readiness/page');
+        const { default: GeoReadinessPage } =
+            await import('@/app/admin/(workspace)/clients/[clientId]/geo/readiness/page');
 
         const element = GeoReadinessPage();
 
@@ -20,4 +21,3 @@ describe('geo readiness route wiring', () => {
         expect(element.props).toEqual({});
     });
 });
-

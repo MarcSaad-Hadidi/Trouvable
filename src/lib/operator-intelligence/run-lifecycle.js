@@ -37,11 +37,11 @@ export function normalizeRunParseStatus(run = {}) {
     if (!isRunInProgressStatus(run?.status)) return parseStatus;
 
     const hasTerminalArtifacts = Boolean(
-        run?.error_class
-        || run?.latency_ms !== null && run?.latency_ms !== undefined
-        || (typeof run?.response_text === 'string' && run.response_text.trim())
-        || (typeof run?.raw_response_full === 'string' && run.raw_response_full.trim())
-        || run?.raw_analysis?.error
+        run?.error_class ||
+        (run?.latency_ms !== null && run?.latency_ms !== undefined) ||
+        (typeof run?.response_text === 'string' && run.response_text.trim()) ||
+        (typeof run?.raw_response_full === 'string' && run.raw_response_full.trim()) ||
+        run?.raw_analysis?.error,
     );
 
     return hasTerminalArtifacts ? parseStatus : null;
@@ -95,12 +95,16 @@ export function getRunDiagnostic(run = {}) {
     return null;
 }
 
-
-
 export function needsRunOperatorReview(run = {}) {
     const parseStatus = normalizeRunParseStatus(run);
     if (isRunFailureStatus(run?.status)) return true;
     if (parseStatus === 'parsed_failed' || parseStatus === 'parsed_partial') return true;
-    if (isRunSuccessStatus(run?.status) && run?.parse_confidence !== null && run?.parse_confidence !== undefined && Number(run.parse_confidence) < 0.5) return true;
+    if (
+        isRunSuccessStatus(run?.status) &&
+        run?.parse_confidence !== null &&
+        run?.parse_confidence !== undefined &&
+        Number(run.parse_confidence) < 0.5
+    )
+        return true;
     return false;
 }

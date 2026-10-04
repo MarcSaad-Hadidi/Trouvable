@@ -22,15 +22,16 @@ describe('google grounding', () => {
 
     it('uses tavily fallback when configured and google is absent', async () => {
         process.env.TAVILY_API_KEY = 'tvly-test';
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ({
-                results: [
-                    { title: 'Result 1', url: 'https://example.com/a', content: 'Snippet A' },
-                ],
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({
+                    results: [{ title: 'Result 1', url: 'https://example.com/a', content: 'Snippet A' }],
+                }),
+                text: async () => '',
             }),
-            text: async () => '',
-        }));
+        );
 
         const { buildGoogleGroundingContext } = await import('@/lib/llm-comparison/google-grounding');
         const result = await buildGoogleGroundingContext({

@@ -27,15 +27,16 @@ function firstScore(...candidates) {
 function getLayeredRoot(audit) {
     const extracted = audit?.extracted_data;
     if (!extracted || typeof extracted !== 'object') return null;
-    return extracted.layered_v1 && typeof extracted.layered_v1 === 'object'
-        ? extracted.layered_v1
-        : null;
+    return extracted.layered_v1 && typeof extracted.layered_v1 === 'object' ? extracted.layered_v1 : null;
 }
 
 function getDimensionScores(audit) {
     const layered = getLayeredRoot(audit);
     return [
-        { scores: layered?.final_trouvable_score?.dimension_scores, source: 'layered.final_trouvable_score.dimension_scores' },
+        {
+            scores: layered?.final_trouvable_score?.dimension_scores,
+            source: 'layered.final_trouvable_score.dimension_scores',
+        },
         { scores: layered?.dimension_scores, source: 'layered.dimension_scores' },
         { scores: audit?.extracted_data?.dimension_scores, source: 'extracted.dimension_scores' },
     ].filter(({ scores }) => scores && typeof scores === 'object');
@@ -80,22 +81,26 @@ function scoreReading({ value, source }) {
 /** @returns {ScoreReading} */
 export function readSeoScore(audit) {
     const layered = getDimensionReading(audit, 'technical_seo');
-    return scoreReading(firstScore(
-        [layered.value, layered.source],
-        [audit?.seo_score, 'legacy.seo_score'],
-        [audit?.breakdown?.technical_seo?.score, 'legacy.breakdown.technical_seo'],
-    ));
+    return scoreReading(
+        firstScore(
+            [layered.value, layered.source],
+            [audit?.seo_score, 'legacy.seo_score'],
+            [audit?.breakdown?.technical_seo?.score, 'legacy.breakdown.technical_seo'],
+        ),
+    );
 }
 
 /** @returns {ScoreReading} */
 export function readGeoScore(audit) {
     const local = getDimensionReading(audit, 'local_readiness');
     const layered = local.value !== null ? local : getDimensionReading(audit, 'ai_answerability');
-    return scoreReading(firstScore(
-        [layered.value, layered.source],
-        [audit?.geo_score, 'legacy.geo_score'],
-        [audit?.breakdown?.local_readiness?.score, 'legacy.breakdown.local_readiness'],
-    ));
+    return scoreReading(
+        firstScore(
+            [layered.value, layered.source],
+            [audit?.geo_score, 'legacy.geo_score'],
+            [audit?.breakdown?.local_readiness?.score, 'legacy.breakdown.local_readiness'],
+        ),
+    );
 }
 
 /** @returns {ScoreReading} */
@@ -105,7 +110,10 @@ export function readOverallScore(audit) {
         [audit?.deterministic_score, 'deterministic_score'],
         [audit?.overall_score, 'overall_score'],
         [audit?.breakdown?.overall?.score, 'legacy.breakdown.overall.score'],
-        [getLayeredRoot(audit)?.final_trouvable_score?.deterministic_score, 'layered.final_trouvable_score.deterministic_score'],
+        [
+            getLayeredRoot(audit)?.final_trouvable_score?.deterministic_score,
+            'layered.final_trouvable_score.deterministic_score',
+        ],
         [audit?.seo_breakdown?.overall?.deterministic_score, 'legacy.seo_breakdown.overall.deterministic_score'],
         [audit?.geo_breakdown?.overall?.deterministic_score, 'legacy.geo_breakdown.overall.deterministic_score'],
     );
@@ -113,9 +121,11 @@ export function readOverallScore(audit) {
 
     const seo = readSeoScore(audit);
     const geo = readGeoScore(audit);
-    return scoreReading(seo.value !== null && geo.value !== null
-        ? { value: Math.round((seo.value + geo.value) / 2), source: 'derived.seo+geo/2' }
-        : reading);
+    return scoreReading(
+        seo.value !== null && geo.value !== null
+            ? { value: Math.round((seo.value + geo.value) / 2), source: 'derived.seo+geo/2' }
+            : reading,
+    );
 }
 
 /**
@@ -128,10 +138,9 @@ export function readDimensions(audit) {
     const result = {};
     for (const key of keys) {
         const layered = getDimensionReading(audit, key);
-        result[key] = scoreReading(firstScore(
-            [layered.value, layered.source],
-            [audit?.breakdown?.[key]?.score, 'legacy.breakdown.' + key],
-        ));
+        result[key] = scoreReading(
+            firstScore([layered.value, layered.source], [audit?.breakdown?.[key]?.score, 'legacy.breakdown.' + key]),
+        );
     }
     return result;
 }

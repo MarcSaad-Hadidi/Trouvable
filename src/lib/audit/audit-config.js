@@ -112,21 +112,13 @@ export function getCrawlSafetyCeiling() {
             DEFAULT_MAX_FETCH_ATTEMPTS,
             HARD_MAX_FETCH_ATTEMPTS,
         ),
-        maxDurationMs: clampInt(
-            process.env.AUDIT_MAX_DURATION_MS,
-            DEFAULT_MAX_DURATION_MS,
-            HARD_MAX_DURATION_MS,
-        ),
+        maxDurationMs: clampInt(process.env.AUDIT_MAX_DURATION_MS, DEFAULT_MAX_DURATION_MS, HARD_MAX_DURATION_MS),
     };
 }
 
 export function getSitemapDiscoveryConfig() {
     return {
-        maxSitemapDocs: clampInt(
-            process.env.AUDIT_MAX_SITEMAP_DOCS,
-            DEFAULT_MAX_SITEMAP_DOCS,
-            HARD_MAX_SITEMAP_DOCS,
-        ),
+        maxSitemapDocs: clampInt(process.env.AUDIT_MAX_SITEMAP_DOCS, DEFAULT_MAX_SITEMAP_DOCS, HARD_MAX_SITEMAP_DOCS),
         maxUrlsFromSitemap: clampInt(
             process.env.AUDIT_MAX_URLS_FROM_SITEMAP,
             DEFAULT_MAX_URLS_FROM_SITEMAP,
@@ -162,11 +154,7 @@ export function getCrawlerRuntimeConfig() {
 }
 
 export function getFullAuditTimeoutMs() {
-    return clampInt(
-        process.env.AUDIT_FULL_TIMEOUT_MS,
-        DEFAULT_FULL_AUDIT_TIMEOUT_MS,
-        HARD_FULL_AUDIT_TIMEOUT_MS,
-    );
+    return clampInt(process.env.AUDIT_FULL_TIMEOUT_MS, DEFAULT_FULL_AUDIT_TIMEOUT_MS, HARD_FULL_AUDIT_TIMEOUT_MS);
 }
 
 /**

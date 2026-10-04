@@ -37,15 +37,23 @@ async function executeQueryRunWriteWithCompat(context, payload, executor) {
         if (!error) {
             if (strippedColumns.length > 0) {
                 console.warn(
-                    `[DB] ${context}: query_runs schema drift detected. Retried without columns: ${strippedColumns.join(', ')}`
+                    `[DB] ${context}: query_runs schema drift detected. Retried without columns: ${strippedColumns.join(', ')}`,
                 );
             }
             return data;
         }
 
         const missingColumn = extractMissingSchemaCacheColumn(error, 'query_runs');
-        if (!missingColumn || !OPTIONAL_QUERY_RUN_DRIFT_COLUMNS.has(missingColumn) || !Object.prototype.hasOwnProperty.call(writePayload, missingColumn)) {
-            throw createDbError(context, error, strippedColumns.length > 0 ? { queryRunSchemaDriftColumns: strippedColumns } : {});
+        if (
+            !missingColumn ||
+            !OPTIONAL_QUERY_RUN_DRIFT_COLUMNS.has(missingColumn) ||
+            !Object.prototype.hasOwnProperty.call(writePayload, missingColumn)
+        ) {
+            throw createDbError(
+                context,
+                error,
+                strippedColumns.length > 0 ? { queryRunSchemaDriftColumns: strippedColumns } : {},
+            );
         }
 
         delete writePayload[missingColumn];
@@ -69,7 +77,9 @@ export async function createQueryRun(runData) {
         prompt_payload: runData.prompt_payload ?? {},
         raw_response_full: runData.raw_response_full ?? runData.response_text ?? null,
         normalized_response: runData.normalized_response ?? runData.parsed_response ?? {},
-        parse_status: Object.prototype.hasOwnProperty.call(runData, 'parse_status') ? (runData.parse_status ?? null) : null,
+        parse_status: Object.prototype.hasOwnProperty.call(runData, 'parse_status')
+            ? (runData.parse_status ?? null)
+            : null,
         parse_warnings: runData.parse_warnings ?? [],
         usage_tokens: runData.usage_tokens ?? {},
         retry_count: runData.retry_count ?? 0,
@@ -77,33 +87,57 @@ export async function createQueryRun(runData) {
         target_detection: runData.target_detection ?? {},
     };
 
-    return executeQueryRunWriteWithCompat('createQueryRun', normalizedRunData, (payload) => (
-        db().from('query_runs').insert(payload).select().single()
-    ));
+    return executeQueryRunWriteWithCompat('createQueryRun', normalizedRunData, (payload) =>
+        db().from('query_runs').insert(payload).select().single(),
+    );
 }
 
 export async function updateQueryRun(id, updates) {
     const normalizedUpdates = {
         ...updates,
-        ...(Object.prototype.hasOwnProperty.call(updates, 'provider') ? { provider: updates.provider || 'unknown' } : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'provider')
+            ? { provider: updates.provider || 'unknown' }
+            : {}),
         ...(Object.prototype.hasOwnProperty.call(updates, 'model') ? { model: updates.model || 'unknown' } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'raw_analysis') ? { raw_analysis: updates.raw_analysis ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'parsed_response') ? { parsed_response: updates.parsed_response ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'prompt_payload') ? { prompt_payload: updates.prompt_payload ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'normalized_response') ? { normalized_response: updates.normalized_response ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'parse_warnings') ? { parse_warnings: updates.parse_warnings ?? [] } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'usage_tokens') ? { usage_tokens: updates.usage_tokens ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'target_detection') ? { target_detection: updates.target_detection ?? {} } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'total_mentioned') ? { total_mentioned: updates.total_mentioned ?? 0 } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'target_found') ? { target_found: updates.target_found ?? false } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'run_mode') ? { run_mode: updates.run_mode || 'standard' } : {}),
-        ...(Object.prototype.hasOwnProperty.call(updates, 'engine_variant') ? { engine_variant: updates.engine_variant || 'tavily_orchestrated' } : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'raw_analysis')
+            ? { raw_analysis: updates.raw_analysis ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'parsed_response')
+            ? { parsed_response: updates.parsed_response ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'prompt_payload')
+            ? { prompt_payload: updates.prompt_payload ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'normalized_response')
+            ? { normalized_response: updates.normalized_response ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'parse_warnings')
+            ? { parse_warnings: updates.parse_warnings ?? [] }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'usage_tokens')
+            ? { usage_tokens: updates.usage_tokens ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'target_detection')
+            ? { target_detection: updates.target_detection ?? {} }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'total_mentioned')
+            ? { total_mentioned: updates.total_mentioned ?? 0 }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'target_found')
+            ? { target_found: updates.target_found ?? false }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'run_mode')
+            ? { run_mode: updates.run_mode || 'standard' }
+            : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, 'engine_variant')
+            ? { engine_variant: updates.engine_variant || 'tavily_orchestrated' }
+            : {}),
         ...(Object.prototype.hasOwnProperty.call(updates, 'locale') ? { locale: updates.locale || 'fr-CA' } : {}),
     };
 
-    return executeQueryRunWriteWithCompat(`updateQueryRun ${id}`, normalizedUpdates, (payload) => (
-        db().from('query_runs').update(payload).eq('id', id).select().single()
-    ));
+    return executeQueryRunWriteWithCompat(`updateQueryRun ${id}`, normalizedUpdates, (payload) =>
+        db().from('query_runs').update(payload).eq('id', id).select().single(),
+    );
 }
 
 export async function getQueryRuns(clientId, limit = 20) {
@@ -119,10 +153,7 @@ export async function getQueryRuns(clientId, limit = 20) {
 }
 
 export async function countQueryRunsForClientSince(clientId, sinceIso) {
-    let query = db()
-        .from('query_runs')
-        .select('id', { count: 'exact', head: true })
-        .eq('client_id', clientId);
+    let query = db().from('query_runs').select('id', { count: 'exact', head: true }).eq('client_id', clientId);
 
     if (typeof sinceIso === 'string' && sinceIso.trim()) {
         query = query.gte('created_at', sinceIso);
@@ -188,7 +219,9 @@ export async function getQueryRunsResponseBrowser(clientId, limit = 120) {
 export async function getQueryRunsHistory(clientId, limit = 200) {
     const { data, error } = await db()
         .from('query_runs')
-        .select(`id, client_id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`)
+        .select(
+            `id, client_id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`,
+        )
         .eq('client_id', clientId)
         .or('run_mode.is.null,run_mode.eq.standard,run_mode.eq.compare,run_mode.eq.benchmark')
         .order('created_at', { ascending: false })
@@ -201,7 +234,9 @@ export async function getQueryRunsHistory(clientId, limit = 200) {
 export async function getCompletedQueryRuns(clientId, limit = null) {
     let query = db()
         .from('query_runs')
-        .select(`id, client_id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`)
+        .select(
+            `id, client_id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`,
+        )
         .eq('client_id', clientId)
         .eq('status', 'completed')
         .or('run_mode.is.null,run_mode.eq.standard')
@@ -224,10 +259,7 @@ export async function createQueryMentions(mentions) {
 }
 
 export async function deleteQueryMentionsByRunId(queryRunId) {
-    const { error } = await db()
-        .from('query_mentions')
-        .delete()
-        .eq('query_run_id', queryRunId);
+    const { error } = await db().from('query_mentions').delete().eq('query_run_id', queryRunId);
 
     if (error) throw new Error(`[DB] deleteQueryMentionsByRunId ${queryRunId}: ${error.message}`);
 }
@@ -258,16 +290,16 @@ export async function getBenchmarkRunsBySession(sessionId) {
 export async function getRecentQueryRuns(clientId, limit = 5, { includeAllModes = false } = {}) {
     let query = db()
         .from('query_runs')
-        .select(`id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`)
+        .select(
+            `id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, total_mentioned, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`,
+        )
         .eq('client_id', clientId);
 
     if (!includeAllModes) {
         query = query.or('run_mode.is.null,run_mode.eq.standard');
     }
 
-    const { data, error } = await query
-        .order('created_at', { ascending: false })
-        .limit(limit);
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(limit);
 
     if (error) throw new Error(`[DB] getRecentQueryRuns: ${error.message}`);
     return normalizeQueryRunRows(data);
@@ -276,7 +308,9 @@ export async function getRecentQueryRuns(clientId, limit = 5, { includeAllModes 
 export async function getLastRunPerTrackedQuery(clientId) {
     const { data: runs, error } = await db()
         .from('query_runs')
-        .select(`id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, response_text, raw_response_full, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`)
+        .select(
+            `id, tracked_query_id, query_text, provider, model, status, run_mode, engine_variant, discovery_mode, parse_status, parse_confidence, latency_ms, target_found, target_position, total_mentioned, response_text, raw_response_full, created_at, parsed_response, prompt_payload, ${QUERY_RUN_TRACKED_QUERY_SELECT}`,
+        )
         .eq('client_id', clientId)
         .or('run_mode.is.null,run_mode.eq.standard')
         .order('created_at', { ascending: false });

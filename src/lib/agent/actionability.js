@@ -21,11 +21,11 @@
 import { clamp, toArray, hoursSince, deriveReliability } from './report-readings';
 
 export const ACTIONABILITY_DIMENSION_WEIGHTS = Object.freeze({
-    offer_clarity: 0.30,
+    offer_clarity: 0.3,
     contact_booking: 0.25,
-    local_coverage: 0.20,
+    local_coverage: 0.2,
     trust_proof: 0.15,
-    content_actionability: 0.10,
+    content_actionability: 0.1,
 });
 
 const DIMENSION_LABELS = Object.freeze({
@@ -340,7 +340,9 @@ function buildTrustProofDimension({ geoData, socialProfiles, extracted }) {
     if (reviewTerms >= 1 || hasReviewSchema) {
         score += 20;
         observed = true;
-        evidence.push(hasReviewSchema ? 'Schema Review / AggregateRating détecté.' : `${reviewTerms} terme(s) d’avis observé(s).`);
+        evidence.push(
+            hasReviewSchema ? 'Schema Review / AggregateRating détecté.' : `${reviewTerms} terme(s) d’avis observé(s).`,
+        );
         if (hasReviewSchema) score += 5;
     } else {
         gaps.push('Pas de langage ou schema d’avis (Review / AggregateRating).');
@@ -550,7 +552,9 @@ export function buildActionabilityReport({ client = null, audit = null } = {}) {
     }
 
     if (audit?.scan_status && audit.scan_status === 'failed') {
-        return buildEmptyReport('Le dernier audit a échoué. Relancez un audit pour activer l’analyse d’actionnabilité.');
+        return buildEmptyReport(
+            'Le dernier audit a échoué. Relancez un audit pour activer l’analyse d’actionnabilité.',
+        );
     }
 
     const extracted = audit.extracted_data || {};
@@ -574,13 +578,8 @@ export function buildActionabilityReport({ client = null, audit = null } = {}) {
     const weighted = dimensions.reduce((acc, dim) => acc + dim.score * dim.weight, 0);
     const globalScore = weightSum > 0 ? Math.round(weighted / weightSum) : null;
 
-    const globalStatus = globalScore === null
-        ? 'unavailable'
-        : globalScore >= 70
-            ? 'couvert'
-            : globalScore >= 40
-                ? 'partiel'
-                : 'bloqué';
+    const globalStatus =
+        globalScore === null ? 'unavailable' : globalScore >= 70 ? 'couvert' : globalScore >= 40 ? 'partiel' : 'bloqué';
 
     const reliability = deriveReliability(audit);
 

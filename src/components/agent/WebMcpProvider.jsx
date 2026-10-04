@@ -7,7 +7,12 @@ function safePath(path) {
     if (typeof path !== 'string') return '';
     const trimmed = path.trim();
     if (!trimmed.startsWith('/')) return '';
-    if (trimmed.startsWith('/admin') || trimmed.startsWith('/portal') || trimmed.startsWith('/espace') || trimmed.startsWith('/api')) {
+    if (
+        trimmed.startsWith('/admin') ||
+        trimmed.startsWith('/portal') ||
+        trimmed.startsWith('/espace') ||
+        trimmed.startsWith('/api')
+    ) {
         return '';
     }
     return trimmed;

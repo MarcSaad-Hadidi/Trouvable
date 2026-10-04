@@ -8,4 +8,3 @@ export const metadata = buildSeoGrowthMetadata(page);
 export default function AiOverviewsPage() {
     return <SeoGrowthPage page={page} />;
 }
-

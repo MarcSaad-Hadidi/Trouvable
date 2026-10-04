@@ -23,11 +23,7 @@ export function extractForLLM(scanResults, providedSiteClassification = null) {
     const ed = scanResults.extracted_data || {};
     const siteClassification = providedSiteClassification || classifySiteForAudit(scanResults);
     const textChunks = (ed.text_chunks || []).slice(0, 14);
-    const cleanText = textChunks
-        .join('\n\n')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 5000);
+    const cleanText = textChunks.join('\n\n').replace(/\s+/g, ' ').trim().slice(0, 5000);
 
     const pageSummaries = (ed.page_summaries || []).slice(0, 8).map((page) => ({
         url: page.url,

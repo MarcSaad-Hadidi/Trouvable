@@ -1,6 +1,12 @@
 import 'server-only';
 
-export const RECURRING_JOB_TYPES = ['audit_refresh', 'prompt_rerun', 'gsc_sync_daily', 'ga4_sync_daily', 'community_sync'];
+export const RECURRING_JOB_TYPES = [
+    'audit_refresh',
+    'prompt_rerun',
+    'gsc_sync_daily',
+    'ga4_sync_daily',
+    'community_sync',
+];
 export const RECURRING_RUN_STATUS = ['pending', 'running', 'completed', 'failed', 'cancelled'];
 export const RECURRING_TRIGGER_SOURCES = ['cron', 'manual', 'retry', 'system'];
 
@@ -33,7 +39,15 @@ export const DEFAULT_RECURRING_JOB_CONFIG = {
 };
 
 export const CONNECTOR_PROVIDERS = ['ga4', 'gsc', 'agent_reach'];
-export const CONNECTOR_STATES = ['not_connected', 'configured', 'disabled', 'sample_mode', 'error', 'healthy', 'syncing'];
+export const CONNECTOR_STATES = [
+    'not_connected',
+    'configured',
+    'disabled',
+    'sample_mode',
+    'error',
+    'healthy',
+    'syncing',
+];
 
 /** States valid for DB persistence (matches client_data_connectors CHECK constraint). */
 export const CONNECTOR_STORED_STATES = ['not_connected', 'configured', 'disabled', 'sample_mode', 'error'];

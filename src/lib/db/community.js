@@ -9,11 +9,7 @@ import { finiteNumberOrNull } from '@/lib/numbers';
 
 export async function insertCollectionRun(payload) {
     const supabase = getAdminSupabase();
-    const { data, error } = await supabase
-        .from('community_collection_runs')
-        .insert(payload)
-        .select('*')
-        .single();
+    const { data, error } = await supabase.from('community_collection_runs').insert(payload).select('*').single();
     if (error) throw new Error(`[Community] insertCollectionRun: ${error.message}`);
     return data;
 }
@@ -43,8 +39,6 @@ export async function getLatestCollectionRun(clientId, source = null) {
     if (error) throw new Error(`[Community] getLatestCollectionRun: ${error.message}`);
     return data;
 }
-
-
 
 // ──────────────────────────────────────────────────────────────
 // Documents
@@ -87,8 +81,6 @@ export async function markDocumentsProcessed(documentIds) {
     if (error) throw new Error(`[Community] markDocumentsProcessed: ${error.message}`);
 }
 
-
-
 // ──────────────────────────────────────────────────────────────
 // Mentions
 // ──────────────────────────────────────────────────────────────
@@ -96,23 +88,15 @@ export async function markDocumentsProcessed(documentIds) {
 export async function insertMentions(mentions) {
     if (!mentions?.length) return [];
     const supabase = getAdminSupabase();
-    const { data, error } = await supabase
-        .from('community_mentions')
-        .insert(mentions)
-        .select('id');
+    const { data, error } = await supabase.from('community_mentions').insert(mentions).select('id');
     if (error) throw new Error(`[Community] insertMentions: ${error.message}`);
     return data || [];
 }
 
-
-
 export async function deleteMentionsForDocuments(documentIds) {
     if (!documentIds?.length) return;
     const supabase = getAdminSupabase();
-    const { error } = await supabase
-        .from('community_mentions')
-        .delete()
-        .in('document_id', documentIds);
+    const { error } = await supabase.from('community_mentions').delete().in('document_id', documentIds);
     if (error) throw new Error(`[Community] deleteMentionsForDocuments: ${error.message}`);
 }
 
@@ -147,10 +131,7 @@ export async function listClusters(clientId, { clusterType = null, limit = 100 }
 
 export async function clearClusters(clientId) {
     const supabase = getAdminSupabase();
-    const { error } = await supabase
-        .from('community_clusters')
-        .delete()
-        .eq('client_id', clientId);
+    const { error } = await supabase.from('community_clusters').delete().eq('client_id', clientId);
     if (error) throw new Error(`[Community] clearClusters: ${error.message}`);
 }
 
@@ -184,8 +165,6 @@ export async function listOpportunities(clientId, { opportunityType = null, stat
     return data || [];
 }
 
-
-
 // ──────────────────────────────────────────────────────────────
 // Aggregate stats for social slice
 // ──────────────────────────────────────────────────────────────
@@ -196,7 +175,11 @@ export async function getCommunityStats(clientId) {
     const [docsResult, clustersResult, opportunitiesResult, mentionsResult] = await Promise.all([
         supabase.from('community_documents').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
         supabase.from('community_clusters').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
-        supabase.from('community_opportunities').select('id', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'open'),
+        supabase
+            .from('community_opportunities')
+            .select('id', { count: 'exact', head: true })
+            .eq('client_id', clientId)
+            .eq('status', 'open'),
         supabase.from('community_mentions').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
     ]);
 

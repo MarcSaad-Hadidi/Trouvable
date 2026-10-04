@@ -38,10 +38,13 @@ export async function POST(request) {
             }
 
             if (prompt.quality_status === 'weak') {
-                return NextResponse.json({
-                    error: 'Activation refusee: ce prompt est classe faible. Modifiez-le puis relancez l activation.',
-                    code: 'weak_prompt_activation_blocked',
-                }, { status: 409 });
+                return NextResponse.json(
+                    {
+                        error: 'Activation refusee: ce prompt est classe faible. Modifiez-le puis relancez l activation.',
+                        code: 'weak_prompt_activation_blocked',
+                    },
+                    { status: 409 },
+                );
             }
         }
 

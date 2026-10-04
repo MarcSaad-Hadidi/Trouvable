@@ -41,7 +41,8 @@ export default function ApiDocsPage() {
         <main className="mx-auto max-w-4xl px-6 py-16">
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Documentation API</h1>
             <p className="mt-3 text-zinc-600">
-                Cette page regroupe les endpoints utilises pour la decouverte automatisee d API et l integration d agents.
+                Cette page regroupe les endpoints utilises pour la decouverte automatisee d API et l integration d
+                agents.
             </p>
 
             <ul className="mt-10 space-y-4">

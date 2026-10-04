@@ -6,13 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import { Orbit } from 'lucide-react';
 import Link from 'next/link';
 
-import { 
-    CommandHeader, 
-    CommandMetricCard, 
+import {
+    CommandHeader,
+    CommandMetricCard,
     CommandPageShell,
-    COMMAND_BUTTONS, 
-    COMMAND_PANEL, 
-    cn 
+    COMMAND_BUTTONS,
+    COMMAND_PANEL,
+    cn,
 } from '@/features/admin/shared/components/command';
 import GeoCitationsView from '@/features/admin/geo/GeoCitationsView';
 import GeoCompetitorsView from '@/features/admin/geo/GeoCompetitorsView';
@@ -45,7 +45,12 @@ export default function GeoSignalsView() {
         />
     );
 
-    if (citationsLoading || competitorsLoading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Synchronisation des capteurs radar...</div></CommandPageShell>;
+    if (citationsLoading || competitorsLoading)
+        return (
+            <CommandPageShell header={header}>
+                <div className="p-8 animate-pulse text-white/50">Synchronisation des capteurs radar...</div>
+            </CommandPageShell>
+        );
 
     const coverage = citationsData?.summary?.citationCoveragePercent || 0;
     const uniqueHosts = citationsData?.summary?.uniqueSourceHosts || 0;
@@ -55,11 +60,18 @@ export default function GeoSignalsView() {
     if (!citationsData && !competitorsData) {
         return (
             <CommandPageShell header={header}>
-                <div className={cn(COMMAND_PANEL, "p-20 text-center")}>
+                <div className={cn(COMMAND_PANEL, 'p-20 text-center')}>
                     <Orbit className="mx-auto mb-4 h-12 w-12 text-white/10" />
                     <h3 className="text-lg font-bold text-white mb-2">Signaux en attente</h3>
-                    <p className="text-sm text-white/40 max-w-md mx-auto mb-8">Les indicateurs radar s&#39;activeront dès que les premières exécutions GEO seront disponibles.</p>
-                    <Link href={clientId ? `/admin/clients/${clientId}/geo/runs` : '/admin/clients'} className={COMMAND_BUTTONS.primary}>Démarrer un scan</Link>
+                    <p className="text-sm text-white/40 max-w-md mx-auto mb-8">
+                        Les indicateurs radar s&#39;activeront dès que les premières exécutions GEO seront disponibles.
+                    </p>
+                    <Link
+                        href={clientId ? `/admin/clients/${clientId}/geo/runs` : '/admin/clients'}
+                        className={COMMAND_BUTTONS.primary}
+                    >
+                        Démarrer un scan
+                    </Link>
                 </div>
             </CommandPageShell>
         );
@@ -68,21 +80,41 @@ export default function GeoSignalsView() {
     return (
         <CommandPageShell header={header}>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <CommandMetricCard label="Couverture Source" value={`${coverage}%`} detail="Présence citations" tone={coverage > 50 ? 'ok' : (coverage > 20 ? 'warning' : 'neutral')} />
+                <CommandMetricCard
+                    label="Couverture Source"
+                    value={`${coverage}%`}
+                    detail="Présence citations"
+                    tone={coverage > 50 ? 'ok' : coverage > 20 ? 'warning' : 'neutral'}
+                />
                 <CommandMetricCard label="Domaines Uniques" value={uniqueHosts} detail="Hôtes distincts" tone="info" />
-                <CommandMetricCard label="Concurrents" value={confirmedCompetitors} detail="Mentions actives" tone={confirmedCompetitors > 0 ? 'warning' : 'neutral'} />
+                <CommandMetricCard
+                    label="Concurrents"
+                    value={confirmedCompetitors}
+                    detail="Mentions actives"
+                    tone={confirmedCompetitors > 0 ? 'warning' : 'neutral'}
+                />
                 <CommandMetricCard label="Runs Terminés" value={totalRuns} detail="Moteur radar" tone="neutral" />
             </div>
 
             <div className="flex flex-col gap-8 mt-2">
                 <section id="sources" className="scroll-mt-32">
-                    <div className={cn(COMMAND_PANEL, "p-8 bg-[#06070a] border-white/[0.08] shadow-[0_0_50px_rgba(255,255,255,0.02)]")}>
+                    <div
+                        className={cn(
+                            COMMAND_PANEL,
+                            'p-8 bg-[#06070a] border-white/[0.08] shadow-[0_0_50px_rgba(255,255,255,0.02)]',
+                        )}
+                    >
                         <GeoCitationsView sharedData={citationsData} />
                     </div>
                 </section>
- 
+
                 <section id="concurrents" className="scroll-mt-32">
-                    <div className={cn(COMMAND_PANEL, "p-8 bg-[#06070a] border-rose-500/20 shadow-[0_0_60px_rgba(244,63,94,0.08)]")}>
+                    <div
+                        className={cn(
+                            COMMAND_PANEL,
+                            'p-8 bg-[#06070a] border-rose-500/20 shadow-[0_0_60px_rgba(244,63,94,0.08)]',
+                        )}
+                    >
                         <GeoCompetitorsView sharedData={competitorsData} />
                     </div>
                 </section>

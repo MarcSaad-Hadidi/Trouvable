@@ -142,8 +142,15 @@ function normalizeFixItem(item = {}) {
         : [];
     const category = safeText(item.category);
     const title = safeText(item.title) || 'Action à traiter';
-    const fallbackKey = safeText(item.dedupeKey) || `${safeText(item.source || 'fix')}|${title.toLowerCase()}|${category.toLowerCase()}`;
-    const fallbackId = `fix-${fallbackKey.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 64) || 'item'}`;
+    const fallbackKey =
+        safeText(item.dedupeKey) ||
+        `${safeText(item.source || 'fix')}|${title.toLowerCase()}|${category.toLowerCase()}`;
+    const fallbackId = `fix-${
+        fallbackKey
+            .replace(/[^a-z0-9]+/gi, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 64) || 'item'
+    }`;
 
     return {
         id: item.id || fallbackId,
@@ -203,10 +210,7 @@ function mapTruthClassToProvenance(truthClass) {
 }
 
 function buildOpportunityFixes(opportunitySlice) {
-    const active = [
-        ...(opportunitySlice?.byStatus?.open || []),
-        ...(opportunitySlice?.byStatus?.in_progress || []),
-    ];
+    const active = [...(opportunitySlice?.byStatus?.open || []), ...(opportunitySlice?.byStatus?.in_progress || [])];
 
     return active.map((item, index) => ({
         id: `opportunity-${item.id || index}`,
@@ -286,7 +290,9 @@ function buildActionabilityFixes(report) {
             title: dimension.topFix,
             description: dimension.label ? `Dimension: ${dimension.label}` : null,
             category: 'actionnabilité',
-            priority: normalizePriority(ACTIONABILITY_PRIORITY_BY_DIMENSION[dimension.key] || priorityFromScore(dimension.score)),
+            priority: normalizePriority(
+                ACTIONABILITY_PRIORITY_BY_DIMENSION[dimension.key] || priorityFromScore(dimension.score),
+            ),
             status: 'open',
             source: 'actionability',
             provenance: mapReliabilityToProvenance(report.reliability),
@@ -306,19 +312,21 @@ function buildActionabilityFixes(report) {
     const fallbackMessage = safeText(weakest.gaps?.[0]) || safeText(weakest.summary) || null;
     if (!fallbackMessage) return [];
 
-    return [{
-        id: `actionability-fallback-${weakest.key || 'global'}`,
-        dedupeKey: `actionability-fallback:${weakest.key || 'global'}`,
-        title: fallbackMessage,
-        description: weakest.label ? `Dimension: ${weakest.label}` : null,
-        category: 'actionnabilité',
-        priority: priorityFromScore(weakest.score),
-        status: 'open',
-        source: 'actionability',
-        provenance: mapReliabilityToProvenance(report.reliability),
-        linkedSubscores: ['actionability'],
-        dimensionKey: weakest.key || null,
-    }];
+    return [
+        {
+            id: `actionability-fallback-${weakest.key || 'global'}`,
+            dedupeKey: `actionability-fallback:${weakest.key || 'global'}`,
+            title: fallbackMessage,
+            description: weakest.label ? `Dimension: ${weakest.label}` : null,
+            category: 'actionnabilité',
+            priority: priorityFromScore(weakest.score),
+            status: 'open',
+            source: 'actionability',
+            provenance: mapReliabilityToProvenance(report.reliability),
+            linkedSubscores: ['actionability'],
+            dimensionKey: weakest.key || null,
+        },
+    ];
 }
 
 function buildProtocolsFixes(report) {
@@ -346,7 +354,9 @@ function buildProtocolsFixes(report) {
             title: dimension.topFix,
             description: dimension.label ? `Dimension: ${dimension.label}` : null,
             category: 'protocoles',
-            priority: normalizePriority(PROTOCOL_PRIORITY_BY_DIMENSION[dimension.key] || priorityFromScore(dimension.score)),
+            priority: normalizePriority(
+                PROTOCOL_PRIORITY_BY_DIMENSION[dimension.key] || priorityFromScore(dimension.score),
+            ),
             status: 'open',
             source: 'protocols',
             provenance: mapReliabilityToProvenance(report.reliability),
@@ -366,25 +376,33 @@ function buildProtocolsFixes(report) {
     const fallbackMessage = safeText(weakest.gaps?.[0]) || safeText(weakest.summary) || null;
     if (!fallbackMessage) return [];
 
-    return [{
-        id: `protocols-fallback-${weakest.key || 'global'}`,
-        dedupeKey: `protocols-fallback:${weakest.key || 'global'}`,
-        title: fallbackMessage,
-        description: weakest.label ? `Dimension: ${weakest.label}` : null,
-        category: 'protocoles',
-        priority: priorityFromScore(weakest.score),
-        status: 'open',
-        source: 'protocols',
-        provenance: mapReliabilityToProvenance(report.reliability),
-        linkedSubscores: ['advanced_protocols'],
-        dimensionKey: weakest.key || null,
-    }];
+    return [
+        {
+            id: `protocols-fallback-${weakest.key || 'global'}`,
+            dedupeKey: `protocols-fallback:${weakest.key || 'global'}`,
+            title: fallbackMessage,
+            description: weakest.label ? `Dimension: ${weakest.label}` : null,
+            category: 'protocoles',
+            priority: priorityFromScore(weakest.score),
+            status: 'open',
+            source: 'protocols',
+            provenance: mapReliabilityToProvenance(report.reliability),
+            linkedSubscores: ['advanced_protocols'],
+            dimensionKey: weakest.key || null,
+        },
+    ];
 }
 
 function buildVisibilityFixes({ overviewSlice, score }) {
     const kpis = overviewSlice?.kpis || {};
-    const trackedPromptsTotal = overviewSlice?.dataSources?.trackedQueries === 'unavailable' ? null : finiteNumberOrNull(kpis.trackedPromptsTotal);
-    const completedRunsTotal = overviewSlice?.dataSources?.totalQueryRuns === 'unavailable' ? null : finiteNumberOrNull(kpis.completedRunsTotal);
+    const trackedPromptsTotal =
+        overviewSlice?.dataSources?.trackedQueries === 'unavailable'
+            ? null
+            : finiteNumberOrNull(kpis.trackedPromptsTotal);
+    const completedRunsTotal =
+        overviewSlice?.dataSources?.totalQueryRuns === 'unavailable'
+            ? null
+            : finiteNumberOrNull(kpis.completedRunsTotal);
     const mentionRate = isFiniteNumber(kpis.mentionRatePercent) ? kpis.mentionRatePercent : null;
     const visibilityProxy = isFiniteNumber(kpis.visibilityProxyPercent) ? kpis.visibilityProxyPercent : null;
     const citationCoverage = isFiniteNumber(kpis.citationCoveragePercent) ? kpis.citationCoveragePercent : null;
@@ -409,7 +427,8 @@ function buildVisibilityFixes({ overviewSlice, score }) {
             id: 'visibility-no-runs',
             dedupeKey: 'visibility:no-runs',
             title: 'Lancer des exécutions GEO sur les prompts actifs',
-            description: 'Des prompts existent, mais aucune exécution complétée ne permet de calculer la visibilité réelle.',
+            description:
+                'Des prompts existent, mais aucune exécution complétée ne permet de calculer la visibilité réelle.',
             category: 'visibilité',
             priority: 'high',
             status: 'open',
@@ -425,21 +444,30 @@ function buildVisibilityFixes({ overviewSlice, score }) {
             label: 'taux de mention',
             value: mentionRate,
             title: 'Améliorer le taux de mention de la cible',
-            detail: mentionRate === null || mentionRate === undefined ? 'Aucune mesure de mention disponible.' : `Valeur actuelle: ${Math.round(mentionRate)}%.`,
+            detail:
+                mentionRate === null || mentionRate === undefined
+                    ? 'Aucune mesure de mention disponible.'
+                    : `Valeur actuelle: ${Math.round(mentionRate)}%.`,
         },
         {
             key: 'visibility_proxy',
             label: 'proxy de visibilité',
             value: visibilityProxy,
             title: 'Réduire l’écart de visibilité concurrentielle',
-            detail: visibilityProxy === null || visibilityProxy === undefined ? 'Le proxy de visibilité est indisponible.' : `Valeur actuelle: ${Math.round(visibilityProxy)}%.`,
+            detail:
+                visibilityProxy === null || visibilityProxy === undefined
+                    ? 'Le proxy de visibilité est indisponible.'
+                    : `Valeur actuelle: ${Math.round(visibilityProxy)}%.`,
         },
         {
             key: 'citation_coverage',
             label: 'couverture des citations',
             value: citationCoverage,
             title: 'Augmenter la couverture de citations traçables',
-            detail: citationCoverage === null || citationCoverage === undefined ? 'La couverture de citations est indisponible.' : `Valeur actuelle: ${Math.round(citationCoverage)}%.`,
+            detail:
+                citationCoverage === null || citationCoverage === undefined
+                    ? 'La couverture de citations est indisponible.'
+                    : `Valeur actuelle: ${Math.round(citationCoverage)}%.`,
         },
     ];
 
@@ -483,21 +511,19 @@ function buildVisibilityFixes({ overviewSlice, score }) {
 }
 
 function buildReviewFixes(opportunitySlice) {
-    return (opportunitySlice?.reviewQueue || [])
-        .slice(0, 8)
-        .map((item, index) => ({
-            id: `review-${item.id || index}`,
-            dedupeKey: `review:${item.id || item.title || index}`,
-            title: item.title || 'Élément à réviser',
-            description: item.recommended_fix || item.evidence_summary || item.description || null,
-            category: item.family || item.category || 'revue',
-            priority: normalizePriority(item.severity || item.priority),
-            status: 'needs_review',
-            source: 'review',
-            created_at: item.created_at || null,
-            provenance: mapTruthClassToProvenance(item.truth_class),
-            linkedSubscores: [],
-        }));
+    return (opportunitySlice?.reviewQueue || []).slice(0, 8).map((item, index) => ({
+        id: `review-${item.id || index}`,
+        dedupeKey: `review:${item.id || item.title || index}`,
+        title: item.title || 'Élément à réviser',
+        description: item.recommended_fix || item.evidence_summary || item.description || null,
+        category: item.family || item.category || 'revue',
+        priority: normalizePriority(item.severity || item.priority),
+        status: 'needs_review',
+        source: 'review',
+        created_at: item.created_at || null,
+        provenance: mapTruthClassToProvenance(item.truth_class),
+        linkedSubscores: [],
+    }));
 }
 
 function buildSubscoreGuardrailFixes(score, existingItems) {
@@ -518,8 +544,9 @@ function buildSubscoreGuardrailFixes(score, existingItems) {
         if (missingScore || !needsFix || coverage.has(key)) continue;
 
         const label = SUBSCORE_LABELS[key] || key;
-        const message = safeText(entry?.reason)
-            || (missingScore
+        const message =
+            safeText(entry?.reason) ||
+            (missingScore
                 ? `Le sous-score ${label} n’est pas calculable avec les données disponibles.`
                 : `Le sous-score ${label} est à ${currentScore}/100.`);
 
@@ -559,19 +586,17 @@ function countBySource(items = []) {
 }
 
 function collectSubscoreGaps(score) {
-    return SUBSCORE_KEYS
-        .map((key) => {
-            const entry = score?.subscores?.[key];
-            const value = entry?.score;
-            if (!isFiniteNumber(value) || value >= 100) return null;
-            return {
-                key,
-                label: SUBSCORE_LABELS[key] || key,
-                score: isFiniteNumber(value) ? value : null,
-                reason: safeText(entry?.reason) || null,
-            };
-        })
-        .filter(Boolean);
+    return SUBSCORE_KEYS.map((key) => {
+        const entry = score?.subscores?.[key];
+        const value = entry?.score;
+        if (!isFiniteNumber(value) || value >= 100) return null;
+        return {
+            key,
+            label: SUBSCORE_LABELS[key] || key,
+            score: isFiniteNumber(value) ? value : null,
+            reason: safeText(entry?.reason) || null,
+        };
+    }).filter(Boolean);
 }
 
 function computeCoverage(score, fixes = []) {
@@ -582,9 +607,7 @@ function computeCoverage(score, fixes = []) {
             covered.add(key);
         }
     }
-    const uncoveredSubscores = subscoreGaps
-        .filter((gap) => !covered.has(gap.key))
-        .map((gap) => gap.key);
+    const uncoveredSubscores = subscoreGaps.filter((gap) => !covered.has(gap.key)).map((gap) => gap.key);
 
     return {
         hasKnownGaps: subscoreGaps.length > 0,
@@ -603,15 +626,25 @@ export function buildAgentRemediationPipeline({
 } = {}) {
     const dataSources = {};
     const errors = [];
-    for (const [source, value] of Object.entries({ opportunities: opportunitySlice, readiness: readinessSlice,
-        actionability: actionabilityReport, protocols: protocolsReport, overview: overviewSlice })) {
+    for (const [source, value] of Object.entries({
+        opportunities: opportunitySlice,
+        readiness: readinessSlice,
+        actionability: actionabilityReport,
+        protocols: protocolsReport,
+        overview: overviewSlice,
+    })) {
         dataSources[source] = value?.status || (value ? 'available' : 'unavailable');
-        if (dataSources[source] === 'unavailable') errors.push({ source, message: 'Données temporairement indisponibles.' });
-        for (const error of value?.errors || []) errors.push({ source: `${source}.${error.source}`, message: 'Données temporairement indisponibles.' });
+        if (dataSources[source] === 'unavailable')
+            errors.push({ source, message: 'Données temporairement indisponibles.' });
+        for (const error of value?.errors || [])
+            errors.push({ source: `${source}.${error.source}`, message: 'Données temporairement indisponibles.' });
     }
     const sourceStates = Object.values(dataSources);
-    const status = sourceStates.every(state => state === 'unavailable') ? 'unavailable'
-        : sourceStates.some(state => ['partial', 'unavailable'].includes(state)) ? 'partial' : 'available';
+    const status = sourceStates.every((state) => state === 'unavailable')
+        ? 'unavailable'
+        : sourceStates.some((state) => ['partial', 'unavailable'].includes(state))
+          ? 'partial'
+          : 'available';
     const complete = status === 'available';
     const seedFixes = [
         ...buildOpportunityFixes(opportunitySlice),
@@ -633,7 +666,9 @@ export function buildAgentRemediationPipeline({
     const coverage = computeCoverage(score, actionable);
 
     return {
-        status, dataSources, errors,
+        status,
+        dataSources,
+        errors,
         items: allItems,
         topFixes: actionable.slice(0, 12),
         byPriority,
@@ -653,12 +688,13 @@ export function buildAgentRemediationPipeline({
 export function buildAgentFixesEmptyState({ opportunitySlice = null, remediation = null } = {}) {
     const hasFixes = Boolean(remediation?.topFixes?.length);
     if (hasFixes) return null;
-    if (remediation?.status && remediation.status !== 'available') return {
-        title: 'Correctifs temporairement indisponibles',
-        description: 'La file conserve les éléments connus mais ses sources ne sont pas toutes disponibles.',
-    };
+    if (remediation?.status && remediation.status !== 'available')
+        return {
+            title: 'Correctifs temporairement indisponibles',
+            description: 'La file conserve les éléments connus mais ses sources ne sont pas toutes disponibles.',
+        };
 
-    if (!opportunitySlice && !(remediation?.coverage?.hasKnownGaps)) {
+    if (!opportunitySlice && !remediation?.coverage?.hasKnownGaps) {
         return {
             title: 'Correctifs d’exécution indisponibles',
             description: 'La file de remédiation n’est pas disponible pour ce mandat.',
@@ -669,16 +705,16 @@ export function buildAgentFixesEmptyState({ opportunitySlice = null, remediation
         return {
             title: 'Correctifs en attente de synchronisation',
             description:
-                'Des écarts sont détectés mais aucune action n’a encore été matérialisée. '
-                + 'La remontée des problèmes vers la remédiation doit être vérifiée.',
+                'Des écarts sont détectés mais aucune action n’a encore été matérialisée. ' +
+                'La remontée des problèmes vers la remédiation doit être vérifiée.',
         };
     }
 
     return {
         title: 'Aucun correctif prioritaire',
         description:
-            'Aucune action ouverte, en cours ou en revue n’est détectée dans la fenêtre courante. '
-            + 'Le pipeline est cohérent avec les signaux disponibles.',
+            'Aucune action ouverte, en cours ou en revue n’est détectée dans la fenêtre courante. ' +
+            'Le pipeline est cohérent avec les signaux disponibles.',
     };
 }
 
@@ -724,11 +760,13 @@ export function buildAgentMajorBlockers({ readinessSlice = null, remediation = n
 
     if (remediation?.status && remediation.status !== 'available') return [];
 
-    return [{
-        title: 'Aucun blocage majeur',
-        detail: 'Les signaux observés ne montrent pas de blocage critique à traiter immédiatement.',
-        status: 'couvert',
-        reliability: 'calculated',
-        source: 'derived',
-    }];
+    return [
+        {
+            title: 'Aucun blocage majeur',
+            detail: 'Les signaux observés ne montrent pas de blocage critique à traiter immédiatement.',
+            status: 'couvert',
+            reliability: 'calculated',
+            source: 'derived',
+        },
+    ];
 }

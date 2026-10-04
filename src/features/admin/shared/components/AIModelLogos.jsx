@@ -15,7 +15,10 @@ export function AIModelLogo({ modelId, size = 22, className = '' }) {
     if (!model) return null;
 
     return (
-        <div className={`flex items-center justify-center flex-shrink-0 ${className}`} style={{ width: size, height: size }}>
+        <div
+            className={`flex items-center justify-center flex-shrink-0 ${className}`}
+            style={{ width: size, height: size }}
+        >
             <Image
                 src={model.logo}
                 alt={model.name}

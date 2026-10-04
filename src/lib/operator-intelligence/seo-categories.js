@@ -11,7 +11,9 @@ export const LOCAL_CATEGORIES = new Set(['geo', 'local', 'content']);
  */
 export function isSeoRelevant(category) {
     const cat = (category || '').toLowerCase();
-    return SEO_CATEGORIES.has(cat) || cat.startsWith('technical') || cat.startsWith('seo') || cat.startsWith('identity');
+    return (
+        SEO_CATEGORIES.has(cat) || cat.startsWith('technical') || cat.startsWith('seo') || cat.startsWith('identity')
+    );
 }
 
 /**

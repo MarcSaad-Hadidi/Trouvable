@@ -29,7 +29,11 @@ function stringOrFallback(value, fallback = '') {
 
 function stringArray(value) {
     return Array.isArray(value)
-        ? [...new Set(value.filter((item) => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim()))]
+        ? [
+              ...new Set(
+                  value.filter((item) => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim()),
+              ),
+          ]
         : [];
 }
 
@@ -48,12 +52,12 @@ function normalizeHallucinationRisk(value) {
 function normalizeCitations(value) {
     return Array.isArray(value)
         ? value
-            .map((item) => ({
-                url: stringOrFallback(item?.url),
-                claim: stringOrFallback(item?.claim),
-                evidence_span: stringOrFallback(item?.evidence_span),
-            }))
-            .filter((item) => item.url)
+              .map((item) => ({
+                  url: stringOrFallback(item?.url),
+                  claim: stringOrFallback(item?.claim),
+                  evidence_span: stringOrFallback(item?.evidence_span),
+              }))
+              .filter((item) => item.url)
         : [];
 }
 
@@ -114,17 +118,30 @@ export function normalizeAuditAnalysis(rawData) {
         return { success: true, data: result.data, errors: null };
     }
 
-    console.warn('[AI/Normalize] Audit analysis validation partielle:', result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`));
+    console.warn(
+        '[AI/Normalize] Audit analysis validation partielle:',
+        result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+    );
 
     const partial = {
         business_summary: stringOrFallback(rawData?.business_summary, 'Resume non disponible'),
-        geo_recommendability: ['strong', 'moderate', 'weak', 'unclear'].includes(rawData?.geo_recommendability) ? rawData.geo_recommendability : 'unclear',
+        geo_recommendability: ['strong', 'moderate', 'weak', 'unclear'].includes(rawData?.geo_recommendability)
+            ? rawData.geo_recommendability
+            : 'unclear',
         geo_recommendability_rationale: stringOrFallback(rawData?.geo_recommendability_rationale),
-        llm_comprehension_score: Number.isFinite(rawData?.llm_comprehension_score) ? Math.min(15, Math.max(0, Math.round(rawData.llm_comprehension_score))) : 0,
+        llm_comprehension_score: Number.isFinite(rawData?.llm_comprehension_score)
+            ? Math.min(15, Math.max(0, Math.round(rawData.llm_comprehension_score)))
+            : 0,
         answerability_summary: stringOrFallback(rawData?.answerability_summary),
-        opportunities: Array.isArray(rawData?.opportunities) ? rawData.opportunities.map(normalizeOpportunity).filter(Boolean) : [],
-        faq_suggestions: Array.isArray(rawData?.faq_suggestions) ? rawData.faq_suggestions.map(normalizeFaqSuggestion).filter(Boolean) : [],
-        merge_suggestions: Array.isArray(rawData?.merge_suggestions) ? rawData.merge_suggestions.map(normalizeMergeSuggestion).filter(Boolean) : [],
+        opportunities: Array.isArray(rawData?.opportunities)
+            ? rawData.opportunities.map(normalizeOpportunity).filter(Boolean)
+            : [],
+        faq_suggestions: Array.isArray(rawData?.faq_suggestions)
+            ? rawData.faq_suggestions.map(normalizeFaqSuggestion).filter(Boolean)
+            : [],
+        merge_suggestions: Array.isArray(rawData?.merge_suggestions)
+            ? rawData.merge_suggestions.map(normalizeMergeSuggestion).filter(Boolean)
+            : [],
         detected_services: stringArray(rawData?.detected_services),
         detected_areas: stringArray(rawData?.detected_areas),
         detected_business_name: stringOrFallback(rawData?.detected_business_name) || null,
@@ -147,19 +164,26 @@ export function normalizeGeoQueryAnalysis(rawData) {
         return { success: true, data: result.data, errors: null };
     }
 
-    console.warn('[AI/Normalize] GEO query validation partielle:', result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`));
+    console.warn(
+        '[AI/Normalize] GEO query validation partielle:',
+        result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+    );
 
     const partial = {
         query: stringOrFallback(rawData?.query),
         response_text: stringOrFallback(rawData?.response_text),
         mentioned_businesses: Array.isArray(rawData?.mentioned_businesses) ? rawData.mentioned_businesses : [],
-        total_businesses_mentioned: Number.isFinite(rawData?.total_businesses_mentioned) ? rawData.total_businesses_mentioned : 0,
+        total_businesses_mentioned: Number.isFinite(rawData?.total_businesses_mentioned)
+            ? rawData.total_businesses_mentioned
+            : 0,
         target_found: rawData?.target_found === true,
         target_position: Number.isFinite(rawData?.target_position) ? rawData.target_position : null,
         brand_mentioned: rawData?.brand_mentioned === true || rawData?.target_found === true,
         brand_position: Number.isFinite(rawData?.brand_position)
             ? rawData.brand_position
-            : (Number.isFinite(rawData?.target_position) ? rawData.target_position : null),
+            : Number.isFinite(rawData?.target_position)
+              ? rawData.target_position
+              : null,
         competitors_mentioned: stringArray(rawData?.competitors_mentioned),
         urls_cited: stringArray(rawData?.urls_cited),
         sentiment: normalizeSentiment(rawData?.sentiment),

@@ -4,12 +4,14 @@ import { db, getDbNowIso } from '@/lib/db/core';
 
 function addMinutes(iso, minutes) {
     const base = iso ? new Date(iso) : new Date();
-    return new Date(base.getTime() + (minutes * 60 * 1000)).toISOString();
+    return new Date(base.getTime() + minutes * 60 * 1000).toISOString();
 }
 
 export async function upsertRecurringJobs(rows) {
     if (!Array.isArray(rows) || rows.length === 0) return;
-    const { error } = await db().from('recurring_jobs').upsert(rows, { onConflict: 'client_id,job_type', ignoreDuplicates: true });
+    const { error } = await db()
+        .from('recurring_jobs')
+        .upsert(rows, { onConflict: 'client_id,job_type', ignoreDuplicates: true });
     if (error) throw new Error(`[DB/jobs] upsertRecurringJobs: ${error.message}`);
 }
 
@@ -237,19 +239,15 @@ export async function claimPendingRun(runId, nextAttempt) {
     }
 
     if (error) {
-        const conflictSignature = [
-            error?.code,
-            error?.message,
-            error?.details,
-            error?.hint,
-        ]
+        const conflictSignature = [error?.code, error?.message, error?.details, error?.hint]
             .filter(Boolean)
             .join(' ')
             .toLowerCase();
 
-        const uniqueViolation = conflictSignature.includes('23505')
-            || conflictSignature.includes('duplicate key value')
-            || conflictSignature.includes('unique constraint');
+        const uniqueViolation =
+            conflictSignature.includes('23505') ||
+            conflictSignature.includes('duplicate key value') ||
+            conflictSignature.includes('unique constraint');
         if (uniqueViolation) {
             return { data: null, conflict: true };
         }
@@ -312,7 +310,9 @@ export async function requeueRun(runId, { scheduledFor, errorMessage, summary = 
 export async function listRecentRunsForEngineStats(limit = 80) {
     const { data, error } = await db()
         .from('recurring_job_runs')
-        .select('id, client_id, job_type, status, created_at, started_at, finished_at, attempt_count, max_attempts, error_message')
+        .select(
+            'id, client_id, job_type, status, created_at, started_at, finished_at, attempt_count, max_attempts, error_message',
+        )
         .order('created_at', { ascending: false })
         .limit(limit);
 

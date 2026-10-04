@@ -22,12 +22,12 @@ Les variantes internes (`src/lib/queries/engine-variants.js`) et `/api/admin/que
 
 La [migration qualité](../supabase/migrations/20260322100000_phase31_quality_engine_v2.sql) étend les tables existantes plutôt que de créer une deuxième histoire d'exécution :
 
-| Table | Responsabilité |
-|---|---|
-| `tracked_queries` | Taxonomie, qualité, scopes et metadata du prompt. |
-| `query_runs` | Capture complète, parsing, usage, erreurs, variante et session benchmark. Source unique des exécutions. |
-| `query_mentions` | Mentions, URLs/domaines, evidence spans, confiance et niveau de vérification. |
-| `benchmark_sessions` | Regroupement léger de runs par client, variantes et contexte opérateur ; ne duplique pas les runs. |
+| Table                | Responsabilité                                                                                              |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `tracked_queries`    | Taxonomie, qualité, scopes et metadata du prompt.                                                           |
+| `query_runs`         | Capture complète, parsing, usage, erreurs, variante et session benchmark. Source unique des exécutions.     |
+| `query_mentions`     | Mentions, URLs/domaines, evidence spans, confiance et niveau de vérification.                               |
+| `benchmark_sessions` | Regroupement léger de runs par client, variantes et contexte opérateur ; ne duplique pas les runs.          |
 | `competitor_aliases` | Matching concurrent par client, locale et mode `exact/fuzzy_safe`, sans alias codés dans la logique métier. |
 
 Les contraintes défensives et index sur sessions, variantes, statuts de parsing et mentions sont définis dans la migration. Le DDL conserve le détail des colonnes et valeurs autorisées ; cette note explique leur rôle. Les migrations restent ordonnées et conservées, sans preuve de leur application à une base distante.

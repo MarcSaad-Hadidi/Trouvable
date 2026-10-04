@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { mergeApplyPayloadSchema } from '@/lib/ai/schemas';
-import { getMergeSuggestionById as dbGetMergeSuggestionById, updateMergeSuggestion as dbUpdateMergeSuggestion } from '@/lib/db/merge-suggestions';
+import {
+    getMergeSuggestionById as dbGetMergeSuggestionById,
+    updateMergeSuggestion as dbUpdateMergeSuggestion,
+} from '@/lib/db/merge-suggestions';
 import { getClientById as dbGetClientById, updateClient as dbUpdateClient } from '@/lib/db/clients';
 import { logAction as dbLogAction } from '@/lib/db/actions';
 
@@ -53,7 +56,11 @@ export async function POST(request) {
         const mapping = FIELD_TO_COLUMN_MAP[suggestion.field_name];
 
         let value = suggestion.suggested_value;
-        try { value = JSON.parse(value); } catch { /* keep as string */ }
+        try {
+            value = JSON.parse(value);
+        } catch {
+            /* keep as string */
+        }
 
         const updates = {};
 

@@ -5,9 +5,18 @@ describe('independent source initialization', () => {
     it('starts every read in insertion order before yielding to a microtask', async () => {
         const calls = [];
         const pending = loadIndependentSources({
-            traffic: () => { calls.push('traffic'); return Promise.resolve([{ sessions: 0 }]); },
-            pages: () => { calls.push('pages'); return Promise.resolve([]); },
-            connectors: () => { calls.push('connectors'); return Promise.resolve(null); },
+            traffic: () => {
+                calls.push('traffic');
+                return Promise.resolve([{ sessions: 0 }]);
+            },
+            pages: () => {
+                calls.push('pages');
+                return Promise.resolve([]);
+            },
+            connectors: () => {
+                calls.push('connectors');
+                return Promise.resolve(null);
+            },
         });
         const immediateCalls = [...calls];
         const result = await pending;
@@ -20,9 +29,18 @@ describe('independent source initialization', () => {
     it('starts independent reads even when an earlier loader throws synchronously', async () => {
         const calls = [];
         const pending = loadIndependentSources({
-            traffic: () => { calls.push('traffic'); throw new Error('private database credentials'); },
-            pages: () => { calls.push('pages'); return [{ sessions: 0 }]; },
-            connectors: () => { calls.push('connectors'); return Promise.resolve([]); },
+            traffic: () => {
+                calls.push('traffic');
+                throw new Error('private database credentials');
+            },
+            pages: () => {
+                calls.push('pages');
+                return [{ sessions: 0 }];
+            },
+            connectors: () => {
+                calls.push('connectors');
+                return Promise.resolve([]);
+            },
         });
         const immediateCalls = [...calls];
         const result = await pending;

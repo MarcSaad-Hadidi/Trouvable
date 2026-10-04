@@ -6,4 +6,3 @@ export default async function ClientLayout({ children, params }) {
     const { clientId } = await params;
     return <ClientWorkspaceShell clientId={clientId}>{children}</ClientWorkspaceShell>;
 }
-

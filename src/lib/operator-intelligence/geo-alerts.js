@@ -1,6 +1,5 @@
 import 'server-only';
 
-
 import { getConnectorOverviewForClient } from '@/lib/connectors';
 import { getTrendSlice } from '@/lib/continuous/jobs';
 import { getCrawlerSlice } from '@/lib/operator-intelligence/geo-crawlers';
@@ -42,7 +41,8 @@ function buildCrawlerAlerts(crawlerSlice) {
             severity: 'critique',
             evidence: `${summary.criticalBlockedCount} bot(s) critique(s) bloqué(s) via robots.txt.`,
             reliability: 'measured',
-            suggestedAction: 'Relire les directives robots.txt et lever les blocages des bots qui alimentent les réponses IA.',
+            suggestedAction:
+                'Relire les directives robots.txt et lever les blocages des bots qui alimentent les réponses IA.',
         });
     } else if ((summary?.blockedCount || 0) > 0) {
         alerts.push({
@@ -107,9 +107,7 @@ function buildConsistencyAlerts(consistencySlice) {
     const alerts = [];
     const { dimensions = [], criticalContradictions = [] } = consistencySlice;
 
-    const incoherentDimensions = dimensions.filter(
-        (d) => ['incohérent', 'écart', 'écart notable'].includes(d.status),
-    );
+    const incoherentDimensions = dimensions.filter((d) => ['incohérent', 'écart', 'écart notable'].includes(d.status));
 
     if (incoherentDimensions.length > 0) {
         const labels = incoherentDimensions.map((d) => d.label).join(', ');
@@ -120,7 +118,7 @@ function buildConsistencyAlerts(consistencySlice) {
             severity: criticalContradictions.length > 0 ? 'critique' : 'avertissement',
             evidence: `Écarts observés sur : ${labels}. ${criticalContradictions.length} contradiction(s) critique(s).`,
             reliability: 'calculated',
-            suggestedAction: 'Réconcilier les coordonnées et l\'identité entre le dossier partagé et le schema du site.',
+            suggestedAction: "Réconcilier les coordonnées et l'identité entre le dossier partagé et le schema du site.",
         });
     }
 
@@ -145,7 +143,8 @@ function buildReadinessAlerts(readinessSlice) {
             severity: 'avertissement',
             evidence: `Dimensions faibles : ${labels}.`,
             reliability: 'calculated',
-            suggestedAction: 'Corriger les lacunes structurelles sur les pages les plus faibles identifiées dans la surface de préparation.',
+            suggestedAction:
+                'Corriger les lacunes structurelles sur les pages les plus faibles identifiées dans la surface de préparation.',
         });
     }
 
@@ -176,9 +175,10 @@ function buildFreshnessAlerts(trendSlice) {
             familyKey: 'freshness',
             title: 'Audit en retard',
             severity: 'critique',
-            evidence: freshness.audit.hours !== null && freshness.audit.hours !== undefined
-                ? `Le dernier audit date de ${freshness.audit.hours}h.`
-                : 'La date du dernier audit n\'est pas disponible.',
+            evidence:
+                freshness.audit.hours !== null && freshness.audit.hours !== undefined
+                    ? `Le dernier audit date de ${freshness.audit.hours}h.`
+                    : "La date du dernier audit n'est pas disponible.",
             reliability: 'calculated',
             suggestedAction: 'Relancer un audit pour obtenir des signaux frais.',
         });
@@ -190,7 +190,7 @@ function buildFreshnessAlerts(trendSlice) {
             severity: 'avertissement',
             evidence: `Le dernier audit date de ${freshness.audit.hours || '?'}h.`,
             reliability: 'calculated',
-            suggestedAction: 'Prévoir une actualisation de l\'audit prochainement.',
+            suggestedAction: "Prévoir une actualisation de l'audit prochainement.",
         });
     }
 
@@ -200,9 +200,10 @@ function buildFreshnessAlerts(trendSlice) {
             familyKey: 'freshness',
             title: 'Exécutions en retard',
             severity: 'critique',
-            evidence: freshness.runs.hours !== null && freshness.runs.hours !== undefined
-                ? `La dernière exécution date de ${freshness.runs.hours}h.`
-                : 'La date de la dernière exécution n\'est pas disponible.',
+            evidence:
+                freshness.runs.hours !== null && freshness.runs.hours !== undefined
+                    ? `La dernière exécution date de ${freshness.runs.hours}h.`
+                    : "La date de la dernière exécution n'est pas disponible.",
             reliability: 'calculated',
             suggestedAction: 'Relancer le cycle quotidien des prompts.',
         });
@@ -234,7 +235,8 @@ function buildConnectorAlerts(connectors) {
             severity: 'critique',
             evidence: `${errorConnectors.length} connecteur(s) en état d'erreur : ${errorConnectors.map((c) => c.provider).join(', ')}.`,
             reliability: 'measured',
-            suggestedAction: 'Vérifier la configuration et les identifiants du connecteur concerné dans les paramètres du dossier.',
+            suggestedAction:
+                'Vérifier la configuration et les identifiants du connecteur concerné dans les paramètres du dossier.',
         });
     }
 
@@ -266,7 +268,8 @@ function buildSignalAlerts(trendSlice) {
             severity: 'avertissement',
             evidence: `Couverture des citations en recul de ${Math.abs(citationDrop.delta)} points sur la fenêtre observée.`,
             reliability: 'calculated',
-            suggestedAction: 'Renforcer les prompts qui génèrent des citations fiables et vérifier les sources observées.',
+            suggestedAction:
+                'Renforcer les prompts qui génèrent des citations fiables et vérifier les sources observées.',
         });
     }
 
@@ -332,27 +335,27 @@ const UNSUPPORTED_ALERTS = [
     {
         id: 'unsupported_ai_presence',
         title: 'Perte de présence IA',
-        reason: 'Aucun suivi continu de présence IA en temps réel n\'est disponible. Seul le taux de mention par snapshots est mesuré.',
+        reason: "Aucun suivi continu de présence IA en temps réel n'est disponible. Seul le taux de mention par snapshots est mesuré.",
     },
     {
         id: 'unsupported_competitor_dominant',
         title: 'Nouveau concurrent dominant',
-        reason: 'Aucune détection de dominance concurrentielle n\'est implémentée. Seules les mentions brutes sont stockées.',
+        reason: "Aucune détection de dominance concurrentielle n'est implémentée. Seules les mentions brutes sont stockées.",
     },
     {
         id: 'unsupported_negative_citation',
         title: 'Citation négative',
-        reason: 'Aucune analyse de sentiment sur les citations n\'est disponible dans le repo.',
+        reason: "Aucune analyse de sentiment sur les citations n'est disponible dans le repo.",
     },
     {
         id: 'unsupported_llms_txt_stale',
         title: 'llms.txt obsolète',
-        reason: 'Aucun suivi automatique de la fraîcheur du fichier llms.txt n\'est implémenté.',
+        reason: "Aucun suivi automatique de la fraîcheur du fichier llms.txt n'est implémenté.",
     },
     {
         id: 'unsupported_external_brand',
         title: 'Contradiction de marque externe',
-        reason: 'Seule la cohérence schema/dossier est vérifiée. Aucune réconciliation avec les annuaires ou profils tiers n\'est en place.',
+        reason: "Seule la cohérence schema/dossier est vérifiée. Aucune réconciliation avec les annuaires ou profils tiers n'est en place.",
     },
 ];
 
@@ -409,11 +412,12 @@ function buildOperatorSummary(alerts) {
         calculatedCount,
         globalSeverity,
         reliability: 'calculated',
-        description: total === 0
-            ? 'Aucune alerte GEO active détectée dans les signaux actuellement disponibles.'
-            : criticalCount > 0
-                ? `${criticalCount} alerte(s) critique(s) nécessitent une intervention prioritaire.`
-                : `${total} alerte(s) active(s) identifiée(s) dans la veille GEO.`,
+        description:
+            total === 0
+                ? 'Aucune alerte GEO active détectée dans les signaux actuellement disponibles.'
+                : criticalCount > 0
+                  ? `${criticalCount} alerte(s) critique(s) nécessitent une intervention prioritaire.`
+                  : `${total} alerte(s) active(s) identifiée(s) dans la veille GEO.`,
     };
 }
 
@@ -467,7 +471,7 @@ function buildRecommendations(alerts) {
     if (recommendations.length === 0) {
         recommendations.push({
             title: 'Aucune correction prioritaire',
-            action: 'Les signaux actuels ne remontent pas d\'alerte nécessitant une intervention immédiate. Poursuivre le suivi régulier.',
+            action: "Les signaux actuels ne remontent pas d'alerte nécessitant une intervention immédiate. Poursuivre le suivi régulier.",
             severity: 'info',
             reliability: 'calculated',
         });
@@ -477,15 +481,14 @@ function buildRecommendations(alerts) {
 }
 
 export async function getAlertsSlice(clientId) {
-    const [crawlerSlice, schemaSlice, consistencySlice, readinessSlice, trendSlice, connectors] =
-        await Promise.all([
-            getCrawlerSlice(clientId).catch(() => null),
-            getSchemaSlice(clientId).catch(() => null),
-            getConsistencySlice(clientId).catch(() => null),
-            getReadinessSlice(clientId).catch(() => null),
-            getTrendSlice(clientId).catch(() => null),
-            getConnectorOverviewForClient(clientId).catch(() => null),
-        ]);
+    const [crawlerSlice, schemaSlice, consistencySlice, readinessSlice, trendSlice, connectors] = await Promise.all([
+        getCrawlerSlice(clientId).catch(() => null),
+        getSchemaSlice(clientId).catch(() => null),
+        getConsistencySlice(clientId).catch(() => null),
+        getReadinessSlice(clientId).catch(() => null),
+        getTrendSlice(clientId).catch(() => null),
+        getConnectorOverviewForClient(clientId).catch(() => null),
+    ]);
 
     const allAlerts = [
         ...buildCrawlerAlerts(crawlerSlice),

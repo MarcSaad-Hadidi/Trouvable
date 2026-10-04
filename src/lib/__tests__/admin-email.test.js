@@ -44,7 +44,7 @@ describe('admin-email', () => {
             expect(isAdminEmail(undefined)).toBe(false);
         });
 
-        it('supporte une liste d\'emails s\u00e9par\u00e9s par virgule', async () => {
+        it("supporte une liste d'emails s\u00e9par\u00e9s par virgule", async () => {
             process.env.CLERK_ADMIN_EMAIL = 'alice@trouvable.app,bob@trouvable.app';
             const { isAdminEmail } = await loadModule();
             expect(isAdminEmail('alice@trouvable.app')).toBe(true);

@@ -11,7 +11,10 @@ export function auditsToScoreSeries(audits) {
     if (!Array.isArray(audits) || audits.length === 0) return null;
 
     const sorted = [...audits]
-        .filter((a) => a.seo_score !== null && a.seo_score !== undefined && a.geo_score !== null && a.geo_score !== undefined)
+        .filter(
+            (a) =>
+                a.seo_score !== null && a.seo_score !== undefined && a.geo_score !== null && a.geo_score !== undefined,
+        )
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
     if (sorted.length === 0) return null;
@@ -20,7 +23,7 @@ export function auditsToScoreSeries(audits) {
         new Date(a.created_at).toLocaleDateString('fr-FR', {
             day: '2-digit',
             month: 'short',
-        })
+        }),
     );
 
     return {
@@ -42,7 +45,7 @@ export function sourceMentionsTimelineToSeries(timeline) {
     const sorted = [...timeline].sort((a, b) => a.date.localeCompare(b.date));
     if (sorted.length < 2) return null;
     const labels = sorted.map((t) =>
-        new Date(t.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+        new Date(t.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
     );
     return {
         labels,
@@ -88,9 +91,7 @@ export function cumulativeVisibilityByTopModels(runs, maxModels = 3) {
     const series = top.map((mk, si) => {
         const data = allDays.map((day) => {
             const end = new Date(day + 'T23:59:59.999Z').getTime();
-            const rs = sortedAsc.filter(
-                (r) => modelKey(r) === mk && new Date(r.created_at).getTime() <= end
-            );
+            const rs = sortedAsc.filter((r) => modelKey(r) === mk && new Date(r.created_at).getTime() <= end);
             if (rs.length === 0) return NaN;
             const found = rs.filter((r) => r.target_found).length;
             return Math.round((found / rs.length) * 100);
@@ -103,7 +104,7 @@ export function cumulativeVisibilityByTopModels(runs, maxModels = 3) {
     });
 
     const labels = allDays.map((d) =>
-        new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+        new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
     );
 
     return { labels, series };
@@ -122,7 +123,7 @@ export function queryRunsToVisibilitySeries(runs) {
             month: 'short',
             hour: '2-digit',
             minute: '2-digit',
-        })
+        }),
     );
 
     return {

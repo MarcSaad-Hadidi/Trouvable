@@ -4,18 +4,42 @@ export const TRUTH_CLASSES = ['observed', 'derived', 'inferred', 'uncertain', 'r
 export const CONFIDENCE_BANDS = ['low', 'medium', 'high'];
 export const REVIEW_STATUSES = ['auto_accepted', 'needs_review', 'reviewed_confirmed', 'reviewed_rejected', 'blocked'];
 
-export const PROBLEM_FAMILIES = ['identity', 'locality', 'schema', 'technical_seo', 'content', 'trust', 'competitor', 'citation', 'query_coverage', 'operations'];
+export const PROBLEM_FAMILIES = [
+    'identity',
+    'locality',
+    'schema',
+    'technical_seo',
+    'content',
+    'trust',
+    'competitor',
+    'citation',
+    'query_coverage',
+    'operations',
+];
 export const PROBLEM_SEVERITIES = ['low', 'medium', 'high', 'critical'];
-export const PROBLEM_IMPACTS = ['discoverability', 'recommendability', 'answerability', 'credibility', 'conversion', 'operability'];
-export const PROBLEM_SURFACES = ['site', 'page', 'profile', 'query_run', 'query_set', 'citation', 'competitor_landscape', 'continuous_job', 'portal'];
+export const PROBLEM_IMPACTS = [
+    'discoverability',
+    'recommendability',
+    'answerability',
+    'credibility',
+    'conversion',
+    'operability',
+];
+export const PROBLEM_SURFACES = [
+    'site',
+    'page',
+    'profile',
+    'query_run',
+    'query_set',
+    'citation',
+    'competitor_landscape',
+    'continuous_job',
+    'portal',
+];
 export const PROBLEM_FIXABILITY = ['quick_win', 'standard', 'heavy_lift', 'operator_only', 'non_actionable'];
 
 export function uniqueTruthyStrings(values = []) {
-    return [...new Set(
-        (values || [])
-            .map((value) => String(value || '').trim())
-            .filter(Boolean)
-    )];
+    return [...new Set((values || []).map((value) => String(value || '').trim()).filter(Boolean))];
 }
 
 export function slugifyTruthKey(value) {
@@ -30,9 +54,12 @@ export function slugifyTruthKey(value) {
 }
 
 export function normalizeTruthClass(value, fallback = 'uncertain') {
-    const normalized = String(value || '').trim().toLowerCase();
+    const normalized = String(value || '')
+        .trim()
+        .toLowerCase();
     if (TRUTH_CLASSES.includes(normalized)) return normalized;
-    if (normalized === 'not_connected' || normalized === 'non_verifiable' || normalized === 'non-verifiable') return 'uncertain';
+    if (normalized === 'not_connected' || normalized === 'non_verifiable' || normalized === 'non-verifiable')
+        return 'uncertain';
     if (normalized === 'weak') return 'uncertain';
     if (normalized === 'strong') return 'observed';
     return TRUTH_CLASSES.includes(fallback) ? fallback : 'uncertain';
@@ -45,7 +72,9 @@ export function normalizeConfidenceBand(value, fallback = 'medium') {
         return 'low';
     }
 
-    const normalized = String(value || '').trim().toLowerCase();
+    const normalized = String(value || '')
+        .trim()
+        .toLowerCase();
     if (CONFIDENCE_BANDS.includes(normalized)) return normalized;
     if (normalized === 'strong') return 'high';
     if (normalized === 'weak' || normalized === 'unclear') return 'low';
@@ -61,7 +90,9 @@ export function defaultReviewStatusForTruthClass(truthClass) {
 }
 
 export function normalizeReviewStatus(value, fallback = null) {
-    const normalized = String(value || '').trim().toLowerCase();
+    const normalized = String(value || '')
+        .trim()
+        .toLowerCase();
     if (REVIEW_STATUSES.includes(normalized)) return normalized;
     if (normalized === 'review_required' || normalized === 'pending_review') return 'needs_review';
     if (normalized === 'accepted' || normalized === 'confirmed') return 'reviewed_confirmed';

@@ -6,11 +6,16 @@ import { LlmComparisonError } from './response-contract';
 /** Resolve comparison models at call time, including the existing env aliases. */
 export function getCompareModel(provider) {
     switch (provider) {
-        case 'gemini': return process.env.GOOGLE_MODEL_COMPARE || process.env.GEMINI_MODEL_COMPARE || 'gemini-2.5-flash';
-        case 'groq': return process.env.GROQ_MODEL_COMPARE || 'llama-3.3-70b-versatile';
-        case 'mistral': return process.env.MISTRAL_MODEL_COMPARE || 'mistral-small-2603';
-        case 'openrouter': return process.env.OPENROUTER_MODEL_COMPARE || process.env.OPENROUTER_MODEL_QUERY || 'openai/gpt-4o-mini';
-        default: throw new LlmComparisonError('runtime_error', `Provider compare inconnu: ${provider}`);
+        case 'gemini':
+            return process.env.GOOGLE_MODEL_COMPARE || process.env.GEMINI_MODEL_COMPARE || 'gemini-2.5-flash';
+        case 'groq':
+            return process.env.GROQ_MODEL_COMPARE || 'llama-3.3-70b-versatile';
+        case 'mistral':
+            return process.env.MISTRAL_MODEL_COMPARE || 'mistral-small-2603';
+        case 'openrouter':
+            return process.env.OPENROUTER_MODEL_COMPARE || process.env.OPENROUTER_MODEL_QUERY || 'openai/gpt-4o-mini';
+        default:
+            throw new LlmComparisonError('runtime_error', `Provider compare inconnu: ${provider}`);
     }
 }
 

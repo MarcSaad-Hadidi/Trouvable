@@ -7,8 +7,6 @@ import {
     generateCorrectionPromptFromRef,
 } from '@/lib/correction-prompts/service';
 
-
-
 export const dynamic = 'force-dynamic';
 
 export async function POST(request, { params }) {
@@ -50,14 +48,16 @@ export async function POST(request, { params }) {
         return noStoreJson(result);
     } catch (error) {
         if (error instanceof CorrectionPromptServiceError) {
-            return noStoreJson({
-                error: error.message,
-                details: error.details || null,
-            }, { status: error.status || 500 });
+            return noStoreJson(
+                {
+                    error: error.message,
+                    details: error.details || null,
+                },
+                { status: error.status || 500 },
+            );
         }
 
         console.error(`[api/admin/seo/client/${clientId}/correction-prompt]`, error);
         return noStoreJson({ error: 'Erreur generation prompt correction' }, { status: 500 });
     }
 }
-

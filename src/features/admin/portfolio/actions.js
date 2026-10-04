@@ -46,10 +46,7 @@ export async function togglePublishAction(id, currentStatus) {
         publication_status: nextPublished ? 'published' : 'draft',
     });
 
-    const { error } = await supabase
-        .from('client_geo_profiles')
-        .update(payload)
-        .eq('id', id);
+    const { error } = await supabase.from('client_geo_profiles').update(payload).eq('id', id);
 
     if (error) {
         console.error('[Admin TogglePublish Error]', error);

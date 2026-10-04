@@ -29,7 +29,7 @@ export async function POST(request) {
         if (client.client_slug !== v.data.confirmSlug.trim()) {
             return NextResponse.json(
                 { error: 'Confirmation invalide : saisissez le slug exact du client pour supprimer définitivement.' },
-                { status: 400 }
+                { status: 400 },
             );
         }
         await dbDeleteClientHard(v.data.clientId);

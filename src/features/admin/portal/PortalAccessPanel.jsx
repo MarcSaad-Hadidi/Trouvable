@@ -130,19 +130,24 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                         Le dossier est en statut «&nbsp;{lifecycleStatus || 'inconnu'}&nbsp;»
                     </p>
                     <p className="mt-1 text-sm text-amber-200/60">
-                        Le portail fonctionne, mais certaines données peuvent être incomplètes tant que le dossier n&apos;est pas passé en «&nbsp;active&nbsp;».
+                        Le portail fonctionne, mais certaines données peuvent être incomplètes tant que le dossier
+                        n&apos;est pas passé en «&nbsp;active&nbsp;».
                     </p>
                 </div>
             )}
             <div className="rounded-2xl border border-white/10 bg-[#0f0f0f] p-6">
                 <h2 className="text-base font-bold text-white">Ajouter un accès client</h2>
                 <p className="mt-2 text-sm text-white/45">
-                    Un compte Clerk sera créé automatiquement pour cette adresse. Le client recevra un lien de connexion par courriel et pourra consulter son tableau de bord sur l&apos;espace client.
+                    Un compte Clerk sera créé automatiquement pour cette adresse. Le client recevra un lien de connexion
+                    par courriel et pourra consulter son tableau de bord sur l&apos;espace client.
                 </p>
 
                 <form onSubmit={handleSave} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div className="min-w-0 flex-1">
-                        <label htmlFor="portal-email" className="mb-1 block text-xs font-semibold uppercase tracking-[0.06em] text-white/45">
+                        <label
+                            htmlFor="portal-email"
+                            className="mb-1 block text-xs font-semibold uppercase tracking-[0.06em] text-white/45"
+                        >
                             Courriel d’accès au tableau de bord client
                         </label>
                         <input
@@ -165,10 +170,14 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                 </form>
 
                 {error && (
-                    <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2 text-sm text-red-200">{error}</div>
+                    <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2 text-sm text-red-200">
+                        {error}
+                    </div>
                 )}
                 {success && (
-                    <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200">{success}</div>
+                    <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200">
+                        {success}
+                    </div>
                 )}
 
                 <div className="mt-4 space-y-1">
@@ -206,7 +215,11 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                                 className="shrink-0 rounded-md border border-white/10 p-1 text-white/35 transition-colors hover:bg-white/[0.06] hover:text-white/60"
                                 title="Copier le lien"
                             >
-                                {copiedPath === path ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                                {copiedPath === path ? (
+                                    <Check className="h-3 w-3 text-emerald-400" />
+                                ) : (
+                                    <Copy className="h-3 w-3" />
+                                )}
                             </button>
                         </div>
                     ))}
@@ -218,23 +231,37 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                     <div>
                         <h2 className="text-base font-bold text-white">Accès enregistrés</h2>
                         <p className="mt-1 text-xs text-white/35">
-                            Chaque adresse correspond à un compte invité. Seuls les accès actifs permettent la connexion au portail.
+                            Chaque adresse correspond à un compte invité. Seuls les accès actifs permettent la connexion
+                            au portail.
                         </p>
                     </div>
                 </div>
-                
+
                 <div className="mt-4 pb-4 border-b border-white/10 w-full flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                     <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-white/60 uppercase tracking-[0.05em] mb-1">Email de bienvenue</span>
-                        <span className="text-[11px] text-white/40">Le dernier accès actif recevra l&#39;invitation (incluant le lien GSC automatique).</span>
+                        <span className="text-xs font-semibold text-white/60 uppercase tracking-[0.05em] mb-1">
+                            Email de bienvenue
+                        </span>
+                        <span className="text-[11px] text-white/40">
+                            Le dernier accès actif recevra l&#39;invitation (incluant le lien GSC automatique).
+                        </span>
                     </div>
                     {members.length > 0 && <ResendInvitationButton clientId={clientId} />}
                 </div>
 
                 <div className="mt-5 flex flex-wrap items-center gap-3 text-[10px] text-white/25">
-                    <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400/60" />Actif : peut se connecter</span>
-                    <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400/60" />En attente : doit être activé</span>
-                    <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-white/20" />Révoqué : accès suspendu</span>
+                    <span className="flex items-center gap-1">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+                        Actif : peut se connecter
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400/60" />
+                        En attente : doit être activé
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-white/20" />
+                        Révoqué : accès suspendu
+                    </span>
                 </div>
 
                 {members.length === 0 ? (
@@ -245,9 +272,17 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                     <ul className="mt-4 divide-y divide-white/[0.06]">
                         {members.map((row) => {
                             const st = statusLabel(row.status);
-                            const borderColor = row.status === 'active' ? 'border-l-emerald-400/40' : row.status === 'pending' ? 'border-l-amber-400/40' : 'border-l-white/10';
+                            const borderColor =
+                                row.status === 'active'
+                                    ? 'border-l-emerald-400/40'
+                                    : row.status === 'pending'
+                                      ? 'border-l-amber-400/40'
+                                      : 'border-l-white/10';
                             return (
-                                <li key={row.id} className={`flex flex-wrap items-center justify-between gap-3 border-l-2 py-5 pl-4 first:pt-0 ${borderColor}`}>
+                                <li
+                                    key={row.id}
+                                    className={`flex flex-wrap items-center justify-between gap-3 border-l-2 py-5 pl-4 first:pt-0 ${borderColor}`}
+                                >
                                     <div className="min-w-0">
                                         <div className="font-medium text-white">{row.contact_email}</div>
                                         <div className="mt-1 text-[11px] text-white/35">
@@ -256,7 +291,11 @@ export default function PortalAccessPanel({ clientId, clientSlug, lifecycleStatu
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${st.cls}`}>{st.text}</span>
+                                        <span
+                                            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${st.cls}`}
+                                        >
+                                            {st.text}
+                                        </span>
                                         {row.status === 'pending' && (
                                             <button
                                                 type="button"
@@ -321,7 +360,9 @@ function ResendInvitationButton({ clientId }) {
             >
                 {isLoading ? 'Envoi...' : 'Envoyer manuel'}
             </button>
-            {status === 'success' && <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Envoyé</span>}
+            {status === 'success' && (
+                <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Envoyé</span>
+            )}
             {status && status !== 'success' && <span className="text-[11px] text-red-400 font-semibold">{status}</span>}
         </div>
     );

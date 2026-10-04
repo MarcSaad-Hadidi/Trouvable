@@ -210,19 +210,25 @@ describe('GEO Mistral engine wiring', () => {
         });
 
         expect(result.variants).toEqual(['mistral_geo_default']);
-        expect(dbMock.createQueryRun).toHaveBeenCalledWith(expect.objectContaining({
-            parse_status: null,
-        }));
-        expect(callAiTextMock).toHaveBeenCalledWith(expect.objectContaining({
-            providerOverride: 'mistral',
-            fallbackProvider: null,
-            modelOverride: 'mistral-test-model',
-        }));
-        expect(callAiJsonMock).toHaveBeenCalledWith(expect.objectContaining({
-            providerOverride: 'mistral',
-            fallbackProvider: null,
-            modelOverride: expect.any(String),
-        }));
+        expect(dbMock.createQueryRun).toHaveBeenCalledWith(
+            expect.objectContaining({
+                parse_status: null,
+            }),
+        );
+        expect(callAiTextMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                providerOverride: 'mistral',
+                fallbackProvider: null,
+                modelOverride: 'mistral-test-model',
+            }),
+        );
+        expect(callAiJsonMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                providerOverride: 'mistral',
+                fallbackProvider: null,
+                modelOverride: expect.any(String),
+            }),
+        );
     });
 
     it('preserves failed execution status when reparsing a stored run', async () => {
@@ -245,8 +251,11 @@ describe('GEO Mistral engine wiring', () => {
             performedBy: 'operator@test.dev',
         });
 
-        expect(dbMock.updateQueryRun).toHaveBeenCalledWith('run-1', expect.objectContaining({
-            status: 'failed',
-        }));
+        expect(dbMock.updateQueryRun).toHaveBeenCalledWith(
+            'run-1',
+            expect.objectContaining({
+                status: 'failed',
+            }),
+        );
     });
 });

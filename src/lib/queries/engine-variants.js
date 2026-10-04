@@ -11,7 +11,7 @@ export const ENGINE_VARIANTS = {
         provider: 'orchestrated',
         model: 'composite-free',
         is_available: () => !!process.env.TAVILY_API_KEY,
-        web_enabled: true
+        web_enabled: true,
     },
     groq_compound_mini: {
         id: 'groq_compound_mini',
@@ -21,7 +21,7 @@ export const ENGINE_VARIANTS = {
         provider: 'groq',
         model: process.env.GROQ_MODEL_BENCHMARK_COMPOUND_MINI || 'llama-3.3-70b-versatile',
         is_available: () => !!process.env.GROQ_API_KEY,
-        web_enabled: true
+        web_enabled: true,
     },
     gemini_free_non_grounded: {
         id: 'gemini_free_non_grounded',
@@ -31,7 +31,7 @@ export const ENGINE_VARIANTS = {
         provider: 'gemini',
         model: process.env.GEMINI_MODEL_BENCHMARK_FREE || 'gemini-2.5-flash',
         is_available: () => !!process.env.GEMINI_API_KEY,
-        web_enabled: false
+        web_enabled: false,
     },
     mistral_small_non_grounded: {
         id: 'mistral_small_non_grounded',
@@ -41,7 +41,7 @@ export const ENGINE_VARIANTS = {
         provider: 'mistral',
         model: process.env.MISTRAL_MODEL_BENCHMARK_COMPARE || process.env.MISTRAL_MODEL_COMPARE || 'mistral-small-2603',
         is_available: () => !!process.env.MISTRAL_API_KEY,
-        web_enabled: false
+        web_enabled: false,
     },
     mistral_geo_default: {
         id: 'mistral_geo_default',
@@ -54,7 +54,7 @@ export const ENGINE_VARIANTS = {
         temperature: 0.15,
         max_tokens: 2300,
         is_available: () => !!process.env.MISTRAL_API_KEY,
-        web_enabled: false
+        web_enabled: false,
     },
     openrouter_non_grounded: {
         id: 'openrouter_non_grounded',
@@ -64,7 +64,7 @@ export const ENGINE_VARIANTS = {
         provider: 'openrouter',
         model: process.env.OPENROUTER_MODEL_BENCHMARK || process.env.OPENROUTER_MODEL_QUERY || 'openai/gpt-4o-mini',
         is_available: () => !!process.env.OPENROUTER_API_KEY,
-        web_enabled: false
+        web_enabled: false,
     },
 };
 
@@ -92,24 +92,22 @@ function estimateCostUsd({ provider, usage }) {
 }
 
 function isVariantEnabled() {
-    const raw = String(process.env.BENCHMARK_ENABLE_FREE_SANDBOX ?? '1').trim().toLowerCase();
+    const raw = String(process.env.BENCHMARK_ENABLE_FREE_SANDBOX ?? '1')
+        .trim()
+        .toLowerCase();
     return !['0', 'false', 'off', 'no'].includes(raw);
 }
 
 function resolveVariants(requestedVariants = []) {
-    const values = Array.isArray(requestedVariants) && requestedVariants.length > 0
-        ? requestedVariants
-        : Object.keys(ENGINE_VARIANTS);
+    const values =
+        Array.isArray(requestedVariants) && requestedVariants.length > 0
+            ? requestedVariants
+            : Object.keys(ENGINE_VARIANTS);
 
     return values.filter((variant) => ENGINE_VARIANTS[variant]);
 }
 
-export async function runBenchmarkVariant({
-    variant,
-    messages,
-    purpose = 'query',
-    maxTokens = 2048,
-}) {
+export async function runBenchmarkVariant({ variant, messages, purpose = 'query', maxTokens = 2048 }) {
     const variantMeta = ENGINE_VARIANTS[variant];
     if (!variantMeta) {
         return {
@@ -296,7 +294,7 @@ export function listBenchmarkVariants(requestedVariants = []) {
         const v = ENGINE_VARIANTS[key];
         return {
             ...v,
-            is_available: typeof v.is_available === 'function' ? v.is_available() : true
+            is_available: typeof v.is_available === 'function' ? v.is_available() : true,
         };
     });
 }

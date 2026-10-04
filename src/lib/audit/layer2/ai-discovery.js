@@ -86,7 +86,13 @@ export async function auditAiDiscoveryEndpoints(siteUrl) {
         return {
             score: 0,
             endpoints: [],
-            findings: [{ id: 'ai_discovery.invalid_url', severity: 'medium', message: 'Could not resolve site origin for AI discovery probe.' }],
+            findings: [
+                {
+                    id: 'ai_discovery.invalid_url',
+                    severity: 'medium',
+                    message: 'Could not resolve site origin for AI discovery probe.',
+                },
+            ],
         };
     }
 

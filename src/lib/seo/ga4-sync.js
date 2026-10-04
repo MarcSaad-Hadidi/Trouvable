@@ -11,9 +11,7 @@ function dateToYmd(date) {
 
 function resolveWindow({ startDate, endDate } = {}) {
     const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate
-        ? new Date(startDate)
-        : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 27 * 24 * 60 * 60 * 1000);
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
         throw new Error('Invalid GA4 sync window.');
@@ -75,8 +73,19 @@ export async function runGa4SyncForClient(clientId, options = {}) {
     let pageRows;
     try {
         [trafficRows, pageRows] = await Promise.all([
-            fetchGa4TrafficDaily({ propertyId, startDate: window.startDate, endDate: window.endDate, googleRefreshToken }),
-            fetchGa4TopPages({ propertyId, startDate: window.startDate, endDate: window.endDate, limit: 50, googleRefreshToken }),
+            fetchGa4TrafficDaily({
+                propertyId,
+                startDate: window.startDate,
+                endDate: window.endDate,
+                googleRefreshToken,
+            }),
+            fetchGa4TopPages({
+                propertyId,
+                startDate: window.startDate,
+                endDate: window.endDate,
+                limit: 50,
+                googleRefreshToken,
+            }),
         ]);
     } catch (fetchError) {
         await updateConnectorState({

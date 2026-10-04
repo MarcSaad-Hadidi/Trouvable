@@ -7,24 +7,26 @@ import { requireAdmin } from '@/lib/auth';
 import { compareModels } from '@/lib/llm-comparison/compare-models';
 import { LlmComparisonError, SOURCE_TYPES } from '@/lib/llm-comparison/response-contract';
 
-const payloadSchema = z.object({
-    source_type: z.enum([SOURCE_TYPES.URL, SOURCE_TYPES.TEXT]).optional(),
-    url: z.string().url().optional(),
-    text: z.string().min(1).optional(),
-    prompt: z.string().min(1).max(20_000),
-    provider_timeout_ms: z.number().int().positive().max(120_000).optional(),
-    max_content_chars: z.number().int().positive().max(120_000).optional(),
-    enable_google_grounding: z.boolean().optional(),
-    client_id: z.string().uuid().optional(),
-}).superRefine((value, ctx) => {
-    if (!value.url && !value.text) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['url'],
-            message: 'Fournir au moins `url` ou `text`.',
-        });
-    }
-});
+const payloadSchema = z
+    .object({
+        source_type: z.enum([SOURCE_TYPES.URL, SOURCE_TYPES.TEXT]).optional(),
+        url: z.string().url().optional(),
+        text: z.string().min(1).optional(),
+        prompt: z.string().min(1).max(20_000),
+        provider_timeout_ms: z.number().int().positive().max(120_000).optional(),
+        max_content_chars: z.number().int().positive().max(120_000).optional(),
+        enable_google_grounding: z.boolean().optional(),
+        client_id: z.string().uuid().optional(),
+    })
+    .superRefine((value, ctx) => {
+        if (!value.url && !value.text) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['url'],
+                message: 'Fournir au moins `url` ou `text`.',
+            });
+        }
+    });
 
 function statusFromError(error) {
     const errClass = error?.errorClass || 'runtime_error';
@@ -106,8 +108,9 @@ export async function POST(request) {
             // Run extraction pipeline on each persisted run to populate
             // parsed_response, normalized_response, mentions, and diagnostics
             const reparses = createdRuns.map((run) =>
-                reparseStoredQueryRun({ clientId, runId: run.id })
-                    .catch((err) => console.error(`[llm-compare] reparse ${run.id}:`, err?.message || err))
+                reparseStoredQueryRun({ clientId, runId: run.id }).catch((err) =>
+                    console.error(`[llm-compare] reparse ${run.id}:`, err?.message || err),
+                ),
             );
             await Promise.allSettled(reparses);
         }
@@ -116,18 +119,24 @@ export async function POST(request) {
     } catch (error) {
         console.error('[api/admin/llm-compare]', error);
         if (error instanceof LlmComparisonError) {
-            return NextResponse.json({
-                error: {
-                    class: error.errorClass,
-                    message: error.message,
+            return NextResponse.json(
+                {
+                    error: {
+                        class: error.errorClass,
+                        message: error.message,
+                    },
                 },
-            }, { status: statusFromError(error) });
+                { status: statusFromError(error) },
+            );
         }
-        return NextResponse.json({
-            error: {
-                class: 'runtime_error',
-                message: error?.message || 'Execution compare impossible',
+        return NextResponse.json(
+            {
+                error: {
+                    class: 'runtime_error',
+                    message: error?.message || 'Execution compare impossible',
+                },
             },
-        }, { status: 500 });
+            { status: 500 },
+        );
     }
 }

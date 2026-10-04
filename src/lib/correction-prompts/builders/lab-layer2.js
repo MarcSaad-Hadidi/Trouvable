@@ -51,9 +51,10 @@ function findLayer2Finding(audit, findingRef) {
     if (!moduleData) return null;
 
     const findings = toArray(moduleData?.findings);
-    const finding = findings.find((entry) => compactString(entry?.id) === rawFindingId)
-        || findings.find((entry) => compactString(entry?.check_id) === rawFindingId)
-        || null;
+    const finding =
+        findings.find((entry) => compactString(entry?.id) === rawFindingId) ||
+        findings.find((entry) => compactString(entry?.check_id) === rawFindingId) ||
+        null;
 
     return finding ? { moduleKey, finding, moduleData } : null;
 }
@@ -75,13 +76,15 @@ export function buildLayer2CorrectionPromptContext({ client, audit, ref }) {
     const dimension = MODULE_TO_DIMENSION[moduleKey] || 'ai_answerability';
     const severity = compactString(finding?.severity);
     const priority = severityToPriority(severity);
-    const findingMessage = compactString(finding?.message)
-        || compactString(finding?.title)
-        || compactString(finding?.label)
-        || `Point ${finding?.id || 'non renseigné'} détecté sur ${moduleLabel}.`;
-    const recommendedFix = compactString(finding?.recommendation)
-        || compactString(finding?.fix)
-        || 'Corriger le point technique concerné en s\'appuyant sur le diagnostic Layer 2 exposé.';
+    const findingMessage =
+        compactString(finding?.message) ||
+        compactString(finding?.title) ||
+        compactString(finding?.label) ||
+        `Point ${finding?.id || 'non renseigné'} détecté sur ${moduleLabel}.`;
+    const recommendedFix =
+        compactString(finding?.recommendation) ||
+        compactString(finding?.fix) ||
+        "Corriger le point technique concerné en s'appuyant sur le diagnostic Layer 2 exposé.";
 
     const pseudoIssue = {
         id: `l2:${moduleKey}:${finding?.id || 'finding'}`,
@@ -94,11 +97,12 @@ export function buildLayer2CorrectionPromptContext({ client, audit, ref }) {
         confidence: 'high',
         evidence: findingMessage,
         recommendedFix,
-        sourceUrl: compactString(ref.pageUrl)
-            || compactString(finding?.url)
-            || compactString(moduleData?.url)
-            || compactString(audit?.resolved_url)
-            || compactString(audit?.source_url),
+        sourceUrl:
+            compactString(ref.pageUrl) ||
+            compactString(finding?.url) ||
+            compactString(moduleData?.url) ||
+            compactString(audit?.resolved_url) ||
+            compactString(audit?.source_url),
         affectedScope: 'sitewide',
     };
 

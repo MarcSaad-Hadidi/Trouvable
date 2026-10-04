@@ -14,7 +14,9 @@ export async function getCompetitorSlice(clientId) {
     if (runIds.length > 0) {
         const { data, error } = await supabase
             .from('query_mentions')
-            .select('query_run_id, business_name, normalized_label, entity_type, is_target, position, first_position, confidence, mention_kind, recommendation_strength, co_occurs_with_target')
+            .select(
+                'query_run_id, business_name, normalized_label, entity_type, is_target, position, first_position, confidence, mention_kind, recommendation_strength, co_occurs_with_target',
+            )
             .in('query_run_id', runIds)
             .neq('entity_type', 'source');
         if (error) throw new Error(`[OperatorIntelligence/competitors] mentions: ${error.message}`);
@@ -72,7 +74,7 @@ export async function getCompetitorSlice(clientId) {
                 query_text: queryText,
                 category: getTrackedQueryCategoryMeta(
                     run.tracked_queries?.category || run.tracked_queries?.query_type,
-                    queryText
+                    queryText,
                 ).label,
                 competitor_mentions: 0,
                 recommended_competitors: 0,
@@ -95,9 +97,8 @@ export async function getCompetitorSlice(clientId) {
         }
     }
 
-    const normalizedPressure = runRows.length > 0
-        ? Math.round((competitorPressureScore / runRows.length) * 10) / 10
-        : 0;
+    const normalizedPressure =
+        runRows.length > 0 ? Math.round((competitorPressureScore / runRows.length) * 10) / 10 : 0;
 
     return {
         provenance: {
@@ -113,7 +114,10 @@ export async function getCompetitorSlice(clientId) {
             runsWithoutTargetButCompetitor,
             competitorPressureScore,
             normalizedPressurePerRun: normalizedPressure,
-            sampleSizeWarning: runRows.length < 5 ? 'Faible volume d\'exécutions, les tendances concurrentielles ne sont pas encore fiables.' : null,
+            sampleSizeWarning:
+                runRows.length < 5
+                    ? "Faible volume d'exécutions, les tendances concurrentielles ne sont pas encore fiables."
+                    : null,
         },
         topCompetitors: [...confirmedCompetitorNames.entries()]
             .sort((a, b) => b[1] - a[1])
@@ -129,13 +133,15 @@ export async function getCompetitorSlice(clientId) {
         emptyState: {
             noRuns: {
                 title: 'Aucune exécution pour le moment',
-                description: 'Lancez les prompts suivis. La visibilité concurrentielle est basée uniquement sur les exécutions observées.',
+                description:
+                    'Lancez les prompts suivis. La visibilité concurrentielle est basée uniquement sur les exécutions observées.',
             },
             noCompetitors: {
                 title: 'Aucun concurrent confirmé',
-                description: genericNonTargetMentions > 0
-                    ? `${genericNonTargetMentions} mention(s) hors cible observée(s), mais aucune n’a atteint le seuil « concurrent confirmé » (liste déclarée, recommandation explicite, ou marqueurs type vs / alternative). Enrichissez le profil avec des concurrents connus et des prompts de comparaison.`
-                    : 'Aucune mention hors cible détectée sur les runs : le modèle ne propose probablement pas d’alternatives nommées, ou les réponses sont trop centrées sur la marque. Ce n’est pas une preuve de « zéro concurrence » sur le marché, mais plutôt un signal d’extraction faible. Utilisez des prompts liste / shortlist / vs et déclarez des concurrents dans le profil.',
+                description:
+                    genericNonTargetMentions > 0
+                        ? `${genericNonTargetMentions} mention(s) hors cible observée(s), mais aucune n’a atteint le seuil « concurrent confirmé » (liste déclarée, recommandation explicite, ou marqueurs type vs / alternative). Enrichissez le profil avec des concurrents connus et des prompts de comparaison.`
+                        : 'Aucune mention hors cible détectée sur les runs : le modèle ne propose probablement pas d’alternatives nommées, ou les réponses sont trop centrées sur la marque. Ce n’est pas une preuve de « zéro concurrence » sur le marché, mais plutôt un signal d’extraction faible. Utilisez des prompts liste / shortlist / vs et déclarez des concurrents dans le profil.',
             },
         },
     };

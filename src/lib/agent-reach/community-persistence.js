@@ -1,5 +1,8 @@
 import 'server-only';
-import { getOpportunitiesBySource as dbGetOpportunitiesBySource, createOpportunities as dbCreateOpportunities } from '@/lib/db/opportunities';
+import {
+    getOpportunitiesBySource as dbGetOpportunitiesBySource,
+    createOpportunities as dbCreateOpportunities,
+} from '@/lib/db/opportunities';
 import { upsertOpportunities } from '@/lib/db/community';
 
 // ──────────────────────────────────────────────────────────────
@@ -44,13 +47,19 @@ export async function persistCommunityOpportunities(opportunities, clientId) {
 
             if (newOpps.length > 0) {
                 await dbCreateOpportunities(newOpps).catch((bridgeErr) => {
-                    console.error('[Community→Opportunities bridge] Failed to insert into main opportunities table:', bridgeErr?.message);
+                    console.error(
+                        '[Community→Opportunities bridge] Failed to insert into main opportunities table:',
+                        bridgeErr?.message,
+                    );
                 });
             }
         } catch {
             // Fallback: if dedup check fails, insert all (backward compatible)
             await dbCreateOpportunities(mainOpps).catch((bridgeErr) => {
-                console.error('[Community→Opportunities bridge] Failed to insert into main opportunities table:', bridgeErr?.message);
+                console.error(
+                    '[Community→Opportunities bridge] Failed to insert into main opportunities table:',
+                    bridgeErr?.message,
+                );
             });
         }
     }

@@ -32,11 +32,8 @@ describe('crawl safety config', () => {
         process.env.AUDIT_RENDER_FETCH_FAILURE_ATTEMPT_LIMIT = '5';
         process.env.AUDIT_FULL_TIMEOUT_MS = '123456';
 
-        const {
-            getCrawlerRuntimeConfig,
-            getFullAuditTimeoutMs,
-            getSitemapDiscoveryConfig,
-        } = await import('@/lib/audit/audit-config');
+        const { getCrawlerRuntimeConfig, getFullAuditTimeoutMs, getSitemapDiscoveryConfig } =
+            await import('@/lib/audit/audit-config');
 
         expect(getCrawlerRuntimeConfig()).toMatchObject({
             sitemapSeedLimit: 123,

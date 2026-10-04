@@ -4,18 +4,18 @@ import { buildCanonicalPromptContract } from '../queries/onboarding-prompt-contr
 
 function hasCoreFields(contract) {
     return Boolean(
-        contract.query_text
-        && contract.intent_family
-        && contract.prompt_mode
-        && contract.quality_status
-        && contract.validation_status
-        && contract.prompt_origin
-        && contract.query_type_v2
-        && contract.funnel_stage
-        && contract.geo_scope
-        && contract.brand_scope
-        && contract.comparison_scope
-        && contract.locale
+        contract.query_text &&
+        contract.intent_family &&
+        contract.prompt_mode &&
+        contract.quality_status &&
+        contract.validation_status &&
+        contract.prompt_origin &&
+        contract.query_type_v2 &&
+        contract.funnel_stage &&
+        contract.geo_scope &&
+        contract.brand_scope &&
+        contract.comparison_scope &&
+        contract.locale,
     );
 }
 
@@ -60,7 +60,7 @@ describe('multi-profile robustness', () => {
     const scenarios = [
         {
             name: 'Trouvable',
-            queryText: "Quelles alternatives a Trouvable existent pour la visibilite IA locale et pourquoi ?",
+            queryText: 'Quelles alternatives a Trouvable existent pour la visibilite IA locale et pourquoi ?',
             clientName: 'Trouvable',
             intentFamily: 'competitor',
             promptMode: 'user_like',

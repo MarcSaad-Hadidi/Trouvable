@@ -28,14 +28,16 @@ export function GET() {
     ];
 
     const itemXml = items
-        .map((item) => `
+        .map(
+            (item) => `
     <item>
       <title>${escapeXml(item.title)}</title>
       <description>${escapeXml(item.description)}</description>
       <link>${escapeXml(item.url)}</link>
       <guid>${escapeXml(item.url)}</guid>
       <pubDate>${new Date(item.pubDate).toUTCString()}</pubDate>
-    </item>`)
+    </item>`,
+        )
         .join('\n');
 
     const body = `<?xml version="1.0" encoding="UTF-8"?>

@@ -19,8 +19,8 @@ export function AuditScoresLineChart({ recentAudits }) {
             <div className="geo-premium-card p-6 border border-white/10 border-dashed">
                 <div className="text-sm font-semibold text-white/90 mb-1">Évolution SEO &amp; GEO</div>
                 <p className="text-xs text-white/35 mb-2">
-                    Pas assez d’audits avec scores SEO et GEO pour tracer une courbe. Lancez des audits complets
-                    (statut succès ou partiel avec scores).
+                    Pas assez d’audits avec scores SEO et GEO pour tracer une courbe. Lancez des audits complets (statut
+                    succès ou partiel avec scores).
                 </p>
             </div>
         );
@@ -176,8 +176,14 @@ export function CumulativeModelVisibilityChart({ recentQueryRuns, title = 'Tenda
                 </div>
                 <div className="flex flex-wrap gap-2 justify-end max-w-[240px]">
                     {built.series.map((s) => (
-                        <span key={s.label} className="text-[10px] font-bold uppercase tracking-[0.06em] flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }} />
+                        <span
+                            key={s.label}
+                            className="text-[10px] font-bold uppercase tracking-[0.06em] flex items-center gap-1.5"
+                        >
+                            <span
+                                className="w-2 h-2 rounded-full shrink-0"
+                                style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }}
+                            />
                             <span className="text-white/50 truncate max-w-[104px]">{s.label}</span>
                         </span>
                     ))}

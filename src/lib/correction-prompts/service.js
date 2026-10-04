@@ -64,55 +64,51 @@ async function loadClientAndAudit(clientId) {
     }
 
     if (!audit) {
-        throw new CorrectionPromptServiceError(
-            "Aucun audit exploitable n'est disponible pour ce client.",
-            { status: 404 },
-        );
+        throw new CorrectionPromptServiceError("Aucun audit exploitable n'est disponible pour ce client.", {
+            status: 404,
+        });
     }
 
     return { client, audit };
 }
 
 function runTaskAndShape(context, { taskType, presetVariant, clientId, triggerSource }) {
-    return executeTask(
-        'generate-correction-prompt',
-        buildTaskInput(context, { taskType, presetVariant }),
-        {
-            clientId,
-            triggerSource,
-        },
-    ).then((result) => ({ context, result }))
-    .catch((error) => {
-        if (error instanceof CorrectionPromptValidationError) {
-            throw new CorrectionPromptServiceError(
-                "La generation Mistral n'a pas produit un prompt exploitable.",
-                { status: 422, details: error.details },
-            );
-        }
-        throw error;
-    });
+    return executeTask('generate-correction-prompt', buildTaskInput(context, { taskType, presetVariant }), {
+        clientId,
+        triggerSource,
+    })
+        .then((result) => ({ context, result }))
+        .catch((error) => {
+            if (error instanceof CorrectionPromptValidationError) {
+                throw new CorrectionPromptServiceError("La generation Mistral n'a pas produit un prompt exploitable.", {
+                    status: 422,
+                    details: error.details,
+                });
+            }
+            throw error;
+        });
 }
 
 function buildResponsePayload({ context, result, issue, ref }) {
     const issuePayload = issue
         ? {
-            id: issue.id,
-            title: issue.title,
-            priority: issue.priority,
-            category: issue.category,
-            dimension: issue.dimension,
-            truth_class: issue.truth_class,
-            confidence: issue.confidence,
-        }
+              id: issue.id,
+              title: issue.title,
+              priority: issue.priority,
+              category: issue.category,
+              dimension: issue.dimension,
+              truth_class: issue.truth_class,
+              confidence: issue.confidence,
+          }
         : {
-            id: context.problem.issueId,
-            title: context.problem.title,
-            priority: context.problem.severity,
-            category: context.problem.category,
-            dimension: context.problem.dimension,
-            truth_class: context.problem.truthState,
-            confidence: context.problem.confidence,
-        };
+              id: context.problem.issueId,
+              title: context.problem.title,
+              priority: context.problem.severity,
+              category: context.problem.category,
+              dimension: context.problem.dimension,
+              truth_class: context.problem.truthState,
+              confidence: context.problem.confidence,
+          };
 
     return {
         issue: issuePayload,
@@ -144,10 +140,9 @@ export async function generateSeoHealthCorrectionPrompt({ clientId, issueId, tri
     const issue = issues.find((candidate) => candidate.id === issueId);
 
     if (!issue) {
-        throw new CorrectionPromptServiceError(
-            'Probleme SEO Health introuvable dans le dernier audit.',
-            { status: 404 },
-        );
+        throw new CorrectionPromptServiceError('Probleme SEO Health introuvable dans le dernier audit.', {
+            status: 404,
+        });
     }
 
     const context = buildSeoHealthCorrectionPromptContext({ client, audit, issue });
@@ -164,10 +159,10 @@ export async function generateSeoHealthCorrectionPrompt({ clientId, issueId, tri
     } catch (error) {
         if (error instanceof CorrectionPromptServiceError) throw error;
         if (error instanceof CorrectionPromptValidationError) {
-            throw new CorrectionPromptServiceError(
-                "La generation Mistral n'a pas produit un prompt exploitable.",
-                { status: 422, details: error.details },
-            );
+            throw new CorrectionPromptServiceError("La generation Mistral n'a pas produit un prompt exploitable.", {
+                status: 422,
+                details: error.details,
+            });
         }
         throw error;
     }
@@ -189,10 +184,7 @@ export async function generateCorrectionPromptFromRef({ ref, triggerSource = 'ma
 
     const builder = getContextBuilderForSource(normalized.source);
     if (!builder) {
-        throw new CorrectionPromptServiceError(
-            `Source non supportée : ${normalized.source}`,
-            { status: 400 },
-        );
+        throw new CorrectionPromptServiceError(`Source non supportée : ${normalized.source}`, { status: 400 });
     }
 
     const { client, audit } = await loadClientAndAudit(normalized.clientId);
@@ -219,10 +211,10 @@ export async function generateCorrectionPromptFromRef({ ref, triggerSource = 'ma
     } catch (error) {
         if (error instanceof CorrectionPromptServiceError) throw error;
         if (error instanceof CorrectionPromptValidationError) {
-            throw new CorrectionPromptServiceError(
-                "La generation Mistral n'a pas produit un prompt exploitable.",
-                { status: 422, details: error.details },
-            );
+            throw new CorrectionPromptServiceError("La generation Mistral n'a pas produit un prompt exploitable.", {
+                status: 422,
+                details: error.details,
+            });
         }
         throw error;
     }

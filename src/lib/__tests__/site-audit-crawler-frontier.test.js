@@ -64,10 +64,13 @@ describe('site audit crawler frontier behavior', () => {
     }, 45_000);
 
     it('skips external hosts and records skipped reasons', async () => {
-        pages.set('https://example.com', html({
-            title: 'Home',
-            links: ['/about', 'https://evil.test/private'],
-        }));
+        pages.set(
+            'https://example.com',
+            html({
+                title: 'Home',
+                links: ['/about', 'https://evil.test/private'],
+            }),
+        );
         pages.set('https://example.com/about', html({ title: 'About' }));
 
         const { runSiteAudit } = await import('../audit/scanner.js');

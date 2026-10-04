@@ -18,8 +18,15 @@ function renderView(View, data) {
 describe('AGENT source availability at rendering boundaries', () => {
     it('keeps unavailable mention counts unknown while retaining observed runs and models', () => {
         const text = renderView(AgentVisibilityView, {
-            status: 'partial', dataSources: { mentions: 'unavailable' }, emptyState: null,
-            kpis: { competitorMentionsCount: null, genericMentionsCount: null, completedRunsTotal: 3, trackedPromptsTotal: 2 },
+            status: 'partial',
+            dataSources: { mentions: 'unavailable' },
+            emptyState: null,
+            kpis: {
+                competitorMentionsCount: null,
+                genericMentionsCount: null,
+                completedRunsTotal: 3,
+                trackedPromptsTotal: 2,
+            },
             topModels: [{ provider: 'Fixture provider', model: 'Fixture model', total_runs: 3, total_mentions: null }],
         });
         expect(text).toContain('Concurrents citésn.d.');
@@ -32,8 +39,14 @@ describe('AGENT source availability at rendering boundaries', () => {
 
     it('preserves observed zero mention counts', () => {
         const text = renderView(AgentVisibilityView, {
-            status: 'available', emptyState: null,
-            kpis: { competitorMentionsCount: 0, genericMentionsCount: 0, completedRunsTotal: 3, trackedPromptsTotal: 2 },
+            status: 'available',
+            emptyState: null,
+            kpis: {
+                competitorMentionsCount: 0,
+                genericMentionsCount: 0,
+                completedRunsTotal: 3,
+                trackedPromptsTotal: 2,
+            },
         });
         expect(text).toContain('Concurrents cités0');
         expect(text).toContain('0 mention(s) générique(s)');
@@ -42,8 +55,18 @@ describe('AGENT source availability at rendering boundaries', () => {
 
     it('keeps incomplete remediation aggregates unknown while displaying known actions', () => {
         const text = renderView(AgentFixesView, {
-            status: 'partial', emptyState: null,
-            summary: { open: null, total: null, highPriorityOpen: null, derivedOpen: null, inProgress: null, reviewQueueCount: null, remediationDraftCount: null, opportunityOpen: 2 },
+            status: 'partial',
+            emptyState: null,
+            summary: {
+                open: null,
+                total: null,
+                highPriorityOpen: null,
+                derivedOpen: null,
+                inProgress: null,
+                reviewQueueCount: null,
+                remediationDraftCount: null,
+                opportunityOpen: 2,
+            },
             topFixes: [{ id: 'known', title: 'Correctif connu', priority: 'high', status: 'open' }],
         });
         expect(text).toContain('Correctifs actifsn.d.');
@@ -60,8 +83,17 @@ describe('AGENT source availability at rendering boundaries', () => {
 
     it('preserves observed zero remediation counts', () => {
         const text = renderView(AgentFixesView, {
-            status: 'available', emptyState: null,
-            summary: { open: 0, total: 0, highPriorityOpen: 0, derivedOpen: 0, inProgress: 0, reviewQueueCount: 0, remediationDraftCount: 0 },
+            status: 'available',
+            emptyState: null,
+            summary: {
+                open: 0,
+                total: 0,
+                highPriorityOpen: 0,
+                derivedOpen: 0,
+                inProgress: 0,
+                reviewQueueCount: 0,
+                remediationDraftCount: 0,
+            },
         });
         expect(text).toContain('Correctifs actifs0');
         expect(text).toContain('Priorité haute0');

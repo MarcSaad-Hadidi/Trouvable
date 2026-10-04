@@ -13,13 +13,14 @@ export default function CommandStrip() {
     const { worldLabel, pageLabel, worldTone } = useMemo(() => {
         if (!pathname) return { worldLabel: 'Portfolio', pageLabel: 'Centre de commande', worldTone: 'neutral' };
 
-        if (pathname === '/admin/clients') return { worldLabel: 'Portfolio', pageLabel: 'Portefeuille', worldTone: 'neutral' };
+        if (pathname === '/admin/clients')
+            return { worldLabel: 'Portfolio', pageLabel: 'Portefeuille', worldTone: 'neutral' };
         if (pathname === '/admin') return { worldLabel: 'Portfolio', pageLabel: 'Cockpit', worldTone: 'neutral' };
 
         const clientMatch = pathname.match(/\/admin\/clients\/[^/]+/);
         if (clientMatch) {
             const sub = pathname.replace(clientMatch[0], '');
-            
+
             if (sub.startsWith('/seo')) {
                 const map = {
                     '/seo': 'Vue SEO',
@@ -30,7 +31,7 @@ export default function CommandStrip() {
                     '/seo/cannibalization': 'Cannibalisation',
                     '/seo/opportunities': 'Opportunités SEO',
                     '/seo/correction-prompts': 'Prompts correction',
-                    '/seo/local': 'Préparation locale'
+                    '/seo/local': 'Préparation locale',
                 };
                 return { worldLabel: 'SEO Ops', pageLabel: map[sub] || 'SEO Ops', worldTone: 'seo' };
             }
@@ -90,7 +91,7 @@ export default function CommandStrip() {
         geo: 'text-[#7c6aef]',
         agent: 'text-[#d4874a]',
         shared: 'text-white/60',
-        neutral: 'text-white/60'
+        neutral: 'text-white/60',
     };
 
     return (
@@ -106,11 +107,16 @@ export default function CommandStrip() {
             {client && (
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 hidden md:flex">
                     <span className="text-[12px] font-medium text-white/60">{client.client_name}</span>
-                    <div className={cn(
-                        "h-1.5 w-1.5 rounded-full shadow-[0_0_8px_currentColor]",
-                        client.attention === 'critical' ? 'bg-[#e06060] text-[#e06060]' :
-                        client.attention === 'needs_attention' ? 'bg-[#d4a34a] text-[#d4a34a]' : 'bg-[#4ade80] text-[#4ade80]'
-                    )} />
+                    <div
+                        className={cn(
+                            'h-1.5 w-1.5 rounded-full shadow-[0_0_8px_currentColor]',
+                            client.attention === 'critical'
+                                ? 'bg-[#e06060] text-[#e06060]'
+                                : client.attention === 'needs_attention'
+                                  ? 'bg-[#d4a34a] text-[#d4a34a]'
+                                  : 'bg-[#4ade80] text-[#4ade80]',
+                        )}
+                    />
                 </div>
             )}
 
@@ -124,7 +130,10 @@ export default function CommandStrip() {
 
                 <div className="h-4 w-px bg-white/[0.08] mx-1 hidden sm:block" />
 
-                <button className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 hover:bg-white/[0.06] hover:text-white transition-colors" aria-label="Rafraîchir">
+                <button
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 hover:bg-white/[0.06] hover:text-white transition-colors"
+                    aria-label="Rafraîchir"
+                >
                     <RefreshCw className="h-3.5 w-3.5" />
                 </button>
 

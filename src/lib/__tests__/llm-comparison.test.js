@@ -13,10 +13,13 @@ const runMistralCompareMock = vi.fn();
 const runOpenRouterCompareMock = vi.fn();
 const buildGoogleGroundingContextMock = vi.fn();
 vi.mock('@/lib/llm-comparison/provider-adapters', () => ({
-    runProviderCompare: (provider, args) => ({
-        gemini: runGeminiCompareMock, groq: runGroqCompareMock,
-        mistral: runMistralCompareMock, openrouter: runOpenRouterCompareMock,
-    })[provider](args),
+    runProviderCompare: (provider, args) =>
+        ({
+            gemini: runGeminiCompareMock,
+            groq: runGroqCompareMock,
+            mistral: runMistralCompareMock,
+            openrouter: runOpenRouterCompareMock,
+        })[provider](args),
     getCompareModel: (provider) => `${provider}-test-model`,
 }));
 vi.mock('@/lib/llm-comparison/google-grounding', () => ({
@@ -41,10 +44,26 @@ describe('llm comparison orchestration', () => {
     });
 
     it('returns full success with 4 providers', async () => {
-        runGeminiCompareMock.mockResolvedValue({ model: 'gemini-a', content: 'g', usage: { prompt_tokens: 1, completion_tokens: 2 } });
-        runGroqCompareMock.mockResolvedValue({ model: 'groq-a', content: 'q', usage: { prompt_tokens: 3, completion_tokens: 4 } });
-        runMistralCompareMock.mockResolvedValue({ model: 'mistral-a', content: 'm', usage: { prompt_tokens: 5, completion_tokens: 6 } });
-        runOpenRouterCompareMock.mockResolvedValue({ model: 'openrouter-a', content: 'o', usage: { prompt_tokens: 7, completion_tokens: 8 } });
+        runGeminiCompareMock.mockResolvedValue({
+            model: 'gemini-a',
+            content: 'g',
+            usage: { prompt_tokens: 1, completion_tokens: 2 },
+        });
+        runGroqCompareMock.mockResolvedValue({
+            model: 'groq-a',
+            content: 'q',
+            usage: { prompt_tokens: 3, completion_tokens: 4 },
+        });
+        runMistralCompareMock.mockResolvedValue({
+            model: 'mistral-a',
+            content: 'm',
+            usage: { prompt_tokens: 5, completion_tokens: 6 },
+        });
+        runOpenRouterCompareMock.mockResolvedValue({
+            model: 'openrouter-a',
+            content: 'o',
+            usage: { prompt_tokens: 7, completion_tokens: 8 },
+        });
 
         const { compareModels } = await import('@/lib/llm-comparison/compare-models');
         const result = await compareModels({ text: 'raw', prompt: 'analyse' });

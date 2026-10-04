@@ -32,7 +32,8 @@ describe('geo foundation route wiring', () => {
     });
 
     it('wires the client GEO crawlers route to the crawlers view', async () => {
-        const { default: GeoCrawlersPage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo/crawlers/page');
+        const { default: GeoCrawlersPage } =
+            await import('@/app/admin/(workspace)/clients/[clientId]/geo/crawlers/page');
 
         const element = GeoCrawlersPage();
 
@@ -59,7 +60,8 @@ describe('geo foundation route wiring', () => {
     });
 
     it('wires the client GEO readiness route to the readiness view', async () => {
-        const { default: GeoReadinessPage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo/readiness/page');
+        const { default: GeoReadinessPage } =
+            await import('@/app/admin/(workspace)/clients/[clientId]/geo/readiness/page');
 
         const element = GeoReadinessPage();
 
@@ -68,7 +70,8 @@ describe('geo foundation route wiring', () => {
     });
 
     it('redirects the client crawlers alias to the GEO namespace', async () => {
-        const { default: GeoCrawlersAliasPage } = await import('@/app/admin/(workspace)/clients/[clientId]/crawlers/page');
+        const { default: GeoCrawlersAliasPage } =
+            await import('@/app/admin/(workspace)/clients/[clientId]/crawlers/page');
 
         await GeoCrawlersAliasPage({
             params: Promise.resolve({ clientId: 'client-123' }),
@@ -97,4 +100,3 @@ describe('geo foundation route wiring', () => {
         expect(redirectMock).toHaveBeenCalledWith('/admin/clients/client-123/geo');
     });
 });
-

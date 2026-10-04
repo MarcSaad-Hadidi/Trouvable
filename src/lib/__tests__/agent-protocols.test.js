@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import {
-    PROTOCOL_DIMENSION_WEIGHTS,
-    buildProtocolsReport,
-    deriveProtocolsInput,
-} from '../agent/protocols.js';
+import { PROTOCOL_DIMENSION_WEIGHTS, buildProtocolsReport, deriveProtocolsInput } from '../agent/protocols.js';
 
 function makeAudit(overrides = {}) {
     return {
@@ -89,7 +85,10 @@ describe('buildProtocolsReport — observed signal guardrail', () => {
                                 { key: 'ai_faq_json', url: '/ai/faq.json', found: true, parse_ok: true },
                             ],
                         },
-                        brand_entity: { score: 80, details: { has_organization_schema: true, has_local_business_schema: true } },
+                        brand_entity: {
+                            score: 80,
+                            details: { has_organization_schema: true, has_local_business_schema: true },
+                        },
                     },
                     subsystem_scores: { crawler_access_score: 100 },
                 },
@@ -102,14 +101,17 @@ describe('buildProtocolsReport — observed signal guardrail', () => {
 });
 
 describe('buildProtocolsReport — per-dimension behaviour', () => {
-    it.each([null, undefined, '', '  ', false, true, {}, [], NaN, Infinity, 'invalid'].map((value) => [value]))('does not invent a crawler blockage from unavailable score %s', (value) => {
-        const audit = makeAudit();
-        audit.extracted_data.layered_v1.subsystem_scores.crawler_access_score = value;
-        const crawler = buildProtocolsReport({ audit }).dimensions.find((d) => d.key === 'crawler_access');
-        expect(crawler.score).toBe(0);
-        expect(crawler.evidence).toEqual([]);
-        expect(crawler.gaps).toEqual(['Score crawler access indisponible — audit trop ancien ou erreur de fetch.']);
-    });
+    it.each([null, undefined, '', '  ', false, true, {}, [], NaN, Infinity, 'invalid'].map((value) => [value]))(
+        'does not invent a crawler blockage from unavailable score %s',
+        (value) => {
+            const audit = makeAudit();
+            audit.extracted_data.layered_v1.subsystem_scores.crawler_access_score = value;
+            const crawler = buildProtocolsReport({ audit }).dimensions.find((d) => d.key === 'crawler_access');
+            expect(crawler.score).toBe(0);
+            expect(crawler.evidence).toEqual([]);
+            expect(crawler.gaps).toEqual(['Score crawler access indisponible — audit trop ancien ou erreur de fetch.']);
+        },
+    );
 
     it.each([0, '0'])('preserves the observed crawler blockage for score %s', (value) => {
         const audit = makeAudit();
@@ -189,7 +191,12 @@ describe('deriveProtocolsInput', () => {
                                 red_flags: [],
                             },
                         },
-                        ai_discovery_endpoints: { score: 40, endpoints: [{ key: 'ai_well_known', url: '/.well-known/ai.txt', found: true, parse_ok: true }] },
+                        ai_discovery_endpoints: {
+                            score: 40,
+                            endpoints: [
+                                { key: 'ai_well_known', url: '/.well-known/ai.txt', found: true, parse_ok: true },
+                            ],
+                        },
                     },
                     subsystem_scores: { crawler_access_score: 80 },
                 },

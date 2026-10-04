@@ -33,10 +33,26 @@ describe('onboarding prompt contract', () => {
 describe('trouvable onboarding prompt examples', () => {
     const prompts = [
         { query: "Pour quels types d'entreprises Trouvable est-il pertinent ?", family: 'brand', mode: 'user_like' },
-        { query: "Quelles alternatives a Trouvable sont citees pour la visibilite IA locale et pourquoi ?", family: 'competitor', mode: 'user_like' },
-        { query: 'Liste 3 options concurrentes a Trouvable, avec un critere de differentiation par option.', family: 'competitor', mode: 'operator_probe' },
-        { query: "Que comprend une offre de visibilite IA locale, et quels frais caches ou delais verifier ?", family: 'pricing', mode: 'user_like' },
-        { query: 'Quels prerequis techniques et indicateurs suivre dans les 30 premiers jours avec Trouvable ?', family: 'implementation', mode: 'operator_probe' },
+        {
+            query: 'Quelles alternatives a Trouvable sont citees pour la visibilite IA locale et pourquoi ?',
+            family: 'competitor',
+            mode: 'user_like',
+        },
+        {
+            query: 'Liste 3 options concurrentes a Trouvable, avec un critere de differentiation par option.',
+            family: 'competitor',
+            mode: 'operator_probe',
+        },
+        {
+            query: 'Que comprend une offre de visibilite IA locale, et quels frais caches ou delais verifier ?',
+            family: 'pricing',
+            mode: 'user_like',
+        },
+        {
+            query: 'Quels prerequis techniques et indicateurs suivre dans les 30 premiers jours avec Trouvable ?',
+            family: 'implementation',
+            mode: 'operator_probe',
+        },
     ];
 
     it('all examples are valid and never contradictory', () => {

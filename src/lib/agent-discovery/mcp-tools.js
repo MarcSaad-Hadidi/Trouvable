@@ -1,9 +1,4 @@
-import {
-    SITE_AI_DESCRIPTION,
-    SITE_AI_DISCOVERY_PATHS,
-    SITE_NAME,
-    SITE_URL,
-} from '@/lib/site-config';
+import { SITE_AI_DESCRIPTION, SITE_AI_DISCOVERY_PATHS, SITE_NAME, SITE_URL } from '@/lib/site-config';
 
 export const MCP_PROTOCOL_VERSION = '2025-11-25';
 
@@ -59,7 +54,12 @@ function safePath(value) {
     if (typeof value !== 'string') return '';
     const trimmed = value.trim();
     if (!trimmed.startsWith('/')) return '';
-    if (trimmed.startsWith('/admin') || trimmed.startsWith('/portal') || trimmed.startsWith('/espace') || trimmed.startsWith('/api')) {
+    if (
+        trimmed.startsWith('/admin') ||
+        trimmed.startsWith('/portal') ||
+        trimmed.startsWith('/espace') ||
+        trimmed.startsWith('/api')
+    ) {
         return '';
     }
     return trimmed;

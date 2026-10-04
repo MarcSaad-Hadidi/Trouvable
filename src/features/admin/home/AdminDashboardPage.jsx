@@ -59,8 +59,12 @@ function PulseRing({ counts, total }) {
             <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
                 {/* Track */}
                 <circle
-                    cx={center} cy={center} r={radius}
-                    fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={strokeWidth}
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.04)"
+                    strokeWidth={strokeWidth}
                 />
                 {/* Segments */}
                 {segments.map((seg) => {
@@ -71,7 +75,9 @@ function PulseRing({ counts, total }) {
                     const el = (
                         <circle
                             key={seg.key}
-                            cx={center} cy={center} r={radius}
+                            cx={center}
+                            cy={center}
+                            r={radius}
                             fill="none"
                             stroke={seg.color}
                             strokeWidth={strokeWidth}
@@ -132,30 +138,57 @@ function NextDecisionCard({ client }) {
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <svg className="h-4 w-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        <svg
+                            className="h-4 w-4 text-white/30"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                            />
                         </svg>
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
                             {isUrgent ? 'Prochaine décision' : 'Prochain mandat'}
                         </span>
                     </div>
-                    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em]', tone.pill)}>
+                    <span
+                        className={cn(
+                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em]',
+                            tone.pill,
+                        )}
+                    >
                         <span className={cn('h-1.5 w-1.5 rounded-full', tone.dot)} />
-                        {s?.attention === 'critical' ? 'Critique' : s?.attention === 'needs_attention' ? 'Action requise' : s?.attention === 'watch' ? 'Surveillance' : 'Stable'}
+                        {s?.attention === 'critical'
+                            ? 'Critique'
+                            : s?.attention === 'needs_attention'
+                              ? 'Action requise'
+                              : s?.attention === 'watch'
+                                ? 'Surveillance'
+                                : 'Stable'}
                     </span>
                 </div>
 
                 <div>
                     <h3 className="text-[20px] font-bold tracking-[-0.03em] text-white/95">{client.client_name}</h3>
                     <p className="mt-2 text-[12px] leading-relaxed text-white/50">
-                        {primaryReason} · {s?.openOpportunities ?? 0} actions en file · {s?.completedRunsWindow ?? 0} exécutions / 21j
+                        {primaryReason} · {s?.openOpportunities ?? 0} actions en file · {s?.completedRunsWindow ?? 0}{' '}
+                        exécutions / 21j
                     </p>
                 </div>
 
                 {s?.reasons?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                         {s.reasons.slice(0, 4).map((r) => (
-                            <span key={r} className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1 text-[9px] font-semibold text-white/40">{r}</span>
+                            <span
+                                key={r}
+                                className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1 text-[9px] font-semibold text-white/40"
+                            >
+                                {r}
+                            </span>
                         ))}
                     </div>
                 )}
@@ -178,9 +211,16 @@ function NextDecisionCard({ client }) {
 
 function FreshnessCard({ rows, now }) {
     const withRun = rows.filter((r) => r.operatorSignals?.latestRunAt);
-    const fresh = withRun.filter((r) => (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000 < 24).length;
-    const aging = withRun.filter((r) => { const h = (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000; return h >= 24 && h < 72; }).length;
-    const stale = withRun.filter((r) => (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000 >= 72).length;
+    const fresh = withRun.filter(
+        (r) => (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000 < 24,
+    ).length;
+    const aging = withRun.filter((r) => {
+        const h = (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000;
+        return h >= 24 && h < 72;
+    }).length;
+    const stale = withRun.filter(
+        (r) => (now - new Date(r.operatorSignals.latestRunAt).getTime()) / 3600000 >= 72,
+    ).length;
     const noRun = rows.length - withRun.length;
 
     const cells = [
@@ -192,7 +232,9 @@ function FreshnessCard({ rows, now }) {
 
     return (
         <div className={cn(COMMAND_PANEL, 'px-5 py-4')}>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-4">Fraîcheur des données</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-4">
+                Fraîcheur des données
+            </div>
             <div className="grid grid-cols-4 gap-3 text-center">
                 {cells.map((c) => (
                     <div key={c.label}>
@@ -210,7 +252,9 @@ function FreshnessCard({ rows, now }) {
 function ActionsPipelineCard({ totalActions, criticalCount, attentionCount }) {
     return (
         <div className={cn(COMMAND_PANEL, 'px-5 py-4')}>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-4">Actions en pipeline</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-4">
+                Actions en pipeline
+            </div>
             <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
                     <div className="text-[20px] font-bold tabular-nums text-white/85">{totalActions}</div>
@@ -242,16 +286,33 @@ function MandateCard({ client }) {
             className="group flex w-[260px] shrink-0 flex-col gap-3 rounded-[14px] border border-white/[0.07] bg-[#111111] p-4 transition-all duration-200 hover:border-white/[0.14] hover:bg-[#141414]"
         >
             <div className="flex items-center justify-between">
-                <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.06em]', tone.pill)}>
-                    <span className={cn('h-1.5 w-1.5 rounded-full', tone.dot, s?.attention === 'critical' && 'cmd-health-dot')} />
-                    {s?.attention === 'critical' ? 'Critique' : s?.attention === 'needs_attention' ? 'Attention' : s?.attention === 'watch' ? 'Surveillance' : 'Stable'}
+                <span
+                    className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.06em]',
+                        tone.pill,
+                    )}
+                >
+                    <span
+                        className={cn(
+                            'h-1.5 w-1.5 rounded-full',
+                            tone.dot,
+                            s?.attention === 'critical' && 'cmd-health-dot',
+                        )}
+                    />
+                    {s?.attention === 'critical'
+                        ? 'Critique'
+                        : s?.attention === 'needs_attention'
+                          ? 'Attention'
+                          : s?.attention === 'watch'
+                            ? 'Surveillance'
+                            : 'Stable'}
                 </span>
-                {freshLabel && (
-                    <span className="text-[9px] text-white/25 tabular-nums">{freshLabel}</span>
-                )}
+                {freshLabel && <span className="text-[9px] text-white/25 tabular-nums">{freshLabel}</span>}
             </div>
             <div>
-                <div className="text-[14px] font-semibold text-white/90 group-hover:text-white truncate transition-colors">{client.client_name}</div>
+                <div className="text-[14px] font-semibold text-white/90 group-hover:text-white truncate transition-colors">
+                    {client.client_name}
+                </div>
                 <div className="text-[10px] text-white/30 mt-1">
                     {s?.openOpportunities ?? 0} actions · {s?.completedRunsWindow ?? 0} exéc.
                 </div>
@@ -259,7 +320,12 @@ function MandateCard({ client }) {
             {s?.reasons?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                     {s.reasons.slice(0, 2).map((r) => (
-                        <span key={r} className="rounded border border-white/[0.05] bg-white/[0.03] px-1.5 py-0.5 text-[8px] text-white/30">{r}</span>
+                        <span
+                            key={r}
+                            className="rounded border border-white/[0.05] bg-white/[0.03] px-1.5 py-0.5 text-[8px] text-white/30"
+                        >
+                            {r}
+                        </span>
                     ))}
                 </div>
             )}
@@ -298,14 +364,19 @@ export default async function AdminDashboard() {
     };
 
     const totalActions = clients.reduce((sum, c) => sum + (c.operatorSignals?.openOpportunities ?? 0), 0);
-    const urgentClient = sorted.find((c) => c.operatorSignals?.attention === 'critical' || c.operatorSignals?.attention === 'needs_attention') || sorted[0] || null;
+    const urgentClient =
+        sorted.find(
+            (c) => c.operatorSignals?.attention === 'critical' || c.operatorSignals?.attention === 'needs_attention',
+        ) ||
+        sorted[0] ||
+        null;
 
     const header = (
         <CommandHeader
             eyebrow="Centre de commande"
             title="Tableau de bord"
             subtitle="Triage portefeuille, mandats critiques, fraîcheur des données et prochaines actions."
-            actions={(
+            actions={
                 <>
                     <Link href="/admin/clients" className={COMMAND_BUTTONS.secondary}>
                         Portefeuille
@@ -314,7 +385,7 @@ export default async function AdminDashboard() {
                         Nouveau mandat
                     </Link>
                 </>
-            )}
+            }
         />
     );
 
@@ -333,7 +404,9 @@ export default async function AdminDashboard() {
                     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
                         {/* Portfolio Pulse */}
                         <div className={cn(COMMAND_SURFACE, 'p-5 sm:p-6')}>
-                            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35 mb-5">Portfolio Pulse</div>
+                            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35 mb-5">
+                                Portfolio Pulse
+                            </div>
                             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
                                 <PulseRing counts={counts} total={clients.length} />
                                 <PulseLegend counts={counts} />
@@ -358,8 +431,13 @@ export default async function AdminDashboard() {
                     {sorted.length > 0 && (
                         <div>
                             <div className="flex items-center justify-between mb-3">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Mandats par priorité</div>
-                                <Link href="/admin/clients" className="text-[10px] font-semibold text-white/30 hover:text-white/60 transition-colors">
+                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
+                                    Mandats par priorité
+                                </div>
+                                <Link
+                                    href="/admin/clients"
+                                    className="text-[10px] font-semibold text-white/30 hover:text-white/60 transition-colors"
+                                >
                                     Voir tout →
                                 </Link>
                             </div>
@@ -373,18 +451,42 @@ export default async function AdminDashboard() {
 
                     {/* ── Row 4: Quick Actions ── */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <Link href="/admin/clients" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">Portefeuille</div>
-                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Tous les mandats</div>
+                        <Link
+                            href="/admin/clients"
+                            className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
+                        >
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
+                                Portefeuille
+                            </div>
+                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
+                                Tous les mandats
+                            </div>
                         </Link>
-                        <Link href="/admin/clients/new" className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">Nouveau</div>
-                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">Créer un mandat</div>
+                        <Link
+                            href="/admin/clients/new"
+                            className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}
+                        >
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
+                                Nouveau
+                            </div>
+                            <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white">
+                                Créer un mandat
+                            </div>
                         </Link>
                         {clients[0] && (
-                            <Link href={`/admin/clients/${clients[0].id}/dossier`} className={cn(COMMAND_PANEL, 'group px-4 py-4 transition-all hover:border-white/[0.18]')}>
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">Dernier mandat</div>
-                                <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">{clients[0].client_name}</div>
+                            <Link
+                                href={`/admin/clients/${clients[0].id}/dossier`}
+                                className={cn(
+                                    COMMAND_PANEL,
+                                    'group px-4 py-4 transition-all hover:border-white/[0.18]',
+                                )}
+                            >
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 mb-2">
+                                    Dernier mandat
+                                </div>
+                                <div className="text-[13px] font-semibold text-white/75 transition-colors group-hover:text-white truncate">
+                                    {clients[0].client_name}
+                                </div>
                             </Link>
                         )}
                         {counts.critical > 0 && urgentClient && (
@@ -392,7 +494,9 @@ export default async function AdminDashboard() {
                                 href={`/admin/clients/${urgentClient.id}/dossier`}
                                 className="group rounded-[14px] border border-[#e06060]/20 bg-[#e06060]/[0.04] px-4 py-4 transition-all hover:border-[#e06060]/35"
                             >
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e06060]/60 mb-2">Critique</div>
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e06060]/60 mb-2">
+                                    Critique
+                                </div>
                                 <div className="text-[13px] font-semibold text-[#f0a8a8] transition-colors group-hover:text-white truncate">
                                     {urgentClient.client_name}
                                 </div>

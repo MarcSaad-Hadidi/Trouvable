@@ -5,7 +5,19 @@ import { normalizeText, createSeoQueryMatcher } from './seo-query-matching';
 
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, normalizeUrl, aggregatePageRows, getPathname, getPrimarySegment, buildGscFreshness, resolveConnectorStatus } from './seo-gsc';
+import {
+    getSinceDate,
+    filterRowsSince,
+    createSearchMetricBucket,
+    accumulateSearchMetrics,
+    readSearchMetrics,
+    normalizeUrl,
+    aggregatePageRows,
+    getPathname,
+    getPrimarySegment,
+    buildGscFreshness,
+    resolveConnectorStatus,
+} from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
@@ -23,7 +35,9 @@ const GSC_FRESHNESS_MESSAGES = {
     stale: 'Données trop anciennes pour appuyer un arbitrage opérateur serein.',
 };
 
-const { sharedTokens, overlapScore } = createSeoQueryMatcher({ additionalStopwords: ['blog', 'actualites', 'actualite'] });
+const { sharedTokens, overlapScore } = createSeoQueryMatcher({
+    additionalStopwords: ['blog', 'actualites', 'actualite'],
+});
 
 const BRAND_STOPWORDS = new Set([
     'inc',
@@ -101,12 +115,14 @@ function comparePages(left, right) {
 }
 
 function getPageStrengthScore(page) {
-    return toNumber(page?.word_count)
-        + toNumber(page?.faq_pairs_count) * 24
-        + toNumber(page?.citability?.block_count) * 16
-        + toNumber(page?.citability?.page_score)
-        + toNumber(page?.service_signal_count) * 8
-        + Math.min(toNumber(page?.local_signal_count) * 4, 20);
+    return (
+        toNumber(page?.word_count) +
+        toNumber(page?.faq_pairs_count) * 24 +
+        toNumber(page?.citability?.block_count) * 16 +
+        toNumber(page?.citability?.page_score) +
+        toNumber(page?.service_signal_count) * 8 +
+        Math.min(toNumber(page?.local_signal_count) * 4, 20)
+    );
 }
 
 function getPageLabel(page) {
@@ -145,23 +161,31 @@ function pickRicherText(left, right) {
 }
 
 function mergePageSummaries(existingPage, incomingPage) {
-    const preferredPage = getPageStrengthScore(incomingPage) > getPageStrengthScore(existingPage)
-        ? incomingPage
-        : existingPage;
+    const preferredPage =
+        getPageStrengthScore(incomingPage) > getPageStrengthScore(existingPage) ? incomingPage : existingPage;
 
     return {
         ...existingPage,
         ...incomingPage,
         ...preferredPage,
         url: compactString(existingPage?.url) || compactString(incomingPage?.url) || compactString(preferredPage?.url),
-        page_type: compactString(existingPage?.page_type) || compactString(incomingPage?.page_type) || compactString(preferredPage?.page_type),
+        page_type:
+            compactString(existingPage?.page_type) ||
+            compactString(incomingPage?.page_type) ||
+            compactString(preferredPage?.page_type),
         title: pickRicherText(existingPage?.title, incomingPage?.title),
         description: pickRicherText(existingPage?.description, incomingPage?.description),
         h1: pickRicherText(existingPage?.h1, incomingPage?.h1),
         word_count: Math.max(toNumber(existingPage?.word_count), toNumber(incomingPage?.word_count)),
         faq_pairs_count: Math.max(toNumber(existingPage?.faq_pairs_count), toNumber(incomingPage?.faq_pairs_count)),
-        service_signal_count: Math.max(toNumber(existingPage?.service_signal_count), toNumber(incomingPage?.service_signal_count)),
-        local_signal_count: Math.max(toNumber(existingPage?.local_signal_count), toNumber(incomingPage?.local_signal_count)),
+        service_signal_count: Math.max(
+            toNumber(existingPage?.service_signal_count),
+            toNumber(incomingPage?.service_signal_count),
+        ),
+        local_signal_count: Math.max(
+            toNumber(existingPage?.local_signal_count),
+            toNumber(incomingPage?.local_signal_count),
+        ),
         citability: {
             ...(existingPage?.citability || {}),
             ...(incomingPage?.citability || {}),
@@ -249,7 +273,12 @@ function addRowMetrics(bucket, rowMetrics, isBrandLike) {
 }
 
 function finalizeMetricBucket(bucket) {
-    return { url: bucket.url, ...readSearchMetrics(bucket), sharedQueryCount: bucket.sharedQueryCount, nonBrandSharedQueryCount: bucket.nonBrandSharedQueryCount };
+    return {
+        url: bucket.url,
+        ...readSearchMetrics(bucket),
+        sharedQueryCount: bucket.sharedQueryCount,
+        nonBrandSharedQueryCount: bucket.nonBrandSharedQueryCount,
+    };
 }
 
 function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {
@@ -334,21 +363,25 @@ function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {
     }
 
     return Array.from(pairMap.values()).map((pair) => {
-        const pages = pair.pageKeys.map((pageKey) => {
-            const auditPage = pageIndex.get(pageKey) || { url: pair.pageMetrics.get(pageKey)?.url || pageKey };
-            return buildPageDescriptor(auditPage, finalizeMetricBucket(pair.pageMetrics.get(pageKey)));
-        }).sort((left, right) => String(left.label).localeCompare(String(right.label), 'fr-CA'));
+        const pages = pair.pageKeys
+            .map((pageKey) => {
+                const auditPage = pageIndex.get(pageKey) || { url: pair.pageMetrics.get(pageKey)?.url || pageKey };
+                return buildPageDescriptor(auditPage, finalizeMetricBucket(pair.pageMetrics.get(pageKey)));
+            })
+            .sort((left, right) => String(left.label).localeCompare(String(right.label), 'fr-CA'));
 
-        const confidenceLabel = pair.nonBrandSharedQueryCount >= 2 && pair.sharedImpressions >= 60
-            ? 'Confiance élevée'
-            : pair.sharedImpressions >= 20
-                ? 'Confiance moyenne'
-                : 'Signal à confirmer';
-        const confidenceTone = pair.nonBrandSharedQueryCount >= 2 && pair.sharedImpressions >= 60
-            ? 'high'
-            : pair.sharedImpressions >= 20
-                ? 'medium'
-                : 'low';
+        const confidenceLabel =
+            pair.nonBrandSharedQueryCount >= 2 && pair.sharedImpressions >= 60
+                ? 'Confiance élevée'
+                : pair.sharedImpressions >= 20
+                  ? 'Confiance moyenne'
+                  : 'Signal à confirmer';
+        const confidenceTone =
+            pair.nonBrandSharedQueryCount >= 2 && pair.sharedImpressions >= 60
+                ? 'high'
+                : pair.sharedImpressions >= 20
+                  ? 'medium'
+                  : 'low';
 
         return {
             id: `measured_${pair.pairKey}`,
@@ -361,11 +394,12 @@ function buildMeasuredPairSignals(rows, pageIndex, brandTokens) {
                 sharedClicks: pair.sharedClicks,
                 sharedImpressions: pair.sharedImpressions,
                 pageMetrics: new Map(
-                    Array.from(pair.pageMetrics.entries()).map(([pageKey, bucket]) => ([pageKey, finalizeMetricBucket(bucket)])),
+                    Array.from(pair.pageMetrics.entries()).map(([pageKey, bucket]) => [
+                        pageKey,
+                        finalizeMetricBucket(bucket),
+                    ]),
                 ),
-                querySamples: pair.querySamples
-                    .sort((left, right) => right.impressions - left.impressions)
-                    .slice(0, 4),
+                querySamples: pair.querySamples.sort((left, right) => right.impressions - left.impressions).slice(0, 4),
             },
             confidenceLabel,
             confidenceTone,
@@ -382,13 +416,14 @@ function inspectPairSignals(left, right) {
     const sameSegment = getPrimarySegment(left?.url) && getPrimarySegment(left?.url) === getPrimarySegment(right?.url);
     const samePageType = compactString(left?.page_type) && left?.page_type === right?.page_type;
     const bothServiceHeavy = toNumber(left?.service_signal_count) > 0 && toNumber(right?.service_signal_count) > 0;
-    const lowLocalDifferentiation = toNumber(left?.local_signal_count) === 0 && toNumber(right?.local_signal_count) === 0;
+    const lowLocalDifferentiation =
+        toNumber(left?.local_signal_count) === 0 && toNumber(right?.local_signal_count) === 0;
     const headlineOverlap = overlapScore(headlineLeft, headlineRight);
     const pathOverlap = overlapScore(getPathname(left?.url), getPathname(right?.url));
 
     let score = headlineOverlap;
     if (sameSegment) score += 0.18;
-    if (samePageType) score += 0.10;
+    if (samePageType) score += 0.1;
     if (pathTokens.length > 0) score += 0.08;
     if (bothServiceHeavy) score += 0.06;
     if (lowLocalDifferentiation) score += 0.04;
@@ -420,10 +455,15 @@ function buildCalculatedPairSignals(pages) {
 
             const pairSignals = inspectPairSignals(left, right);
             const strongLexical = pairSignals.headlineTokens.length >= 2 && pairSignals.headlineOverlap >= 0.42;
-            const strongFamilySignal = pairSignals.sameSegment && (pairSignals.samePageType || pairSignals.pathTokens.length > 0);
+            const strongFamilySignal =
+                pairSignals.sameSegment && (pairSignals.samePageType || pairSignals.pathTokens.length > 0);
             const veryStrongOverlap = pairSignals.headlineOverlap >= 0.58;
 
-            if (!(veryStrongOverlap || (strongLexical && strongFamilySignal) || (pairSignals.samePageType && pairSignals.sameSegment && pairSignals.headlineOverlap >= 0.32))) {
+            if (!(
+                veryStrongOverlap ||
+                (strongLexical && strongFamilySignal) ||
+                (pairSignals.samePageType && pairSignals.sameSegment && pairSignals.headlineOverlap >= 0.32)
+            )) {
                 continue;
             }
 
@@ -431,7 +471,9 @@ function buildCalculatedPairSignals(pages) {
             signals.push({
                 id: `calculated_${pairKey}`,
                 pairKey,
-                pages: [buildPageDescriptor(left), buildPageDescriptor(right)].sort((first, second) => String(first.label).localeCompare(String(second.label), 'fr-CA')),
+                pages: [buildPageDescriptor(left), buildPageDescriptor(right)].sort((first, second) =>
+                    String(first.label).localeCompare(String(second.label), 'fr-CA'),
+                ),
                 calculated: {
                     reliability: 'calculated',
                     score: pairSignals.score,
@@ -489,9 +531,10 @@ function buildCalculatedEvidence(calculatedSignal) {
 
     return {
         reliability: 'calculated',
-        text: parts.length > 0
-            ? `Recouvrement potentiel calculé: ${parts.join(' · ')}.`
-            : 'Recouvrement potentiel calculé à partir des titres, H1, segments d’URL et rôles de page.',
+        text:
+            parts.length > 0
+                ? `Recouvrement potentiel calculé: ${parts.join(' · ')}.`
+                : 'Recouvrement potentiel calculé à partir des titres, H1, segments d’URL et rôles de page.',
         detail: `Score structurel ${Math.round(calculatedSignal.calculated.score * 100)} / 100.`,
         signals,
         score: calculatedSignal.calculated.score,
@@ -513,8 +556,8 @@ function buildMeasuredEvidence(measuredSignal) {
         };
     }
 
-    const isMostlyBrand = measuredSignal.measured.sharedQueryCount > 0
-        && measuredSignal.measured.nonBrandSharedQueryCount === 0;
+    const isMostlyBrand =
+        measuredSignal.measured.sharedQueryCount > 0 && measuredSignal.measured.nonBrandSharedQueryCount === 0;
 
     return {
         reliability: 'measured',
@@ -539,13 +582,13 @@ function rankPageForWinner(page, measuredMetrics, overallMetrics) {
     const position = measuredMetrics?.position ?? overallMetrics?.current?.position ?? 99;
 
     return (
-        measuredClicks * 1000
-        + measuredImpressions * 10
-        + overallClicks * 100
-        + overallImpressions
-        - pagePriority(page) * 12
-        + getPageStrengthScore(page)
-        - position
+        measuredClicks * 1000 +
+        measuredImpressions * 10 +
+        overallClicks * 100 +
+        overallImpressions -
+        pagePriority(page) * 12 +
+        getPageStrengthScore(page) -
+        position
     );
 }
 
@@ -568,7 +611,11 @@ function chooseWinner(pages, measuredEvidence, pagePerformance) {
                 overallMetrics: key ? pagePerformance.get(key) : null,
             };
         })
-        .sort((left, right) => rankPageForWinner(right.page, right.measuredMetrics, right.overallMetrics) - rankPageForWinner(left.page, left.measuredMetrics, left.overallMetrics));
+        .sort(
+            (left, right) =>
+                rankPageForWinner(right.page, right.measuredMetrics, right.overallMetrics) -
+                rankPageForWinner(left.page, left.measuredMetrics, left.overallMetrics),
+        );
 
     const winner = rankedPages[0];
     const trailingPages = rankedPages.slice(1);
@@ -592,9 +639,10 @@ function chooseWinner(pages, measuredEvidence, pagePerformance) {
             page: winner.page,
             reliability: 'measured',
             why: `${winner.page.label} capte le plus de signal sur les requêtes partagées (${measuredClicks.toLocaleString('fr-FR')} clics, ${measuredImpressions.toLocaleString('fr-FR')} impressions).`,
-            weakerNote: trailingPages.length > 0
-                ? `Les autres pages de ce groupe restent derrière sur le recouvrement mesuré.`
-                : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
+            weakerNote:
+                trailingPages.length > 0
+                    ? `Les autres pages de ce groupe restent derrière sur le recouvrement mesuré.`
+                    : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
         };
     }
 
@@ -603,9 +651,10 @@ function chooseWinner(pages, measuredEvidence, pagePerformance) {
             page: winner.page,
             reliability: 'measured',
             why: `${winner.page.label} reste la page la plus visible sur la fenêtre GSC disponible, même hors requêtes partagées strictes.`,
-            weakerNote: trailingPages.length > 0
-                ? 'Les autres pages de ce groupe portent moins de traction organique globale.'
-                : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
+            weakerNote:
+                trailingPages.length > 0
+                    ? 'Les autres pages de ce groupe portent moins de traction organique globale.'
+                    : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
         };
     }
 
@@ -615,9 +664,10 @@ function chooseWinner(pages, measuredEvidence, pagePerformance) {
         why: winner.page.pageType
             ? `${winner.page.label} paraît la meilleure candidate par rôle éditorial, densité de contenu et richesse observée dans l’audit.`
             : 'Aucune page ne ressort via la mesure; le repo ne permet ici qu’un arbitrage faible.',
-        weakerNote: trailingPages.length > 0
-            ? 'Les autres pages sont moins structurées ou moins riches dans les signaux audit disponibles.'
-            : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
+        weakerNote:
+            trailingPages.length > 0
+                ? 'Les autres pages sont moins structurées ou moins riches dans les signaux audit disponibles.'
+                : 'Aucune autre page n’entre en concurrence directe dans ce groupe.',
     };
 }
 
@@ -628,14 +678,18 @@ function buildActionRecommendation(group, winner) {
     const sameRole = uniqueTypes.size === 1 && uniqueTypes.size > 0;
     const mixedRoles = uniqueTypes.size > 1;
     const dominantMeasured = measured.sharedImpressions >= 60 && measured.nonBrandSharedQueryCount >= 2;
-    const structuralDuplication = calculated.score >= 0.65 && (calculated.signals.some((signal) => signal.includes('Même segment')) || calculated.signals.some((signal) => signal.includes('Même type')));
+    const structuralDuplication =
+        calculated.score >= 0.65 &&
+        (calculated.signals.some((signal) => signal.includes('Même segment')) ||
+            calculated.signals.some((signal) => signal.includes('Même type')));
 
     if (measured.reliability === 'measured' && dominantMeasured && sameRole && structuralDuplication) {
         return {
             label: 'Fusionner',
             reliability: 'calculated',
             why: 'Les deux pages servent probablement la même intention: requêtes partagées nettes, rôle similaire et cadrage éditorial proche.',
-            guardrail: 'Vérifier avant fusion qu’aucune page ne porte un angle service ou un contexte local réellement distinct.',
+            guardrail:
+                'Vérifier avant fusion qu’aucune page ne porte un angle service ou un contexte local réellement distinct.',
         };
     }
 
@@ -644,7 +698,8 @@ function buildActionRecommendation(group, winner) {
             label: 'Repositionner',
             reliability: 'calculated',
             why: `Garder ${winner.page.label} sur l’intention principale et recadrer l’autre page sur un angle plus spécifique ou plus local.`,
-            guardrail: 'Ne pas réécrire en aveugle: confirmer d’abord quelles requêtes partagées sont vraiment business-critical.',
+            guardrail:
+                'Ne pas réécrire en aveugle: confirmer d’abord quelles requêtes partagées sont vraiment business-critical.',
         };
     }
 
@@ -653,7 +708,8 @@ function buildActionRecommendation(group, winner) {
             label: 'Conserver séparé',
             reliability: 'calculated',
             why: 'Les pages remplissent des rôles différents. Le recouvrement actuel ne suffit pas à justifier une fusion.',
-            guardrail: 'Clarifier toutefois le title, le H1 et la promesse de chaque page pour éviter une dérive progressive.',
+            guardrail:
+                'Clarifier toutefois le title, le H1 et la promesse de chaque page pour éviter une dérive progressive.',
         };
     }
 
@@ -662,7 +718,8 @@ function buildActionRecommendation(group, winner) {
             label: 'Différencier',
             reliability: 'calculated',
             why: 'Le repo observe surtout un recouvrement potentiel de cadrage. La bonne action immédiate est de différencier angle, titre, H1 ou preuve locale avant d’aller plus loin.',
-            guardrail: 'Tant qu’aucune requête partagée hors marque n’est mesurée, parler de cannibalisation stricte resterait excessif.',
+            guardrail:
+                'Tant qu’aucune requête partagée hors marque n’est mesurée, parler de cannibalisation stricte resterait excessif.',
         };
     }
 
@@ -675,7 +732,11 @@ function buildActionRecommendation(group, winner) {
 }
 
 function buildGroupTypeLabel(measured, calculated) {
-    if (measured.reliability === 'measured' && measured.nonBrandSharedQueryCount > 0 && calculated.reliability === 'calculated') {
+    if (
+        measured.reliability === 'measured' &&
+        measured.nonBrandSharedQueryCount > 0 &&
+        calculated.reliability === 'calculated'
+    ) {
         return 'Chevauchement probable';
     }
     if (measured.reliability === 'measured' && measured.nonBrandSharedQueryCount === 0) {
@@ -684,7 +745,10 @@ function buildGroupTypeLabel(measured, calculated) {
     if (measured.reliability === 'measured') {
         return 'Requêtes partagées mesurées';
     }
-    if (calculated.reliability === 'calculated' && calculated.signals.some((signal) => signal.includes('Même segment'))) {
+    if (
+        calculated.reliability === 'calculated' &&
+        calculated.signals.some((signal) => signal.includes('Même segment'))
+    ) {
         return 'Même famille de pages';
     }
     if (calculated.reliability === 'calculated') {
@@ -694,7 +758,8 @@ function buildGroupTypeLabel(measured, calculated) {
 }
 
 function buildGroupTitle(index, measured, calculated, pages) {
-    const topMeasuredQuery = measured.querySamples.find((query) => query.isBrandLike === false) || measured.querySamples[0];
+    const topMeasuredQuery =
+        measured.querySamples.find((query) => query.isBrandLike === false) || measured.querySamples[0];
     if (topMeasuredQuery?.query) {
         return `Groupe ${index + 1} · Autour de « ${topMeasuredQuery.query.slice(0, 42)}${topMeasuredQuery.query.length > 42 ? '…' : ''} »`;
     }
@@ -742,7 +807,9 @@ function buildUnavailableEvidence(measuredSignal, calculatedSignal, auditExists)
 
 function buildOperatorSummary(groups, audit, gscFreshness) {
     const measuredCount = groups.filter((group) => group.measured.reliability === 'measured').length;
-    const probableCount = groups.filter((group) => group.measured.reliability !== 'measured' && group.calculated.reliability === 'calculated').length;
+    const probableCount = groups.filter(
+        (group) => group.measured.reliability !== 'measured' && group.calculated.reliability === 'calculated',
+    ).length;
 
     const parts = [];
 
@@ -761,11 +828,15 @@ function buildOperatorSummary(groups, audit, gscFreshness) {
     }
 
     if (gscFreshness.reliability === 'unavailable') {
-        parts.push('Sans Search Console exploitable, la page ne peut pas prouver une cannibalisation stricte par la mesure.');
+        parts.push(
+            'Sans Search Console exploitable, la page ne peut pas prouver une cannibalisation stricte par la mesure.',
+        );
     }
 
     if (!audit?.created_at) {
-        parts.push('Sans audit structurel récent, la différenciation éditoriale ne peut pas être confirmée proprement.');
+        parts.push(
+            'Sans audit structurel récent, la différenciation éditoriale ne peut pas être confirmée proprement.',
+        );
     }
 
     return {
@@ -784,17 +855,19 @@ function buildReliabilityBreakdown(groups, gscFreshness, audit) {
             id: 'measured',
             title: 'Mesurée',
             reliability: 'measured',
-            text: measuredCount > 0
-                ? `${measuredCount} groupe(s) appuyés par des requêtes Search Console partagées.`
-                : 'Aucun recouvrement mesuré par requêtes partagées sur la fenêtre active.',
+            text:
+                measuredCount > 0
+                    ? `${measuredCount} groupe(s) appuyés par des requêtes Search Console partagées.`
+                    : 'Aucun recouvrement mesuré par requêtes partagées sur la fenêtre active.',
         },
         {
             id: 'calculated',
             title: 'Calculée',
             reliability: 'calculated',
-            text: calculatedCount > 0
-                ? `${calculatedCount} groupe(s) soutenus par title, H1, segment d’URL ou rôle de page.`
-                : 'Aucun recouvrement structurel assez net n’a été calculé dans les pages auditées.',
+            text:
+                calculatedCount > 0
+                    ? `${calculatedCount} groupe(s) soutenus par title, H1, segment d’URL ou rôle de page.`
+                    : 'Aucun recouvrement structurel assez net n’a été calculé dans les pages auditées.',
         },
         {
             id: 'ai',
@@ -809,8 +882,8 @@ function buildReliabilityBreakdown(groups, gscFreshness, audit) {
             text: !audit?.created_at
                 ? 'Audit structurel indisponible: impossible de confirmer titles, H1 et types de pages.'
                 : gscFreshness.reliability === 'unavailable'
-                    ? 'Search Console indisponible: impossible de prouver un partage de requêtes.'
-                    : 'Pas de date éditoriale par page ni de clustering d’intention plus fin pour aller au-delà.',
+                  ? 'Search Console indisponible: impossible de prouver un partage de requêtes.'
+                  : 'Pas de date éditoriale par page ni de clustering d’intention plus fin pour aller au-delà.',
         },
     ];
 }
@@ -822,9 +895,10 @@ function buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCoun
         {
             id: 'content-merge',
             title: 'Revoir le contenu consolidable',
-            description: groups.length > 0
-                ? 'Croiser ces recouvrements avec les opportunités de consolidation déjà visibles dans Contenu SEO.'
-                : 'La surface Contenu SEO reste le bon endroit pour vérifier les signaux de fusion déjà visibles.',
+            description:
+                groups.length > 0
+                    ? 'Croiser ces recouvrements avec les opportunités de consolidation déjà visibles dans Contenu SEO.'
+                    : 'La surface Contenu SEO reste le bon endroit pour vérifier les signaux de fusion déjà visibles.',
             href: `${baseHref}/seo/content#merge`,
             cta: 'Ouvrir Contenu SEO',
             reliability: 'calculated',
@@ -832,7 +906,8 @@ function buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCoun
         {
             id: 'on-page',
             title: 'Comparer titles et H1',
-            description: 'Utiliser la lecture on-page pour confirmer si le conflit vient du cadrage éditorial, et non seulement des URL.',
+            description:
+                'Utiliser la lecture on-page pour confirmer si le conflit vient du cadrage éditorial, et non seulement des URL.',
             href: `${baseHref}/seo/on-page`,
             cta: 'Ouvrir on-page',
             reliability: 'calculated',
@@ -840,9 +915,10 @@ function buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCoun
         {
             id: 'seo-opportunities',
             title: 'Préparer un arbitrage SEO',
-            description: contentOpportunityCount > 0
-                ? `${contentOpportunityCount} opportunité(s) contenu sont déjà ouvertes et peuvent servir de point d’entrée opérateur.`
-                : 'La file Opportunités SEO sert de point de branchement pour transformer un recouvrement confirmé en tâche opérateur.',
+            description:
+                contentOpportunityCount > 0
+                    ? `${contentOpportunityCount} opportunité(s) contenu sont déjà ouvertes et peuvent servir de point d’entrée opérateur.`
+                    : 'La file Opportunités SEO sert de point de branchement pour transformer un recouvrement confirmé en tâche opérateur.',
             href: `${baseHref}/seo/opportunities`,
             cta: 'Ouvrir Opportunités SEO',
             reliability: 'calculated',
@@ -853,7 +929,8 @@ function buildActionHooks(clientId, groups, gscFreshness, contentOpportunityCoun
         hooks.push({
             id: 'connect-gsc',
             title: 'Connecter Search Console',
-            description: 'Sans GSC proprement synchronisée, la page restera limitée au recouvrement structurel probable.',
+            description:
+                'Sans GSC proprement synchronisée, la page restera limitée au recouvrement structurel probable.',
             href: `${baseHref}/dossier/connectors`,
             cta: 'Voir les connecteurs',
             reliability: 'unavailable',
@@ -889,27 +966,30 @@ function mergeSignals(measuredSignals, calculatedSignals, pagePerformance, audit
         .map(({ measuredSignal, calculatedSignal }) => {
             const measured = buildMeasuredEvidence(measuredSignal);
             const calculated = buildCalculatedEvidence(calculatedSignal);
-            const pages = (measuredSignal?.pages || calculatedSignal?.pages || []).slice().sort((left, right) => String(left.label).localeCompare(String(right.label), 'fr-CA'));
+            const pages = (measuredSignal?.pages || calculatedSignal?.pages || [])
+                .slice()
+                .sort((left, right) => String(left.label).localeCompare(String(right.label), 'fr-CA'));
             const winner = chooseWinner(pages, measured, pagePerformance);
             const action = buildActionRecommendation({ measured, calculated, pages }, winner);
             const unavailable = buildUnavailableEvidence(measuredSignal, calculatedSignal, auditExists);
-            const confidenceTone = measuredSignal?.confidenceTone
-                || calculatedSignal?.confidenceTone
-                || 'low';
-            const confidenceLabel = measuredSignal?.confidenceLabel
-                || calculatedSignal?.confidenceLabel
-                || 'Signal à confirmer';
+            const confidenceTone = measuredSignal?.confidenceTone || calculatedSignal?.confidenceTone || 'low';
+            const confidenceLabel =
+                measuredSignal?.confidenceLabel || calculatedSignal?.confidenceLabel || 'Signal à confirmer';
             const typeLabel = buildGroupTypeLabel(measured, calculated);
 
             let summary = 'Signal de recouvrement à confirmer.';
             if (measured.reliability === 'measured' && calculated.reliability === 'calculated') {
-                summary = 'Les deux pages se partagent des requêtes mesurées et présentent aussi une proximité éditoriale ou structurelle.';
+                summary =
+                    'Les deux pages se partagent des requêtes mesurées et présentent aussi une proximité éditoriale ou structurelle.';
             } else if (measured.reliability === 'measured' && measured.nonBrandSharedQueryCount === 0) {
-                summary = 'Le partage mesuré porte surtout sur des requêtes de marque. Signal utile, mais moins probant pour conclure à une cannibalisation hors marque.';
+                summary =
+                    'Le partage mesuré porte surtout sur des requêtes de marque. Signal utile, mais moins probant pour conclure à une cannibalisation hors marque.';
             } else if (measured.reliability === 'measured') {
-                summary = 'Le partage de requêtes est mesuré dans Search Console. La concurrence est donc crédible, même si l’arbitrage éditorial reste à confirmer.';
+                summary =
+                    'Le partage de requêtes est mesuré dans Search Console. La concurrence est donc crédible, même si l’arbitrage éditorial reste à confirmer.';
             } else if (calculated.reliability === 'calculated') {
-                summary = 'Le repo observe surtout un recouvrement potentiel de cadrage entre les pages, sans preuve GSC partagée sur la fenêtre courante.';
+                summary =
+                    'Le repo observe surtout un recouvrement potentiel de cadrage entre les pages, sans preuve GSC partagée sur la fenêtre courante.';
             }
 
             return {
@@ -929,7 +1009,12 @@ function mergeSignals(measuredSignals, calculatedSignals, pagePerformance, audit
                 summary,
                 winner,
                 action,
-                reliability: measured.reliability === 'measured' ? 'measured' : calculated.reliability === 'calculated' ? 'calculated' : 'unavailable',
+                reliability:
+                    measured.reliability === 'measured'
+                        ? 'measured'
+                        : calculated.reliability === 'calculated'
+                          ? 'calculated'
+                          : 'unavailable',
                 score: Math.max(measuredSignal?.score || 0, calculatedSignal?.score || 0),
             };
         })
@@ -952,18 +1037,16 @@ export async function getSeoCannibalizationSlice(clientId) {
     const { audit, opportunities: latestOpportunities, connectors: connectorRows, gscRows, client } = values;
     const clientName = client?.clientName ?? null;
     if (dataSources.gscRows === 'empty') {
-        dataSources.gscRows = dataSources.connectors !== 'unavailable' && resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected' ? 'not_connected' : 'not_observed';
+        dataSources.gscRows =
+            dataSources.connectors !== 'unavailable' &&
+            resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected'
+                ? 'not_connected'
+                : 'not_observed';
     }
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
-    const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries))
-        .slice()
-        .sort(comparePages);
-    const pageIndex = new Map(
-        pages
-            .map((page) => [normalizeUrl(page?.url), page])
-            .filter(([key]) => Boolean(key)),
-    );
+    const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries)).slice().sort(comparePages);
+    const pageIndex = new Map(pages.map((page) => [normalizeUrl(page?.url), page]).filter(([key]) => Boolean(key)));
 
     const currentGscRows = filterRowsSince(gscRows, getSinceDate(CURRENT_WINDOW_DAYS));
     const brandTokens = dataSources.client === 'unavailable' ? null : extractBrandTokens(clientName);
@@ -972,17 +1055,25 @@ export async function getSeoCannibalizationSlice(clientId) {
     const measuredSignals = buildMeasuredPairSignals(currentGscRows, pageIndex, brandTokens);
     const calculatedSignals = buildCalculatedPairSignals(pages);
     const groups = mergeSignals(measuredSignals, calculatedSignals, pagePerformance, Boolean(audit));
-    const contentOpportunityCount = dataSources.opportunities === 'unavailable' ? null : toArray(latestOpportunities?.active)
-        .filter((item) => item?.status === 'open' && item?.category === 'content').length;
+    const contentOpportunityCount =
+        dataSources.opportunities === 'unavailable'
+            ? null
+            : toArray(latestOpportunities?.active).filter(
+                  (item) => item?.status === 'open' && item?.category === 'content',
+              ).length;
 
     if (!audit && currentGscRows.length === 0) {
         return {
             ...availability,
-            clientName, contentOpportunityCount,
+            clientName,
+            contentOpportunityCount,
             freshness: { gsc: gscFreshness },
             emptyState: {
                 title: 'Cannibalisation SEO indisponible',
-                description: errors.length > 0 ? 'Données temporairement indisponibles pour cette lecture de cannibalisation.' : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Connectez GSC ou relancez un audit avant d’ouvrir cette lecture.',
+                description:
+                    errors.length > 0
+                        ? 'Données temporairement indisponibles pour cette lecture de cannibalisation.'
+                        : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Connectez GSC ou relancez un audit avant d’ouvrir cette lecture.',
             },
         };
     }
@@ -997,18 +1088,24 @@ export async function getSeoCannibalizationSlice(clientId) {
 
     return {
         ...availability,
-        clientName, contentOpportunityCount,
+        clientName,
+        contentOpportunityCount,
         available: true,
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
-            siteTypeLabel: audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
+            siteTypeLabel:
+                audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
         },
         summaryCards: [
             {
                 id: 'group_count',
                 label: 'Groupes détectés',
-                value: groups.length === 0 && (dataSources.audit === 'unavailable' || dataSources.gscRows === 'unavailable') ? null : groups.length,
+                value:
+                    groups.length === 0 &&
+                    (dataSources.audit === 'unavailable' || dataSources.gscRows === 'unavailable')
+                        ? null
+                        : groups.length,
                 detail: 'Paires ou familles où un recouvrement ressort proprement',
                 reliability: 'calculated',
                 accent: groups.length > 0 ? 'sky' : 'slate',
@@ -1016,7 +1113,9 @@ export async function getSeoCannibalizationSlice(clientId) {
             {
                 id: 'measured_count',
                 label: 'Recouvrements mesurés',
-                value: ['unavailable', 'not_connected', 'not_observed'].includes(dataSources.gscRows) ? null : measuredGroupCount,
+                value: ['unavailable', 'not_connected', 'not_observed'].includes(dataSources.gscRows)
+                    ? null
+                    : measuredGroupCount,
                 detail: 'Groupes appuyés par des requêtes Search Console partagées',
                 reliability: measuredGroupCount > 0 ? 'measured' : 'unavailable',
                 accent: measuredGroupCount > 0 ? 'emerald' : 'amber',
@@ -1038,7 +1137,13 @@ export async function getSeoCannibalizationSlice(clientId) {
                 accent: globalConfidence === 'Élevée' ? 'emerald' : globalConfidence === 'Moyenne' ? 'amber' : 'slate',
             },
         ],
-        operatorSummary: groups.length === 0 && availability.status !== 'available' ? { ...operatorSummary, text: 'Lecture incomplète : les sources disponibles ne permettent pas de conclure à une absence de recouvrement.' } : operatorSummary,
+        operatorSummary:
+            groups.length === 0 && availability.status !== 'available'
+                ? {
+                      ...operatorSummary,
+                      text: 'Lecture incomplète : les sources disponibles ne permettent pas de conclure à une absence de recouvrement.',
+                  }
+                : operatorSummary,
         freshness: {
             audit: auditFreshness,
             gsc: gscFreshness,
@@ -1047,9 +1152,12 @@ export async function getSeoCannibalizationSlice(clientId) {
                 reliability: measuredGroupCount > 0 ? 'measured' : 'unavailable',
                 label: 'Recouvrement mesuré',
                 value: measuredGroupCount > 0 ? `${measuredGroupCount} groupe(s)` : 'Indisponible',
-                detail: dataSources.gscRows === 'unavailable' ? 'Mesure des recouvrements temporairement indisponible.' : measuredGroupCount > 0
-                    ? 'Au moins un groupe est appuyé par des requêtes GSC partagées.'
-                    : 'Aucune paire de pages ne se partage de requêtes mesurées sur la fenêtre courante.',
+                detail:
+                    dataSources.gscRows === 'unavailable'
+                        ? 'Mesure des recouvrements temporairement indisponible.'
+                        : measuredGroupCount > 0
+                          ? 'Au moins un groupe est appuyé par des requêtes GSC partagées.'
+                          : 'Aucune paire de pages ne se partage de requêtes mesurées sur la fenêtre courante.',
                 lastObservedDate: gscFreshness.lastObservedDate || null,
                 lastSyncedAt: gscFreshness.lastSyncedAt || null,
             },

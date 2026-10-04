@@ -89,9 +89,7 @@ describe('markdown response negotiation endpoint', () => {
         global.fetch = async () => new Response('<html><body><h1>Accueil</h1><p>Bienvenue.</p></body></html>');
 
         try {
-            const response = await mod.GET(
-                new Request('https://www.trouvable.app/__agent/markdown?path=%2F'),
-            );
+            const response = await mod.GET(new Request('https://www.trouvable.app/__agent/markdown?path=%2F'));
 
             expect(response.status).toBe(200);
             expect(response.headers.get('content-type')).toContain('text/markdown');

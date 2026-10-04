@@ -4,13 +4,7 @@ import { useMemo, useState } from 'react';
 
 import IssueQuickAction from '@/features/admin/shared/components/IssueQuickAction';
 
-import {
-    LabCollapsible,
-    LabDiagnosticSection,
-    LabEmptyState,
-    LabPill,
-    LabSectionHeader,
-} from './LabPrimitives';
+import { LabCollapsible, LabDiagnosticSection, LabEmptyState, LabPill, LabSectionHeader } from './LabPrimitives';
 import {
     aggregateChecksByCategory,
     getLayer1ViewModel,
@@ -74,7 +68,8 @@ function pageMatchesStatus(group, filter) {
     if (filter === 'problem') return group.fail > 0;
     if (filter === 'watch') return group.fail === 0 && group.warn > 0;
     if (filter === 'ok') return group.fail === 0 && group.warn === 0 && group.pass > 0;
-    if (filter === 'skip') return group.total > 0 && group.pass === 0 && group.warn === 0 && group.fail === 0 && group.skip > 0;
+    if (filter === 'skip')
+        return group.total > 0 && group.pass === 0 && group.warn === 0 && group.fail === 0 && group.skip > 0;
     if (filter === 'unknown') return group.total === 0 || group.unknown === group.total;
     return true;
 }
@@ -95,8 +90,18 @@ function pageMatchesSearch(group, needle) {
     const lower = needle.toLowerCase();
     if (group.url.toLowerCase().includes(lower)) return true;
     for (const check of group.checks) {
-        if (String(check?.category || '').toLowerCase().includes(lower)) return true;
-        if (String(check?.check_id || '').toLowerCase().includes(lower)) return true;
+        if (
+            String(check?.category || '')
+                .toLowerCase()
+                .includes(lower)
+        )
+            return true;
+        if (
+            String(check?.check_id || '')
+                .toLowerCase()
+                .includes(lower)
+        )
+            return true;
         const fr = checkIdFr(check?.check_id || check?.id);
         if (fr && fr.toLowerCase().includes(lower)) return true;
     }
@@ -118,30 +123,42 @@ function ScanHeaderMetrics({ crawlMetadata, renderStats, siteLevelRawScores, tot
         <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Score brut du scan</div>
-                    <div className={`mt-1 font-['Plus_Jakarta_Sans',sans-serif] text-xl font-extrabold tabular-nums ${scoreToneClass(overallRaw)}`}>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Score brut du scan
+                    </div>
+                    <div
+                        className={`mt-1 font-['Plus_Jakarta_Sans',sans-serif] text-xl font-extrabold tabular-nums ${scoreToneClass(overallRaw)}`}
+                    >
                         {overallRaw != null ? overallRaw : '—'}
                         <span className="ml-0.5 text-[10px] text-white/25">/100</span>
                     </div>
                     <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">Diagnostic interne</div>
                 </div>
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Stratégie d&apos;exploration</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Stratégie d&apos;exploration
+                    </div>
                     <div className="mt-1 text-[13px] font-semibold text-white/85">{strategyLabel}</div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">Mode de rendu : <span className="text-white/50">{renderLabel}</span></div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
+                        Mode de rendu : <span className="text-white/50">{renderLabel}</span>
+                    </div>
                 </div>
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Pages analysées</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Pages analysées
+                    </div>
                     <div className="mt-1 text-xl font-extrabold tabular-nums text-white/85">
                         {pagesVisited}
-                        {pagesBudget ? (
-                            <span className="ml-1 text-[10px] text-white/30">/ {pagesBudget}</span>
-                        ) : null}
+                        {pagesBudget ? <span className="ml-1 text-[10px] text-white/30">/ {pagesBudget}</span> : null}
                     </div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">{sitemapSources.length} source{sitemapSources.length > 1 ? 's' : ''} sitemap</div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
+                        {sitemapSources.length} source{sitemapSources.length > 1 ? 's' : ''} sitemap
+                    </div>
                 </div>
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Couverture pages</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Couverture pages
+                    </div>
                     <div className="mt-1 flex items-baseline gap-1.5 text-[13px] font-semibold">
                         <span className="tabular-nums text-red-300">{totals.pages.problem || 0}</span>
                         <span className="text-[10px] text-white/30">pb.</span>
@@ -152,7 +169,9 @@ function ScanHeaderMetrics({ crawlMetadata, renderStats, siteLevelRawScores, tot
                         <span className="tabular-nums text-emerald-300">{totals.pages.ok || 0}</span>
                         <span className="text-[10px] text-white/30">OK</span>
                     </div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">{totals.pages.total} pages testées</div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
+                        {totals.pages.total} pages testées
+                    </div>
                 </div>
             </div>
 
@@ -160,25 +179,35 @@ function ScanHeaderMetrics({ crawlMetadata, renderStats, siteLevelRawScores, tot
                 <div className="rounded-xl border border-red-400/20 bg-red-400/[0.03] px-3 py-2.5">
                     <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-red-300/80">Problèmes</div>
                     <div className="mt-1 text-xl font-extrabold tabular-nums text-red-300">{totals.checks.fail}</div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">vérifications en échec</div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
+                        vérifications en échec
+                    </div>
                 </div>
                 <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.03] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-amber-300/80">À surveiller</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-amber-300/80">
+                        À surveiller
+                    </div>
                     <div className="mt-1 text-xl font-extrabold tabular-nums text-amber-200">{totals.checks.warn}</div>
                     <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">avertissements</div>
                 </div>
                 <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/[0.03] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-300/80">Vérifiés OK</div>
-                    <div className="mt-1 text-xl font-extrabold tabular-nums text-emerald-300">{totals.checks.pass}</div>
-                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">vérifications validées</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-300/80">
+                        Vérifiés OK
+                    </div>
+                    <div className="mt-1 text-xl font-extrabold tabular-nums text-emerald-300">
+                        {totals.checks.pass}
+                    </div>
+                    <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
+                        vérifications validées
+                    </div>
                 </div>
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.015] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Non applicables</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Non applicables
+                    </div>
                     <div className="mt-1 text-xl font-extrabold tabular-nums text-white/65">{totals.checks.skip}</div>
                     <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/30">
-                        {totals.checks.unknown > 0
-                            ? `${totals.checks.unknown} indéterminées`
-                            : 'skip volontaires'}
+                        {totals.checks.unknown > 0 ? `${totals.checks.unknown} indéterminées` : 'skip volontaires'}
                     </div>
                 </div>
             </div>
@@ -186,7 +215,9 @@ function ScanHeaderMetrics({ crawlMetadata, renderStats, siteLevelRawScores, tot
             {renderStats && (
                 <div className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-3">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Rendu des pages</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                            Rendu des pages
+                        </span>
                         <LabPill
                             label={renderLabel}
                             tone={renderStats.audit_strategy === 'static_only' ? 'warn' : 'good'}
@@ -198,10 +229,22 @@ function ScanHeaderMetrics({ crawlMetadata, renderStats, siteLevelRawScores, tot
                         )}
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-white/55">
-                        <span>Rendues : <span className="tabular-nums text-white/75">{renderStats.rendered_pages ?? 0}</span></span>
-                        <span>Statiques : <span className="tabular-nums text-white/75">{renderStats.static_pages ?? 0}</span></span>
-                        <span>Fallback : <span className="tabular-nums text-white/75">{renderStats.render_fallback_pages ?? 0}</span></span>
-                        <span>Échecs : <span className="tabular-nums text-white/75">{renderStats.render_failures ?? 0}</span></span>
+                        <span>
+                            Rendues :{' '}
+                            <span className="tabular-nums text-white/75">{renderStats.rendered_pages ?? 0}</span>
+                        </span>
+                        <span>
+                            Statiques :{' '}
+                            <span className="tabular-nums text-white/75">{renderStats.static_pages ?? 0}</span>
+                        </span>
+                        <span>
+                            Fallback :{' '}
+                            <span className="tabular-nums text-white/75">{renderStats.render_fallback_pages ?? 0}</span>
+                        </span>
+                        <span>
+                            Échecs :{' '}
+                            <span className="tabular-nums text-white/75">{renderStats.render_failures ?? 0}</span>
+                        </span>
                     </div>
                     {renderStats.audit_strategy_message && (
                         <p className="mt-1 text-[10px] text-white/40">{renderStats.audit_strategy_message}</p>
@@ -251,7 +294,9 @@ function CategoryCard({ categoryKey, score, bucket, isActive, onActivate }) {
                     </div>
                 </div>
                 {typeof score === 'number' ? (
-                    <div className={`shrink-0 text-right font-['Plus_Jakarta_Sans',sans-serif] text-lg font-extrabold tabular-nums ${tone}`}>
+                    <div
+                        className={`shrink-0 text-right font-['Plus_Jakarta_Sans',sans-serif] text-lg font-extrabold tabular-nums ${tone}`}
+                    >
                         {score}
                         <span className="text-[9px] text-white/25">/100</span>
                     </div>
@@ -268,10 +313,20 @@ function CategoryCard({ categoryKey, score, bucket, isActive, onActivate }) {
             />
 
             <div className="mt-2 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-white/45">
-                <span><span className="tabular-nums text-red-300/90">{bucket?.fail || 0}</span> pb.</span>
-                <span><span className="tabular-nums text-amber-200/90">{bucket?.warn || 0}</span> surv.</span>
-                <span><span className="tabular-nums text-emerald-300/90">{bucket?.pass || 0}</span> OK</span>
-                {(bucket?.skip || 0) > 0 && <span><span className="tabular-nums text-white/55">{bucket?.skip}</span> skip</span>}
+                <span>
+                    <span className="tabular-nums text-red-300/90">{bucket?.fail || 0}</span> pb.
+                </span>
+                <span>
+                    <span className="tabular-nums text-amber-200/90">{bucket?.warn || 0}</span> surv.
+                </span>
+                <span>
+                    <span className="tabular-nums text-emerald-300/90">{bucket?.pass || 0}</span> OK
+                </span>
+                {(bucket?.skip || 0) > 0 && (
+                    <span>
+                        <span className="tabular-nums text-white/55">{bucket?.skip}</span> skip
+                    </span>
+                )}
             </div>
 
             {bucket?.topIssues?.length > 0 && (
@@ -337,18 +392,23 @@ function ScanCategoryCards({ categoryAggregates, siteCategoryScores, activeCateg
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {ordered.map((key) => {
                     const rawScoreEntry = siteCategoryScores?.[key];
-                    const score = typeof rawScoreEntry?.score === 'number'
-                        ? rawScoreEntry.score
-                        : typeof rawScoreEntry === 'number'
-                        ? rawScoreEntry
-                        : null;
+                    const score =
+                        typeof rawScoreEntry?.score === 'number'
+                            ? rawScoreEntry.score
+                            : typeof rawScoreEntry === 'number'
+                              ? rawScoreEntry
+                              : null;
                     const bucket = bucketByCategory.get(key) || {
                         category: key,
                         pass: rawScoreEntry?.pass || 0,
                         warn: rawScoreEntry?.warn || 0,
                         fail: rawScoreEntry?.fail || 0,
                         skip: rawScoreEntry?.skip || 0,
-                        total: (rawScoreEntry?.pass || 0) + (rawScoreEntry?.warn || 0) + (rawScoreEntry?.fail || 0) + (rawScoreEntry?.skip || 0),
+                        total:
+                            (rawScoreEntry?.pass || 0) +
+                            (rawScoreEntry?.warn || 0) +
+                            (rawScoreEntry?.fail || 0) +
+                            (rawScoreEntry?.skip || 0),
                         topIssues: [],
                     };
                     return (
@@ -420,16 +480,22 @@ function PageChecksRow({ group, statusFilter, categoryFilter, clientId }) {
                                     <span className="text-white/15">·</span>
                                 </>
                             )}
-                            <span>{group.total} vérification{group.total > 1 ? 's' : ''}</span>
+                            <span>
+                                {group.total} vérification{group.total > 1 ? 's' : ''}
+                            </span>
                         </div>
                     </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                     {group.fail > 0 && <LabPill label={`${group.fail} pb.`} tone="bad" />}
                     {group.warn > 0 && <LabPill label={`${group.warn} surv.`} tone="warn" />}
-                    {group.pass > 0 && group.fail === 0 && group.warn === 0 && <LabPill label={`${group.pass} OK`} tone="good" />}
+                    {group.pass > 0 && group.fail === 0 && group.warn === 0 && (
+                        <LabPill label={`${group.pass} OK`} tone="good" />
+                    )}
                     {group.pageStatus === 'unknown' && <LabPill label={pill.label} tone={pill.tone} />}
-                    <span className={`ml-1 text-xs text-white/40 transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+                    <span className={`ml-1 text-xs text-white/40 transition-transform ${open ? 'rotate-180' : ''}`}>
+                        ▾
+                    </span>
                 </div>
             </button>
 
@@ -443,30 +509,34 @@ function PageChecksRow({ group, statusFilter, categoryFilter, clientId }) {
                         <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                             {visibleChecks.map((check, index) => {
                                 const s = checkStatusFr(check);
-                                const borderClass = s.tone === 'good'
-                                    ? 'border-emerald-400/15 bg-emerald-400/[0.03]'
-                                    : s.tone === 'warn'
-                                    ? 'border-amber-400/15 bg-amber-400/[0.03]'
-                                    : s.tone === 'bad'
-                                    ? 'border-red-400/15 bg-red-400/[0.03]'
-                                    : 'border-white/[0.06] bg-white/[0.02]';
-                                const label = checkIdFr(check.check_id || check.id) || humanizeCategoryKey(check.category || 'vérification');
+                                const borderClass =
+                                    s.tone === 'good'
+                                        ? 'border-emerald-400/15 bg-emerald-400/[0.03]'
+                                        : s.tone === 'warn'
+                                          ? 'border-amber-400/15 bg-amber-400/[0.03]'
+                                          : s.tone === 'bad'
+                                            ? 'border-red-400/15 bg-red-400/[0.03]'
+                                            : 'border-white/[0.06] bg-white/[0.02]';
+                                const label =
+                                    checkIdFr(check.check_id || check.id) ||
+                                    humanizeCategoryKey(check.category || 'vérification');
                                 const evidenceText = check.evidence
                                     ? typeof check.evidence === 'string'
                                         ? check.evidence
                                         : JSON.stringify(check.evidence)
                                     : null;
-                                const canGeneratePrompt = (s.tone === 'bad' || s.tone === 'warn') && clientId && (check.check_id || check.id);
+                                const canGeneratePrompt =
+                                    (s.tone === 'bad' || s.tone === 'warn') && clientId && (check.check_id || check.id);
                                 const problemRef = canGeneratePrompt
                                     ? {
-                                        source: 'lab_layer1_check',
-                                        clientId,
-                                        checkId: String(check.check_id || check.id),
-                                        pageUrl: group.url,
-                                        layer: 'layer1',
-                                        category: check.category || null,
-                                        label,
-                                    }
+                                          source: 'lab_layer1_check',
+                                          clientId,
+                                          checkId: String(check.check_id || check.id),
+                                          pageUrl: group.url,
+                                          layer: 'layer1',
+                                          category: check.category || null,
+                                          label,
+                                      }
                                     : null;
                                 return (
                                     <div
@@ -490,12 +560,20 @@ function PageChecksRow({ group, statusFilter, categoryFilter, clientId }) {
                                             <div className="flex shrink-0 items-center gap-1.5">
                                                 <LabPill label={s.label} tone={s.tone} />
                                                 {problemRef ? (
-                                                    <IssueQuickAction problemRef={problemRef} label="Prompt" size="xs" variant="primary" />
+                                                    <IssueQuickAction
+                                                        problemRef={problemRef}
+                                                        label="Prompt"
+                                                        size="xs"
+                                                        variant="primary"
+                                                    />
                                                 ) : null}
                                             </div>
                                         </div>
                                         {evidenceText && (
-                                            <p className="mt-1 line-clamp-2 text-[10px] text-white/50" title={evidenceText}>
+                                            <p
+                                                className="mt-1 line-clamp-2 text-[10px] text-white/50"
+                                                title={evidenceText}
+                                            >
                                                 {evidenceText}
                                             </p>
                                         )}
@@ -523,10 +601,11 @@ function ScanPageExplorer({
     clientId,
 }) {
     const filtered = useMemo(
-        () => groups
-            .filter((group) => pageMatchesStatus(group, statusFilter))
-            .filter((group) => pageMatchesCategory(group, categoryFilter, statusFilter))
-            .filter((group) => pageMatchesSearch(group, search.trim())),
+        () =>
+            groups
+                .filter((group) => pageMatchesStatus(group, statusFilter))
+                .filter((group) => pageMatchesCategory(group, categoryFilter, statusFilter))
+                .filter((group) => pageMatchesSearch(group, search.trim())),
         [groups, statusFilter, categoryFilter, search],
     );
 
@@ -583,22 +662,24 @@ function ScanPageExplorer({
             {categories.length > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className="text-[10px] uppercase tracking-wider text-white/35">Catégorie :</span>
-                    {[CATEGORY_TAB_ALL, ...categories.map((c) => ({ key: c, label: humanizeCategoryKey(c) }))].map((tab) => {
-                        const isActive = categoryFilter === tab.key;
-                        const toneClass = isActive
-                            ? 'border-violet-400/40 bg-violet-400/[0.08] text-violet-200'
-                            : 'border-white/[0.06] bg-white/[0.015] text-white/50 hover:text-white/75';
-                        return (
-                            <button
-                                key={tab.key}
-                                type="button"
-                                onClick={() => setCategoryFilter(tab.key)}
-                                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors ${toneClass}`}
-                            >
-                                {tab.label}
-                            </button>
-                        );
-                    })}
+                    {[CATEGORY_TAB_ALL, ...categories.map((c) => ({ key: c, label: humanizeCategoryKey(c) }))].map(
+                        (tab) => {
+                            const isActive = categoryFilter === tab.key;
+                            const toneClass = isActive
+                                ? 'border-violet-400/40 bg-violet-400/[0.08] text-violet-200'
+                                : 'border-white/[0.06] bg-white/[0.015] text-white/50 hover:text-white/75';
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setCategoryFilter(tab.key)}
+                                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors ${toneClass}`}
+                                >
+                                    {tab.label}
+                                </button>
+                            );
+                        },
+                    )}
                 </div>
             )}
 
@@ -609,15 +690,17 @@ function ScanPageExplorer({
                         description="Essayez un autre onglet, une autre catégorie, ou videz le champ de recherche."
                     />
                 ) : (
-                    filtered.slice(0, 80).map((group) => (
-                        <PageChecksRow
-                            key={group.url}
-                            group={group}
-                            statusFilter={statusFilter}
-                            categoryFilter={categoryFilter}
-                            clientId={clientId}
-                        />
-                    ))
+                    filtered
+                        .slice(0, 80)
+                        .map((group) => (
+                            <PageChecksRow
+                                key={group.url}
+                                group={group}
+                                statusFilter={statusFilter}
+                                categoryFilter={categoryFilter}
+                                clientId={clientId}
+                            />
+                        ))
                 )}
                 {filtered.length > 80 && (
                     <p className="pt-1 text-[10px] text-white/35">
@@ -734,20 +817,24 @@ export default function AuditLabGeoScan({ audit, clientId = null }) {
                         <div className="space-y-1">
                             {pagesList.slice(0, 50).map((page, idx) => {
                                 const statusCode = page.status_code;
-                                const tone = statusCode == null
-                                    ? 'neutral'
-                                    : statusCode >= 500
-                                    ? 'bad'
-                                    : statusCode >= 300
-                                    ? 'warn'
-                                    : 'good';
+                                const tone =
+                                    statusCode == null
+                                        ? 'neutral'
+                                        : statusCode >= 500
+                                          ? 'bad'
+                                          : statusCode >= 300
+                                            ? 'warn'
+                                            : 'good';
                                 return (
                                     <div
                                         key={idx}
                                         className="flex items-center justify-between gap-2 rounded-md border border-white/[0.04] bg-white/[0.02] px-2.5 py-1.5"
                                     >
                                         <div className="min-w-0">
-                                            <div className="truncate font-mono text-[11px] text-white/70" title={page.url}>
+                                            <div
+                                                className="truncate font-mono text-[11px] text-white/70"
+                                                title={page.url}
+                                            >
                                                 {page.url}
                                             </div>
                                             {page.title && (
@@ -757,7 +844,9 @@ export default function AuditLabGeoScan({ audit, clientId = null }) {
                                         <div className="flex shrink-0 items-center gap-1">
                                             {statusCode != null && <LabPill label={String(statusCode)} tone={tone} />}
                                             {page.page_type && <LabPill label={humanizeCategoryKey(page.page_type)} />}
-                                            {page.render_mode && <LabPill label={humanizeCategoryKey(page.render_mode)} />}
+                                            {page.render_mode && (
+                                                <LabPill label={humanizeCategoryKey(page.render_mode)} />
+                                            )}
                                         </div>
                                     </div>
                                 );

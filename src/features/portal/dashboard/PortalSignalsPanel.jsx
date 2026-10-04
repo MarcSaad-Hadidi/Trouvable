@@ -33,9 +33,7 @@ function PromptPositionSummary({ prompts }) {
                 <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/20">
                     Taux de détection
                 </span>
-                <span className="text-[14px] font-black tabular-nums text-emerald-400/85">
-                    {foundPct}%
-                </span>
+                <span className="text-[14px] font-black tabular-nums text-emerald-400/85">{foundPct}%</span>
             </div>
             <div className="flex h-[6px] overflow-hidden rounded-full bg-white/[0.03]">
                 <motion.div
@@ -131,7 +129,9 @@ export default function PortalSignalsPanel({ prompts = [], sources = [] }) {
                                             ? prompt.target_position != null
                                                 ? `#${prompt.target_position}`
                                                 : 'Cité'
-                                            : prompt.target_found === false ? 'Non cité' : 'Indisponible'}
+                                            : prompt.target_found === false
+                                              ? 'Non cité'
+                                              : 'Indisponible'}
                                     </div>
                                 </motion.div>
                             ))}

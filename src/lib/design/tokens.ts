@@ -16,25 +16,28 @@ export function cn(...values: Array<string | false | null | undefined>) {
 /* ── Raw Palette ── */
 
 export const COMMAND_COLORS = {
-    ok: '#10b981',       // High-saturation emerald
-    warning: '#f59e0b',  // Vibrant amber
+    ok: '#10b981', // High-saturation emerald
+    warning: '#f59e0b', // Vibrant amber
     critical: '#f43f5e', // Strong rose
-    info: '#7c6aef',     // Electric violet
-    neutral: '#9ca3af',  // Brighter grey
-    unavailable: '#4b5563', 
-    violet: '#7c6aef',   
-    indigo: '#6366f1',   
-    steel: '#38bdf8',    // Brighter sky
-    orange: '#fb923c',   // Brighter orange
-    agentIndigo: '#818cf8', 
-    cyan: '#22d3ee',     
+    info: '#7c6aef', // Electric violet
+    neutral: '#9ca3af', // Brighter grey
+    unavailable: '#4b5563',
+    violet: '#7c6aef',
+    indigo: '#6366f1',
+    steel: '#38bdf8', // Brighter sky
+    orange: '#fb923c', // Brighter orange
+    agentIndigo: '#818cf8',
+    cyan: '#22d3ee',
 } as const;
 
 /* ── Surface Tokens ── */
 
-export const COMMAND_SURFACE = 'rounded-[20px] border border-white/[0.12] bg-[#060708] shadow-[0_32px_120px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]';
-export const COMMAND_SURFACE_SOFT = 'rounded-[18px] border border-white/[0.1] bg-[#080808] shadow-[0_28px_90px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]';
-export const COMMAND_PANEL = 'rounded-[16px] border border-white/[0.08] bg-[#0d0e12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]';
+export const COMMAND_SURFACE =
+    'rounded-[20px] border border-white/[0.12] bg-[#060708] shadow-[0_32px_120px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]';
+export const COMMAND_SURFACE_SOFT =
+    'rounded-[18px] border border-white/[0.1] bg-[#080808] shadow-[0_28px_90px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]';
+export const COMMAND_PANEL =
+    'rounded-[16px] border border-white/[0.08] bg-[#0d0e12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]';
 export const COMMAND_MUTED_PANEL = 'rounded-[14px] border border-white/[0.07] bg-white/[0.04]';
 
 /* ── Service World (Discipline) Accents ── */
@@ -143,7 +146,9 @@ export const COMMAND_TEXT = {
 /* ── Buttons ── */
 
 export const COMMAND_BUTTONS = {
-    primary: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-[#7c6aef]/45 bg-[#7c6aef] px-4 py-2.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#8d7bff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
-    secondary: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-white/[0.1] bg-white/[0.045] px-4 py-2.5 text-[12px] font-semibold text-white/75 no-underline transition-colors hover:border-white/[0.18] hover:bg-white/[0.075] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
+    primary:
+        'inline-flex items-center justify-center gap-2 rounded-[8px] border border-[#7c6aef]/45 bg-[#7c6aef] px-4 py-2.5 text-[12px] font-semibold text-white no-underline transition-colors hover:bg-[#8d7bff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
+    secondary:
+        'inline-flex items-center justify-center gap-2 rounded-[8px] border border-white/[0.1] bg-white/[0.045] px-4 py-2.5 text-[12px] font-semibold text-white/75 no-underline transition-colors hover:border-white/[0.18] hover:bg-white/[0.075] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
     subtle: 'inline-flex items-center justify-center gap-2 rounded-[8px] border border-transparent bg-transparent px-3 py-2 text-[12px] font-semibold text-white/50 no-underline transition-colors hover:border-white/[0.1] hover:bg-white/[0.04] hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c6aef]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#000000]',
 } as const;

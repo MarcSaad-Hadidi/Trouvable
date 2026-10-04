@@ -21,9 +21,11 @@ function withAdminClerk(children, enabled) {
 }
 
 function displayEmail(user) {
-    return user?.emailAddresses?.find((entry) => entry.id === user?.primaryEmailAddressId)?.emailAddress
-        || user?.emailAddresses?.[0]?.emailAddress
-        || '';
+    return (
+        user?.emailAddresses?.find((entry) => entry.id === user?.primaryEmailAddressId)?.emailAddress ||
+        user?.emailAddresses?.[0]?.emailAddress ||
+        ''
+    );
 }
 
 export default async function AdminWorkspaceLayout({ children }) {
@@ -52,20 +54,31 @@ export default async function AdminWorkspaceLayout({ children }) {
             console.error('[AdminWorkspaceLayout] resolvePortalMembership', error);
         }
 
-        return withAdminClerk((
+        return withAdminClerk(
             <div className="flex min-h-screen flex-col items-center justify-center bg-[#000000] p-6 text-center">
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
-                    <svg className="h-7 w-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    <svg
+                        className="h-7 w-7 text-red-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                        />
                     </svg>
                 </div>
                 <h1 className="mb-2 text-xl font-bold text-white">Acces administration refuse</h1>
                 <p className="mb-1 max-w-md text-sm text-white/40">
-                    Le compte <span className="font-medium text-white/70">{userEmail}</span> n&apos;est pas dans la liste des operateurs
-                    Trouvable (<code className="text-white/50">CLERK_ADMIN_EMAIL</code>).
+                    Le compte <span className="font-medium text-white/70">{userEmail}</span> n&apos;est pas dans la
+                    liste des operateurs Trouvable (<code className="text-white/50">CLERK_ADMIN_EMAIL</code>).
                 </p>
                 <p className="mb-6 max-w-md text-xs text-white/30">
-                    L&apos;acces au <strong className="text-white/45">portail client</strong> et au centre de commande sont deux roles distincts.
+                    L&apos;acces au <strong className="text-white/45">portail client</strong> et au centre de commande
+                    sont deux roles distincts.
                 </p>
 
                 <div className="flex w-full max-w-sm flex-col gap-3">
@@ -85,24 +98,23 @@ export default async function AdminWorkspaceLayout({ children }) {
                         </Link>
                     </p>
                 </div>
-            </div>
-        ), true);
+            </div>,
+            true,
+        );
     }
 
     const isDevBypass = accessState.kind === 'dev-bypass';
-    return withAdminClerk((
+    return withAdminClerk(
         <IssueHandoffProvider>
             <div className="geo-shell flex h-screen w-full bg-[#000000] overflow-hidden text-white text-[13px]">
                 {/* AdminRail is fixed, so we add left padding to the main content area */}
                 <AdminRail devBypass={isDevBypass} />
-                
-                <div className="flex-1 flex min-w-0 pl-[var(--rail-w)]">
-                    {children}
-                </div>
+
+                <div className="flex-1 flex min-w-0 pl-[var(--rail-w)]">{children}</div>
             </div>
             <IssueActionsDrawer />
             <AdminKeyboardShortcuts />
-        </IssueHandoffProvider>
-    ), true);
+        </IssueHandoffProvider>,
+        true,
+    );
 }
-

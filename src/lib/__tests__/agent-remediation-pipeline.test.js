@@ -140,4 +140,3 @@ describe('AGENT remediation helpers', () => {
         expect(emptyState.title).toContain('synchronisation');
     });
 });
-

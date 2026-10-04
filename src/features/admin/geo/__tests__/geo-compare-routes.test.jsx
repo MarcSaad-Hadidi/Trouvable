@@ -30,7 +30,8 @@ describe('geo compare route wiring', () => {
             client: { client_name: 'Trouvable Test' },
         });
 
-        const { default: ClientGeoComparePage } = await import('@/app/admin/(workspace)/clients/[clientId]/geo/compare/page');
+        const { default: ClientGeoComparePage } =
+            await import('@/app/admin/(workspace)/clients/[clientId]/geo/compare/page');
         const element = ClientGeoComparePage();
         expect(element.type).toBe(geoCompareViewMock);
         expect(element.props).toEqual({

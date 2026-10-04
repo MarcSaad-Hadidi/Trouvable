@@ -105,21 +105,27 @@ function pickWeakTitles(pages) {
         .slice(0, 5)
         .map((page) => {
             const length = String(page?.title || '').trim().length;
-            return baseItem(page, length === 0
-                ? 'Aucun title exploitable n’a été observé.'
-                : `Title trop court (${length} caractères observés).`);
+            return baseItem(
+                page,
+                length === 0
+                    ? 'Aucun title exploitable n’a été observé.'
+                    : `Title trop court (${length} caractères observés).`,
+            );
         });
 
     return makeBlock({
         id: 'weak_titles',
         title: 'Titles faibles',
-        status: items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
+        status:
+            items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'Aucun title faible détecté sur l’échantillon audité.'
-            : `${items.length} page(s) montrent un title absent ou trop court pour cadrer clairement le sujet.`,
+        summary:
+            items.length === 0
+                ? 'Aucun title faible détecté sur l’échantillon audité.'
+                : `${items.length} page(s) montrent un title absent ou trop court pour cadrer clairement le sujet.`,
         detail: 'Lecture déterministe basée sur les titles persistés dans `page_summaries`.',
-        suggestion: items.length > 0 ? 'Renforcer le sujet, l’offre et le contexte utile dans les titles prioritaires.' : null,
+        suggestion:
+            items.length > 0 ? 'Renforcer le sujet, l’offre et le contexte utile dans les titles prioritaires.' : null,
         items,
     });
 }
@@ -133,21 +139,29 @@ function pickWeakMetas(pages) {
         .slice(0, 5)
         .map((page) => {
             const length = String(page?.description || '').trim().length;
-            return baseItem(page, length === 0
-                ? 'Aucune meta description exploitable observée.'
-                : `Meta trop courte (${length} caractères observés).`);
+            return baseItem(
+                page,
+                length === 0
+                    ? 'Aucune meta description exploitable observée.'
+                    : `Meta trop courte (${length} caractères observés).`,
+            );
         });
 
     return makeBlock({
         id: 'weak_metas',
         title: 'Metas faibles',
-        status: items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
+        status:
+            items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'Les metas auditées ont une longueur exploitable sur l’échantillon observé.'
-            : `${items.length} page(s) ont une meta absente ou trop courte pour soutenir le clic organique.`,
+        summary:
+            items.length === 0
+                ? 'Les metas auditées ont une longueur exploitable sur l’échantillon observé.'
+                : `${items.length} page(s) ont une meta absente ou trop courte pour soutenir le clic organique.`,
         detail: 'Contrôle déterministe fondé sur la meta description observée dans le crawl.',
-        suggestion: items.length > 0 ? 'Réécrire les metas pour clarifier la promesse, le service et le contexte d’usage.' : null,
+        suggestion:
+            items.length > 0
+                ? 'Réécrire les metas pour clarifier la promesse, le service et le contexte d’usage.'
+                : null,
         items,
     });
 }
@@ -165,19 +179,24 @@ function pickMisalignedH1(pages) {
         .map((page) => {
             const title = compactString(page?.title);
             const h1 = compactString(page?.h1);
-            return baseItem(page, !h1
-                ? 'Aucun H1 clair observé sur cette page.'
-                : `Recouvrement faible entre le title et le H1 (${Math.round(overlapScore(title, h1) * 100)}% de tokens communs).`);
+            return baseItem(
+                page,
+                !h1
+                    ? 'Aucun H1 clair observé sur cette page.'
+                    : `Recouvrement faible entre le title et le H1 (${Math.round(overlapScore(title, h1) * 100)}% de tokens communs).`,
+            );
         });
 
     return makeBlock({
         id: 'misaligned_h1',
         title: 'H1 mal alignés',
-        status: items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
+        status:
+            items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'Les H1 audités restent globalement alignés avec les titles observés.'
-            : `${items.length} page(s) manquent d’un H1 clair ou aligné avec le title.`,
+        summary:
+            items.length === 0
+                ? 'Les H1 audités restent globalement alignés avec les titles observés.'
+                : `${items.length} page(s) manquent d’un H1 clair ou aligné avec le title.`,
         detail: 'Détection déterministe basée sur la présence du H1 et son chevauchement lexical avec le title.',
         suggestion: items.length > 0 ? 'Réaligner le H1 sur l’intention principale servie par le title.' : null,
         items,
@@ -193,21 +212,28 @@ function pickDirectAnswerGaps(pages) {
             return important && faqCount === 0 && citabilityCount === 0;
         })
         .slice(0, 5)
-        .map((page) => baseItem(
-            page,
-            `Aucune FAQ et aucun bloc de réponse directe exploitable (${Number(page?.citability?.block_count || 0)} bloc cité).`,
-        ));
+        .map((page) =>
+            baseItem(
+                page,
+                `Aucune FAQ et aucun bloc de réponse directe exploitable (${Number(page?.citability?.block_count || 0)} bloc cité).`,
+            ),
+        );
 
     return makeBlock({
         id: 'direct_answers',
         title: 'Manque de réponse directe',
-        status: items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
+        status:
+            items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'L’échantillon audité expose au moins des FAQ ou des blocs réutilisables sur les pages clés.'
-            : `${items.length} page(s) clés ne montrent ni FAQ ni bloc de réponse directement réutilisable.`,
+        summary:
+            items.length === 0
+                ? 'L’échantillon audité expose au moins des FAQ ou des blocs réutilisables sur les pages clés.'
+                : `${items.length} page(s) clés ne montrent ni FAQ ni bloc de réponse directement réutilisable.`,
         detail: 'Lecture basée sur `faq_pairs_count` et sur les blocs de citabilité persistés par page.',
-        suggestion: items.length > 0 ? 'Ajouter des réponses courtes, structurées et localement utiles sur les pages clés.' : null,
+        suggestion:
+            items.length > 0
+                ? 'Ajouter des réponses courtes, structurées et localement utiles sur les pages clés.'
+                : null,
         items,
     });
 }
@@ -220,21 +246,27 @@ function pickGenericContent(pages) {
             return wordCount < 180 || (wordCount < 260 && serviceSignals === 0);
         })
         .slice(0, 5)
-        .map((page) => baseItem(
-            page,
-            `${Number(page?.word_count || 0)} mots visibles et ${Number(page?.service_signal_count || 0)} signal service détecté.`,
-        ));
+        .map((page) =>
+            baseItem(
+                page,
+                `${Number(page?.word_count || 0)} mots visibles et ${Number(page?.service_signal_count || 0)} signal service détecté.`,
+            ),
+        );
 
     return makeBlock({
         id: 'generic_content',
         title: 'Contenu trop générique',
         status: items.length === 0 ? 'ok' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'Le contenu audité garde une densité et des signaux métier corrects sur l’échantillon observé.'
-            : `${items.length} page(s) exposent un contenu court ou peu spécifique métier.`,
+        summary:
+            items.length === 0
+                ? 'Le contenu audité garde une densité et des signaux métier corrects sur l’échantillon observé.'
+                : `${items.length} page(s) exposent un contenu court ou peu spécifique métier.`,
         detail: 'Heuristique déterministe fondée sur le volume visible et les signaux service observés.',
-        suggestion: items.length > 0 ? 'Renforcer les pages concernées avec des éléments métier concrets, des cas et des détails de service.' : null,
+        suggestion:
+            items.length > 0
+                ? 'Renforcer les pages concernées avec des éléments métier concrets, des cas et des détails de service.'
+                : null,
         items,
     });
 }
@@ -254,20 +286,29 @@ function pickLocalClarityGaps(pages, serviceAreaApplicability) {
     }
 
     const items = pages
-        .filter((page) => ['homepage', 'services', 'location'].includes(page?.page_type) && Number(page?.local_signal_count || 0) === 0)
+        .filter(
+            (page) =>
+                ['homepage', 'services', 'location'].includes(page?.page_type) &&
+                Number(page?.local_signal_count || 0) === 0,
+        )
         .slice(0, 5)
         .map((page) => baseItem(page, 'Aucun signal local clair observé sur cette page auditée.'));
 
     return makeBlock({
         id: 'local_clarity',
         title: 'Manque de clarté locale',
-        status: items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
+        status:
+            items.length === 0 ? 'ok' : items.some((item) => item.contextKey === 'homepage') ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'Les pages clés auditée(s) exposent au moins des indices locaux exploitables.'
-            : `${items.length} page(s) clés manquent encore de repères locaux explicites.`,
+        summary:
+            items.length === 0
+                ? 'Les pages clés auditée(s) exposent au moins des indices locaux exploitables.'
+                : `${items.length} page(s) clés manquent encore de repères locaux explicites.`,
         detail: 'Évaluation déterministe dérivée des signaux locaux observés par page.',
-        suggestion: items.length > 0 ? 'Ajouter lieux, zones servies, ancrages locaux ou preuves territoriales là où l’intention le justifie.' : null,
+        suggestion:
+            items.length > 0
+                ? 'Ajouter lieux, zones servies, ancrages locaux ou preuves territoriales là où l’intention le justifie.'
+                : null,
         items,
     });
 }
@@ -278,16 +319,36 @@ function pickEeatSignals(audit) {
     const items = [];
 
     if (Number(pageStats.about_pages || 0) === 0) {
-        items.push({ label: 'Page À propos absente', url: null, context: 'site', evidence: 'Aucune page de type `about` n’a été observée dans le crawl.' });
+        items.push({
+            label: 'Page À propos absente',
+            url: null,
+            context: 'site',
+            evidence: 'Aucune page de type `about` n’a été observée dans le crawl.',
+        });
     }
     if (Number(pageStats.contact_pages || 0) === 0) {
-        items.push({ label: 'Page Contact absente', url: null, context: 'site', evidence: 'Aucune page de type `contact` n’a été observée dans le crawl.' });
+        items.push({
+            label: 'Page Contact absente',
+            url: null,
+            context: 'site',
+            evidence: 'Aucune page de type `contact` n’a été observée dans le crawl.',
+        });
     }
     if (toArray(trustSignals.proof_terms).length === 0 && toArray(trustSignals.review_terms).length === 0) {
-        items.push({ label: 'Preuves visibles insuffisantes', url: null, context: 'site', evidence: 'Aucun terme de preuve, d’avis ou de réassurance n’a été extrait.' });
+        items.push({
+            label: 'Preuves visibles insuffisantes',
+            url: null,
+            context: 'site',
+            evidence: 'Aucun terme de preuve, d’avis ou de réassurance n’a été extrait.',
+        });
     }
     if (toArray(trustSignals.social_networks).length === 0) {
-        items.push({ label: 'Renfort social absent', url: null, context: 'site', evidence: 'Aucun profil social public n’a été observé comme preuve complémentaire.' });
+        items.push({
+            label: 'Renfort social absent',
+            url: null,
+            context: 'site',
+            evidence: 'Aucun profil social public n’a été observé comme preuve complémentaire.',
+        });
     }
 
     return makeBlock({
@@ -295,11 +356,15 @@ function pickEeatSignals(audit) {
         title: 'Signaux visibles E-E-A-T insuffisants',
         status: items.length === 0 ? 'ok' : items.length >= 3 ? 'critical' : 'warning',
         reliability: 'calculated',
-        summary: items.length === 0
-            ? 'L’échantillon audité montre des signaux visibles de confiance et d’identité suffisants.'
-            : `${items.length} manque(s) visible(s) affaiblissent encore l’exposition de l’expertise et de la confiance.`,
+        summary:
+            items.length === 0
+                ? 'L’échantillon audité montre des signaux visibles de confiance et d’identité suffisants.'
+                : `${items.length} manque(s) visible(s) affaiblissent encore l’exposition de l’expertise et de la confiance.`,
         detail: 'Lecture déterministe basée sur les pages support et les signaux de confiance observés.',
-        suggestion: items.length > 0 ? 'Renforcer preuves, pages support et signaux publics de réassurance là où ils manquent.' : null,
+        suggestion:
+            items.length > 0
+                ? 'Renforcer preuves, pages support et signaux publics de réassurance là où ils manquent.'
+                : null,
         items,
     });
 }
@@ -331,7 +396,8 @@ function buildSuggestions(blocks, aiSummary) {
         suggestions.push({
             id: 'no_priority_gap',
             title: 'Aucune faiblesse on-page dominante',
-            description: 'Le dernier audit ne fait pas ressortir de faiblesse on-page majeure sur l’échantillon audité.',
+            description:
+                'Le dernier audit ne fait pas ressortir de faiblesse on-page majeure sur l’échantillon audité.',
             reliability: 'calculated',
         });
     }
@@ -340,7 +406,11 @@ function buildSuggestions(blocks, aiSummary) {
 }
 
 export async function getSeoOnPageSlice(clientId) {
-    const { values: { audit }, dataSources, errors } = await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) });
+    const {
+        values: { audit },
+        dataSources,
+        errors,
+    } = await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) });
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
     if (!audit) {
@@ -348,33 +418,40 @@ export async function getSeoOnPageSlice(clientId) {
             ...availability,
             emptyState: {
                 title: 'Analyse on-page indisponible',
-                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles pour cette lecture on-page.' : 'Aucun audit exploitable n’est disponible pour ouvrir une lecture on-page fiable.',
+                description:
+                    dataSources.audit === 'unavailable'
+                        ? 'Données audit temporairement indisponibles pour cette lecture on-page.'
+                        : 'Aucun audit exploitable n’est disponible pour ouvrir une lecture on-page fiable.',
             },
         };
     }
 
-    const pages = toArray(audit?.extracted_data?.page_summaries)
-        .slice()
-        .sort(comparePages);
+    const pages = toArray(audit?.extracted_data?.page_summaries).slice().sort(comparePages);
 
     if (pages.length === 0) {
         return {
             ...availability,
             emptyState: {
                 title: 'Analyse on-page indisponible',
-                description: 'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture on-page honnête.',
+                description:
+                    'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture on-page honnête.',
             },
         };
     }
 
-    const serviceAreaApplicability = audit?.seo_breakdown?.site_classification?.applicability?.service_area
-        || audit?.site_classification?.applicability?.service_area
-        || 'medium';
-    const directAnswerCount = pages.filter((page) => Number(page?.faq_pairs_count || 0) > 0 || Number(page?.citability?.block_count || 0) > 0).length;
+    const serviceAreaApplicability =
+        audit?.seo_breakdown?.site_classification?.applicability?.service_area ||
+        audit?.site_classification?.applicability?.service_area ||
+        'medium';
+    const directAnswerCount = pages.filter(
+        (page) => Number(page?.faq_pairs_count || 0) > 0 || Number(page?.citability?.block_count || 0) > 0,
+    ).length;
     const trustSurfacesVisible = [
         Number(audit?.extracted_data?.page_stats?.about_pages || 0) > 0,
         Number(audit?.extracted_data?.page_stats?.contact_pages || 0) > 0,
-        toArray(audit?.extracted_data?.trust_signals?.proof_terms).length + toArray(audit?.extracted_data?.trust_signals?.review_terms).length > 0,
+        toArray(audit?.extracted_data?.trust_signals?.proof_terms).length +
+            toArray(audit?.extracted_data?.trust_signals?.review_terms).length >
+            0,
         toArray(audit?.extracted_data?.trust_signals?.social_networks).length > 0,
     ].filter(Boolean).length;
 
@@ -393,7 +470,8 @@ export async function getSeoOnPageSlice(clientId) {
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
-            siteTypeLabel: audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
+            siteTypeLabel:
+                audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
         },
         summaryCards: [
             {

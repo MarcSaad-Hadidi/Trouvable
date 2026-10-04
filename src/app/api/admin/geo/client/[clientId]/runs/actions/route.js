@@ -4,11 +4,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth';
 import { deleteProblematicQueryRuns } from '@/lib/db/query-runs';
 
-const actionSchema = z.discriminatedUnion('action', [
-    z.object({ action: z.literal('clear_errors') }),
-]);
-
-
+const actionSchema = z.discriminatedUnion('action', [z.object({ action: z.literal('clear_errors') })]);
 
 export async function POST(request, { params }) {
     const admin = await requireAdmin();

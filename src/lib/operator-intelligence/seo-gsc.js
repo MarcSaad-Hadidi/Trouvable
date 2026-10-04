@@ -42,7 +42,12 @@ export function readSearchMetrics(bucket) {
         clicks: bucket.clicks,
         impressions: bucket.impressions,
         ctr: bucket.impressions > 0 ? bucket.clicks / bucket.impressions : null,
-        position: weightedPosition(bucket.impressions, bucket.weightedPositionSum, bucket.fallbackPositionSum, bucket.fallbackCount),
+        position: weightedPosition(
+            bucket.impressions,
+            bucket.weightedPositionSum,
+            bucket.fallbackPositionSum,
+            bucket.fallbackCount,
+        ),
     };
 }
 
@@ -83,21 +88,23 @@ export function aggregatePageRows(rows) {
     }
 
     return new Map(
-        Array.from(aggregated.entries()).map(([key, bucket]) => ([
+        Array.from(aggregated.entries()).map(([key, bucket]) => [
             key,
             {
                 url: bucket.url,
                 ...readSearchMetrics(bucket),
             },
-        ])),
+        ]),
     );
 }
 
 export function getLatestObservedDate(rows) {
-    return (rows || [])
-        .map((row) => String(row?.date || '').trim())
-        .filter(Boolean)
-        .sort((left, right) => right.localeCompare(left))[0] || null;
+    return (
+        (rows || [])
+            .map((row) => String(row?.date || '').trim())
+            .filter(Boolean)
+            .sort((left, right) => right.localeCompare(left))[0] || null
+    );
 }
 
 export function getObservedAgeDays(dateString) {
@@ -140,16 +147,21 @@ export function getPrimarySegment(value) {
 
 /** GSC observation status; surface wording is supplied explicitly by each consumer. */
 export function buildGscFreshness(connectorRows, rows, dataSources, messages) {
-    const gscStatus = dataSources.connectors === 'unavailable'
-        ? { status: 'unavailable', lastSyncedAt: null }
-        : resolveConnectorStatus(connectorRows, 'gsc');
+    const gscStatus =
+        dataSources.connectors === 'unavailable'
+            ? { status: 'unavailable', lastSyncedAt: null }
+            : resolveConnectorStatus(connectorRows, 'gsc');
     const lastObservedDate = getLatestObservedDate(rows);
     const ageDays = getObservedAgeDays(lastObservedDate);
 
     if (dataSources.gscRows === 'unavailable' || (!lastObservedDate && gscStatus.status === 'unavailable')) {
         return {
-            status: 'unavailable', reliability: 'unavailable', label: 'Search Console',
-            connectorStatus: gscStatus.status, lastObservedDate, lastSyncedAt: gscStatus.lastSyncedAt,
+            status: 'unavailable',
+            reliability: 'unavailable',
+            label: 'Search Console',
+            connectorStatus: gscStatus.status,
+            lastObservedDate,
+            lastSyncedAt: gscStatus.lastSyncedAt,
             detail: 'Données Search Console temporairement indisponibles.',
         };
     }
@@ -162,9 +174,10 @@ export function buildGscFreshness(connectorRows, rows, dataSources, messages) {
             connectorStatus: gscStatus.status,
             lastObservedDate: null,
             lastSyncedAt: gscStatus.lastSyncedAt,
-            detail: gscStatus.status === 'not_connected'
-                ? 'Search Console non connectée pour ce mandat.'
-                : messages.connectedEmpty,
+            detail:
+                gscStatus.status === 'not_connected'
+                    ? 'Search Console non connectée pour ce mandat.'
+                    : messages.connectedEmpty,
         };
     }
 
@@ -175,11 +188,12 @@ export function buildGscFreshness(connectorRows, rows, dataSources, messages) {
         connectorStatus: gscStatus.status,
         lastObservedDate,
         lastSyncedAt: gscStatus.lastSyncedAt,
-        detail: ageDays === null
-            ? 'Date observée non exploitable proprement.'
-            : ageDays <= 3
-                ? messages.fresh
-                : ageDays <= 7
+        detail:
+            ageDays === null
+                ? 'Date observée non exploitable proprement.'
+                : ageDays <= 3
+                  ? messages.fresh
+                  : ageDays <= 7
                     ? messages.aging
                     : messages.stale,
     };

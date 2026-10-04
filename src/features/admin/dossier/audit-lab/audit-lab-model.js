@@ -25,7 +25,15 @@ const asNumber = finiteNumberOrNull;
  * hero always has something meaningful.
  */
 export function getFinalStableScores(audit) {
-    if (!audit) return { finalScore: null, seoScore: null, geoScore: null, deterministicScore: null, hybridScore: null, llmStatus: null };
+    if (!audit)
+        return {
+            finalScore: null,
+            seoScore: null,
+            geoScore: null,
+            deterministicScore: null,
+            hybridScore: null,
+            llmStatus: null,
+        };
 
     const seoScore = asNumber(audit.seo_score);
     const geoScore = asNumber(audit.geo_score);
@@ -136,15 +144,22 @@ export function getSeoGeoBucketsViewModel(audit) {
             .map(([key]) => ({ key, dimension: byKey.get(key) || null, meta: dimensionFrMeta(key) }));
 
         const applicableScores = bucketDimensions
-            .map((entry) => (entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A' ? entry.dimension.score : null))
+            .map((entry) =>
+                entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A'
+                    ? entry.dimension.score
+                    : null,
+            )
             .filter((score) => score !== null);
-        const bucketScore = applicableScores.length > 0
-            ? Math.round(applicableScores.reduce((acc, score) => acc + score, 0) / applicableScores.length)
-            : null;
+        const bucketScore =
+            applicableScores.length > 0
+                ? Math.round(applicableScores.reduce((acc, score) => acc + score, 0) / applicableScores.length)
+                : null;
 
         const keys = bucketDimensions.map((entry) => entry.key);
         const bucketIssues = issues.filter((issue) => keys.includes(String(issue?.dimension || '').toLowerCase()));
-        const bucketStrengths = strengths.filter((strength) => keys.includes(String(strength?.dimension || '').toLowerCase()));
+        const bucketStrengths = strengths.filter((strength) =>
+            keys.includes(String(strength?.dimension || '').toLowerCase()),
+        );
 
         // Synthesize corrective points when the bucket is below the "near-perfect"
         // threshold. This fixes the historical incoherence where SEO/GEO could be
@@ -189,10 +204,12 @@ export function getSeoGeoBucketsViewModel(audit) {
 }
 
 export function getClassification(audit) {
-    return audit?.geo_breakdown?.site_classification
-        || audit?.seo_breakdown?.site_classification
-        || audit?.extracted_data?.layered_v1?.classification
-        || null;
+    return (
+        audit?.geo_breakdown?.site_classification ||
+        audit?.seo_breakdown?.site_classification ||
+        audit?.extracted_data?.layered_v1?.classification ||
+        null
+    );
 }
 
 /**
@@ -216,12 +233,12 @@ export function getLayer1ViewModel(audit) {
     const scannedPages = toArray(audit?.scanned_pages);
 
     const hasAny = Boolean(
-        crawlMetadata
-        || renderStats
-        || siteLevelRawScores
-        || pageLevelChecks.length
-        || pageArtifacts.length
-        || scannedPages.length,
+        crawlMetadata ||
+        renderStats ||
+        siteLevelRawScores ||
+        pageLevelChecks.length ||
+        pageArtifacts.length ||
+        scannedPages.length,
     );
 
     return {
@@ -330,7 +347,12 @@ export function aggregateChecksByCategory(pageGroups) {
             if (!byCategory.has(category)) {
                 byCategory.set(category, {
                     category,
-                    pass: 0, warn: 0, fail: 0, skip: 0, unknown: 0, total: 0,
+                    pass: 0,
+                    warn: 0,
+                    fail: 0,
+                    skip: 0,
+                    unknown: 0,
+                    total: 0,
                     byCheckId: new Map(),
                 });
             }
@@ -359,7 +381,7 @@ export function aggregateChecksByCategory(pageGroups) {
         const topIssues = Array.from(bucket.byCheckId.entries())
             .map(([checkId, counts]) => ({ checkId, ...counts }))
             .filter((entry) => entry.fail > 0 || entry.warn > 0)
-            .sort((a, b) => (b.fail - a.fail) || (b.warn - a.warn))
+            .sort((a, b) => b.fail - a.fail || b.warn - a.warn)
             .slice(0, 3);
 
         const { byCheckId: _discard, ...rest } = bucket;
@@ -368,7 +390,7 @@ export function aggregateChecksByCategory(pageGroups) {
     }
 
     // Order: most broken categories first, then by total activity.
-    result.sort((a, b) => (b.fail - a.fail) || (b.warn - a.warn) || (b.total - a.total));
+    result.sort((a, b) => b.fail - a.fail || b.warn - a.warn || b.total - a.total);
     return result;
 }
 
@@ -407,12 +429,16 @@ export function getLayer2ViewModel(audit) {
 
     const modules = expert
         ? [
-            { key: 'llms_txt_deep', label: 'llms.txt (validation profonde)', data: expert.llms_txt_deep },
-            { key: 'ai_discovery_endpoints', label: 'Endpoints de découverte IA', data: expert.ai_discovery_endpoints },
-            { key: 'brand_entity', label: 'Marque / entité', data: expert.brand_entity },
-            { key: 'trust_stack', label: 'Signaux de confiance', data: expert.trust_stack },
-            { key: 'negative_signals', label: 'Signaux négatifs', data: expert.negative_signals },
-        ].filter((m) => m.data)
+              { key: 'llms_txt_deep', label: 'llms.txt (validation profonde)', data: expert.llms_txt_deep },
+              {
+                  key: 'ai_discovery_endpoints',
+                  label: 'Endpoints de découverte IA',
+                  data: expert.ai_discovery_endpoints,
+              },
+              { key: 'brand_entity', label: 'Marque / entité', data: expert.brand_entity },
+              { key: 'trust_stack', label: 'Signaux de confiance', data: expert.trust_stack },
+              { key: 'negative_signals', label: 'Signaux négatifs', data: expert.negative_signals },
+          ].filter((m) => m.data)
         : [];
 
     return {
@@ -477,8 +503,11 @@ export function formatDate(iso) {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleString('fr-FR', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     } catch {
         return String(iso);
@@ -503,12 +532,14 @@ export function buildCompareSnapshotFromAudit(audit, { label = null } = {}) {
         applicability: dim.applicability || null,
     }));
     const classification = getClassification(audit);
-    const layer1 = audit?.extracted_data?.layered_v1_layer1?.site_level_raw_scores
-        || audit?.extracted_data?.layered_v1?.site_level_raw_scores
-        || null;
-    const layer2Summary = audit?.geo_breakdown?.subsystem_scores?.layer2_expert_summary
-        || audit?.extracted_data?.layered_v1?.subsystem_scores?.layer2_expert_summary
-        || null;
+    const layer1 =
+        audit?.extracted_data?.layered_v1_layer1?.site_level_raw_scores ||
+        audit?.extracted_data?.layered_v1?.site_level_raw_scores ||
+        null;
+    const layer2Summary =
+        audit?.geo_breakdown?.subsystem_scores?.layer2_expert_summary ||
+        audit?.extracted_data?.layered_v1?.subsystem_scores?.layer2_expert_summary ||
+        null;
     const scannedPages = toArray(audit?.scanned_pages);
 
     return {
@@ -523,10 +554,10 @@ export function buildCompareSnapshotFromAudit(audit, { label = null } = {}) {
         pagesSuccessful: scannedPages.filter((page) => page?.success).length,
         classification: classification
             ? {
-                type: classification.type || null,
-                label: classification.label || null,
-                confidence: classification.confidence || null,
-            }
+                  type: classification.type || null,
+                  label: classification.label || null,
+                  confidence: classification.confidence || null,
+              }
             : null,
         scores: {
             finalScore: scores.finalScore,
@@ -537,30 +568,34 @@ export function buildCompareSnapshotFromAudit(audit, { label = null } = {}) {
         dimensions,
         layer1: layer1
             ? {
-                overall: layer1.overall ?? null,
-                categories: layer1.categories || {},
-                totals: layer1.totals || null,
-            }
+                  overall: layer1.overall ?? null,
+                  categories: layer1.categories || {},
+                  totals: layer1.totals || null,
+              }
             : null,
         layer2: layer2Summary
             ? {
-                summary_score: layer2Summary.summary_score ?? null,
-                finding_counts: layer2Summary.finding_counts || null,
-            }
+                  summary_score: layer2Summary.summary_score ?? null,
+                  finding_counts: layer2Summary.finding_counts || null,
+              }
             : null,
-        issues: toArray(audit?.issues).slice(0, 8).map((issue) => ({
-            id: issue.id || issue.code || null,
-            title: issue.title || issue.message || null,
-            severity: issue.severity || issue.priority || null,
-            category: issue.category || null,
-            dimension: issue.dimension || null,
-        })),
-        strengths: toArray(audit?.strengths).slice(0, 6).map((strength) => ({
-            id: strength.id || strength.code || null,
-            title: strength.title || strength.message || null,
-            category: strength.category || null,
-            dimension: strength.dimension || null,
-        })),
+        issues: toArray(audit?.issues)
+            .slice(0, 8)
+            .map((issue) => ({
+                id: issue.id || issue.code || null,
+                title: issue.title || issue.message || null,
+                severity: issue.severity || issue.priority || null,
+                category: issue.category || null,
+                dimension: issue.dimension || null,
+            })),
+        strengths: toArray(audit?.strengths)
+            .slice(0, 6)
+            .map((strength) => ({
+                id: strength.id || strength.code || null,
+                title: strength.title || strength.message || null,
+                category: strength.category || null,
+                dimension: strength.dimension || null,
+            })),
     };
 }
 
@@ -671,7 +706,9 @@ function deriveLayer1Problems(audit, alreadyCoveredKeys) {
             source: 'layer1',
             id: `layer1:${entry.checkId}`,
             title: `Check technique « ${entry.checkId} » en échec`,
-            description: entry.evidenceSamples[0] || `${entry.fail} échec(s), ${entry.warn} avertissement(s) relevés pendant le scan.`,
+            description:
+                entry.evidenceSamples[0] ||
+                `${entry.fail} échec(s), ${entry.warn} avertissement(s) relevés pendant le scan.`,
             severity: dominantStatus === 'fail' ? (entry.weight >= 2 ? 'high' : 'medium') : 'low',
             slot,
             category: entry.category,
@@ -794,7 +831,10 @@ export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dime
     const synthesized = [];
 
     const applicableDims = dimensions
-        .filter((entry) => entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A')
+        .filter(
+            (entry) =>
+                entry.dimension && Number.isFinite(entry.dimension.score) && entry.dimension.applicability !== 'N/A',
+        )
         .map((entry) => ({ key: entry.key, score: entry.dimension.score, label: entry.meta?.label || entry.key }))
         .sort((a, b) => a.score - b.score);
 
@@ -829,13 +869,14 @@ export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dime
     }
 
     const sortedLayer1 = Array.from(relevantLayer1.values())
-        .sort((a, b) => (b.fail - a.fail) || (b.warn - a.warn))
+        .sort((a, b) => b.fail - a.fail || b.warn - a.warn)
         .slice(0, 3);
     for (const check of sortedLayer1) {
         synthesized.push({
             id: `synth:layer1:${check.checkId}`,
             title: `Contrôle technique « ${check.checkId} » ${check.fail > 0 ? 'en échec' : 'à surveiller'}`,
-            description: check.evidence || `${check.fail} échec(s), ${check.warn} avertissement(s) détectés pendant le scan.`,
+            description:
+                check.evidence || `${check.fail} échec(s), ${check.warn} avertissement(s) détectés pendant le scan.`,
             severity: check.fail > 0 ? 'medium' : 'low',
             source: 'layer1',
         });
@@ -851,7 +892,8 @@ export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dime
                 synthesized.push({
                     id: `synth:layer2:${expertModule.key}:${finding.id || finding.code || finding.title || Math.random().toString(36).slice(2, 8)}`,
                     title: finding.title || finding.message || `Finding expert — ${expertModule.label}`,
-                    description: finding.detail || finding.description || `Signal expert détecté sur « ${expertModule.label} ».`,
+                    description:
+                        finding.detail || finding.description || `Signal expert détecté sur « ${expertModule.label} ».`,
                     severity: String(finding.severity || 'medium').toLowerCase(),
                     source: 'layer2',
                 });
@@ -900,7 +942,8 @@ const DIMENSION_TO_FAMILY = {
 
 function guessEffort(entry) {
     const title = String(entry.title || '').toLowerCase();
-    if (title.includes('title') || title.includes('meta') || title.includes('canonical') || title.includes('robots')) return 'faible';
+    if (title.includes('title') || title.includes('meta') || title.includes('canonical') || title.includes('robots'))
+        return 'faible';
     if (title.includes('schema') || title.includes('faq') || title.includes('json-ld')) return 'moyen';
     if (title.includes('contenu') || title.includes('page') || title.includes('service')) return 'élevé';
     return 'moyen';
@@ -937,17 +980,21 @@ export function getOpportunityModel(audit) {
         const priority = String(issue?.priority || issue?.severity || 'medium').toLowerCase();
         const effort = guessEffort(issue);
         const isQuickWin =
-            effort === 'faible'
-            && (priority === 'high' || priority === 'medium')
-            && (title.includes('title') || title.includes('meta') || title.includes('canonical') || title.includes('robots') || title.includes('h1'));
+            effort === 'faible' &&
+            (priority === 'high' || priority === 'medium') &&
+            (title.includes('title') ||
+                title.includes('meta') ||
+                title.includes('canonical') ||
+                title.includes('robots') ||
+                title.includes('h1'));
 
         const family = isQuickWin ? 'quick_wins' : opportunityFamilyFromRaw(issue);
         opportunities.push({
             kind: 'gap',
             family,
-            title: issue.title || issue.description || 'Opportunité d\'amélioration',
+            title: issue.title || issue.description || "Opportunité d'amélioration",
             detected: issue.evidence_summary || issue.description || 'Signal manquant ou incomplet détecté.',
-            why: issue.description || 'Ce signal manque aujourd\'hui et limite la lecture par les moteurs & IA.',
+            why: issue.description || "Ce signal manque aujourd'hui et limite la lecture par les moteurs & IA.",
             action: issue.recommended_fix || 'À corriger dans la prochaine itération on-page.',
             expectedImpact: guessImpactForFamily(family, effort),
             effort,
@@ -1057,7 +1104,8 @@ const SUBSCORE_LABELS = {
 
 const REWRITE_HINTS = {
     specificity: 'Ajouter des chiffres, noms propres et termes métier concrets.',
-    self_containment: 'Rendre le bloc auto-suffisant — éviter les pronoms et les renvois implicites à d\'autres paragraphes.',
+    self_containment:
+        "Rendre le bloc auto-suffisant — éviter les pronoms et les renvois implicites à d'autres paragraphes.",
     answer_density: 'Formuler une réponse directe à une question claire dès la première phrase.',
     factual_density: 'Enrichir de faits vérifiables : dates, lieux, labels, chiffres, sources.',
 };
@@ -1128,7 +1176,7 @@ export function getCitabilityActionableModel(audit) {
     }
 
     const pages = Array.from(pageMap.values())
-        .sort((a, b) => (b.lowBlocks - a.lowBlocks) || ((a.pageScore ?? 100) - (b.pageScore ?? 100)))
+        .sort((a, b) => b.lowBlocks - a.lowBlocks || (a.pageScore ?? 100) - (b.pageScore ?? 100))
         .slice(0, 4);
 
     const scores = allBlocks.map((b) => b.citability_score).filter((n) => Number.isFinite(n));

@@ -4,12 +4,7 @@ import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 import { loadIndependentSources, getSourceStatus } from '@/lib/operator-intelligence/source-availability';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
-import {
-    getLatestCollectionRun,
-    listClusters,
-    listOpportunities,
-    getCommunityStats,
-} from '@/lib/db/community';
+import { getLatestCollectionRun, listClusters, listOpportunities, getCommunityStats } from '@/lib/db/community';
 import { evidenceLevel } from '@/lib/agent-reach/contracts';
 import { resolveBusinessType } from '@/lib/ai/business-type-resolver';
 
@@ -26,10 +21,11 @@ function buildSiteContext(client) {
     const resolved = resolveBusinessType(rawBusinessType, siteClassification, clientName);
 
     // Pick the best human-readable label: offering_anchor > resolved category > raw type
-    const businessLabel = resolved.offering_anchor
-        || (resolved.canonical_category !== 'unknown' ? resolved.canonical_category.replace(/_/g, ' ') : '')
-        || rawBusinessType
-        || null;
+    const businessLabel =
+        resolved.offering_anchor ||
+        (resolved.canonical_category !== 'unknown' ? resolved.canonical_category.replace(/_/g, ' ') : '') ||
+        rawBusinessType ||
+        null;
 
     return {
         client_name: clientName || null,
@@ -104,7 +100,7 @@ function resolveConnectionStatus(connectorRow, latestRun, stats, dataSources) {
             message:
                 latestRun || dataSources.latestRun === 'unavailable' || stats?.documents > 0
                     ? 'Intelligence communautaire non connectée actuellement.'
-                    : 'Intelligence communautaire non connectée, aucune collecte externe n\'a été exécutée.',
+                    : "Intelligence communautaire non connectée, aucune collecte externe n'a été exécutée.",
             requirement: 'Lancez une collecte manuelle ou attendez le prochain cycle du moteur continu.',
         };
     }
@@ -167,7 +163,7 @@ function buildNotConnectedSlice(client, availability) {
         connection: {
             status: 'not_connected',
             connector: 'agent_reach',
-            message: 'Intelligence communautaire non connectée, aucune collecte externe n\'a été exécutée.',
+            message: "Intelligence communautaire non connectée, aucune collecte externe n'a été exécutée.",
             requirement: 'Lancez une collecte manuelle ou attendez le prochain cycle du moteur continu.',
         },
         summary: {
@@ -199,7 +195,8 @@ function buildNotConnectedSlice(client, availability) {
         contentAngleOpportunities: [],
         emptyState: {
             title: 'Intelligence communautaire non connectée',
-            description: 'Aucune collecte n\'a encore eu lieu : les compteurs à zéro ne signifient pas l\'absence de discussions sur votre marque. Lancez une collecte manuelle ou attendez le prochain cycle du moteur continu.',
+            description:
+                "Aucune collecte n'a encore eu lieu : les compteurs à zéro ne signifient pas l'absence de discussions sur votre marque. Lancez une collecte manuelle ou attendez le prochain cycle du moteur continu.",
         },
     };
 }
@@ -252,7 +249,8 @@ export async function getSocialSlice(clientId) {
     const aiMentionOpportunities = formatOpportunities(opportunities, 'ai_mention_opportunity', { maxItems: 4 });
     const contentAngleOpportunities = formatOpportunities(opportunities, 'content_opportunity', { maxItems: 4 });
 
-    const isConnected = connection.status === 'connected' || connection.status === 'connected_empty' || connection.status === 'syncing';
+    const isConnected =
+        connection.status === 'connected' || connection.status === 'connected_empty' || connection.status === 'syncing';
 
     return {
         ...availability,
@@ -272,15 +270,17 @@ export async function getSocialSlice(clientId) {
             mentions_count: stats?.mentions ?? null,
             site_context: dataSources.client === 'unavailable' ? null : buildSiteContext(client),
             query_seeds: latestRun?.seed_queries || [],
-            last_run: latestRun ? {
-                id: latestRun.id,
-                status: latestRun.status,
-                started_at: latestRun.started_at,
-                finished_at: latestRun.finished_at,
-                documents_collected: latestRun.documents_collected,
-                documents_persisted: latestRun.documents_persisted,
-                run_context: latestRun.run_context || null,
-            } : null,
+            last_run: latestRun
+                ? {
+                      id: latestRun.id,
+                      status: latestRun.status,
+                      started_at: latestRun.started_at,
+                      finished_at: latestRun.finished_at,
+                      documents_collected: latestRun.documents_collected,
+                      documents_persisted: latestRun.documents_persisted,
+                      run_context: latestRun.run_context || null,
+                  }
+                : null,
         },
         topComplaints,
         topQuestions,
@@ -305,13 +305,17 @@ export async function getSocialSlice(clientId) {
                       description:
                           'Certaines données communautaires sont temporairement indisponibles. Les données connues sont conservées.',
                   }
-                : !isConnected || stats.documents === 0 ? {
-            title: latestRun && stats.documents === 0
-                ? 'Aucun document pertinent collecté pour le moment'
-                : 'Aucune donnée communautaire collectée',
-            description: latestRun && stats.documents === 0
-                ? `La dernière collecte (${latestRun.status}) n'a pas trouvé de nouveau document pertinent. Les seeds seront enrichis lors des prochaines exécutions, ce qui ne signifie pas l'absence de discussions sur votre marque.`
-                : 'Le connecteur est actif mais aucune discussion externe n\'a encore été collectée. La prochaine collecte sera déclenchée par le moteur continu.',
-        } : null,
+                : !isConnected || stats.documents === 0
+                  ? {
+                        title:
+                            latestRun && stats.documents === 0
+                                ? 'Aucun document pertinent collecté pour le moment'
+                                : 'Aucune donnée communautaire collectée',
+                        description:
+                            latestRun && stats.documents === 0
+                                ? `La dernière collecte (${latestRun.status}) n'a pas trouvé de nouveau document pertinent. Les seeds seront enrichis lors des prochaines exécutions, ce qui ne signifie pas l'absence de discussions sur votre marque.`
+                                : "Le connecteur est actif mais aucune discussion externe n'a encore été collectée. La prochaine collecte sera déclenchée par le moteur continu.",
+                    }
+                  : null,
     };
 }

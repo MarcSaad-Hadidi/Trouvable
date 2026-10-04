@@ -7,13 +7,7 @@ import {
     __internal__,
 } from '../agent/actionability.js';
 
-const DIM_KEYS = [
-    'offer_clarity',
-    'contact_booking',
-    'local_coverage',
-    'trust_proof',
-    'content_actionability',
-];
+const DIM_KEYS = ['offer_clarity', 'contact_booking', 'local_coverage', 'trust_proof', 'content_actionability'];
 
 function makeAudit(overrides = {}) {
     return {
@@ -57,11 +51,11 @@ describe('actionability weights', () => {
     });
 
     it('locks the exact Phase 2 weights', () => {
-        expect(ACTIONABILITY_DIMENSION_WEIGHTS.offer_clarity).toBe(0.30);
+        expect(ACTIONABILITY_DIMENSION_WEIGHTS.offer_clarity).toBe(0.3);
         expect(ACTIONABILITY_DIMENSION_WEIGHTS.contact_booking).toBe(0.25);
-        expect(ACTIONABILITY_DIMENSION_WEIGHTS.local_coverage).toBe(0.20);
+        expect(ACTIONABILITY_DIMENSION_WEIGHTS.local_coverage).toBe(0.2);
         expect(ACTIONABILITY_DIMENSION_WEIGHTS.trust_proof).toBe(0.15);
-        expect(ACTIONABILITY_DIMENSION_WEIGHTS.content_actionability).toBe(0.10);
+        expect(ACTIONABILITY_DIMENSION_WEIGHTS.content_actionability).toBe(0.1);
     });
 });
 
@@ -107,7 +101,8 @@ describe('buildActionabilityReport — observed signal guardrail', () => {
             business_details: {
                 services: ['Service A', 'Service B', 'Service C'],
                 short_desc: 'Cabinet spécialisé en conseil stratégique local.',
-                long_desc: 'Texte long de présentation détaillée très complet avec beaucoup de contenu explicatif utile pour les moteurs.',
+                long_desc:
+                    'Texte long de présentation détaillée très complet avec beaucoup de contenu explicatif utile pour les moteurs.',
                 areas_served: ['Montréal', 'Laval', 'Longueuil'],
                 opening_hours: ['Lun-Ven 09h-17h'],
                 maps_url: 'https://maps.example.com/foo',
@@ -169,11 +164,7 @@ describe('buildActionabilityReport — rich observed data', () => {
                 has_faq_schema: true,
                 has_organization_schema: true,
                 has_local_business_schema: true,
-                schema_entities: [
-                    { '@type': 'Service' },
-                    { '@type': 'Review' },
-                    { '@type': 'LocalBusiness' },
-                ],
+                schema_entities: [{ '@type': 'Service' }, { '@type': 'Review' }, { '@type': 'LocalBusiness' }],
                 h2_clusters: [['A', 'B', 'C', 'D']],
                 local_signals: {
                     cities: ['Montréal', 'Laval', 'Longueuil'],

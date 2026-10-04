@@ -1,6 +1,9 @@
 import 'server-only';
 
-import { getRecentQueryRuns as dbGetRecentQueryRuns, getBenchmarkRunsBySession as dbGetBenchmarkRunsBySession } from '@/lib/db/query-runs';
+import {
+    getRecentQueryRuns as dbGetRecentQueryRuns,
+    getBenchmarkRunsBySession as dbGetBenchmarkRunsBySession,
+} from '@/lib/db/query-runs';
 import { getBenchmarkSessionsForClient as dbGetBenchmarkSessionsForClient } from '@/lib/db/benchmarks';
 import { normalizeRunParseStatus } from '@/lib/operator-intelligence/run-lifecycle';
 import { listBenchmarkVariants } from '@/lib/queries/engine-variants';
@@ -19,9 +22,7 @@ function summarizeBenchmarkSession(session, runs = []) {
         parse_confidence: run.parse_confidence ?? null,
         latency_ms: run.latency_ms ?? null,
         citations: Number(
-            run.normalized_response?.external_source_mentions
-            ?? run.normalized_response?.source_mentions
-            ?? 0,
+            run.normalized_response?.external_source_mentions ?? run.normalized_response?.source_mentions ?? 0,
         ),
         competitors: Number(run.normalized_response?.competitor_mentions || 0),
         cost_estimate_usd: run.raw_analysis?.benchmark?.cost_estimate_usd ?? null,
@@ -68,9 +69,17 @@ export async function getModelsSlice(clientId) {
     const ws = results[0].value;
     const recentQueryRuns = results[1].status === 'fulfilled' ? results[1].value : [];
     const benchmarkSessions = results[2].status === 'fulfilled' ? results[2].value : [];
-    const dataSources = { ...ws.snapshot.sources, recentRuns: results[1].status === 'fulfilled' ? (recentQueryRuns.length ? 'available' : 'empty') : 'unavailable', benchmarks: results[2].status === 'fulfilled' ? (benchmarkSessions.length ? 'available' : 'empty') : 'unavailable' };
+    const dataSources = {
+        ...ws.snapshot.sources,
+        recentRuns:
+            results[1].status === 'fulfilled' ? (recentQueryRuns.length ? 'available' : 'empty') : 'unavailable',
+        benchmarks:
+            results[2].status === 'fulfilled' ? (benchmarkSessions.length ? 'available' : 'empty') : 'unavailable',
+    };
     const errors = [...ws.snapshot.errors];
-    for (const source of ['recentRuns', 'benchmarks']) if (dataSources[source] === 'unavailable') errors.push({ source, message: 'Données temporairement indisponibles.' });
+    for (const source of ['recentRuns', 'benchmarks'])
+        if (dataSources[source] === 'unavailable')
+            errors.push({ source, message: 'Données temporairement indisponibles.' });
     const sessionDetails = [];
     for (const session of benchmarkSessions || []) {
         try {
@@ -87,7 +96,7 @@ export async function getModelsSlice(clientId) {
 
     // Merge compare-mode runs into modelPerformance.
     // The snapshot only includes standard/null run_mode; compare runs come via recentQueryRuns.
-    const compareRuns = (recentQueryRuns || []).filter(r => r.run_mode === 'compare');
+    const compareRuns = (recentQueryRuns || []).filter((r) => r.run_mode === 'compare');
     const mpMap = new Map();
     for (const row of modelPerformance || []) {
         mpMap.set(`${row.provider}|||${row.model}`, { ...row });
@@ -95,7 +104,14 @@ export async function getModelsSlice(clientId) {
     for (const r of compareRuns) {
         const key = `${r.provider || 'unknown'}|||${r.model || 'unknown'}`;
         if (!mpMap.has(key)) {
-            mpMap.set(key, { provider: r.provider || 'unknown', model: r.model || 'unknown', runs: 0, targetFound: 0, sources: 0, targetRatePercent: 0 });
+            mpMap.set(key, {
+                provider: r.provider || 'unknown',
+                model: r.model || 'unknown',
+                runs: 0,
+                targetFound: 0,
+                sources: 0,
+                targetRatePercent: 0,
+            });
         }
         const row = mpMap.get(key);
         row.runs += 1;
@@ -120,7 +136,8 @@ export async function getModelsSlice(clientId) {
         recentQueryRuns,
         summary: {
             totalRuns: runMetrics.totalQueryRuns.value ?? null,
-            totalProviders: ws.snapshot.sources.runs === 'unavailable' ? null : Object.keys(runMetrics.runsByProvider || {}).length,
+            totalProviders:
+                ws.snapshot.sources.runs === 'unavailable' ? null : Object.keys(runMetrics.runsByProvider || {}).length,
         },
         benchmark: {
             variantsCatalog: listBenchmarkVariants(),
@@ -128,7 +145,8 @@ export async function getModelsSlice(clientId) {
         },
         emptyState: {
             title: 'Aucune execution pour le moment',
-            description: 'Lancez d abord les prompts suivis. Les performances provider/modele sont calculees sur les exécutions observées.',
+            description:
+                'Lancez d abord les prompts suivis. Les performances provider/modele sont calculees sur les exécutions observées.',
         },
     };
 }

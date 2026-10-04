@@ -28,9 +28,7 @@ export async function getSeoActionsSlice(clientId, { audit } = {}) {
     let suggestions = [];
     try {
         const allSuggestions = await listRemediationSuggestionsForClient(clientId);
-        suggestions = allSuggestions.filter(
-            (s) => SEO_RELEVANT_PROBLEM_TYPES.has(s.problem_type)
-        );
+        suggestions = allSuggestions.filter((s) => SEO_RELEVANT_PROBLEM_TYPES.has(s.problem_type));
     } catch {
         // Table may not exist yet or be empty — graceful degradation
     }
@@ -43,10 +41,13 @@ export async function getSeoActionsSlice(clientId, { audit } = {}) {
 
     return {
         available: hasData,
-        emptyState: hasData ? null : {
-            title: 'Aucune action SEO identifiée',
-            description: 'Aucune suggestion de remédiation SEO et aucun problème d\'audit détecté. Lancez un audit ou attendez le suivi continu.',
-        },
+        emptyState: hasData
+            ? null
+            : {
+                  title: 'Aucune action SEO identifiée',
+                  description:
+                      "Aucune suggestion de remédiation SEO et aucun problème d'audit détecté. Lancez un audit ou attendez le suivi continu.",
+              },
         suggestions: suggestions.map((s) => ({
             id: s.id,
             problemType: s.problem_type,

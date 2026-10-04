@@ -20,7 +20,9 @@ function detectHydrationHints(html = '') {
 }
 
 function countWords(text = '') {
-    const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+    const normalized = String(text || '')
+        .replace(/\s+/g, ' ')
+        .trim();
     if (!normalized) return 0;
     return normalized.split(' ').length;
 }
@@ -71,7 +73,9 @@ async function connectRemoteBrowser(chromium) {
             if (parsed.search) {
                 safeMessage = safeMessage.replaceAll(parsed.search, '');
             }
-        } catch { /* ignore URL parse errors */ }
+        } catch {
+            /* ignore URL parse errors */
+        }
         return {
             browser: null,
             reason: 'remote_browser_failed',
@@ -144,7 +148,7 @@ export async function createPlaywrightRenderer() {
             async render() {
                 return { ok: false, error: 'Playwright rendering disabled by config. Falling back.' };
             },
-            async close() { },
+            async close() {},
         };
     }
 
@@ -152,7 +156,8 @@ export async function createPlaywrightRenderer() {
         const { chromium } = await loadChromiumModule();
         const remoteConnection = await connectRemoteBrowser(chromium);
         const serverlessConnection = remoteConnection ? null : await launchServerlessChromium(chromium);
-        const localConnection = (remoteConnection || serverlessConnection?.browser) ? null : await launchLocalBrowser(chromium);
+        const localConnection =
+            remoteConnection || serverlessConnection?.browser ? null : await launchLocalBrowser(chromium);
 
         const connection = [remoteConnection, serverlessConnection, localConnection].find((c) => c?.browser);
         if (!connection?.browser) {
@@ -161,15 +166,13 @@ export async function createPlaywrightRenderer() {
                 remoteConnection?.error
                     ? `remote: ${remoteConnection.error}`
                     : remoteConnection === null
-                        ? 'remote: no AUDIT_BROWSER_WS_ENDPOINT configured'
-                        : null,
+                      ? 'remote: no AUDIT_BROWSER_WS_ENDPOINT configured'
+                      : null,
                 serverlessConnection?.error ? `serverless: ${serverlessConnection.error}` : null,
                 localConnection?.error ? `local: ${localConnection.error}` : null,
             ].filter(Boolean);
 
-            throw new Error(
-                `No browser strategy succeeded. ${failureReasons.join(' | ')}`
-            );
+            throw new Error(`No browser strategy succeeded. ${failureReasons.join(' | ')}`);
         }
 
         const browser = connection.browser;
@@ -200,7 +203,10 @@ export async function createPlaywrightRenderer() {
                     const finalUrl = page.url();
                     const html = await page.content();
                     const title = await page.title().catch(() => '');
-                    const bodyText = await page.locator('body').innerText().catch(() => '');
+                    const bodyText = await page
+                        .locator('body')
+                        .innerText()
+                        .catch(() => '');
                     const visibleWordCount = countWords(bodyText);
                     const hydrationHints = detectHydrationHints(html);
                     const appShellLikely = visibleWordCount < 120 && hydrationHints.length > 0;
@@ -223,12 +229,12 @@ export async function createPlaywrightRenderer() {
                         error: error?.message || 'Playwright render failed',
                     };
                 } finally {
-                    await page.close().catch(() => { });
+                    await page.close().catch(() => {});
                 }
             },
             async close() {
-                await context.close().catch(() => { });
-                await browser.close().catch(() => { });
+                await context.close().catch(() => {});
+                await browser.close().catch(() => {});
             },
         };
     } catch (error) {
@@ -238,7 +244,7 @@ export async function createPlaywrightRenderer() {
             async render() {
                 return { ok: false, error: 'Playwright unavailable' };
             },
-            async close() { },
+            async close() {},
         };
     }
 }

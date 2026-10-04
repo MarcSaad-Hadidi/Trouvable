@@ -34,9 +34,10 @@ export async function getSeoOverviewSlice(clientId, { audit } = {}) {
         gscRows: () => getRecentGscRows(clientId, { days: 28, limit: 50 }),
     });
     const { ga4Traffic: trafficRows, ga4TopPages: topPages, gscRows } = values;
-    const connector = provider => dataSources.connectors === 'unavailable'
-        ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
-        : resolveConnectorStatus(values.connectors, provider);
+    const connector = (provider) =>
+        dataSources.connectors === 'unavailable'
+            ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
+            : resolveConnectorStatus(values.connectors, provider);
     const ga4 = connector('ga4');
     const gsc = connector('gsc');
 

@@ -90,7 +90,7 @@ describe('GEO prompt templates v3', () => {
 
     it('controlled_context_answer injects business context and marks the run as context_injected', () => {
         const result = buildGeoPromptForMode({
-            query: "Dans quels cas Trouvable est-il pertinent ?",
+            query: 'Dans quels cas Trouvable est-il pertinent ?',
             mode: 'controlled_context_answer',
             businessContext,
             locale: 'fr-CA',
@@ -116,9 +116,7 @@ describe('GEO prompt templates v3', () => {
             mode: 'source_grounded_evaluation',
             businessContext,
             locale: 'fr-CA',
-            sources: [
-                { url: 'https://example.com/trouvable-review', title: 'Review', snippet: 'Signal externe.' },
-            ],
+            sources: [{ url: 'https://example.com/trouvable-review', title: 'Review', snippet: 'Signal externe.' }],
         });
 
         const text = flattenMessages(result);
@@ -156,7 +154,7 @@ describe('GEO prompt templates v3', () => {
         const messages = buildGeoQueryAnalysisPrompt(
             'Est-ce que Trouvable est credible ?',
             'Je ne peux pas verifier son efficacite sans sources externes. Aucune URL fournie.',
-            'Trouvable'
+            'Trouvable',
         );
 
         const fullText = messages.map((message) => message.content).join('\n');

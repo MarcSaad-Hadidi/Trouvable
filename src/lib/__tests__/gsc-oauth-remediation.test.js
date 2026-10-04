@@ -39,18 +39,22 @@ describe('GSC property resolution', () => {
     it('normalizes a bare domain to a URL-prefix property', async () => {
         const { resolveGscProperty } = await import('@/lib/seo/gsc-property');
 
-        expect(resolveGscProperty({
-            connector: { config: { site_url: 'example.com' } },
-            websiteUrl: null,
-        })).toBe('https://example.com/');
+        expect(
+            resolveGscProperty({
+                connector: { config: { site_url: 'example.com' } },
+                websiteUrl: null,
+            }),
+        ).toBe('https://example.com/');
     });
 
     it('keeps Search Console domain properties unchanged', async () => {
         const { resolveGscProperty } = await import('@/lib/seo/gsc-property');
 
-        expect(resolveGscProperty({
-            connector: { config: { site_url: 'sc-domain:example.com' } },
-            websiteUrl: 'https://fallback.test',
-        })).toBe('sc-domain:example.com');
+        expect(
+            resolveGscProperty({
+                connector: { config: { site_url: 'sc-domain:example.com' } },
+                websiteUrl: 'https://fallback.test',
+            }),
+        ).toBe('sc-domain:example.com');
     });
 });

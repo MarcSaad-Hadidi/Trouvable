@@ -104,7 +104,11 @@ const GEO_PROMPT_TEMPLATES = {
 };
 
 function normalizePromptMode(mode) {
-    const raw = String(mode || '').trim().toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    const raw = String(mode || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/-/g, '_');
     const mapped = GEO_PROMPT_MODE_ALIASES[raw] || raw;
     return GEO_PROMPT_TEMPLATES[mapped] ? mapped : 'controlled_context_answer';
 }
@@ -182,9 +186,12 @@ function buildControlledBusinessContext(businessContext = {}) {
 
 function buildPromptMetadata({ requestedMode, modeKey, template, businessContext, locale, language, sources }) {
     const sourceUrls = sources.map((source) => source.url);
-    const evidenceLevel = modeKey === 'source_grounded_evaluation'
-        ? (sourceUrls.length > 0 ? 'source_provided' : 'none')
-        : template.evidence_level;
+    const evidenceLevel =
+        modeKey === 'source_grounded_evaluation'
+            ? sourceUrls.length > 0
+                ? 'source_provided'
+                : 'none'
+            : template.evidence_level;
 
     return {
         discovery_mode: requestedMode,
@@ -221,7 +228,12 @@ export function buildGeoPromptForMode({
     language = null,
     sources = [],
 }) {
-    const requestedMode = String(mode || '').trim().toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_') || 'controlled_context_answer';
+    const requestedMode =
+        String(mode || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/-/g, '_') || 'controlled_context_answer';
     const modeKey = normalizePromptMode(mode);
     const template = GEO_PROMPT_TEMPLATES[modeKey];
     const sourceItems = normalizeSourceItems(sources);
@@ -273,9 +285,11 @@ ${question}
 Sources fournies:
 ${serializeSources(sourceItems)}
 
-${sourceItems.length > 0
+${
+    sourceItems.length > 0
         ? 'Reponds avec preuves, limites et URLs fournies uniquement.'
-        : "Aucune source fiable n'est fournie: explique que la reponse n'est pas verifiable au lieu d'inventer des liens."}`;
+        : "Aucune source fiable n'est fournie: explique que la reponse n'est pas verifiable au lieu d'inventer des liens."
+}`;
     } else if (modeKey === 'operator_extraction') {
         system = `Tu es un extracteur structure. Tu ne dois pas generer de nouvelle reponse utilisateur.
 Extrais uniquement les marques, concurrents, URLs, sentiment, position de la marque cible, niveau de preuve, claims, incertitudes et risque d hallucination.`;

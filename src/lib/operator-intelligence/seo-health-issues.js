@@ -31,9 +31,11 @@ function isSeoHealthIssue(issue) {
         .join(' ')
         .toLowerCase();
 
-    return issue?.dimension === 'technical_seo'
-        || issue?.category === 'technical'
-        || /canonical|https|crawl|render|robots|crawler|schema|index|noindex|llms/i.test(haystack);
+    return (
+        issue?.dimension === 'technical_seo' ||
+        issue?.category === 'technical' ||
+        /canonical|https|crawl|render|robots|crawler|schema|index|noindex|llms/i.test(haystack)
+    );
 }
 
 function issueReliability(issue) {
@@ -45,15 +47,16 @@ function issueReliability(issue) {
 }
 
 function normalizeIssueCard(issue, audit) {
-    const evidenceItems = toArray(issue?.evidence).map((item) => compactString(item?.summary)).filter(Boolean);
-    const evidence = compactString(issue?.evidence_summary)
-        || evidenceItems.join(' · ')
-        || 'Preuve non detaillee dans cet audit.';
-    const recommendedFix = compactString(issue?.recommended_fix)
-        || 'Correction a preciser depuis la preuve observee.';
-    const sourceUrl = compactString(issue?.affected_entity?.source_url)
-        || compactString(audit?.resolved_url)
-        || compactString(audit?.source_url);
+    const evidenceItems = toArray(issue?.evidence)
+        .map((item) => compactString(item?.summary))
+        .filter(Boolean);
+    const evidence =
+        compactString(issue?.evidence_summary) || evidenceItems.join(' · ') || 'Preuve non detaillee dans cet audit.';
+    const recommendedFix = compactString(issue?.recommended_fix) || 'Correction a preciser depuis la preuve observee.';
+    const sourceUrl =
+        compactString(issue?.affected_entity?.source_url) ||
+        compactString(audit?.resolved_url) ||
+        compactString(audit?.source_url);
 
     return {
         id: issue?.id || String(issue?.title || issue?.description || 'issue'),

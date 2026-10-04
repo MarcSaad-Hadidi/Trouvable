@@ -18,23 +18,32 @@ export default function AgentCompetitorsPage() {
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const summary = data?.summary || {};
-    const emptyState = data?.emptyState || (!data?.available ? {
-        title: 'Comparatif AGENT indisponible',
-        description: 'Aucune exécution exploitable ne permet encore de lire la pression concurrentielle du dossier.',
-    } : null);
+    const emptyState =
+        data?.emptyState ||
+        (!data?.available
+            ? {
+                  title: 'Comparatif AGENT indisponible',
+                  description:
+                      'Aucune exécution exploitable ne permet encore de lire la pression concurrentielle du dossier.',
+              }
+            : null);
 
     return (
         <AgentPageFrame
             eyebrow="AGENT Ops"
             title="Comparatif AGENT"
             subtitle={`Lecture concurrentielle réelle pour ${client?.client_name || 'ce mandat'} : concurrents cités, prompts perdus et mentions génériques.`}
-            actions={(
+            actions={
                 <>
                     {pageActionLink(data?.links?.prompts || `${baseHref}/geo/prompts`, 'Requêtes GEO')}
                     {pageActionLink(data?.links?.runs || `${baseHref}/geo/runs`, 'Exécutions GEO')}
-                    {pageActionLink(data?.links?.competitors || `${baseHref}/geo/competitors`, 'Carte concurrents', 'primary')}
+                    {pageActionLink(
+                        data?.links?.competitors || `${baseHref}/geo/competitors`,
+                        'Carte concurrents',
+                        'primary',
+                    )}
                 </>
-            )}
+            }
             loading={loading}
             error={error}
             emptyState={emptyState}
@@ -59,7 +68,10 @@ export default function AgentCompetitorsPage() {
                     {
                         id: 'pressure',
                         label: 'Pression / exécution',
-                        value: summary.normalizedPressurePerRun != null ? summary.normalizedPressurePerRun.toFixed(1) : 'n.d.',
+                        value:
+                            summary.normalizedPressurePerRun != null
+                                ? summary.normalizedPressurePerRun.toFixed(1)
+                                : 'n.d.',
                         detail: 'Indicateur normalisé',
                         tone: 'info',
                     },
@@ -74,7 +86,10 @@ export default function AgentCompetitorsPage() {
             />
 
             {summary.sampleSizeWarning ? (
-                <CommandChartCard title="Alerte échantillon" subtitle="Lecture honnête de la taille de base utilisée pour le comparatif.">
+                <CommandChartCard
+                    title="Alerte échantillon"
+                    subtitle="Lecture honnête de la taille de base utilisée pour le comparatif."
+                >
                     <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/10 p-4 text-[12px] leading-relaxed text-amber-100/90">
                         {summary.sampleSizeWarning}
                     </div>
@@ -112,10 +127,15 @@ export default function AgentCompetitorsPage() {
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.queryText}</span>
-                                {item.severity ? <AgentChip tone={toneForPriority(item.severity)}>{formatAgentPriority(item.severity)}</AgentChip> : null}
+                                {item.severity ? (
+                                    <AgentChip tone={toneForPriority(item.severity)}>
+                                        {formatAgentPriority(item.severity)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
                             <div className="text-[12px] text-white/60">
-                                {formatAgentCategory(item.category)} · {item.competitorMentions ?? 0} mention(s) · dernière exécution {item.latestRunAt || 'n.d.'}
+                                {formatAgentCategory(item.category)} · {item.competitorMentions ?? 0} mention(s) ·
+                                dernière exécution {item.latestRunAt || 'n.d.'}
                             </div>
                         </div>
                     )}

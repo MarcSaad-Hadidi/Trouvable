@@ -4,17 +4,11 @@ import { requireAdmin } from '@/lib/auth';
 // Side-effect: registers the community-briefing task
 import '@/lib/ai/tasks/community-briefing';
 import { executeTask } from '@/lib/ai/tasks/registry';
-import {
-    getLatestCollectionRun,
-    listClusters,
-    listOpportunities,
-} from '@/lib/db/community';
+import { getLatestCollectionRun, listClusters, listOpportunities } from '@/lib/db/community';
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
 import { resolveBusinessType } from '@/lib/ai/business-type-resolver';
 
 export const dynamic = 'force-dynamic';
-
-
 
 export async function POST(_, { params }) {
     const admin = await requireAdmin();
@@ -43,10 +37,11 @@ export async function POST(_, { params }) {
         const siteClassification = client?.site_classification || {};
         const clientName = String(client?.client_name || '').trim();
         const resolved = resolveBusinessType(rawBusinessType, siteClassification, clientName);
-        const businessLabel = resolved.offering_anchor
-            || (resolved.canonical_category !== 'unknown' ? resolved.canonical_category.replace(/_/g, ' ') : '')
-            || rawBusinessType
-            || 'entreprise locale';
+        const businessLabel =
+            resolved.offering_anchor ||
+            (resolved.canonical_category !== 'unknown' ? resolved.canonical_category.replace(/_/g, ' ') : '') ||
+            rawBusinessType ||
+            'entreprise locale';
         const city = String(client?.address?.city || client?.target_region || '').trim() || null;
 
         const seedDiagnostics = latestRun?.run_context?.seed_diagnostics || [];
@@ -84,4 +79,3 @@ export async function POST(_, { params }) {
         return noStoreJson({ error: 'Erreur generation briefing' }, { status: 500 });
     }
 }
-

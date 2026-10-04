@@ -17,7 +17,7 @@ import {
     Trash2Icon,
     XCircleIcon,
     ArrowUpRightIcon,
-    TerminalIcon
+    TerminalIcon,
 } from 'lucide-react';
 import { BarChart, Bar, Cell, ResponsiveContainer } from 'recharts';
 
@@ -29,32 +29,73 @@ import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/cont
 /* ── Utilities ── */
 
 function parseJsonResponse(response) {
-    return response.json().catch(() => ({})).then((json) => {
-        if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
-        return json;
-    });
+    return response
+        .json()
+        .catch(() => ({}))
+        .then((json) => {
+            if (!response.ok) throw new Error(json.error || `Erreur ${response.status}`);
+            return json;
+        });
 }
 
 function formatDateTime(value) {
     if (!value) return '—';
     try {
         return new Date(value).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-    } catch { return '—'; }
+    } catch {
+        return '—';
+    }
 }
 
 function formatShortTime(value) {
     if (!value) return '--:--';
     try {
         return new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    } catch { return '--:--'; }
+    } catch {
+        return '--:--';
+    }
 }
 
 function statusMeta(status) {
-    if (status === 'completed') return { label: 'Succès', short: 'OK', icon: CheckCircle2Icon, color: 'text-emerald-400', chip: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' };
-    if (status === 'partial') return { label: 'Partiel', short: 'PART', icon: AlertCircleIcon, color: 'text-amber-400', chip: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' };
-    if (status === 'running' || status === 'pending') return { label: 'En cours', short: 'RUN', icon: RefreshCwIcon, color: 'text-[#7c6aef]', chip: 'bg-[#7c6aef]/10 text-[#7c6aef] border border-[#7c6aef]/20' };
-    if (status === 'failed' || status === 'partial_error') return { label: 'Échec', short: 'ERR', icon: XCircleIcon, color: 'text-rose-400', chip: 'bg-rose-500/10 text-rose-400 border border-rose-500/20' };
-    return { label: status || 'n.d.', short: '—', icon: ClockIcon, color: 'text-white/40', chip: 'bg-white/5 text-white/40 border border-white/10' };
+    if (status === 'completed')
+        return {
+            label: 'Succès',
+            short: 'OK',
+            icon: CheckCircle2Icon,
+            color: 'text-emerald-400',
+            chip: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+        };
+    if (status === 'partial')
+        return {
+            label: 'Partiel',
+            short: 'PART',
+            icon: AlertCircleIcon,
+            color: 'text-amber-400',
+            chip: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+        };
+    if (status === 'running' || status === 'pending')
+        return {
+            label: 'En cours',
+            short: 'RUN',
+            icon: RefreshCwIcon,
+            color: 'text-[#7c6aef]',
+            chip: 'bg-[#7c6aef]/10 text-[#7c6aef] border border-[#7c6aef]/20',
+        };
+    if (status === 'failed' || status === 'partial_error')
+        return {
+            label: 'Échec',
+            short: 'ERR',
+            icon: XCircleIcon,
+            color: 'text-rose-400',
+            chip: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+        };
+    return {
+        label: status || 'n.d.',
+        short: '—',
+        icon: ClockIcon,
+        color: 'text-white/40',
+        chip: 'bg-white/5 text-white/40 border border-white/10',
+    };
 }
 
 function modeLabel(run) {
@@ -119,32 +160,45 @@ export default function GeoRunsPage() {
     const statusCounts = data?.summary?.statusCounts || {};
     const totalRuns = data?.summary?.total || 0;
     const parsedSuccess = data?.summary?.parseCounts?.parsed_success;
-    const parseValidity = typeof parsedSuccess === 'number' && Number.isFinite(parsedSuccess)
-        ? `${Math.round((parsedSuccess / (totalRuns || 1)) * 100)}%` : 'n.d.';
+    const parseValidity =
+        typeof parsedSuccess === 'number' && Number.isFinite(parsedSuccess)
+            ? `${Math.round((parsedSuccess / (totalRuns || 1)) * 100)}%`
+            : 'n.d.';
 
     const filteredRuns = useMemo(() => {
         const query = search.trim().toLowerCase();
         if (!query) return history;
-        return history.filter((run) => (
-            String(run.id || '').toLowerCase().includes(query)
-            || String(run.query_text || '').toLowerCase().includes(query)
-            || String(run.provider || '').toLowerCase().includes(query)
-        ));
+        return history.filter(
+            (run) =>
+                String(run.id || '')
+                    .toLowerCase()
+                    .includes(query) ||
+                String(run.query_text || '')
+                    .toLowerCase()
+                    .includes(query) ||
+                String(run.provider || '')
+                    .toLowerCase()
+                    .includes(query),
+        );
     }, [history, search]);
 
     const visibleRuns = useMemo(() => filteredRuns.slice(0, 50), [filteredRuns]);
 
     const timelineData = useMemo(() => {
-        return history.slice(0, 32).reverse().map((run) => ({
-            id: run.id,
-            time: formatShortTime(run.created_at),
-            duration: latencySeconds(run),
-            status: run.status,
-        }));
+        return history
+            .slice(0, 32)
+            .reverse()
+            .map((run) => ({
+                id: run.id,
+                time: formatShortTime(run.created_at),
+                duration: latencySeconds(run),
+                status: run.status,
+            }));
     }, [history]);
 
     const nextSelectedRunId = visibleRuns.some((run) => run.id === selectedRunId)
-        ? selectedRunId : (visibleRuns[0]?.id ?? null);
+        ? selectedRunId
+        : (visibleRuns[0]?.id ?? null);
     if (selectedRunId !== nextSelectedRunId) setSelectedRunId(nextSelectedRunId);
 
     const detailKey = `${clientId}:${selectedRunId}:${refreshToken}`;
@@ -169,7 +223,9 @@ export default function GeoRunsPage() {
             signal: controller.signal,
         })
             .then(parseJsonResponse)
-            .then((json) => { if (!controller.signal.aborted) setSelectedRunDetail(json); })
+            .then((json) => {
+                if (!controller.signal.aborted) setSelectedRunDetail(json);
+            })
             .catch((loadError) => {
                 if (loadError.name === 'AbortError') return;
                 setDetailError(loadError.message);
@@ -205,9 +261,14 @@ export default function GeoRunsPage() {
             eyebrow="IA / GEO"
             title="Historique d'Exécution"
             subtitle="Timeline et inspecteur haute-densité des audits moteurs. Suivi des flux radar."
-            actions={(
+            actions={
                 <div className="flex gap-2">
-                    <button type="button" onClick={clearErrors} disabled={clearPending} className={COMMAND_BUTTONS.secondary}>
+                    <button
+                        type="button"
+                        onClick={clearErrors}
+                        disabled={clearPending}
+                        className={COMMAND_BUTTONS.secondary}
+                    >
                         <Trash2Icon className="h-3.5 w-3.5" />
                         Purger
                     </button>
@@ -216,40 +277,89 @@ export default function GeoRunsPage() {
                         Lancer Audit
                     </Link>
                 </div>
-            )}
+            }
         />
     );
 
-    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Synchronisation de la timeline...</div></CommandPageShell>;
-    if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
+    if (loading)
+        return (
+            <CommandPageShell header={header}>
+                <div className="p-8 animate-pulse text-white/50">Synchronisation de la timeline...</div>
+            </CommandPageShell>
+        );
+    if (error)
+        return (
+            <CommandPageShell header={header}>
+                <CommandEmptyState title="Indisponible" description={error} />
+            </CommandPageShell>
+        );
 
     return (
         <CommandPageShell header={header}>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <CommandMetricCard label="Total Runs" value={totalRuns} detail="Historique global" tone="info" />
-                <CommandMetricCard label="Succès" value={`${totalRuns ? Math.round(((statusCounts.completed || 0) / totalRuns) * 100) : 0}%`} detail={`${(statusCounts.failed || 0)} échecs`} tone={(statusCounts.failed || 0) > 0 ? 'warning' : 'ok'} />
-                <CommandMetricCard label="Latence Moy." value={history.length ? `${Math.round(history.reduce((s, r) => s + latencySeconds(r), 0) / history.length)}s` : '—'} detail="Réponse moteur" tone="neutral" />
-                <CommandMetricCard label="Validité Parsing" value={parseValidity} detail="Intégrité JSON" tone={parseValidity === 'n.d.' ? 'neutral' : 'ok'} />
+                <CommandMetricCard
+                    label="Succès"
+                    value={`${totalRuns ? Math.round(((statusCounts.completed || 0) / totalRuns) * 100) : 0}%`}
+                    detail={`${statusCounts.failed || 0} échecs`}
+                    tone={(statusCounts.failed || 0) > 0 ? 'warning' : 'ok'}
+                />
+                <CommandMetricCard
+                    label="Latence Moy."
+                    value={
+                        history.length
+                            ? `${Math.round(history.reduce((s, r) => s + latencySeconds(r), 0) / history.length)}s`
+                            : '—'
+                    }
+                    detail="Réponse moteur"
+                    tone="neutral"
+                />
+                <CommandMetricCard
+                    label="Validité Parsing"
+                    value={parseValidity}
+                    detail="Intégrité JSON"
+                    tone={parseValidity === 'n.d.' ? 'neutral' : 'ok'}
+                />
             </div>
 
             {actionMessage && (
-                <div className={cn(COMMAND_PANEL, "mt-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white/55")}>
+                <div
+                    className={cn(
+                        COMMAND_PANEL,
+                        'mt-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-white/55',
+                    )}
+                >
                     {actionMessage}
                 </div>
             )}
 
             <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 h-[calc(100vh-280px)] min-h-[600px]">
                 <div className="lg:col-span-8 flex flex-col gap-4">
-                    <div className={cn(COMMAND_PANEL, 'p-6 h-[160px] flex flex-col relative overflow-hidden group bg-[#06070a]')}>
+                    <div
+                        className={cn(
+                            COMMAND_PANEL,
+                            'p-6 h-[160px] flex flex-col relative overflow-hidden group bg-[#06070a]',
+                        )}
+                    >
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <ActivityIcon className="h-4 w-4 text-[#7c6aef]" />
-                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">Pression Temps-Réel</h3>
+                                <h3 className="text-[12px] font-bold uppercase tracking-[0.14em] text-white/35">
+                                    Pression Temps-Réel
+                                </h3>
                             </div>
                             <div className="flex gap-4">
-                                {['completed', 'failed'].map(s => (
-                                    <div key={s} className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white/20">
-                                        <div className={cn("h-1.5 w-1.5 rounded-full", s === 'completed' ? 'bg-emerald-500' : 'bg-rose-500')} />
+                                {['completed', 'failed'].map((s) => (
+                                    <div
+                                        key={s}
+                                        className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white/20"
+                                    >
+                                        <div
+                                            className={cn(
+                                                'h-1.5 w-1.5 rounded-full',
+                                                s === 'completed' ? 'bg-emerald-500' : 'bg-rose-500',
+                                            )}
+                                        />
                                         {s}
                                     </div>
                                 ))}
@@ -260,7 +370,17 @@ export default function GeoRunsPage() {
                                 <BarChart data={timelineData}>
                                     <Bar dataKey="duration" radius={[1, 1, 0, 0]}>
                                         {timelineData.map((entry, idx) => (
-                                            <Cell key={idx} fill={entry.status === 'completed' ? '#10b981' : (entry.status === 'partial' ? '#f59e0b' : '#f43f5e')} fillOpacity={0.4} />
+                                            <Cell
+                                                key={idx}
+                                                fill={
+                                                    entry.status === 'completed'
+                                                        ? '#10b981'
+                                                        : entry.status === 'partial'
+                                                          ? '#f59e0b'
+                                                          : '#f43f5e'
+                                                }
+                                                fillOpacity={0.4}
+                                            />
                                         ))}
                                     </Bar>
                                 </BarChart>
@@ -280,17 +400,27 @@ export default function GeoRunsPage() {
                                     className="w-full bg-transparent border-none focus:ring-0 text-[10px] font-bold tracking-widest text-white/80 placeholder:text-white/10 pl-9 uppercase"
                                 />
                             </div>
-                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{visibleRuns.length} ENTRÉES</div>
+                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
+                                {visibleRuns.length} ENTRÉES
+                            </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto geo-scrollbar">
                             <table className="w-full text-left border-collapse">
                                 <thead className="sticky top-0 z-10 bg-[#060708] border-b border-white/[0.05]">
                                     <tr>
-                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">Run ID</th>
-                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">Prompt Inspecté</th>
-                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">Statut</th>
-                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20 text-right">Moteur / Latence</th>
+                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">
+                                            Run ID
+                                        </th>
+                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">
+                                            Prompt Inspecté
+                                        </th>
+                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20">
+                                            Statut
+                                        </th>
+                                        <th className="px-6 py-3 text-[9px] font-bold uppercase tracking-widest text-white/20 text-right">
+                                            Moteur / Latence
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/[0.03]">
@@ -303,19 +433,35 @@ export default function GeoRunsPage() {
                                                 onClick={() => setSelectedRunId(run.id)}
                                                 className={cn(
                                                     'cursor-pointer transition-all hover:bg-white/[0.02] group',
-                                                    isSelected ? 'bg-[#7c6aef]/5' : ''
+                                                    isSelected ? 'bg-[#7c6aef]/5' : '',
                                                 )}
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className={cn("font-mono text-[11px] font-bold", isSelected ? 'text-[#b8adff]' : 'text-white/70')}>{run.id}</span>
-                                                        <span className="text-[9px] text-white/10 font-bold uppercase tracking-widest mt-1">{formatShortTime(run.created_at)}</span>
+                                                        <span
+                                                            className={cn(
+                                                                'font-mono text-[11px] font-bold',
+                                                                isSelected ? 'text-[#b8adff]' : 'text-white/70',
+                                                            )}
+                                                        >
+                                                            {run.id}
+                                                        </span>
+                                                        <span className="text-[9px] text-white/10 font-bold uppercase tracking-widest mt-1">
+                                                            {formatShortTime(run.created_at)}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-[12px] text-white/50 line-clamp-1 italic group-hover:text-white/80 transition-colors">&quot;{run.query_text}&quot;</div>
+                                                    <div className="text-[12px] text-white/50 line-clamp-1 italic group-hover:text-white/80 transition-colors">
+                                                        &quot;{run.query_text}&quot;
+                                                    </div>
                                                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                                                        <span className={cn("rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest", riskChipClass(run.bias_risk))}>
+                                                        <span
+                                                            className={cn(
+                                                                'rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest',
+                                                                riskChipClass(run.bias_risk),
+                                                            )}
+                                                        >
                                                             {modeLabel(run)}
                                                         </span>
                                                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-white/25">
@@ -325,13 +471,29 @@ export default function GeoRunsPage() {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
-                                                        <div className={cn("h-1.5 w-1.5 rounded-full", meta.color.replace('text-', 'bg-'))} />
-                                                        <span className={cn("text-[9px] font-bold uppercase tracking-widest", meta.color)}>{meta.label}</span>
+                                                        <div
+                                                            className={cn(
+                                                                'h-1.5 w-1.5 rounded-full',
+                                                                meta.color.replace('text-', 'bg-'),
+                                                            )}
+                                                        />
+                                                        <span
+                                                            className={cn(
+                                                                'text-[9px] font-bold uppercase tracking-widest',
+                                                                meta.color,
+                                                            )}
+                                                        >
+                                                            {meta.label}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{run.provider}</div>
-                                                    <div className="text-[10px] font-mono text-white/10">{latencySeconds(run)}s</div>
+                                                    <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                                                        {run.provider}
+                                                    </div>
+                                                    <div className="text-[10px] font-mono text-white/10">
+                                                        {latencySeconds(run)}s
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -362,8 +524,12 @@ export default function GeoRunsPage() {
                                         <div className="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400 mb-4">
                                             <AlertCircleIcon className="h-6 w-6" />
                                         </div>
-                                        <h3 className="text-[12px] font-bold uppercase tracking-widest text-white/80 mb-2">Échec du chargement</h3>
-                                        <p className="text-[11px] text-white/30 max-w-[240px] leading-relaxed mb-6">Impossible de récupérer les détails de cette exécution.</p>
+                                        <h3 className="text-[12px] font-bold uppercase tracking-widest text-white/80 mb-2">
+                                            Échec du chargement
+                                        </h3>
+                                        <p className="text-[11px] text-white/30 max-w-[240px] leading-relaxed mb-6">
+                                            Impossible de récupérer les détails de cette exécution.
+                                        </p>
                                         <div className="text-[10px] font-mono text-rose-400/50 bg-rose-500/5 px-3 py-1 rounded border border-rose-500/10">
                                             {detailError}
                                         </div>
@@ -375,7 +541,12 @@ export default function GeoRunsPage() {
                                                 <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-[12px] text-white/60">
                                                     {selectedRunDetail?.run?.id}
                                                 </div>
-                                                <div className={cn("px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border", statusMeta(selectedRunDetail?.run?.status).chip)}>
+                                                <div
+                                                    className={cn(
+                                                        'px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border',
+                                                        statusMeta(selectedRunDetail?.run?.status).chip,
+                                                    )}
+                                                >
                                                     {selectedRunDetail?.run?.status}
                                                 </div>
                                             </div>
@@ -385,7 +556,12 @@ export default function GeoRunsPage() {
                                             </h2>
 
                                             <div className="mb-6 flex flex-wrap items-center gap-2">
-                                                <span className={cn("rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest", riskChipClass(selectedRunDetail?.run?.bias_risk))}>
+                                                <span
+                                                    className={cn(
+                                                        'rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest',
+                                                        riskChipClass(selectedRunDetail?.run?.bias_risk),
+                                                    )}
+                                                >
                                                     {modeLabel(selectedRunDetail?.run)}
                                                 </span>
                                                 <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white/35">
@@ -403,18 +579,27 @@ export default function GeoRunsPage() {
 
                                             {selectedRunDetail?.run?.context_injected && (
                                                 <div className="mb-6 rounded-2xl border border-amber-500/15 bg-amber-500/10 p-4 text-[11px] leading-relaxed text-amber-100/70">
-                                                    Run avec contexte business injecte. A ne pas utiliser comme preuve de visibilite naturelle.
+                                                    Run avec contexte business injecte. A ne pas utiliser comme preuve
+                                                    de visibilite naturelle.
                                                 </div>
                                             )}
 
                                             <div className="grid grid-cols-2 gap-6">
                                                 <div>
-                                                    <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Timestamp</div>
-                                                    <div className="text-[12px] font-bold text-white/70">{formatDateTime(selectedRunDetail?.run?.created_at)}</div>
+                                                    <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">
+                                                        Timestamp
+                                                    </div>
+                                                    <div className="text-[12px] font-bold text-white/70">
+                                                        {formatDateTime(selectedRunDetail?.run?.created_at)}
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Moteur</div>
-                                                    <div className="text-[12px] font-bold text-white/70 uppercase">{selectedRunDetail?.run?.provider}</div>
+                                                    <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">
+                                                        Moteur
+                                                    </div>
+                                                    <div className="text-[12px] font-bold text-white/70 uppercase">
+                                                        {selectedRunDetail?.run?.provider}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -423,16 +608,26 @@ export default function GeoRunsPage() {
                                             <section>
                                                 <div className="flex items-center gap-2 mb-6 text-[#7c6aef]">
                                                     <CpuIcon className="h-4 w-4" />
-                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Analyse GEO</h3>
+                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">
+                                                        Analyse GEO
+                                                    </h3>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
-                                                    <div className={cn(COMMAND_SURFACE, "p-4")}>
-                                                        <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Position</div>
-                                                        <div className="text-[18px] font-bold text-white tabular-nums">{selectedRunDetail?.run?.target_position ?? '—'}</div>
+                                                    <div className={cn(COMMAND_SURFACE, 'p-4')}>
+                                                        <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">
+                                                            Position
+                                                        </div>
+                                                        <div className="text-[18px] font-bold text-white tabular-nums">
+                                                            {selectedRunDetail?.run?.target_position ?? '—'}
+                                                        </div>
                                                     </div>
-                                                    <div className={cn(COMMAND_SURFACE, "p-4")}>
-                                                        <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">Signal</div>
-                                                        <div className="text-[13px] font-bold text-white">{selectedRunDetail?.diagnostics?.run_signal_tier || 'N/A'}</div>
+                                                    <div className={cn(COMMAND_SURFACE, 'p-4')}>
+                                                        <div className="text-[9px] font-bold uppercase tracking-widest text-white/20 mb-1">
+                                                            Signal
+                                                        </div>
+                                                        <div className="text-[13px] font-bold text-white">
+                                                            {selectedRunDetail?.diagnostics?.run_signal_tier || 'N/A'}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {selectedRunDetail?.diagnostics?.insufficient_evidence && (
@@ -445,7 +640,9 @@ export default function GeoRunsPage() {
                                             <section>
                                                 <div className="flex items-center gap-2 mb-6 text-amber-400/60">
                                                     <TerminalIcon className="h-4 w-4" />
-                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Détails de l&#39;échange</h3>
+                                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">
+                                                        Détails de l&#39;échange
+                                                    </h3>
                                                 </div>
                                                 <div className="space-y-6">
                                                     <div>
@@ -456,7 +653,11 @@ export default function GeoRunsPage() {
                                                         <div className="p-5 rounded-2xl bg-black/40 border border-white/[0.03] font-mono text-[11px] text-white/40 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[300px] geo-scrollbar">
                                                             {typeof selectedRunDetail?.run?.prompt_payload === 'string'
                                                                 ? selectedRunDetail.run.prompt_payload
-                                                                : JSON.stringify(selectedRunDetail?.run?.prompt_payload || {}, null, 2)}
+                                                                : JSON.stringify(
+                                                                      selectedRunDetail?.run?.prompt_payload || {},
+                                                                      null,
+                                                                      2,
+                                                                  )}
                                                         </div>
                                                     </div>
                                                     <div>
@@ -475,7 +676,9 @@ export default function GeoRunsPage() {
                                                 <div className="flex items-center justify-between mb-6">
                                                     <div className="flex items-center gap-2 text-white/30">
                                                         <HistoryIcon className="h-4 w-4" />
-                                                        <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">Citations ({selectedRunDetail?.citations?.length || 0})</h3>
+                                                        <h3 className="text-[11px] font-bold uppercase tracking-[0.14em]">
+                                                            Citations ({selectedRunDetail?.citations?.length || 0})
+                                                        </h3>
                                                     </div>
                                                     {(selectedRunDetail?.citations?.length || 0) > 3 && (
                                                         <button
@@ -487,17 +690,32 @@ export default function GeoRunsPage() {
                                                     )}
                                                 </div>
                                                 <div className="space-y-3">
-                                                    {(showAllCitations ? selectedRunDetail?.citations : selectedRunDetail?.citations?.slice(0, 3))?.map((c, i) => (
-                                                        <div key={i} className={cn(COMMAND_SURFACE, "p-4 group hover:bg-white/[0.04] transition-all")}>
+                                                    {(showAllCitations
+                                                        ? selectedRunDetail?.citations
+                                                        : selectedRunDetail?.citations?.slice(0, 3)
+                                                    )?.map((c, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className={cn(
+                                                                COMMAND_SURFACE,
+                                                                'p-4 group hover:bg-white/[0.04] transition-all',
+                                                            )}
+                                                        >
                                                             <div className="flex items-center justify-between mb-2">
-                                                                <span className="text-[12px] font-bold text-white/80 group-hover:text-white">{c.host}</span>
+                                                                <span className="text-[12px] font-bold text-white/80 group-hover:text-white">
+                                                                    {c.host}
+                                                                </span>
                                                                 <ArrowUpRightIcon className="h-3 w-3 text-white/10 group-hover:text-[#7c6aef] transition-colors" />
                                                             </div>
-                                                            <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-2">&quot;{c.evidence_span}&quot;</p>
+                                                            <p className="text-[11px] text-white/30 leading-relaxed italic line-clamp-2">
+                                                                &quot;{c.evidence_span}&quot;
+                                                            </p>
                                                         </div>
                                                     ))}
                                                     {!selectedRunDetail?.citations?.length && (
-                                                        <div className="p-10 rounded-2xl border border-dashed border-white/5 text-center text-[10px] font-bold uppercase tracking-widest text-white/10">Aucune citation</div>
+                                                        <div className="p-10 rounded-2xl border border-dashed border-white/5 text-center text-[10px] font-bold uppercase tracking-widest text-white/10">
+                                                            Aucune citation
+                                                        </div>
                                                     )}
                                                 </div>
                                             </section>

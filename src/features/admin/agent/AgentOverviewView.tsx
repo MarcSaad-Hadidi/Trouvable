@@ -2,7 +2,12 @@
 
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import { CommandChartCard } from '@/features/admin/shared/components/command/CommandChartCard';
-import { KeyValuePanel, MetricGrid, AgentPageFrame, pageActionLink } from '@/features/admin/agent/agent-page-primitives';
+import {
+    KeyValuePanel,
+    MetricGrid,
+    AgentPageFrame,
+    pageActionLink,
+} from '@/features/admin/agent/agent-page-primitives';
 import { AgentChip, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
 import {
     formatAgentCategory,
@@ -31,19 +36,21 @@ export default function AgentOverviewPage() {
     const snapshot = data?.snapshot || null;
     const subscores = score
         ? Object.values(score.subscores || {}).map((entry) => {
-            const item = (entry || {}) as any;
-            return {
-                key: item.key,
-                score: item.score,
-                status: item.status,
-                weight: item.weight,
-                signalLabel: item.signalLabel,
-                evidence: item.evidence,
-                gaps: item.gaps,
-                label: SUBSCORE_LABELS[item.key] || item.key || 'Sous-score',
-                summary: item.reason || `${formatAgentReliability(item.reliability)}${item.provisional ? ' · provisoire' : ''}`,
-            };
-        })
+              const item = (entry || {}) as any;
+              return {
+                  key: item.key,
+                  score: item.score,
+                  status: item.status,
+                  weight: item.weight,
+                  signalLabel: item.signalLabel,
+                  evidence: item.evidence,
+                  gaps: item.gaps,
+                  label: SUBSCORE_LABELS[item.key] || item.key || 'Sous-score',
+                  summary:
+                      item.reason ||
+                      `${formatAgentReliability(item.reliability)}${item.provisional ? ' · provisoire' : ''}`,
+              };
+          })
         : [];
 
     return (
@@ -51,20 +58,25 @@ export default function AgentOverviewPage() {
             eyebrow="AGENT Ops"
             title="Vue AGENT"
             subtitle={`Lecture consolidée AGENT pour ${client?.client_name || 'ce mandat'} : sous-scores, blocages et remédiation issus des mêmes signaux réels.`}
-            actions={(
+            actions={
                 <>
                     {pageActionLink(data?.links?.visibility || `${baseHref}/agent/visibility`, 'Visibilité AGENT')}
                     {pageActionLink(data?.links?.readiness || `${baseHref}/agent/readiness`, 'Préparation AGENT')}
                     {pageActionLink(data?.links?.fixes || `${baseHref}/agent/fixes`, 'Correctifs AGENT', 'primary')}
                 </>
-            )}
+            }
             loading={loading}
             error={error}
             emptyState={data?.emptyState || null}
             loadingMessage="Calcul du score AGENT et agrégation des remédiations liées aux dimensions réelles."
         >
             {data?.status === 'partial' || data?.status === 'unavailable' ? (
-                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+                <p
+                    role="status"
+                    className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200"
+                >
+                    Données partielles : certains signaux AGENT sont indisponibles.
+                </p>
             ) : null}
             <MetricGrid
                 items={[
@@ -79,7 +91,10 @@ export default function AgentOverviewPage() {
                         id: 'runs',
                         label: 'Exécutions complétées',
                         value: snapshot?.completedRunsTotal ?? 'n.d.',
-                        detail: (snapshot?.completedRunsTotal ?? null) === null ? 'Exécutions indisponibles' : (snapshot?.lastRunAt || 'Aucune exécution observée'),
+                        detail:
+                            (snapshot?.completedRunsTotal ?? null) === null
+                                ? 'Exécutions indisponibles'
+                                : snapshot?.lastRunAt || 'Aucune exécution observée',
                         tone: snapshot?.completedRunsTotal > 0 ? 'ok' : 'neutral',
                     },
                     {
@@ -93,7 +108,10 @@ export default function AgentOverviewPage() {
                         id: 'open',
                         label: 'Correctifs actifs',
                         value: snapshot?.openOpportunitiesCount ?? 'n.d.',
-                        detail: (snapshot?.highPriorityOpen ?? null) === null ? 'Priorités hautes indisponibles' : `${snapshot.highPriorityOpen} priorité(s) haute(s)`,
+                        detail:
+                            (snapshot?.highPriorityOpen ?? null) === null
+                                ? 'Priorités hautes indisponibles'
+                                : `${snapshot.highPriorityOpen} priorité(s) haute(s)`,
                         tone: (snapshot?.highPriorityOpen ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}
@@ -106,13 +124,15 @@ export default function AgentOverviewPage() {
                 >
                     <div className="rounded-[18px] border border-white/[0.06] bg-white/[0.02] p-4">
                         <div className="flex flex-wrap items-center gap-2">
-                            <AgentChip tone={score?.agent_score != null ? 'info' : 'neutral'}>{formatAgentVerdict(score?.verdict)}</AgentChip>
+                            <AgentChip tone={score?.agent_score != null ? 'info' : 'neutral'}>
+                                {formatAgentVerdict(score?.verdict)}
+                            </AgentChip>
                             <AgentChip>{formatAgentConfidence(score?.confidence)}</AgentChip>
                             {score?.provisional ? <AgentChip tone="warning">Provisoire</AgentChip> : null}
                         </div>
                         <div className="mt-4 text-[14px] leading-relaxed text-white/78">
-                            Le score AGENT agrège visibilité, préparation, actionnabilité et protocoles.
-                            Chaque sous-score non parfait doit être reflété dans la remédiation affichée.
+                            Le score AGENT agrège visibilité, préparation, actionnabilité et protocoles. Chaque
+                            sous-score non parfait doit être reflété dans la remédiation affichée.
                         </div>
                     </div>
                 </CommandChartCard>
@@ -140,18 +160,32 @@ export default function AgentOverviewPage() {
                     title="Correctifs prioritaires"
                     subtitle="Remédiations consolidées depuis les problèmes réels détectés dans les dimensions AGENT."
                     items={data?.topFixes || []}
-                    emptyTitle={data?.status === 'partial' || data?.status === 'unavailable' ? 'Correctifs prioritaires indisponibles.' : 'Aucun correctif prioritaire dans la fenêtre courante.'}
+                    emptyTitle={
+                        data?.status === 'partial' || data?.status === 'unavailable'
+                            ? 'Correctifs prioritaires indisponibles.'
+                            : 'Aucun correctif prioritaire dans la fenêtre courante.'
+                    }
                     renderItem={(item) => (
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.title}</span>
-                                {item.priority ? <AgentChip tone={toneForPriority(item.priority)}>{formatAgentPriority(item.priority)}</AgentChip> : null}
-                                {item.status ? <AgentChip tone={toneForStatus(item.status)}>{formatAgentStatus(item.status)}</AgentChip> : null}
+                                {item.priority ? (
+                                    <AgentChip tone={toneForPriority(item.priority)}>
+                                        {formatAgentPriority(item.priority)}
+                                    </AgentChip>
+                                ) : null}
+                                {item.status ? (
+                                    <AgentChip tone={toneForStatus(item.status)}>
+                                        {formatAgentStatus(item.status)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
                             <div className="text-[12px] text-white/60">
                                 {formatAgentCategory(item.category)} · {formatAgentSource(item.source)}
                             </div>
-                            {item.description ? <div className="text-[12px] leading-relaxed text-white/60">{item.description}</div> : null}
+                            {item.description ? (
+                                <div className="text-[12px] leading-relaxed text-white/60">{item.description}</div>
+                            ) : null}
                         </div>
                     )}
                 />
@@ -159,14 +193,24 @@ export default function AgentOverviewPage() {
                     title="Blocages majeurs"
                     subtitle="Blocages critiques consolidés depuis la préparation et les correctifs à priorité haute."
                     items={data?.topBlockers || []}
-                    emptyTitle={data?.status === 'partial' || data?.status === 'unavailable' ? 'Blocages majeurs indisponibles.' : 'Aucun blocage majeur détecté.'}
+                    emptyTitle={
+                        data?.status === 'partial' || data?.status === 'unavailable'
+                            ? 'Blocages majeurs indisponibles.'
+                            : 'Aucun blocage majeur détecté.'
+                    }
                     renderItem={(item) => (
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.title}</span>
-                                {item.status ? <AgentChip tone={toneForStatus(item.status)}>{formatAgentStatus(item.status)}</AgentChip> : null}
+                                {item.status ? (
+                                    <AgentChip tone={toneForStatus(item.status)}>
+                                        {formatAgentStatus(item.status)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
-                            {item.detail ? <div className="text-[12px] leading-relaxed text-white/60">{item.detail}</div> : null}
+                            {item.detail ? (
+                                <div className="text-[12px] leading-relaxed text-white/60">{item.detail}</div>
+                            ) : null}
                         </div>
                     )}
                 />
@@ -174,4 +218,3 @@ export default function AgentOverviewPage() {
         </AgentPageFrame>
     );
 }
-

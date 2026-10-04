@@ -29,8 +29,14 @@ export class ProviderExecutionError extends Error {
 export function classifyProviderError(error) {
     const message = String(error?.message || '').toLowerCase();
     if (message.includes('timeout') || message.includes('aborted')) return 'timeout';
-    if (message.includes('rate') || message.includes('429') || message.includes('too many requests')) return 'rate_limit';
-    if (message.includes('api key') || message.includes('auth') || message.includes('unauthorized') || message.includes('forbidden')) {
+    if (message.includes('rate') || message.includes('429') || message.includes('too many requests'))
+        return 'rate_limit';
+    if (
+        message.includes('api key') ||
+        message.includes('auth') ||
+        message.includes('unauthorized') ||
+        message.includes('forbidden')
+    ) {
         return 'provider_auth_error';
     }
     return 'provider_error';

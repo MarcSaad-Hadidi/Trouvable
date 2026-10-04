@@ -16,62 +16,62 @@
  */
 
 export const LIFECYCLE_STATES = {
-  prospect: 'prospect',
-  onboarding: 'onboarding',
-  active: 'active',
-  paused: 'paused',
-  archived: 'archived',
+    prospect: 'prospect',
+    onboarding: 'onboarding',
+    active: 'active',
+    paused: 'paused',
+    archived: 'archived',
 };
 
 export const LIFECYCLE_STATE_LIST = Object.values(LIFECYCLE_STATES);
 
 export const LIFECYCLE_META = {
-  prospect: {
-    label: 'Prospect',
-    description: 'Fiche créée, pas encore embarqué',
-    entryCondition: 'Record created via quick-create or lead conversion',
-    exitConditions: ['Start onboarding → onboarding', 'Archive directly → archived'],
-    blockedTransitions: ['active', 'paused'],
-  },
-  onboarding: {
-    label: 'Embarquement',
-    description: 'Audit initial et construction du profil en cours',
-    entryCondition: 'Onboarding flow started (audit triggered)',
-    exitConditions: ['Operator activates → active', 'Archive → archived'],
-    blockedTransitions: ['prospect', 'paused'],
-  },
-  active: {
-    label: 'Actif',
-    description: 'Sous service actif : suivi, optimisation et visibilité',
-    entryCondition: 'Operator activates client after onboarding review',
-    exitConditions: ['Pause service → paused', 'Archive → archived'],
-    blockedTransitions: ['prospect', 'onboarding'],
-  },
-  paused: {
-    label: 'En pause',
-    description: 'Service temporairement suspendu',
-    entryCondition: 'Operator pauses (client request, billing hold, etc.)',
-    exitConditions: ['Resume service → active', 'Archive → archived'],
-    blockedTransitions: ['prospect', 'onboarding'],
-  },
-  archived: {
-    label: 'Archivé',
-    description: 'Relation terminée ou fiche supprimée',
-    entryCondition: 'Operator archives from any non-archived state',
-    exitConditions: ['Restore → active'],
-    blockedTransitions: ['prospect', 'onboarding', 'paused'],
-  },
+    prospect: {
+        label: 'Prospect',
+        description: 'Fiche créée, pas encore embarqué',
+        entryCondition: 'Record created via quick-create or lead conversion',
+        exitConditions: ['Start onboarding → onboarding', 'Archive directly → archived'],
+        blockedTransitions: ['active', 'paused'],
+    },
+    onboarding: {
+        label: 'Embarquement',
+        description: 'Audit initial et construction du profil en cours',
+        entryCondition: 'Onboarding flow started (audit triggered)',
+        exitConditions: ['Operator activates → active', 'Archive → archived'],
+        blockedTransitions: ['prospect', 'paused'],
+    },
+    active: {
+        label: 'Actif',
+        description: 'Sous service actif : suivi, optimisation et visibilité',
+        entryCondition: 'Operator activates client after onboarding review',
+        exitConditions: ['Pause service → paused', 'Archive → archived'],
+        blockedTransitions: ['prospect', 'onboarding'],
+    },
+    paused: {
+        label: 'En pause',
+        description: 'Service temporairement suspendu',
+        entryCondition: 'Operator pauses (client request, billing hold, etc.)',
+        exitConditions: ['Resume service → active', 'Archive → archived'],
+        blockedTransitions: ['prospect', 'onboarding'],
+    },
+    archived: {
+        label: 'Archivé',
+        description: 'Relation terminée ou fiche supprimée',
+        entryCondition: 'Operator archives from any non-archived state',
+        exitConditions: ['Restore → active'],
+        blockedTransitions: ['prospect', 'onboarding', 'paused'],
+    },
 };
 
 /**
  * Allowed transitions: { fromState: Set<toState> }
  */
 const ALLOWED_TRANSITIONS = {
-  prospect: new Set(['onboarding', 'archived']),
-  onboarding: new Set(['active', 'archived']),
-  active: new Set(['paused', 'archived']),
-  paused: new Set(['active', 'archived']),
-  archived: new Set(['active']),
+    prospect: new Set(['onboarding', 'archived']),
+    onboarding: new Set(['active', 'archived']),
+    active: new Set(['paused', 'archived']),
+    paused: new Set(['active', 'archived']),
+    archived: new Set(['active']),
 };
 
 /**
@@ -81,8 +81,8 @@ const ALLOWED_TRANSITIONS = {
  * @returns {boolean}
  */
 export function isTransitionAllowed(from, to) {
-  if (!ALLOWED_TRANSITIONS[from]) return false;
-  return ALLOWED_TRANSITIONS[from].has(to);
+    if (!ALLOWED_TRANSITIONS[from]) return false;
+    return ALLOWED_TRANSITIONS[from].has(to);
 }
 
 /**
@@ -92,16 +92,16 @@ export function isTransitionAllowed(from, to) {
  * @returns {string} the validated target state
  */
 export function validateTransition(from, to) {
-  if (!LIFECYCLE_STATE_LIST.includes(from)) {
-    throw new Error(`[Lifecycle] Unknown current state: "${from}"`);
-  }
-  if (!LIFECYCLE_STATE_LIST.includes(to)) {
-    throw new Error(`[Lifecycle] Unknown target state: "${to}"`);
-  }
-  if (!isTransitionAllowed(from, to)) {
-    throw new Error(`[Lifecycle] Transition "${from}" → "${to}" is not allowed`);
-  }
-  return to;
+    if (!LIFECYCLE_STATE_LIST.includes(from)) {
+        throw new Error(`[Lifecycle] Unknown current state: "${from}"`);
+    }
+    if (!LIFECYCLE_STATE_LIST.includes(to)) {
+        throw new Error(`[Lifecycle] Unknown target state: "${to}"`);
+    }
+    if (!isTransitionAllowed(from, to)) {
+        throw new Error(`[Lifecycle] Transition "${from}" → "${to}" is not allowed`);
+    }
+    return to;
 }
 
 /**
@@ -110,8 +110,8 @@ export function validateTransition(from, to) {
  * @returns {string[]}
  */
 export function getAllowedNextStates(current) {
-  const transitions = ALLOWED_TRANSITIONS[current];
-  return transitions ? [...transitions] : [];
+    const transitions = ALLOWED_TRANSITIONS[current];
+    return transitions ? [...transitions] : [];
 }
 
 /**
@@ -124,8 +124,8 @@ export const LIFECYCLE_SERVICEABLE_STATES = [LIFECYCLE_STATES.active, LIFECYCLE_
  * Default lifecycle_status for new records created via different paths.
  */
 export const LIFECYCLE_DEFAULTS = {
-  quickCreate: LIFECYCLE_STATES.prospect,
-  onboarding: LIFECYCLE_STATES.onboarding,
+    quickCreate: LIFECYCLE_STATES.prospect,
+    onboarding: LIFECYCLE_STATES.onboarding,
 };
 
 /**
@@ -133,7 +133,7 @@ export const LIFECYCLE_DEFAULTS = {
  * Validates transition from current state.
  */
 export function transitionToArchived(currentStatus) {
-  return validateTransition(currentStatus || LIFECYCLE_STATES.prospect, LIFECYCLE_STATES.archived);
+    return validateTransition(currentStatus || LIFECYCLE_STATES.prospect, LIFECYCLE_STATES.archived);
 }
 
 /**
@@ -141,5 +141,5 @@ export function transitionToArchived(currentStatus) {
  * Always restores to 'active'.
  */
 export function transitionFromArchived() {
-  return validateTransition(LIFECYCLE_STATES.archived, LIFECYCLE_STATES.active);
+    return validateTransition(LIFECYCLE_STATES.archived, LIFECYCLE_STATES.active);
 }

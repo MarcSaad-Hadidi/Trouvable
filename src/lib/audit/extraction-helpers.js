@@ -1,53 +1,152 @@
 import { hostnameFromInput, inputMatchesHostname } from './url-hosts.js';
 
 const EMAIL_REGEX = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-const NORTH_AMERICAN_PHONE_REGEX = /(?:\+?1[\s.\-/]?)?(?:\(?[2-9]\d{2}\)?[\s.\-/]?)[2-9]\d{2}[\s.\-/]?\d{4}(?:\s*(?:#|x|ext\.?|poste)\s*\d{1,5})?/gi;
+const NORTH_AMERICAN_PHONE_REGEX =
+    /(?:\+?1[\s.\-/]?)?(?:\(?[2-9]\d{2}\)?[\s.\-/]?)[2-9]\d{2}[\s.\-/]?\d{4}(?:\s*(?:#|x|ext\.?|poste)\s*\d{1,5})?/gi;
 const FRENCH_PHONE_REGEX = /(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}/g;
 const CANADIAN_POSTAL_CODE_REGEX = /\b[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d\b/gi;
 
 const TRUST_TERMS = [
-    'avis', 'temoignage', 'temoignages', 'review', 'reviews', 'client depuis', 'depuis',
-    'certifie', 'certifiee', 'garantie', 'recommande', 'expert', 'experts', 'experience', 'reconnu',
-    'licence', 'licencie', 'assurance', 'assure', 'rbq', 'professionnel', 'professionnels',
-    'annees d\'experience', 'ans d\'experience', 'fiable', 'qualite', 'satisfaction',
-    'membre', 'accrédité', 'accredite', 'insured', 'licensed', 'bonded',
+    'avis',
+    'temoignage',
+    'temoignages',
+    'review',
+    'reviews',
+    'client depuis',
+    'depuis',
+    'certifie',
+    'certifiee',
+    'garantie',
+    'recommande',
+    'expert',
+    'experts',
+    'experience',
+    'reconnu',
+    'licence',
+    'licencie',
+    'assurance',
+    'assure',
+    'rbq',
+    'professionnel',
+    'professionnels',
+    "annees d'experience",
+    "ans d'experience",
+    'fiable',
+    'qualite',
+    'satisfaction',
+    'membre',
+    'accrédité',
+    'accredite',
+    'insured',
+    'licensed',
+    'bonded',
 ];
 
 const SAAS_TERMS = [
-    'logiciel', 'software', 'platform', 'plateforme', 'saas', 'demo', 'essai gratuit', 'free trial',
-    'pricing', 'tarifs', 'api', 'integration', 'integrations', 'dashboard', 'login', 'connexion',
-    'sign in', 'sign up', 'automation', 'workflow',
+    'logiciel',
+    'software',
+    'platform',
+    'plateforme',
+    'saas',
+    'demo',
+    'essai gratuit',
+    'free trial',
+    'pricing',
+    'tarifs',
+    'api',
+    'integration',
+    'integrations',
+    'dashboard',
+    'login',
+    'connexion',
+    'sign in',
+    'sign up',
+    'automation',
+    'workflow',
 ];
 
 const LOCAL_TERMS = [
-    'montreal', 'laval', 'longueuil', 'quebec', 'rive-sud', 'rive sud', 'rive-nord', 'rive nord',
-    'ville', 'region', 'quartier', 'zone desservie', 'zones desservies', 'service area', 'area served',
-    'secteur', 'local', 'adresse', 'bureau',
-    'brossard', 'terrebonne', 'repentigny', 'blainville', 'mascouche', 'boisbriand',
-    'saint-jerome', 'saint-jean', 'saint-laurent', 'saint-leonard', 'saint-hubert',
-    'gatineau', 'sherbrooke', 'trois-rivieres', 'drummondville', 'granby', 'saguenay',
-    'verdun', 'lasalle', 'lachine', 'anjou', 'outremont', 'westmount', 'rosemont',
-    'ahuntsic', 'villeray', 'plateau', 'hochelaga', 'mercier',
-    'zone d\'intervention', 'zones d\'intervention', 'secteurs desservis',
-    'grand montreal', 'grande region', 'couronne nord', 'couronne sud',
-    'nous desservons', 'nous couvrons', 'aire de service',
+    'montreal',
+    'laval',
+    'longueuil',
+    'quebec',
+    'rive-sud',
+    'rive sud',
+    'rive-nord',
+    'rive nord',
+    'ville',
+    'region',
+    'quartier',
+    'zone desservie',
+    'zones desservies',
+    'service area',
+    'area served',
+    'secteur',
+    'local',
+    'adresse',
+    'bureau',
+    'brossard',
+    'terrebonne',
+    'repentigny',
+    'blainville',
+    'mascouche',
+    'boisbriand',
+    'saint-jerome',
+    'saint-jean',
+    'saint-laurent',
+    'saint-leonard',
+    'saint-hubert',
+    'gatineau',
+    'sherbrooke',
+    'trois-rivieres',
+    'drummondville',
+    'granby',
+    'saguenay',
+    'verdun',
+    'lasalle',
+    'lachine',
+    'anjou',
+    'outremont',
+    'westmount',
+    'rosemont',
+    'ahuntsic',
+    'villeray',
+    'plateau',
+    'hochelaga',
+    'mercier',
+    "zone d'intervention",
+    "zones d'intervention",
+    'secteurs desservis',
+    'grand montreal',
+    'grande region',
+    'couronne nord',
+    'couronne sud',
+    'nous desservons',
+    'nous couvrons',
+    'aire de service',
 ];
 
-const FAQ_QUESTION_REGEX = /(?:^|\s)(?:q(?:uestion)?\s*:|how|what|why|when|where|who|can|should|combien|comment|pourquoi|quand|ou|qui)\b/i;
+const FAQ_QUESTION_REGEX =
+    /(?:^|\s)(?:q(?:uestion)?\s*:|how|what|why|when|where|who|can|should|combien|comment|pourquoi|quand|ou|qui)\b/i;
 const MAX_TEXT_CHUNKS_PER_PAGE = 8;
 
 export function normalizeWhitespace(value) {
     if (!value || typeof value !== 'string') return '';
-    return value.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    return value
+        .replace(/\u00a0/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 export function uniqueStrings(values = []) {
-    return [...new Set(
-        values
-            .filter((value) => typeof value === 'string')
-            .map((value) => normalizeWhitespace(value))
-            .filter(Boolean)
-    )];
+    return [
+        ...new Set(
+            values
+                .filter((value) => typeof value === 'string')
+                .map((value) => normalizeWhitespace(value))
+                .filter(Boolean),
+        ),
+    ];
 }
 
 export function truncate(value, max = 220) {
@@ -66,13 +165,22 @@ export function firstNonEmpty(...values) {
 
 export function normalizeEmailCandidate(email) {
     if (!email || typeof email !== 'string') return '';
-    return email.replace(/^mailto:/i, '').split('?')[0].replace(/[),.;:]+$/g, '').trim().toLowerCase();
+    return email
+        .replace(/^mailto:/i, '')
+        .split('?')[0]
+        .replace(/[),.;:]+$/g, '')
+        .trim()
+        .toLowerCase();
 }
 
 export function normalizePhoneCandidate(phone) {
     if (!phone || typeof phone !== 'string') return '';
 
-    const withoutScheme = phone.replace(/^tel:/i, '').split('?')[0].trim().replace(/\u00A0/g, ' ');
+    const withoutScheme = phone
+        .replace(/^tel:/i, '')
+        .split('?')[0]
+        .trim()
+        .replace(/\u00A0/g, ' ');
     if (!withoutScheme) return '';
 
     const extensionMatch = withoutScheme.match(/(?:#|x|ext\.?|poste)\s*(\d{1,5})$/i);
@@ -99,7 +207,18 @@ export function normalizePhoneCandidate(phone) {
 export function collectTextChunks($) {
     const chunks = [];
     const seen = new Set();
-    const selectors = ['main p', 'main li', 'article p', 'article li', 'section p', 'section li', '[role="main"] p', '[role="main"] li', 'body p', 'body li'];
+    const selectors = [
+        'main p',
+        'main li',
+        'article p',
+        'article li',
+        'section p',
+        'section li',
+        '[role="main"] p',
+        '[role="main"] li',
+        'body p',
+        'body li',
+    ];
 
     for (const selector of selectors) {
         $(selector).each((_, element) => {
@@ -141,7 +260,10 @@ export function extractPhonesAndEmails($) {
         if (normalized) emails.add(normalized);
     }
 
-    for (const match of [...(text.match(NORTH_AMERICAN_PHONE_REGEX) || []), ...(text.match(FRENCH_PHONE_REGEX) || [])]) {
+    for (const match of [
+        ...(text.match(NORTH_AMERICAN_PHONE_REGEX) || []),
+        ...(text.match(FRENCH_PHONE_REGEX) || []),
+    ]) {
         const normalized = normalizePhoneCandidate(match);
         if (normalized) phones.add(normalized);
     }
@@ -151,7 +273,15 @@ export function extractPhonesAndEmails($) {
 
 export function extractSocialLinks($) {
     const socials = [];
-    const networks = ['facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com', 'x.com', 'tiktok.com', 'youtube.com'];
+    const networks = [
+        'facebook.com',
+        'instagram.com',
+        'linkedin.com',
+        'twitter.com',
+        'x.com',
+        'tiktok.com',
+        'youtube.com',
+    ];
 
     $('a[href]').each((_, el) => {
         const href = $(el).attr('href');
@@ -165,22 +295,63 @@ export function extractSocialLinks($) {
 export function inferPageType(targetUrl, title, h1, bodyText, anchorText = '') {
     const haystack = `${targetUrl} ${title} ${h1} ${anchorText} ${bodyText.slice(0, 300)}`.toLowerCase();
 
-    if (haystack.includes('contact') || haystack.includes('nous joindre') || haystack.includes('contactez') || haystack.includes('soumission') || haystack.includes('estimation') || haystack.includes('demande de devis') || haystack.includes('demandez') || haystack.includes('nous contacter') || haystack.includes('rejoignez')) return 'contact';
+    if (
+        haystack.includes('contact') ||
+        haystack.includes('nous joindre') ||
+        haystack.includes('contactez') ||
+        haystack.includes('soumission') ||
+        haystack.includes('estimation') ||
+        haystack.includes('demande de devis') ||
+        haystack.includes('demandez') ||
+        haystack.includes('nous contacter') ||
+        haystack.includes('rejoignez')
+    )
+        return 'contact';
     if (haystack.includes('faq') || haystack.includes('question')) return 'faq';
-    if (haystack.includes('about') || haystack.includes('a propos') || haystack.includes('propos') || haystack.includes('qui sommes') || haystack.includes('notre histoire') || haystack.includes('notre equipe') || haystack.includes('notre entreprise')) return 'about';
+    if (
+        haystack.includes('about') ||
+        haystack.includes('a propos') ||
+        haystack.includes('propos') ||
+        haystack.includes('qui sommes') ||
+        haystack.includes('notre histoire') ||
+        haystack.includes('notre equipe') ||
+        haystack.includes('notre entreprise')
+    )
+        return 'about';
     if (haystack.includes('pricing') || haystack.includes('tarif') || haystack.includes('price')) return 'pricing';
-    if (haystack.includes('feature') || haystack.includes('fonctionnalite') || haystack.includes('features')) return 'features';
-    if (haystack.includes('product') || haystack.includes('produit') || haystack.includes('platform') || haystack.includes('plateforme')) return 'product';
+    if (haystack.includes('feature') || haystack.includes('fonctionnalite') || haystack.includes('features'))
+        return 'features';
+    if (
+        haystack.includes('product') ||
+        haystack.includes('produit') ||
+        haystack.includes('platform') ||
+        haystack.includes('plateforme')
+    )
+        return 'product';
     if (haystack.includes('blog') || haystack.includes('article') || haystack.includes('guide')) return 'blog';
     if (haystack.includes('docs') || haystack.includes('documentation') || haystack.includes('api')) return 'docs';
-    if (haystack.includes('service') || haystack.includes('prestation') || haystack.includes('solution')) return 'services';
-    if (haystack.includes('ville') || haystack.includes('zone') || haystack.includes('region') || haystack.includes('secteur')) return 'location';
+    if (haystack.includes('service') || haystack.includes('prestation') || haystack.includes('solution'))
+        return 'services';
+    if (
+        haystack.includes('ville') ||
+        haystack.includes('zone') ||
+        haystack.includes('region') ||
+        haystack.includes('secteur')
+    )
+        return 'location';
     return 'unknown';
 }
 
 function normalizeSchemaType(rawType) {
-    if (Array.isArray(rawType)) return rawType.map((value) => normalizeWhitespace(String(value).replace(/^https?:\/\/schema.org\//i, ''))).filter(Boolean);
-    if (typeof rawType === 'string') return rawType.split(',').map((value) => normalizeWhitespace(value.replace(/^https?:\/\/schema.org\//i, ''))).filter(Boolean);
+    if (Array.isArray(rawType))
+        return rawType
+            .map((value) => normalizeWhitespace(String(value).replace(/^https?:\/\/schema.org\//i, '')))
+            .filter(Boolean);
+    if (typeof rawType === 'string')
+        return rawType
+            .split(',')
+            .map((value) => normalizeWhitespace(value.replace(/^https?:\/\/schema.org\//i, '')))
+            .filter(Boolean);
     return [];
 }
 
@@ -205,7 +376,8 @@ function normalizeAreaServed(areaServed) {
     if (!areaServed) return [];
     if (Array.isArray(areaServed)) return uniqueStrings(areaServed.flatMap((item) => normalizeAreaServed(item)));
     if (typeof areaServed === 'string') return uniqueStrings(areaServed.split(/[,/|]/));
-    if (typeof areaServed === 'object') return uniqueStrings([areaServed.name, areaServed.addressLocality, areaServed.addressRegion]);
+    if (typeof areaServed === 'object')
+        return uniqueStrings([areaServed.name, areaServed.addressLocality, areaServed.addressRegion]);
     return [];
 }
 
@@ -215,9 +387,20 @@ function parseFaqEntities(mainEntity, pageUrl) {
     for (const entity of entities) {
         if (!entity || typeof entity !== 'object') continue;
         const question = firstNonEmpty(entity.name, entity.question, entity.headline);
-        const answer = firstNonEmpty(entity.acceptedAnswer?.text, entity.acceptedAnswer?.name, entity.text, entity.answer);
+        const answer = firstNonEmpty(
+            entity.acceptedAnswer?.text,
+            entity.acceptedAnswer?.name,
+            entity.text,
+            entity.answer,
+        );
         if (question && answer) {
-            pairs.push({ question, answer: truncate(answer, 400), source: 'observed', extraction_source: 'schema', page_url: pageUrl });
+            pairs.push({
+                question,
+                answer: truncate(answer, 400),
+                source: 'observed',
+                extraction_source: 'schema',
+                page_url: pageUrl,
+            });
         }
     }
     return pairs;
@@ -245,7 +428,13 @@ export function collectSchemaData($, pageUrl) {
             hasFaqSchema = true;
             faqPairs.push(...parseFaqEntities(node.mainEntity, pageUrl));
         }
-        if (types.some((type) => /(localbusiness|professionalservice|store|restaurant|dentist|medicalclinic|plumber|electrician|hvac|roofing|autobody|autorepair|barber|beautysalon|daycare|dryclean|florist|hairsalon|homeandc|legalservice|locksmith|movingcompany|notary|petstore|realestateagent)/i.test(type))) {
+        if (
+            types.some((type) =>
+                /(localbusiness|professionalservice|store|restaurant|dentist|medicalclinic|plumber|electrician|hvac|roofing|autobody|autorepair|barber|beautysalon|daycare|dryclean|florist|hairsalon|homeandc|legalservice|locksmith|movingcompany|notary|petstore|realestateagent)/i.test(
+                    type,
+                ),
+            )
+        ) {
             hasLocalBusinessSchema = true;
         }
         if (types.some((type) => /^organization$/i.test(type))) {
@@ -266,7 +455,14 @@ export function collectSchemaData($, pageUrl) {
             address,
         };
 
-        if (entity.name || entity.telephone || entity.email || entity.areaServed.length > 0 || entity.sameAs.length > 0 || entity.address?.line) {
+        if (
+            entity.name ||
+            entity.telephone ||
+            entity.email ||
+            entity.areaServed.length > 0 ||
+            entity.sameAs.length > 0 ||
+            entity.address?.line
+        ) {
             schemaEntities.push(entity);
         }
     }
@@ -276,7 +472,7 @@ export function collectSchemaData($, pageUrl) {
         if (!rawJson) return;
         try {
             visitNode(JSON.parse(rawJson));
-        } catch { }
+        } catch {}
     });
 
     return { structuredData, schemaEntities, faqPairs, hasFaqSchema, hasLocalBusinessSchema, hasOrganizationSchema };
@@ -288,11 +484,18 @@ export function extractFaqPairsFromDom($, pageUrl) {
     const pushPair = (question, answer, extractionSource) => {
         const normalizedQuestion = normalizeWhitespace(question);
         const normalizedAnswer = normalizeWhitespace(answer);
-        if (!normalizedQuestion || !normalizedAnswer || normalizedQuestion.length < 10 || normalizedAnswer.length < 20) return;
+        if (!normalizedQuestion || !normalizedAnswer || normalizedQuestion.length < 10 || normalizedAnswer.length < 20)
+            return;
         const key = `${normalizedQuestion.toLowerCase()}::${normalizedAnswer.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.add(key);
-        pairs.push({ question: normalizedQuestion, answer: truncate(normalizedAnswer, 400), source: 'observed', extraction_source: extractionSource, page_url: pageUrl });
+        pairs.push({
+            question: normalizedQuestion,
+            answer: truncate(normalizedAnswer, 400),
+            source: 'observed',
+            extraction_source: extractionSource,
+            page_url: pageUrl,
+        });
     };
 
     $('details').each((_, el) => pushPair($(el).find('summary').first().text(), $(el).text(), 'details'));
@@ -356,11 +559,17 @@ export function extractLocalSignals($, text, schemaEntities, pageUrl) {
         if (text.includes(term)) localTerms.push(term);
     }
     for (const match of text.match(CANADIAN_POSTAL_CODE_REGEX) || []) addressLines.push(match);
-    if (pageUrl.toLowerCase().includes('/ville') || pageUrl.toLowerCase().includes('/region') || pageUrl.toLowerCase().includes('/secteur')) {
+    if (
+        pageUrl.toLowerCase().includes('/ville') ||
+        pageUrl.toLowerCase().includes('/region') ||
+        pageUrl.toLowerCase().includes('/secteur')
+    ) {
         localTerms.push('location-page-url');
         const slugMatch = pageUrl.match(/\/(?:villes?|regions?|secteurs?)\/([\w-]+)/i);
         if (slugMatch) {
-            const name = decodeURIComponent(slugMatch[1]).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const name = decodeURIComponent(slugMatch[1])
+                .replace(/-/g, ' ')
+                .replace(/\b\w/g, (c) => c.toUpperCase());
             if (name.length >= 3) cities.push(name);
         }
     }
@@ -393,20 +602,30 @@ export function extractServiceSignals($, pageType, text) {
 
 export function extractTrustSignals(text, socialLinks) {
     const proofTerms = TRUST_TERMS.filter((term) => text.includes(term));
-    const reviewTerms = ['avis', 'review', 'reviews', 'temoignage', 'temoignages', 'testimonial', 'testimonials'].filter((term) => text.includes(term));
+    const reviewTerms = [
+        'avis',
+        'review',
+        'reviews',
+        'temoignage',
+        'temoignages',
+        'testimonial',
+        'testimonials',
+    ].filter((term) => text.includes(term));
 
     return {
         proof_terms: uniqueStrings(proofTerms),
         review_terms: uniqueStrings(reviewTerms),
-        social_networks: uniqueStrings(socialLinks.map((link) => {
-            if (inputMatchesHostname(link, 'facebook.com')) return 'facebook';
-            if (inputMatchesHostname(link, 'instagram.com')) return 'instagram';
-            if (inputMatchesHostname(link, 'linkedin.com')) return 'linkedin';
-            if (inputMatchesHostname(link, 'youtube.com')) return 'youtube';
-            if (inputMatchesHostname(link, 'tiktok.com')) return 'tiktok';
-            if (inputMatchesHostname(link, 'twitter.com') || inputMatchesHostname(link, 'x.com')) return 'x';
-            return '';
-        })),
+        social_networks: uniqueStrings(
+            socialLinks.map((link) => {
+                if (inputMatchesHostname(link, 'facebook.com')) return 'facebook';
+                if (inputMatchesHostname(link, 'instagram.com')) return 'instagram';
+                if (inputMatchesHostname(link, 'linkedin.com')) return 'linkedin';
+                if (inputMatchesHostname(link, 'youtube.com')) return 'youtube';
+                if (inputMatchesHostname(link, 'tiktok.com')) return 'tiktok';
+                if (inputMatchesHostname(link, 'twitter.com') || inputMatchesHostname(link, 'x.com')) return 'x';
+                return '';
+            }),
+        ),
     };
 }
 

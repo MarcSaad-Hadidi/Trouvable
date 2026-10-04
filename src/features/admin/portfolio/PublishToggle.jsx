@@ -35,23 +35,18 @@ export default function PublishToggle({ id, isPublished, lifecycleStatus }) {
                 onClick={handleToggle}
                 disabled={isPending || isBlocked}
                 title={isBlocked ? `Publication bloquée : le mandat est en état « ${currentLifecycle} »` : undefined}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isPublished
-                    ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20 hover:bg-emerald-400/20'
-                    : isBlocked
-                        ? 'bg-white/[0.02] text-white/20 border-white/[0.05] cursor-not-allowed'
-                        : 'bg-white/[0.04] text-white/40 border-white/10 hover:bg-white/[0.08]'
-                    } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+                    isPublished
+                        ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20 hover:bg-emerald-400/20'
+                        : isBlocked
+                          ? 'bg-white/[0.02] text-white/20 border-white/[0.05] cursor-not-allowed'
+                          : 'bg-white/[0.04] text-white/40 border-white/10 hover:bg-white/[0.08]'
+                } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
                 {isPending ? '...' : isPublished ? 'Publié' : 'Brouillon'}
             </button>
 
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 }

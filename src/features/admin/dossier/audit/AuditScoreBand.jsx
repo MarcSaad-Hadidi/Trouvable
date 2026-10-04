@@ -18,7 +18,8 @@ export default function AuditScoreBand({ audit }) {
     const seoScore = seoReading.value;
     const geoScore = geoReading.value;
     const hybridScore = audit?.geo_breakdown?.overall?.hybrid_score ?? overallReading.value;
-    const siteType = audit?.geo_breakdown?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null;
+    const siteType =
+        audit?.geo_breakdown?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null;
 
     return (
         <div>
@@ -40,14 +41,18 @@ export default function AuditScoreBand({ audit }) {
 function ScoreCard({ label, value, primary }) {
     const tone = value != null ? getScoreTone(value) : 'text-white/30';
     return (
-        <div className={`flex flex-col items-center gap-1 rounded-xl px-5 py-3 ${
-            primary
-                ? 'bg-gradient-to-br from-violet-500/[0.12] to-violet-600/[0.04] border border-violet-400/20 shadow-[0_0_24px_rgba(139,92,246,0.12)]'
-                : 'bg-white/[0.04] border border-white/[0.08]'
-        }`}>
+        <div
+            className={`flex flex-col items-center gap-1 rounded-xl px-5 py-3 ${
+                primary
+                    ? 'bg-gradient-to-br from-violet-500/[0.12] to-violet-600/[0.04] border border-violet-400/20 shadow-[0_0_24px_rgba(139,92,246,0.12)]'
+                    : 'bg-white/[0.04] border border-white/[0.08]'
+            }`}
+        >
             <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-white/50">{label}</span>
             <div className="flex items-baseline gap-1">
-                <span className={`font-['Plus_Jakarta_Sans',sans-serif] ${primary ? 'text-4xl geo-premium-hero-num' : 'text-2xl'} font-extrabold tabular-nums ${primary ? 'text-white/90' : tone}`}>
+                <span
+                    className={`font-['Plus_Jakarta_Sans',sans-serif] ${primary ? 'text-4xl geo-premium-hero-num' : 'text-2xl'} font-extrabold tabular-nums ${primary ? 'text-white/90' : tone}`}
+                >
                     {value != null ? value : '–'}
                 </span>
                 {value != null && <span className="text-[11px] text-white/30">/100</span>}

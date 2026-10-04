@@ -34,7 +34,11 @@ export default function AgentFixesPage() {
             actions={
                 <>
                     {pageActionLink(data?.links?.agentOverview || `${baseHref}/agent`, 'Vue AGENT')}
-                    {pageActionLink(data?.links?.geoOpportunities || `${baseHref}/geo/opportunities`, 'File GEO complète', 'primary')}
+                    {pageActionLink(
+                        data?.links?.geoOpportunities || `${baseHref}/geo/opportunities`,
+                        'File GEO complète',
+                        'primary',
+                    )}
                 </>
             }
             loading={loading}
@@ -43,7 +47,12 @@ export default function AgentFixesPage() {
             loadingMessage="Assemblage des correctifs AGENT depuis les dimensions, blocages et opportunités réelles."
         >
             {data?.status === 'partial' || data?.status === 'unavailable' ? (
-                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+                <p
+                    role="status"
+                    className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200"
+                >
+                    Données partielles : certains signaux AGENT sont indisponibles.
+                </p>
             ) : null}
             <MetricGrid
                 items={[
@@ -51,14 +60,20 @@ export default function AgentFixesPage() {
                         id: 'open',
                         label: 'Correctifs actifs',
                         value: summary.open ?? 'n.d.',
-                        detail: (summary.total ?? null) === null ? 'Total des actions indisponible' : `${summary.total} action(s) au total`,
+                        detail:
+                            (summary.total ?? null) === null
+                                ? 'Total des actions indisponible'
+                                : `${summary.total} action(s) au total`,
                         tone: (summary.open ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                     {
                         id: 'high',
                         label: 'Priorité haute',
                         value: summary.highPriorityOpen ?? 'n.d.',
-                        detail: (summary.derivedOpen ?? null) === null ? 'Signaux dérivés indisponibles' : `${summary.derivedOpen} signal(aux) issu(s) des dimensions`,
+                        detail:
+                            (summary.derivedOpen ?? null) === null
+                                ? 'Signaux dérivés indisponibles'
+                                : `${summary.derivedOpen} signal(aux) issu(s) des dimensions`,
                         tone: (summary.highPriorityOpen ?? 0) > 0 ? 'critical' : 'neutral',
                     },
                     {
@@ -72,7 +87,10 @@ export default function AgentFixesPage() {
                         id: 'review',
                         label: 'À revoir',
                         value: summary.reviewQueueCount ?? 'n.d.',
-                        detail: (summary.remediationDraftCount ?? null) === null ? 'Brouillons indisponibles' : `${summary.remediationDraftCount} brouillon(s)`,
+                        detail:
+                            (summary.remediationDraftCount ?? null) === null
+                                ? 'Brouillons indisponibles'
+                                : `${summary.remediationDraftCount} brouillon(s)`,
                         tone: (summary.reviewQueueCount ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}
@@ -121,12 +139,23 @@ export default function AgentFixesPage() {
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.title}</span>
-                                {item.priority ? <AgentChip tone={toneForPriority(item.priority)}>{formatAgentPriority(item.priority)}</AgentChip> : null}
-                                {item.status ? <AgentChip tone={toneForStatus(item.status)}>{formatAgentStatus(item.status)}</AgentChip> : null}
+                                {item.priority ? (
+                                    <AgentChip tone={toneForPriority(item.priority)}>
+                                        {formatAgentPriority(item.priority)}
+                                    </AgentChip>
+                                ) : null}
+                                {item.status ? (
+                                    <AgentChip tone={toneForStatus(item.status)}>
+                                        {formatAgentStatus(item.status)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
-                            {item.description ? <div className="text-[12px] leading-relaxed text-white/60">{item.description}</div> : null}
+                            {item.description ? (
+                                <div className="text-[12px] leading-relaxed text-white/60">{item.description}</div>
+                            ) : null}
                             <div className="text-[11px] text-white/42">
-                                {formatAgentCategory(item.category)} · {formatAgentSource(item.source)} · {item.created_at || 'Date non disponible'}
+                                {formatAgentCategory(item.category)} · {formatAgentSource(item.source)} ·{' '}
+                                {item.created_at || 'Date non disponible'}
                             </div>
                         </div>
                     )}
@@ -141,10 +170,18 @@ export default function AgentFixesPage() {
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[13px] font-semibold text-white/92">{item.title}</span>
-                                {item.priority ? <AgentChip tone={toneForPriority(item.priority)}>{formatAgentPriority(item.priority)}</AgentChip> : null}
+                                {item.priority ? (
+                                    <AgentChip tone={toneForPriority(item.priority)}>
+                                        {formatAgentPriority(item.priority)}
+                                    </AgentChip>
+                                ) : null}
                             </div>
-                            {item.evidence_summary ? <div className="text-[12px] leading-relaxed text-white/60">{item.evidence_summary}</div> : null}
-                            {item.recommended_fix ? <div className="text-[11px] text-emerald-100/80">Piste: {item.recommended_fix}</div> : null}
+                            {item.evidence_summary ? (
+                                <div className="text-[12px] leading-relaxed text-white/60">{item.evidence_summary}</div>
+                            ) : null}
+                            {item.recommended_fix ? (
+                                <div className="text-[11px] text-emerald-100/80">Piste: {item.recommended_fix}</div>
+                            ) : null}
                         </div>
                     )}
                 />

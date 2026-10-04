@@ -31,11 +31,27 @@ import { classifySourceType, computeSourceConfidence } from '../geo-query-utils.
 
 describe('flattenSnapshotToLegacy — shape contract', () => {
     function makeSnapshot() {
-        const audit = deriveAuditMetrics({ seo_score: 80, geo_score: 60, created_at: '2025-06-01', strengths: ['s'], issues: ['i'] });
-        const runs = deriveRunMetrics([{ id: 'r1', provider: 'a', model: 'b' }], { totalQueryRuns: 5, brandRecommendations: 2 });
+        const audit = deriveAuditMetrics({
+            seo_score: 80,
+            geo_score: 60,
+            created_at: '2025-06-01',
+            strengths: ['s'],
+            issues: ['i'],
+        });
+        const runs = deriveRunMetrics([{ id: 'r1', provider: 'a', model: 'b' }], {
+            totalQueryRuns: 5,
+            brandRecommendations: 2,
+        });
         const mentions = deriveMentionMetrics([], []);
         const prompts = derivePromptMetrics([], new Map());
-        return buildGeoKpiSnapshot({ audit, runs, mentions, prompts, counts: { openOpportunities: 1 }, lastRunAt: '2025-06-01' });
+        return buildGeoKpiSnapshot({
+            audit,
+            runs,
+            mentions,
+            prompts,
+            counts: { openOpportunities: 1 },
+            lastRunAt: '2025-06-01',
+        });
     }
 
     it('does NOT expose confirmedCompetitorMentions key (ambiguity removed)', () => {
@@ -47,11 +63,21 @@ describe('flattenSnapshotToLegacy — shape contract', () => {
     it('includes all expected scalar KPI keys', () => {
         const legacy = flattenSnapshotToLegacy(makeSnapshot(), { id: 'a1' });
         const expectedKeys = [
-            'seoScore', 'geoScore', 'totalQueryRuns', 'openOpportunities',
-            'visibilityProxyPercent', 'visibilityProxyReliability',
-            'competitorMentions', 'genericMentions', 'sourceMentions',
-            'avgParseConfidence', 'parseFailureRate', 'guardrails',
-            'trackedPromptStats', 'modelPerformance', 'latestAudit',
+            'seoScore',
+            'geoScore',
+            'totalQueryRuns',
+            'openOpportunities',
+            'visibilityProxyPercent',
+            'visibilityProxyReliability',
+            'competitorMentions',
+            'genericMentions',
+            'sourceMentions',
+            'avgParseConfidence',
+            'parseFailureRate',
+            'guardrails',
+            'trackedPromptStats',
+            'modelPerformance',
+            'latestAudit',
         ];
         for (const key of expectedKeys) {
             expect(legacy).toHaveProperty(key);
@@ -74,27 +100,21 @@ describe('flattenSnapshotToLegacy — shape contract', () => {
 
 describe('bucketMentionsByType — edge cases', () => {
     it('treats is_target=true business as target, not generic', () => {
-        const rows = [
-            { entity_type: 'business', is_target: true, business_name: 'MyBiz' },
-        ];
+        const rows = [{ entity_type: 'business', is_target: true, business_name: 'MyBiz' }];
         const result = bucketMentionsByType(rows);
         expect(result.targets.length).toBe(1);
         expect(result.generics.length).toBe(0);
     });
 
     it('treats entity_type=business with is_target=false as generic', () => {
-        const rows = [
-            { entity_type: 'business', is_target: false, business_name: 'OtherBiz' },
-        ];
+        const rows = [{ entity_type: 'business', is_target: false, business_name: 'OtherBiz' }];
         const result = bucketMentionsByType(rows);
         expect(result.generics.length).toBe(1);
         expect(result.targets.length).toBe(0);
     });
 
     it('ignores unknown entity_type rows', () => {
-        const rows = [
-            { entity_type: 'unknown_type', business_name: 'X' },
-        ];
+        const rows = [{ entity_type: 'unknown_type', business_name: 'X' }];
         const result = bucketMentionsByType(rows);
         expect(result.sources.length).toBe(0);
         expect(result.competitors.length).toBe(0);
@@ -103,9 +123,7 @@ describe('bucketMentionsByType — edge cases', () => {
     });
 
     it('handles mentions without entity_type (defaults to business → generic)', () => {
-        const rows = [
-            { business_name: 'NoType', is_target: false },
-        ];
+        const rows = [{ business_name: 'NoType', is_target: false }];
         const result = bucketMentionsByType(rows);
         expect(result.generics.length).toBe(1);
     });
@@ -169,10 +187,14 @@ describe('deriveAuditMetrics — LLM degraded / hybrid modes', () => {
 describe('computeGuardrails — combined scenarios', () => {
     it('triggers both LLM_DEGRADED and HIGH_PARSE_FAILURE simultaneously', () => {
         const runs = Array.from({ length: 6 }, (_, i) => ({
-            id: `r${i}`, provider: 'a', model: 'b', parse_status: 'parsed_failed',
+            id: `r${i}`,
+            provider: 'a',
+            model: 'b',
+            parse_status: 'parsed_failed',
         }));
         const audit = deriveAuditMetrics({
-            seo_score: 50, geo_score: 50,
+            seo_score: 50,
+            geo_score: 50,
             seo_breakdown: { overall: { llm_status: 'failed' } },
         });
         const warnings = computeGuardrails({
@@ -229,43 +251,49 @@ describe('opportunity classification (getLatestOpportunities logic)', () => {
     }
 
     it('non-open status always goes to active', () => {
-        const { active, stale } = classifyOpportunities([
-            { id: 1, status: 'dismissed', audit_id: 'old-audit' },
-            { id: 2, status: 'in_progress', audit_id: 'old-audit' },
-        ], 'latest-audit');
+        const { active, stale } = classifyOpportunities(
+            [
+                { id: 1, status: 'dismissed', audit_id: 'old-audit' },
+                { id: 2, status: 'in_progress', audit_id: 'old-audit' },
+            ],
+            'latest-audit',
+        );
         expect(active.length).toBe(2);
         expect(stale.length).toBe(0);
     });
 
     it('open opp matching latest audit goes to active', () => {
-        const { active, stale } = classifyOpportunities([
-            { id: 1, status: 'open', audit_id: 'latest-audit' },
-        ], 'latest-audit');
+        const { active, stale } = classifyOpportunities(
+            [{ id: 1, status: 'open', audit_id: 'latest-audit' }],
+            'latest-audit',
+        );
         expect(active.length).toBe(1);
         expect(stale.length).toBe(0);
     });
 
     it('open opp from old audit goes to stale', () => {
-        const { active, stale } = classifyOpportunities([
-            { id: 1, status: 'open', audit_id: 'old-audit' },
-        ], 'latest-audit');
+        const { active, stale } = classifyOpportunities(
+            [{ id: 1, status: 'open', audit_id: 'old-audit' }],
+            'latest-audit',
+        );
         expect(active.length).toBe(0);
         expect(stale.length).toBe(1);
     });
 
     it('open opp without audit_id goes to active', () => {
-        const { active, stale } = classifyOpportunities([
-            { id: 1, status: 'open', audit_id: null },
-        ], 'latest-audit');
+        const { active, stale } = classifyOpportunities([{ id: 1, status: 'open', audit_id: null }], 'latest-audit');
         expect(active.length).toBe(1);
         expect(stale.length).toBe(0);
     });
 
     it('when no latest audit, all open opps go to active', () => {
-        const { active, stale } = classifyOpportunities([
-            { id: 1, status: 'open', audit_id: 'some-audit' },
-            { id: 2, status: 'open', audit_id: null },
-        ], null);
+        const { active, stale } = classifyOpportunities(
+            [
+                { id: 1, status: 'open', audit_id: 'some-audit' },
+                { id: 2, status: 'open', audit_id: null },
+            ],
+            null,
+        );
         expect(active.length).toBe(2);
         expect(stale.length).toBe(0);
     });
@@ -276,12 +304,31 @@ describe('opportunity classification (getLatestOpportunities logic)', () => {
 describe('extraction-v2 — competitor/generic separation', () => {
     const baseParams = {
         queryText: 'Best electrician in Montreal',
-        responseText: 'Master Electric is a top electrician. Budget Sparks also available. Pro Wire competitors. Visit https://yelp.com/biz/master.',
+        responseText:
+            'Master Electric is a top electrician. Budget Sparks also available. Pro Wire competitors. Visit https://yelp.com/biz/master.',
         analysis: {
             mentioned_businesses: [
-                { name: 'Master Electric', position: 1, context: 'Master Electric is a top electrician', is_target: true, sentiment: 'positive' },
-                { name: 'Budget Sparks', position: 2, context: 'Budget Sparks also available', is_target: false, sentiment: 'neutral' },
-                { name: 'Pro Wire', position: 3, context: 'Pro Wire competitors rival', is_target: false, sentiment: 'neutral' },
+                {
+                    name: 'Master Electric',
+                    position: 1,
+                    context: 'Master Electric is a top electrician',
+                    is_target: true,
+                    sentiment: 'positive',
+                },
+                {
+                    name: 'Budget Sparks',
+                    position: 2,
+                    context: 'Budget Sparks also available',
+                    is_target: false,
+                    sentiment: 'neutral',
+                },
+                {
+                    name: 'Pro Wire',
+                    position: 3,
+                    context: 'Pro Wire competitors rival',
+                    is_target: false,
+                    sentiment: 'neutral',
+                },
             ],
         },
         clientName: 'Master Electric',
@@ -310,8 +357,20 @@ describe('extraction-v2 — competitor/generic separation', () => {
             knownCompetitors: [],
             analysis: {
                 mentioned_businesses: [
-                    { name: 'Master Electric', position: 1, context: 'top electrician', is_target: true, sentiment: 'positive' },
-                    { name: 'Random Cafe', position: 2, context: 'Random Cafe is nearby the location', is_target: false, sentiment: 'neutral' },
+                    {
+                        name: 'Master Electric',
+                        position: 1,
+                        context: 'top electrician',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
+                    {
+                        name: 'Random Cafe',
+                        position: 2,
+                        context: 'Random Cafe is nearby the location',
+                        is_target: false,
+                        sentiment: 'neutral',
+                    },
                 ],
             },
         };
@@ -364,7 +423,13 @@ describe('citation source typing and confidence', () => {
             responseText: 'Check reviews on https://yelp.com/biz/abc and visit https://facebook.com/abc for updates.',
             analysis: {
                 mentioned_businesses: [
-                    { name: 'ABC Plumbing', position: 1, context: 'ABC is top', is_target: true, sentiment: 'positive' },
+                    {
+                        name: 'ABC Plumbing',
+                        position: 1,
+                        context: 'ABC is top',
+                        is_target: true,
+                        sentiment: 'positive',
+                    },
                 ],
             },
             clientName: 'ABC Plumbing',
@@ -398,9 +463,7 @@ describe('buildLastRunMap — edge cases', () => {
     });
 
     it('ignores runs without tracked_query_id', () => {
-        const runs = [
-            { id: 'r1', tracked_query_id: null, created_at: '2025-01-01' },
-        ];
+        const runs = [{ id: 'r1', tracked_query_id: null, created_at: '2025-01-01' }];
         const map = buildLastRunMap(runs);
         expect(map.size).toBe(0);
     });

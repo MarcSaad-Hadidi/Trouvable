@@ -8,7 +8,8 @@ function createOpenIdConfiguration(origin) {
         jwks_uri: `${origin}/.well-known/jwks.json`,
         trouvable_status: 'disabled',
         authorization_server_status: 'unsupported',
-        authorization_server_note: 'Trouvable does not issue OAuth or OpenID tokens from these public discovery endpoints. /api/oauth/authorize and /api/oauth/token return structured unsupported errors.',
+        authorization_server_note:
+            'Trouvable does not issue OAuth or OpenID tokens from these public discovery endpoints. /api/oauth/authorize and /api/oauth/token return structured unsupported errors.',
         response_types_supported: [],
         grant_types_supported: [],
         subject_types_supported: ['public'],

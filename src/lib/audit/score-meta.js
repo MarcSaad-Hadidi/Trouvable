@@ -49,7 +49,11 @@ export function toArray(value) {
 }
 
 export function uniqueStrings(values = []) {
-    return [...new Set(values.filter((value) => typeof value === 'string' && value.trim().length > 0).map((value) => value.trim()))];
+    return [
+        ...new Set(
+            values.filter((value) => typeof value === 'string' && value.trim().length > 0).map((value) => value.trim()),
+        ),
+    ];
 }
 
 export function summarize(values = [], limit = 4) {

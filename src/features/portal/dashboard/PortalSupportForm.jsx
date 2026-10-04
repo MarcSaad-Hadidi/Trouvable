@@ -17,11 +17,7 @@ const TOPICS = [
 const inputClasses =
     'w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3.5 text-[14px] text-white outline-none transition-all duration-200 placeholder:text-white/18 hover:border-white/[0.12] focus:border-[#5b73ff]/40 focus:bg-white/[0.05] focus:ring-1 focus:ring-[#5b73ff]/15';
 
-export default function PortalSupportForm({
-    defaultEmail = '',
-    clientLabel = '',
-    cloudflareBypassEnabled = false,
-}) {
+export default function PortalSupportForm({ defaultEmail = '', clientLabel = '', cloudflareBypassEnabled = false }) {
     const [formData, setFormData] = useState({
         name: '',
         email: defaultEmail,
@@ -78,7 +74,9 @@ export default function PortalSupportForm({
         }
 
         if (!cloudflareBypassEnabled && !isTurnstileConfigured) {
-            setTurnstileError('Verification anti-robot indisponible pour le moment. Merci de reessayer dans quelques instants.');
+            setTurnstileError(
+                'Verification anti-robot indisponible pour le moment. Merci de reessayer dans quelques instants.',
+            );
             return;
         }
 
@@ -133,7 +131,12 @@ export default function PortalSupportForm({
             console.error('Portal support form:', error);
             setTurnstileToken(null);
 
-            if (!cloudflareBypassEnabled && String(error?.message || '').toLowerCase().includes('anti-robot')) {
+            if (
+                !cloudflareBypassEnabled &&
+                String(error?.message || '')
+                    .toLowerCase()
+                    .includes('anti-robot')
+            ) {
                 setTurnstileError('La verification Cloudflare a expire ou a echoue. Merci de valider a nouveau.');
             }
 
@@ -156,7 +159,8 @@ export default function PortalSupportForm({
                         </div>
                         <h3 className="mb-2 text-xl font-bold text-white">Message envoye</h3>
                         <p className="mx-auto max-w-md text-[14px] leading-relaxed text-white/35">
-                            Nous avons bien recu votre demande. L&apos;equipe vous repondra dans les meilleurs delais ouvrables.
+                            Nous avons bien recu votre demande. L&apos;equipe vous repondra dans les meilleurs delais
+                            ouvrables.
                         </p>
                     </div>
                 </motion.div>
@@ -198,7 +202,8 @@ export default function PortalSupportForm({
                                     Votre dossier est suivi en continu
                                 </h2>
                                 <p className="max-w-xl text-[13px] leading-relaxed text-white/32 md:text-[14px]">
-                                    L&apos;equipe reste disponible pour vos questions, vos resultats et la suite de votre accompagnement.
+                                    L&apos;equipe reste disponible pour vos questions, vos resultats et la suite de
+                                    votre accompagnement.
                                 </p>
                             </div>
                             <div className="shrink-0">
@@ -208,7 +213,10 @@ export default function PortalSupportForm({
                                     className="group inline-flex items-center gap-2.5 rounded-xl bg-white px-6 py-3.5 text-[13px] font-bold text-black transition-all hover:-translate-y-px hover:shadow-[0_14px_44px_rgba(255,255,255,0.05)]"
                                 >
                                     Aide sur l&apos;espace client
-                                    <ArrowRight size={15} className="opacity-60 transition-transform group-hover:translate-x-0.5" />
+                                    <ArrowRight
+                                        size={15}
+                                        className="opacity-60 transition-transform group-hover:translate-x-0.5"
+                                    />
                                 </button>
                             </div>
                         </div>
@@ -253,7 +261,8 @@ export default function PortalSupportForm({
                         <form onSubmit={handleSubmit} className="space-y-4 px-8 py-8 md:px-10 md:pb-10">
                             {formStatus === 'error' && (
                                 <div className="rounded-xl border border-red-500/12 bg-red-500/[0.04] px-4 py-3 text-[13px] font-medium leading-relaxed text-red-300/80">
-                                    Une erreur s&apos;est produite. Vous pouvez reessayer ou nous ecrire directement depuis la page contact du site.
+                                    Une erreur s&apos;est produite. Vous pouvez reessayer ou nous ecrire directement
+                                    depuis la page contact du site.
                                 </div>
                             )}
                             {turnstileError && (
@@ -263,7 +272,8 @@ export default function PortalSupportForm({
                             )}
                             {cloudflareBypassEnabled && (
                                 <div className="rounded-xl border border-sky-400/15 bg-sky-400/[0.08] px-4 py-3 text-[13px] font-medium text-sky-100/85">
-                                    Verification Cloudflare simulee en developpement local. L&apos;envoi reste testable sans challenge externe.
+                                    Verification Cloudflare simulee en developpement local. L&apos;envoi reste testable
+                                    sans challenge externe.
                                 </div>
                             )}
 
@@ -282,7 +292,9 @@ export default function PortalSupportForm({
 
                             {clientLabel && (
                                 <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/25">Dossier</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/25">
+                                        Dossier
+                                    </span>
                                     <span className="text-[13px] font-medium text-white/60">{clientLabel}</span>
                                 </div>
                             )}
@@ -334,7 +346,14 @@ export default function PortalSupportForm({
                                     className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-white/35"
                                     htmlFor="portal-support-email"
                                 >
-                                    Courriel {hasKnownEmail ? <span className="normal-case tracking-normal font-normal text-white/20">- associe a votre acces portail</span> : <span className="text-[#5b73ff]/60">*</span>}
+                                    Courriel{' '}
+                                    {hasKnownEmail ? (
+                                        <span className="normal-case tracking-normal font-normal text-white/20">
+                                            - associe a votre acces portail
+                                        </span>
+                                    ) : (
+                                        <span className="text-[#5b73ff]/60">*</span>
+                                    )}
                                 </label>
                                 <input
                                     id="portal-support-email"
@@ -431,11 +450,15 @@ export default function PortalSupportForm({
                                         }}
                                         onError={() => {
                                             setTurnstileToken(null);
-                                            setTurnstileError("La verification Cloudflare n'a pas pu etre chargee. Verifiez votre connexion et reessayez.");
+                                            setTurnstileError(
+                                                "La verification Cloudflare n'a pas pu etre chargee. Verifiez votre connexion et reessayez.",
+                                            );
                                         }}
                                         onExpire={() => {
                                             setTurnstileToken(null);
-                                            setTurnstileError('La verification anti-robot a expire. Merci de valider a nouveau.');
+                                            setTurnstileError(
+                                                'La verification anti-robot a expire. Merci de valider a nouveau.',
+                                            );
                                         }}
                                     />
                                 ) : (
@@ -465,10 +488,7 @@ export default function PortalSupportForm({
                                         formStatus === 'loading' || !canSubmit
                                             ? 'rgba(255,255,255,0.03)'
                                             : 'linear-gradient(135deg, #5b73ff, #7c3aed)',
-                                    color:
-                                        formStatus === 'loading' || !canSubmit
-                                            ? 'rgba(255,255,255,0.25)'
-                                            : '#fff',
+                                    color: formStatus === 'loading' || !canSubmit ? 'rgba(255,255,255,0.25)' : '#fff',
                                     boxShadow:
                                         formStatus === 'loading' || !canSubmit
                                             ? 'none'
@@ -477,16 +497,35 @@ export default function PortalSupportForm({
                             >
                                 {formStatus === 'loading' ? (
                                     <span className="flex items-center justify-center gap-2.5">
-                                        <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                        <svg
+                                            className="h-4 w-4 animate-spin"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-20"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-80"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                            />
                                         </svg>
                                         Envoi en cours...
                                     </span>
                                 ) : (
                                     <span className="flex items-center justify-center gap-2">
                                         Envoyer a l&apos;equipe
-                                        <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                                        <ArrowRight
+                                            size={15}
+                                            className="transition-transform group-hover:translate-x-0.5"
+                                        />
                                     </span>
                                 )}
                             </button>

@@ -17,13 +17,16 @@ function jsonRpcResponse(id, result) {
 }
 
 function jsonRpcError(id, code, message) {
-    return Response.json({
-        jsonrpc: '2.0',
-        id,
-        error: { code, message },
-    }, {
-        status: 400,
-    });
+    return Response.json(
+        {
+            jsonrpc: '2.0',
+            id,
+            error: { code, message },
+        },
+        {
+            status: 400,
+        },
+    );
 }
 
 function initializeResult() {

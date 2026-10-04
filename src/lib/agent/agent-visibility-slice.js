@@ -5,24 +5,25 @@ import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 import { finiteNumberOrNull } from '@/lib/numbers';
 
 function buildEmptyState({ hasRuns, hasPrompts }) {
-    if (hasRuns === null || hasPrompts === null) return {
-        title: 'Visibilité agentique temporairement indisponible',
-        description: 'Les données nécessaires à cette lecture ne sont pas toutes disponibles.',
-    };
+    if (hasRuns === null || hasPrompts === null)
+        return {
+            title: 'Visibilité agentique temporairement indisponible',
+            description: 'Les données nécessaires à cette lecture ne sont pas toutes disponibles.',
+        };
     if (hasRuns) return null;
     if (!hasPrompts) {
         return {
             title: 'Visibilité agentique indisponible',
             description:
-                'Aucun prompt suivi pour ce mandat. '
-                + 'Configurez des prompts dans Visibilité IA › Prompts pour activer la lecture de visibilité agentique.',
+                'Aucun prompt suivi pour ce mandat. ' +
+                'Configurez des prompts dans Visibilité IA › Prompts pour activer la lecture de visibilité agentique.',
         };
     }
     return {
         title: 'Aucune exécution moteur',
         description:
-            'Des prompts sont suivis mais aucune exécution moteur n’a encore été enregistrée. '
-            + 'Lancez une exécution dans Visibilité IA › Exécutions.',
+            'Des prompts sont suivis mais aucune exécution moteur n’a encore été enregistrée. ' +
+            'Lancez une exécution dans Visibilité IA › Exécutions.',
     };
 }
 
@@ -30,17 +31,23 @@ export async function getAgentVisibilitySlice(clientId) {
     const overviewSlice = await getOverviewSlice(clientId).catch(() => null);
     const status = overviewSlice?.status || (overviewSlice ? 'available' : 'unavailable');
     const dataSources = overviewSlice?.dataSources || { overview: overviewSlice ? 'available' : 'unavailable' };
-    const errors = overviewSlice ? overviewSlice.errors || [] : [{ source: 'overview', message: 'Données temporairement indisponibles.' }];
+    const errors = overviewSlice
+        ? overviewSlice.errors || []
+        : [{ source: 'overview', message: 'Données temporairement indisponibles.' }];
     const kpis = overviewSlice?.kpis || {};
     const visibility = overviewSlice?.visibility || {};
     const competitors = overviewSlice?.competitors || {};
     const sources = overviewSlice?.sources || {};
 
-    const completedRunsTotal = dataSources.totalQueryRuns === 'unavailable' ? null : finiteNumberOrNull(kpis.completedRunsTotal);
-    const trackedPromptsTotal = dataSources.trackedQueries === 'unavailable' ? null : finiteNumberOrNull(kpis.trackedPromptsTotal);
+    const completedRunsTotal =
+        dataSources.totalQueryRuns === 'unavailable' ? null : finiteNumberOrNull(kpis.completedRunsTotal);
+    const trackedPromptsTotal =
+        dataSources.trackedQueries === 'unavailable' ? null : finiteNumberOrNull(kpis.trackedPromptsTotal);
 
     return {
-        status, dataSources, errors,
+        status,
+        dataSources,
+        errors,
         provenance: {
             observed: getProvenanceMeta('observed'),
             derived: getProvenanceMeta('derived'),
@@ -84,4 +91,3 @@ export async function getAgentVisibilitySlice(clientId) {
         }),
     };
 }
-

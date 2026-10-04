@@ -17,9 +17,9 @@ const outputSchema = z.object({
 function buildMessages(input) {
     const { clusters } = input;
 
-    const clusterList = clusters.map((c, i) =>
-        `${i + 1}. [${c.cluster_type}] "${c.label}" (${c.mention_count} mentions)`
-    ).join('\n');
+    const clusterList = clusters
+        .map((c, i) => `${i + 1}. [${c.cluster_type}] "${c.label}" (${c.mention_count} mentions)`)
+        .join('\n');
 
     return [
         {
@@ -55,7 +55,9 @@ function normalize(raw) {
     const labels = raw?.labels || [];
     return labels.map((entry) => ({
         original: String(entry.original || ''),
-        normalized: String(entry.normalized || entry.original || '').toLowerCase().trim(),
+        normalized: String(entry.normalized || entry.original || '')
+            .toLowerCase()
+            .trim(),
         cluster_type: String(entry.cluster_type || ''),
         is_duplicate_of: entry.is_duplicate_of || null,
     }));

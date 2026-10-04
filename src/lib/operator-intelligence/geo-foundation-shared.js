@@ -46,7 +46,11 @@ export function normalizeComparableUrl(value) {
         const pathname = parsed.pathname.replace(/\/+$/, '');
         return `${host}${pathname}`;
     } catch {
-        return compact.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '');
+        return compact
+            .toLowerCase()
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '')
+            .replace(/\/+$/, '');
     }
 }
 
@@ -72,12 +76,21 @@ const AUDIT_COPY_EXACT = new Map([
     ['AI crawlers can access the site', 'Les crawlers IA peuvent accéder au site'],
     ['Critical AI crawlers are blocked', 'Des crawlers IA critiques sont bloqués'],
     ['No critical AI crawlers are blocked via robots.txt.', 'Aucun crawler IA critique n’est bloqué via robots.txt.'],
-    ['robots.txt is present and allows major AI crawlers.', 'robots.txt est présent et n’indique pas de blocage sur les principaux crawlers IA.'],
+    [
+        'robots.txt is present and allows major AI crawlers.',
+        'robots.txt est présent et n’indique pas de blocage sur les principaux crawlers IA.',
+    ],
     ['Local schema is present', 'Le schema local est présent'],
-    ['Structured local business data was observed.', 'Des données structurées de type activité locale ont été observées.'],
+    [
+        'Structured local business data was observed.',
+        'Des données structurées de type activité locale ont été observées.',
+    ],
     ['Observed LocalBusiness-style JSON-LD.', 'Un JSON-LD de type LocalBusiness a été observé.'],
     ['Local schema is missing for a locally relevant site', 'Le schema local manque pour un site à enjeu local'],
-    ['No LocalBusiness-style schema was observed in JSON-LD.', 'Aucun schema de type LocalBusiness n’a été observé dans le JSON-LD.'],
+    [
+        'No LocalBusiness-style schema was observed in JSON-LD.',
+        'Aucun schema de type LocalBusiness n’a été observé dans le JSON-LD.',
+    ],
     [
         'The crawl did not observe LocalBusiness-style schema even though the detected site type has local recommendation relevance.',
         'Le crawl n’a pas observé de schema de type LocalBusiness alors que le site présente une pertinence locale.',
@@ -100,7 +113,9 @@ export function localizeAuditCopy(value) {
         return AUDIT_COPY_EXACT.get(compact);
     }
 
-    let match = compact.match(/^(\d+) critical AI crawler\(s\) are blocked via robots\.txt, which prevents inclusion in AI-generated answers\.$/i);
+    let match = compact.match(
+        /^(\d+) critical AI crawler\(s\) are blocked via robots\.txt, which prevents inclusion in AI-generated answers\.$/i,
+    );
     if (match) {
         return `${match[1]} crawler(s) IA critique(s) sont bloqués via robots.txt, ce qui limite leur exposition dans les réponses générées par IA.`;
     }
@@ -127,11 +142,7 @@ export async function getGeoFoundationContext(clientId) {
     const supabase = getAdminSupabase();
 
     const [{ data: clientRow, error: clientError }, audit] = await Promise.all([
-        supabase
-            .from('client_geo_profiles')
-            .select('*')
-            .eq('id', clientId)
-            .maybeSingle(),
+        supabase.from('client_geo_profiles').select('*').eq('id', clientId).maybeSingle(),
         dbGetLatestAudit(clientId).catch(() => null),
     ]);
 

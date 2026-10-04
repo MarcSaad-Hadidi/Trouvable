@@ -21,12 +21,7 @@ export default function SwitchAccountButton({ className }) {
     };
 
     return (
-        <button
-            type="button"
-            onClick={handleClick}
-            disabled={pending}
-            className={className}
-        >
+        <button type="button" onClick={handleClick} disabled={pending} className={className}>
             {pending ? 'Déconnexion…' : 'Se connecter avec un autre compte'}
         </button>
     );

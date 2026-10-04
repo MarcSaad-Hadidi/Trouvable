@@ -53,35 +53,59 @@ export default function SeoCorrectionPromptsPage() {
     }, [clientId, openHandoff, searchParams]);
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
-    const promptableIssues = useMemo(() => (data?.issues || []).filter((issue) => issue?.promptAvailable !== false), [data?.issues]);
+    const promptableIssues = useMemo(
+        () => (data?.issues || []).filter((issue) => issue?.promptAvailable !== false),
+        [data?.issues],
+    );
     const filteredIssues = useMemo(() => {
         const needle = search.trim().toLowerCase();
         if (!needle) return promptableIssues;
-        return promptableIssues.filter((issue) => `${issue.title || ''} ${issue.description || ''} ${issue.evidence || ''}`.toLowerCase().includes(needle));
+        return promptableIssues.filter((issue) =>
+            `${issue.title || ''} ${issue.description || ''} ${issue.evidence || ''}`.toLowerCase().includes(needle),
+        );
     }, [promptableIssues, search]);
 
     const [previousSelectionInput, setPreviousSelectionInput] = useState({ preferredIssueId, filteredIssues });
-    if (previousSelectionInput.preferredIssueId !== preferredIssueId || previousSelectionInput.filteredIssues !== filteredIssues) {
+    if (
+        previousSelectionInput.preferredIssueId !== preferredIssueId ||
+        previousSelectionInput.filteredIssues !== filteredIssues
+    ) {
         setPreviousSelectionInput({ preferredIssueId, filteredIssues });
-        const nextIssueId = preferredIssueId && filteredIssues.some((issue) => issue.id === preferredIssueId)
-            ? preferredIssueId
-            : (filteredIssues.some((issue) => issue.id === selectedIssueId) ? selectedIssueId : (filteredIssues[0]?.id ?? null));
+        const nextIssueId =
+            preferredIssueId && filteredIssues.some((issue) => issue.id === preferredIssueId)
+                ? preferredIssueId
+                : filteredIssues.some((issue) => issue.id === selectedIssueId)
+                  ? selectedIssueId
+                  : (filteredIssues[0]?.id ?? null);
         setSelectedIssueId(nextIssueId);
     }
 
     const selectedIssue = filteredIssues.find((issue) => issue.id === selectedIssueId) || null;
-    const grouped = useMemo(() => ({
-        critical: filteredIssues.filter((issue) => priorityBucket(issue) === 'critical'),
-        medium: filteredIssues.filter((issue) => priorityBucket(issue) === 'medium'),
-        low: filteredIssues.filter((issue) => priorityBucket(issue) === 'low'),
-    }), [filteredIssues]);
+    const grouped = useMemo(
+        () => ({
+            critical: filteredIssues.filter((issue) => priorityBucket(issue) === 'critical'),
+            medium: filteredIssues.filter((issue) => priorityBucket(issue) === 'medium'),
+            low: filteredIssues.filter((issue) => priorityBucket(issue) === 'low'),
+        }),
+        [filteredIssues],
+    );
 
     if (loading) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Prompts de correction IA" subtitle="Chargement des problèmes éligibles et du générateur réel." />}>
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Prompts de correction IA"
+                        subtitle="Chargement des problèmes éligibles et du générateur réel."
+                    />
+                }
+            >
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/90">Chargement de l’atelier de prompts</div>
-                    <p className="mt-2 text-[13px] text-white/55">Les issues SEO Health éligibles et le contexte de génération sont en cours d’assemblage.</p>
+                    <p className="mt-2 text-[13px] text-white/55">
+                        Les issues SEO Health éligibles et le contexte de génération sont en cours d’assemblage.
+                    </p>
                 </div>
             </CommandPageShell>
         );
@@ -89,8 +113,24 @@ export default function SeoCorrectionPromptsPage() {
 
     if (error) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Prompts de correction IA" subtitle="Atelier connecté aux problèmes réels du dossier." />}>
-                <CommandEmptyState title="Prompts de correction indisponibles" description={error} action={<Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>Retour santé SEO</Link>} />
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Prompts de correction IA"
+                        subtitle="Atelier connecté aux problèmes réels du dossier."
+                    />
+                }
+            >
+                <CommandEmptyState
+                    title="Prompts de correction indisponibles"
+                    description={error}
+                    action={
+                        <Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>
+                            Retour santé SEO
+                        </Link>
+                    }
+                />
             </CommandPageShell>
         );
     }
@@ -98,18 +138,50 @@ export default function SeoCorrectionPromptsPage() {
     if (!data || data.emptyState || promptableIssues.length === 0) {
         return (
             <CommandPageShell
-                header={<CommandHeader eyebrow="SEO Ops" title="Prompts de correction IA" subtitle={`Atelier de génération pour ${client?.client_name || 'ce mandat'}.`} actions={<Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>Santé SEO</Link>} />}
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Prompts de correction IA"
+                        subtitle={`Atelier de génération pour ${client?.client_name || 'ce mandat'}.`}
+                        actions={
+                            <Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.primary}>
+                                Santé SEO
+                            </Link>
+                        }
+                    />
+                }
             >
-                <CommandEmptyState title={data?.emptyState?.title || 'Aucun problème éligible pour prompt'} description={data?.emptyState?.description || 'Le dernier audit ne fournit pas encore de problème technique SEO exploitable pour la génération de prompt.'} />
+                <CommandEmptyState
+                    title={data?.emptyState?.title || 'Aucun problème éligible pour prompt'}
+                    description={
+                        data?.emptyState?.description ||
+                        'Le dernier audit ne fournit pas encore de problème technique SEO exploitable pour la génération de prompt.'
+                    }
+                />
             </CommandPageShell>
         );
     }
 
     const metrics = [
-        { label: 'Problèmes éligibles', value: promptableIssues.length, detail: 'Issues SEO Health avec preuve exploitable.', tone: 'info' },
-        { label: 'Critiques', value: grouped.critical.length, detail: 'Priorité haute à corriger.', tone: grouped.critical.length > 0 ? 'critical' : 'neutral' },
+        {
+            label: 'Problèmes éligibles',
+            value: promptableIssues.length,
+            detail: 'Issues SEO Health avec preuve exploitable.',
+            tone: 'info',
+        },
+        {
+            label: 'Critiques',
+            value: grouped.critical.length,
+            detail: 'Priorité haute à corriger.',
+            tone: grouped.critical.length > 0 ? 'critical' : 'neutral',
+        },
         { label: 'À traiter', value: grouped.medium.length, detail: 'Bloc de production courant.', tone: 'warning' },
-        { label: 'Éligibles légers', value: grouped.low.length, detail: 'Améliorations à faible friction.', tone: 'ok' },
+        {
+            label: 'Éligibles légers',
+            value: grouped.low.length,
+            detail: 'Améliorations à faible friction.',
+            tone: 'ok',
+        },
     ];
 
     return (
@@ -121,15 +193,27 @@ export default function SeoCorrectionPromptsPage() {
                     subtitle={`Board de génération relié aux vrais problèmes SEO Health de ${client?.client_name || 'ce mandat'}, sans prompts de démo ni backlog fictif.`}
                     actions={
                         <>
-                            <Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.secondary}>Santé SEO</Link>
-                            <Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.secondary}>Opportunités SEO</Link>
+                            <Link href={`${baseHref}/seo/health`} className={COMMAND_BUTTONS.secondary}>
+                                Santé SEO
+                            </Link>
+                            <Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.secondary}>
+                                Opportunités SEO
+                            </Link>
                         </>
                     }
                 />
             }
         >
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                {metrics.map((metric) => <CommandMetricCard key={metric.label} label={metric.label} value={metric.value} detail={metric.detail} tone={metric.tone} />)}
+                {metrics.map((metric) => (
+                    <CommandMetricCard
+                        key={metric.label}
+                        label={metric.label}
+                        value={metric.value}
+                        detail={metric.detail}
+                        tone={metric.tone}
+                    />
+                ))}
             </div>
 
             <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
@@ -158,40 +242,62 @@ export default function SeoCorrectionPromptsPage() {
                                         <div className={cn('w-2 h-2 rounded-full', meta.color)} />
                                         <h3 className="text-[13px] font-semibold text-white/90">{meta.title}</h3>
                                     </div>
-                                    <span className="text-[10px] font-medium text-white/40 bg-white/5 px-2 py-0.5 rounded-full">{items.length}</span>
+                                    <span className="text-[10px] font-medium text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+                                        {items.length}
+                                    </span>
                                 </div>
                                 <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-none pb-4">
-                                    {items.length > 0 ? items.map((item) => (
-                                        <button
-                                            key={item.id}
-                                            type="button"
-                                            onClick={() => setSelectedIssueId(item.id)}
-                                            className={cn(COMMAND_PANEL, 'w-full p-4 flex flex-col gap-3 text-left group transition-colors', selectedIssue?.id === item.id ? 'ring-1 ring-indigo-400/30 bg-white/[0.05]' : 'hover:bg-white/[0.04]')}
-                                        >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <h4 className="text-[12px] font-semibold text-white/90 leading-snug">{item.title}</h4>
-                                                    <div className="flex items-center gap-2 mt-1.5">
-                                                        <span className="flex items-center gap-1 text-[10px] text-white/40">
-                                                            <Icon className="w-3 h-3" />
-                                                            {item.priority || 'medium'}
-                                                        </span>
-                                                        <span className="text-[10px] text-indigo-300/80">{item.reliability || 'unavailable'}</span>
+                                    {items.length > 0 ? (
+                                        items.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                type="button"
+                                                onClick={() => setSelectedIssueId(item.id)}
+                                                className={cn(
+                                                    COMMAND_PANEL,
+                                                    'w-full p-4 flex flex-col gap-3 text-left group transition-colors',
+                                                    selectedIssue?.id === item.id
+                                                        ? 'ring-1 ring-indigo-400/30 bg-white/[0.05]'
+                                                        : 'hover:bg-white/[0.04]',
+                                                )}
+                                            >
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <h4 className="text-[12px] font-semibold text-white/90 leading-snug">
+                                                            {item.title}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mt-1.5">
+                                                            <span className="flex items-center gap-1 text-[10px] text-white/40">
+                                                                <Icon className="w-3 h-3" />
+                                                                {item.priority || 'medium'}
+                                                            </span>
+                                                            <span className="text-[10px] text-indigo-300/80">
+                                                                {item.reliability || 'unavailable'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <ReliabilityPill value={item.reliability || 'unavailable'} />
+                                                </div>
+                                                <div className="bg-black/40 rounded-lg p-2.5 border border-white/[0.05] overflow-hidden">
+                                                    <div className="text-[10px] font-mono text-white/60 leading-relaxed line-clamp-4">
+                                                        {compactText(item.evidence, 'Preuve indisponible.')}
                                                     </div>
                                                 </div>
-                                                <ReliabilityPill value={item.reliability || 'unavailable'} />
-                                            </div>
-                                            <div className="bg-black/40 rounded-lg p-2.5 border border-white/[0.05] overflow-hidden">
-                                                <div className="text-[10px] font-mono text-white/60 leading-relaxed line-clamp-4">
-                                                    {compactText(item.evidence, 'Preuve indisponible.')}
+                                                <div className="flex items-center justify-between mt-1">
+                                                    <div className="text-[10px] text-white/45">
+                                                        {compactText(item.description, 'Description indisponible.')}
+                                                    </div>
+                                                    <span className="text-[10px] font-medium px-3 py-1 rounded bg-white/[0.05] text-white/70">
+                                                        Sélectionner
+                                                    </span>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1">
-                                                <div className="text-[10px] text-white/45">{compactText(item.description, 'Description indisponible.')}</div>
-                                                <span className="text-[10px] font-medium px-3 py-1 rounded bg-white/[0.05] text-white/70">Sélectionner</span>
-                                            </div>
-                                        </button>
-                                    )) : <div className="rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] p-4 text-[12px] text-white/45">Aucun problème dans cette colonne.</div>}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] p-4 text-[12px] text-white/45">
+                                            Aucun problème dans cette colonne.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -204,35 +310,60 @@ export default function SeoCorrectionPromptsPage() {
                             <SparklesIcon className="w-3.5 h-3.5" />
                             Prompt exécutable
                         </div>
-                        <h3 className="mt-3 text-[18px] font-semibold text-white/92">{selectedIssue?.title || 'Sélectionner un problème'}</h3>
-                        <p className="mt-2 text-[12px] leading-relaxed text-white/48">Sélection ancrée dans la preuve observée. Le générateur reste branché au backend réel de correction.</p>
+                        <h3 className="mt-3 text-[18px] font-semibold text-white/92">
+                            {selectedIssue?.title || 'Sélectionner un problème'}
+                        </h3>
+                        <p className="mt-2 text-[12px] leading-relaxed text-white/48">
+                            Sélection ancrée dans la preuve observée. Le générateur reste branché au backend réel de
+                            correction.
+                        </p>
                     </div>
                     <div className="p-5 space-y-4 overflow-y-auto scrollbar-none">
                         {selectedIssue ? (
                             <>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/38">Priorité</div>
-                                        <div className="mt-2 text-[14px] font-semibold text-white">{selectedIssue.priority || 'medium'}</div>
+                                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/38">
+                                            Priorité
+                                        </div>
+                                        <div className="mt-2 text-[14px] font-semibold text-white">
+                                            {selectedIssue.priority || 'medium'}
+                                        </div>
                                     </div>
                                     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/38">Fiabilité</div>
-                                        <div className="mt-2 text-[14px] font-semibold text-white">{selectedIssue.reliability || 'unavailable'}</div>
+                                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/38">
+                                            Fiabilité
+                                        </div>
+                                        <div className="mt-2 text-[14px] font-semibold text-white">
+                                            {selectedIssue.reliability || 'unavailable'}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-[12px] text-white/72 leading-relaxed">
                                     {compactText(selectedIssue.evidence, 'Preuve indisponible.')}
                                 </div>
                                 <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-4">
-                                    <CorrectionPromptGenerator clientId={clientId} issue={selectedIssue} autoGenerate={autoGenerate} />
+                                    <CorrectionPromptGenerator
+                                        clientId={clientId}
+                                        issue={selectedIssue}
+                                        autoGenerate={autoGenerate}
+                                    />
                                 </div>
                                 <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
-                                    <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-200/70">Discipline de vérité</div>
-                                    <div className="mt-2 text-[12px] leading-relaxed text-white/58">Prompt ancré dans la preuve observée, avec contraintes et validations dérivées du contexte dépôt.</div>
+                                    <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-200/70">
+                                        Discipline de vérité
+                                    </div>
+                                    <div className="mt-2 text-[12px] leading-relaxed text-white/58">
+                                        Prompt ancré dans la preuve observée, avec contraintes et validations dérivées
+                                        du contexte dépôt.
+                                    </div>
                                 </div>
                             </>
                         ) : (
-                            <CommandEmptyState title="Aucun problème sélectionné" description="Choisis une carte à gauche pour générer un prompt réel." />
+                            <CommandEmptyState
+                                title="Aucun problème sélectionné"
+                                description="Choisis une carte à gauche pour générer un prompt réel."
+                            />
                         )}
                     </div>
                 </div>

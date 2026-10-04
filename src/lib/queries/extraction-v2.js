@@ -123,7 +123,7 @@ function parseMentionedBusinesses(structured = []) {
     return (Array.isArray(structured) ? structured : [])
         .map((item, index) => ({
             name: normalizeText(item?.name),
-            position: Number.isFinite(Number(item?.position)) ? Math.max(1, Number(item.position)) : (index + 1),
+            position: Number.isFinite(Number(item?.position)) ? Math.max(1, Number(item.position)) : index + 1,
             context: normalizeText(item?.context),
             is_target: item?.is_target === true,
             sentiment: normalizeText(item?.sentiment) || 'neutral',
@@ -133,7 +133,8 @@ function parseMentionedBusinesses(structured = []) {
 
 function inferRecommendationStrength(mentionContext = '') {
     const text = normalizeLower(mentionContext);
-    if (/(top\s|meilleur|recommand[eé]|strongly|highly|best choice|incontournable|référence)/.test(text)) return 'strong';
+    if (/(top\s|meilleur|recommand[eé]|strongly|highly|best choice|incontournable|référence)/.test(text))
+        return 'strong';
     if (/(bon\b|good\b|option|suggest|consider|populaire|apprécié)/.test(text)) return 'medium';
     return 'weak';
 }
@@ -146,16 +147,18 @@ function inferRecommendationStrength(mentionContext = '') {
 function detectResponseCompetitorFraming(text) {
     const raw = String(text || '').slice(0, 600);
     const lines = raw.split('\n');
-    const headingLines = lines.filter(l => /^\s*#{1,4}\s/.test(l));
+    const headingLines = lines.filter((l) => /^\s*#{1,4}\s/.test(l));
     // Include the first non-empty line only if it's short enough to be a title
-    const firstNonEmpty = lines.find(l => l.trim().length > 0) || '';
+    const firstNonEmpty = lines.find((l) => l.trim().length > 0) || '';
     const candidates = [...headingLines];
     if (firstNonEmpty.length <= 100 && !headingLines.includes(firstNonEmpty)) {
         candidates.push(firstNonEmpty);
     }
     if (candidates.length === 0) return false;
     const framingText = candidates.join(' ').toLowerCase();
-    return /\balternatives?\b|\bconcurrents?\b|compétit|\bcompetitors?\b|\bcompeting\b|\bversus\b|\bvs\b|\brivals?\b|\brivaux\b|\bcomparatif\b|en remplacement|au lieu de|plut[oô]t que/.test(framingText);
+    return /\balternatives?\b|\bconcurrents?\b|compétit|\bcompetitors?\b|\bcompeting\b|\bversus\b|\bvs\b|\brivals?\b|\brivaux\b|\bcomparatif\b|en remplacement|au lieu de|plut[oô]t que/.test(
+        framingText,
+    );
 }
 
 /**
@@ -204,7 +207,9 @@ function detectTarget({ responseText, clientName, structuredBusinesses = [] }) {
         };
     }
 
-    const byStructured = structuredBusinesses.find((row) => row.is_target === true || normalizeLower(row.name) === normalizeLower(target));
+    const byStructured = structuredBusinesses.find(
+        (row) => row.is_target === true || normalizeLower(row.name) === normalizeLower(target),
+    );
     if (byStructured) {
         return {
             target_found: true,
@@ -339,9 +344,7 @@ function buildBusinessAndCompetitorMentions({
         const fuzzyCanonical = exactCanonical ? null : fuzzyResolveCanonical(normalizedName, competitorAliases);
         const isKnownCompetitor = Boolean(exactCanonical || fuzzyCanonical);
 
-        const competitorCanonical = !isTarget
-            ? (exactCanonical || fuzzyCanonical?.canonical_name || null)
-            : null;
+        const competitorCanonical = !isTarget ? exactCanonical || fuzzyCanonical?.canonical_name || null : null;
 
         const spanAroundName = findEvidenceSpan(responseText, normalizedName, 45);
         const spanForCompetitorSignals = findEvidenceSpan(responseText, normalizedName, 420);
@@ -363,8 +366,14 @@ function buildBusinessAndCompetitorMentions({
         });
 
         const confidence = competitorCanonical
-            ? (fuzzyCanonical ? Math.max(0.6, fuzzyCanonical.similarity) : 0.9)
-            : (isTarget ? 0.9 : entityType === 'competitor' ? 0.7 : 0.45);
+            ? fuzzyCanonical
+                ? Math.max(0.6, fuzzyCanonical.similarity)
+                : 0.9
+            : isTarget
+              ? 0.9
+              : entityType === 'competitor'
+                ? 0.7
+                : 0.45;
 
         mentions.push({
             entity_type: entityType,
@@ -373,7 +382,8 @@ function buildBusinessAndCompetitorMentions({
             context: evidenceSpan || business.context || normalizedName,
             is_target: isTarget,
             sentiment: business.sentiment || 'neutral',
-            mention_kind: recommendationStrength === 'strong' && entityType === 'competitor' ? 'recommended' : 'mentioned',
+            mention_kind:
+                recommendationStrength === 'strong' && entityType === 'competitor' ? 'recommended' : 'mentioned',
             mentioned_url: null,
             mentioned_domain: null,
             mentioned_source_name: null,
@@ -396,7 +406,10 @@ function buildBusinessAndCompetitorMentions({
     }
 
     return {
-        mentions: uniqueBy(mentions, (item) => `${item.entity_type}:${normalizeLower(item.normalized_label)}:${item.position ?? 0}`),
+        mentions: uniqueBy(
+            mentions,
+            (item) => `${item.entity_type}:${normalizeLower(item.normalized_label)}:${item.position ?? 0}`,
+        ),
         competitorPressureScore: competitorPressure,
     };
 }
@@ -464,10 +477,7 @@ export function buildExtractionArtifacts({
         isCompetitorFramedResponse,
     });
 
-    const mentionRows = [
-        ...businessAndCompetitor.mentions,
-        ...sourceMentions,
-    ];
+    const mentionRows = [...businessAndCompetitor.mentions, ...sourceMentions];
 
     const mentionCount = mentionRows.length;
     const targetSignals = targetDetection.target_found ? 1 : 0;
@@ -490,13 +500,13 @@ export function buildExtractionArtifacts({
             0.99,
             Number(
                 (
-                    (targetDetection.confidence * 0.35)
-                    + ((mentionCount > 0 ? 0.75 : 0.3) * 0.25)
-                    + ((externalSources.length > 0 ? 0.9 : 0.4) * 0.2)
-                    + ((warnings.length === 0 ? 0.9 : 0.55) * 0.2)
-                ).toFixed(4)
-            )
-        )
+                    targetDetection.confidence * 0.35 +
+                    (mentionCount > 0 ? 0.75 : 0.3) * 0.25 +
+                    (externalSources.length > 0 ? 0.9 : 0.4) * 0.2 +
+                    (warnings.length === 0 ? 0.9 : 0.55) * 0.2
+                ).toFixed(4),
+            ),
+        ),
     );
 
     const normalized = {
@@ -572,9 +582,7 @@ export function buildExtractionArtifacts({
     const targetFound = targetDetection.target_found === true;
     const structuredNamedCount = effectiveBusinesses.length;
     /** Utile = sources externes, concurrents confirmés, ou au moins 2 entités métier dans l’analyse (paysage comparable). */
-    const hasComparableLandscape = extSourceCount > 0
-        || competitorCount > 0
-        || structuredNamedCount >= 2;
+    const hasComparableLandscape = extSourceCount > 0 || competitorCount > 0 || structuredNamedCount >= 2;
 
     let runSignalTier;
     if (!hasResponseText || mentionCount === 0) {

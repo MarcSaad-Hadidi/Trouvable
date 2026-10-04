@@ -31,7 +31,7 @@ export default function ClientListActions({ client }) {
 
     async function hardDelete() {
         const slug = window.prompt(
-            `Suppression définitive : saisissez le slug exact du client pour confirmer.\n${client.client_slug}`
+            `Suppression définitive : saisissez le slug exact du client pour confirmer.\n${client.client_slug}`,
         );
         if (slug == null) return;
         if (slug.trim() !== client.client_slug) {
@@ -59,26 +59,34 @@ export default function ClientListActions({ client }) {
 
     return (
         <div className="flex flex-col items-end gap-1">
-            {(err) && <span className="text-[10px] text-red-400 max-w-[140px] text-right">{err}</span>}
+            {err && <span className="text-[10px] text-red-400 max-w-[140px] text-right">{err}</span>}
             <div className="flex flex-wrap justify-end gap-2">
                 {(busy || isPending) && <Loader2 className="animate-spin text-white/40" size={16} />}
-                <Link href={`/admin/clients/${client.id}/dossier`} className="text-white font-semibold hover:text-emerald-400 text-sm">
+                <Link
+                    href={`/admin/clients/${client.id}/dossier`}
+                    className="text-white font-semibold hover:text-emerald-400 text-sm"
+                >
                     Ouvrir
                 </Link>
-                <Link href={`/admin/clients/${client.id}/edit`} className="text-violet-400 font-semibold hover:text-white text-sm">
+                <Link
+                    href={`/admin/clients/${client.id}/edit`}
+                    className="text-violet-400 font-semibold hover:text-white text-sm"
+                >
                     Éditer
                 </Link>
-                {allowedNext.filter((s) => s !== 'archived').map((targetState) => (
-                    <button
-                        key={targetState}
-                        type="button"
-                        onClick={() => handleLifecycleTransition(targetState)}
-                        disabled={busy || isPending}
-                        className="text-[#7b8fff] text-sm font-semibold hover:underline disabled:opacity-50"
-                    >
-                        {LIFECYCLE_META[targetState]?.label || targetState}
-                    </button>
-                ))}
+                {allowedNext
+                    .filter((s) => s !== 'archived')
+                    .map((targetState) => (
+                        <button
+                            key={targetState}
+                            type="button"
+                            onClick={() => handleLifecycleTransition(targetState)}
+                            disabled={busy || isPending}
+                            className="text-[#7b8fff] text-sm font-semibold hover:underline disabled:opacity-50"
+                        >
+                            {LIFECYCLE_META[targetState]?.label || targetState}
+                        </button>
+                    ))}
                 {allowedNext.includes('archived') && (
                     <button
                         type="button"
@@ -99,7 +107,12 @@ export default function ClientListActions({ client }) {
                         Restaurer
                     </button>
                 )}
-                <button type="button" onClick={hardDelete} disabled={busy || isPending} className="text-red-400/90 text-sm font-semibold hover:underline disabled:opacity-50">
+                <button
+                    type="button"
+                    onClick={hardDelete}
+                    disabled={busy || isPending}
+                    className="text-red-400/90 text-sm font-semibold hover:underline disabled:opacity-50"
+                >
                     Supprimer
                 </button>
             </div>

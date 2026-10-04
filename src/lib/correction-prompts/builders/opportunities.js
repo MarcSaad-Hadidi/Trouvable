@@ -32,7 +32,8 @@ export async function buildOpportunityCorrectionPromptContext({ client, audit, r
         category: opportunity.category || 'seo',
         dimension: opportunity.dimension || 'technical_seo',
         evidence: opportunity.evidence || opportunity.rationale || opportunity.description || '',
-        recommendedFix: opportunity.recommended_action || opportunity.recommended_fix || opportunity.suggested_fix || '',
+        recommendedFix:
+            opportunity.recommended_action || opportunity.recommended_fix || opportunity.suggested_fix || '',
         affectedScope: opportunity.target_url || opportunity.page_url || opportunity.affected_scope || '',
         sourceUrl: opportunity.target_url || opportunity.page_url || opportunity.affected_scope || null,
         priority: opportunity.priority || 'medium',
@@ -40,12 +41,12 @@ export async function buildOpportunityCorrectionPromptContext({ client, audit, r
 
     // On délègue la construction du contexte à la logique partagée SEO Health
     const context = buildSeoHealthCorrectionPromptContext({ client, audit, issue });
-    
+
     // Personnalisation du contexte pour les opportunités
     context.source.surface = ref.source; // 'seo_opportunity' ou 'geo_opportunity'
     context.source.opportunityId = opportunityId;
     context.source.triggerSource = 'opportunity_pipeline';
-    
+
     // Ajustement des labels si nécessaire
     if (ref.source === 'geo_opportunity') {
         context.problem.type = 'geo';

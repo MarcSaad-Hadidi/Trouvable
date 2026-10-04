@@ -49,13 +49,13 @@ export async function callGemini({
     const model = modelOverride || getModel(purpose);
 
     const contents = messages
-        .filter(m => m.role !== 'system')
-        .map(m => ({
+        .filter((m) => m.role !== 'system')
+        .map((m) => ({
             role: m.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: m.content }],
         }));
 
-    const systemInstruction = messages.find(m => m.role === 'system');
+    const systemInstruction = messages.find((m) => m.role === 'system');
 
     const body = {
         contents,
@@ -91,7 +91,7 @@ export async function callGemini({
                     lastError = new Error(msg);
                     const wait = Math.min(2000 * 2 ** attempt, 8000);
                     console.warn(`[AI/Gemini] Retry ${attempt + 1}/${MAX_RETRIES}...`);
-                    await new Promise(r => setTimeout(r, wait));
+                    await new Promise((r) => setTimeout(r, wait));
                     continue;
                 }
                 throw new Error(msg);
@@ -103,7 +103,7 @@ export async function callGemini({
                 throw new Error('[AI/Gemini] Réponse vide (pas de candidates)');
             }
 
-            const text = candidate.content.parts.map(p => p.text || '').join('');
+            const text = candidate.content.parts.map((p) => p.text || '').join('');
             const usage = data.usageMetadata || {};
 
             return {
@@ -122,7 +122,7 @@ export async function callGemini({
             if (attempt < MAX_RETRIES) {
                 const wait = Math.min(2000 * 2 ** attempt, 8000);
                 console.warn(`[AI/Gemini] Erreur: ${lastError.message}. Retry ${attempt + 1}...`);
-                await new Promise(r => setTimeout(r, wait));
+                await new Promise((r) => setTimeout(r, wait));
             }
         }
     }

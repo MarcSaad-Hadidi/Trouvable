@@ -25,10 +25,21 @@ import {
 import { getAdminSupabase } from '@/lib/supabase-admin';
 
 const MENTION_SELECT_FULL = [
-    'query_run_id', 'business_name', 'normalized_label', 'entity_type',
-    'is_target', 'position', 'first_position', 'confidence',
-    'mention_kind', 'recommendation_strength', 'co_occurs_with_target',
-    'created_at', 'normalized_domain', 'source_confidence', 'source_type',
+    'query_run_id',
+    'business_name',
+    'normalized_label',
+    'entity_type',
+    'is_target',
+    'position',
+    'first_position',
+    'confidence',
+    'mention_kind',
+    'recommendation_strength',
+    'co_occurs_with_target',
+    'created_at',
+    'normalized_domain',
+    'source_confidence',
+    'source_type',
     'verified_status',
 ].join(', ');
 
@@ -49,8 +60,12 @@ export async function getGeoWorkspaceSnapshot(clientId) {
             const result = await fetch();
             if (field && result.error) throw result.error;
             const value = field ? result[field] : result;
-            if (field === 'count' && (typeof value !== 'number' || !Number.isFinite(value))) throw new Error('Missing count');
-            sources[source] = value === null || value === undefined || (Array.isArray(value) && value.length === 0) ? 'empty' : 'available';
+            if (field === 'count' && (typeof value !== 'number' || !Number.isFinite(value)))
+                throw new Error('Missing count');
+            sources[source] =
+                value === null || value === undefined || (Array.isArray(value) && value.length === 0)
+                    ? 'empty'
+                    : 'available';
             return value ?? null;
         } catch {
             sources[source] = 'unavailable';
@@ -58,25 +73,118 @@ export async function getGeoWorkspaceSnapshot(clientId) {
             return null;
         }
     }
-    const [latestAudit, openOpportunities, pendingMerge, activeTrackedQueries, totalTrackedQueries, totalQueryRuns, brandRecommendations, completedRuns, lastRunRow, trackedQueries, citationDiagRuns] = await Promise.all([
+    const [
+        latestAudit,
+        openOpportunities,
+        pendingMerge,
+        activeTrackedQueries,
+        totalTrackedQueries,
+        totalQueryRuns,
+        brandRecommendations,
+        completedRuns,
+        lastRunRow,
+        trackedQueries,
+        citationDiagRuns,
+    ] = await Promise.all([
         load('audit', () => getLatestAudit(clientId)),
-        load('openOpportunities', () => supa.from('opportunities').select('*', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'open'), 'count'),
-        load('pendingMerge', () => supa.from('merge_suggestions').select('*', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'pending'), 'count'),
-        load('activeTrackedQueries', () => supa.from('tracked_queries').select('*', { count: 'exact', head: true }).eq('client_id', clientId).eq('is_active', true), 'count'),
-        load('totalTrackedQueries', () => supa.from('tracked_queries').select('*', { count: 'exact', head: true }).eq('client_id', clientId), 'count'),
-        load('totalQueryRuns', () => supa.from('query_runs').select('*', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'completed').or('run_mode.is.null,run_mode.eq.standard'), 'count'),
-        load('brandRecommendations', () => supa.from('query_runs').select('*', { count: 'exact', head: true }).eq('client_id', clientId).eq('status', 'completed').or('run_mode.is.null,run_mode.eq.standard').eq('target_found', true), 'count'),
-        load('runs', () => supa.from('query_runs').select('id, provider, model, target_found, tracked_query_id, created_at, query_text, parse_confidence, parse_status, status, target_position').eq('client_id', clientId).eq('status', 'completed').or('run_mode.is.null,run_mode.eq.standard'), 'data'),
-        load('lastRun', () => supa.from('query_runs').select('created_at').eq('client_id', clientId).or('run_mode.is.null,run_mode.eq.standard').order('created_at', { ascending: false }).limit(1).maybeSingle(), 'data'),
+        load(
+            'openOpportunities',
+            () =>
+                supa
+                    .from('opportunities')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('client_id', clientId)
+                    .eq('status', 'open'),
+            'count',
+        ),
+        load(
+            'pendingMerge',
+            () =>
+                supa
+                    .from('merge_suggestions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('client_id', clientId)
+                    .eq('status', 'pending'),
+            'count',
+        ),
+        load(
+            'activeTrackedQueries',
+            () =>
+                supa
+                    .from('tracked_queries')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('client_id', clientId)
+                    .eq('is_active', true),
+            'count',
+        ),
+        load(
+            'totalTrackedQueries',
+            () => supa.from('tracked_queries').select('*', { count: 'exact', head: true }).eq('client_id', clientId),
+            'count',
+        ),
+        load(
+            'totalQueryRuns',
+            () =>
+                supa
+                    .from('query_runs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('client_id', clientId)
+                    .eq('status', 'completed')
+                    .or('run_mode.is.null,run_mode.eq.standard'),
+            'count',
+        ),
+        load(
+            'brandRecommendations',
+            () =>
+                supa
+                    .from('query_runs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('client_id', clientId)
+                    .eq('status', 'completed')
+                    .or('run_mode.is.null,run_mode.eq.standard')
+                    .eq('target_found', true),
+            'count',
+        ),
+        load(
+            'runs',
+            () =>
+                supa
+                    .from('query_runs')
+                    .select(
+                        'id, provider, model, target_found, tracked_query_id, created_at, query_text, parse_confidence, parse_status, status, target_position',
+                    )
+                    .eq('client_id', clientId)
+                    .eq('status', 'completed')
+                    .or('run_mode.is.null,run_mode.eq.standard'),
+            'data',
+        ),
+        load(
+            'lastRun',
+            () =>
+                supa
+                    .from('query_runs')
+                    .select('created_at')
+                    .eq('client_id', clientId)
+                    .or('run_mode.is.null,run_mode.eq.standard')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle(),
+            'data',
+        ),
         load('trackedQueries', () => getTrackedQueriesAll(clientId)),
-        load('diagnostics', () => supa
-            .from('query_runs')
-            .select('raw_analysis')
-            .eq('client_id', clientId)
-            .eq('status', 'completed')
-            .or('run_mode.is.null,run_mode.eq.standard')
-            .order('created_at', { ascending: false })
-            .limit(120), 'data'),
+        load(
+            'diagnostics',
+            () =>
+                supa
+                    .from('query_runs')
+                    .select('raw_analysis')
+                    .eq('client_id', clientId)
+                    .eq('status', 'completed')
+                    .or('run_mode.is.null,run_mode.eq.standard')
+                    .order('created_at', { ascending: false })
+                    .limit(120),
+            'data',
+        ),
     ]);
 
     const runIds = (completedRuns || []).map((r) => r.id);
@@ -85,7 +193,11 @@ export async function getGeoWorkspaceSnapshot(clientId) {
         sources.mentions = 'unavailable';
         mentionRows = null;
     } else if (runIds.length > 0) {
-        mentionRows = await load('mentions', () => supa.from('query_mentions').select(MENTION_SELECT_FULL).in('query_run_id', runIds), 'data');
+        mentionRows = await load(
+            'mentions',
+            () => supa.from('query_mentions').select(MENTION_SELECT_FULL).in('query_run_id', runIds),
+            'data',
+        );
     } else {
         sources.mentions = 'empty';
     }
@@ -111,9 +223,16 @@ export async function getGeoWorkspaceSnapshot(clientId) {
     function invalidate(metrics, keys) {
         for (const key of keys) {
             const value = metrics[key];
-            metrics[key] = value && typeof value === 'object' && 'value' in value
-                ? { ...value, value: null, confidence: 'low', status: 'unavailable', warnings: ['Données temporairement indisponibles.'] }
-                : null;
+            metrics[key] =
+                value && typeof value === 'object' && 'value' in value
+                    ? {
+                          ...value,
+                          value: null,
+                          confidence: 'low',
+                          status: 'unavailable',
+                          warnings: ['Données temporairement indisponibles.'],
+                      }
+                    : null;
         }
     }
     if (sources.audit === 'unavailable') {
@@ -129,7 +248,8 @@ export async function getGeoWorkspaceSnapshot(clientId) {
     }
     if (sources.mentions === 'unavailable') invalidate(mentionMetrics, Object.keys(mentionMetrics));
     if (sources.trackedQueries === 'unavailable') invalidate(promptMetrics, Object.keys(promptMetrics));
-    else if (sources.runs === 'unavailable') invalidate(promptMetrics, ['withTargetFound', 'withRunNoTarget', 'noRunYet', 'mentionRatePercent']);
+    else if (sources.runs === 'unavailable')
+        invalidate(promptMetrics, ['withTargetFound', 'withRunNoTarget', 'noRunYet', 'mentionRatePercent']);
 
     const snapshot = buildGeoKpiSnapshot({
         audit: auditMetrics,
@@ -142,16 +262,26 @@ export async function getGeoWorkspaceSnapshot(clientId) {
     });
 
     const sourceStates = Object.values(sources);
-    snapshot.status = sourceStates.every(state => state === 'unavailable') ? 'unavailable' : sourceStates.includes('unavailable') ? 'partial' : 'available';
+    snapshot.status = sourceStates.every((state) => state === 'unavailable')
+        ? 'unavailable'
+        : sourceStates.includes('unavailable')
+          ? 'partial'
+          : 'available';
     snapshot.sources = sources;
     snapshot.errors = errors;
-    if (errors.length > 0) snapshot.guardrails.push({ code: 'DATA_UNAVAILABLE', message: 'Certaines données sont temporairement indisponibles.', severity: 'warning' });
+    if (errors.length > 0)
+        snapshot.guardrails.push({
+            code: 'DATA_UNAVAILABLE',
+            message: 'Certaines données sont temporairement indisponibles.',
+            severity: 'warning',
+        });
 
-    const modelPerformance = sources.runs === 'unavailable' ? null : sources.mentions === 'unavailable'
-        ? runMetrics.modelPerformance.map((row) => ({ ...row, sources: null }))
-        : enrichModelPerformanceWithSources(
-        runMetrics.modelPerformance, mentionRows, completedRuns || [],
-    );
+    const modelPerformance =
+        sources.runs === 'unavailable'
+            ? null
+            : sources.mentions === 'unavailable'
+              ? runMetrics.modelPerformance.map((row) => ({ ...row, sources: null }))
+              : enrichModelPerformanceWithSources(runMetrics.modelPerformance, mentionRows, completedRuns || []);
 
     return {
         latestAudit,

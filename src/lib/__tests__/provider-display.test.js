@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-    getProviderMeta,
-    normalizeModelLabel,
-    signalTierLabel,
-} from '@/lib/llm-comparison/provider-display';
+import { getProviderMeta, normalizeModelLabel, signalTierLabel } from '@/lib/llm-comparison/provider-display';
 
 describe('provider display utilities', () => {
     describe('getProviderMeta', () => {
@@ -16,9 +12,7 @@ describe('provider display utilities', () => {
         });
 
         it('returns unique initials to avoid avatar collisions', () => {
-            const initials = ['gemini', 'groq', 'mistral', 'openrouter'].map(
-                (p) => getProviderMeta(p).initials
-            );
+            const initials = ['gemini', 'groq', 'mistral', 'openrouter'].map((p) => getProviderMeta(p).initials);
             expect(new Set(initials).size).toBe(4);
         });
 

@@ -38,10 +38,19 @@ export async function getClientConnectorRows(clientId) {
     }
 
     const byProvider = new Map((data || []).map((row) => [row.provider, row]));
-    return CONNECTOR_PROVIDERS.map((provider) => normalizeConnectorRow(byProvider.get(provider) || { client_id: clientId, provider }, provider));
+    return CONNECTOR_PROVIDERS.map((provider) =>
+        normalizeConnectorRow(byProvider.get(provider) || { client_id: clientId, provider }, provider),
+    );
 }
 
-export async function updateConnectorState({ clientId, provider, status, config = null, lastError = null, lastSyncedAt = undefined }) {
+export async function updateConnectorState({
+    clientId,
+    provider,
+    status,
+    config = null,
+    lastError = null,
+    lastSyncedAt = undefined,
+}) {
     const supabase = getAdminSupabase();
 
     const payload = {

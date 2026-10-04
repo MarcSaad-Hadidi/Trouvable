@@ -4,8 +4,14 @@ import { POST as restore } from '../../app/api/admin/clients/restore/route.js';
 import { clientIdSchema } from '../admin-schemas.js';
 
 const io = vi.hoisted(() => ({
-    admin: vi.fn(), from: vi.fn(), select: vi.fn(), eq: vi.fn(), single: vi.fn(),
-    archive: vi.fn(), restore: vi.fn(), log: vi.fn(),
+    admin: vi.fn(),
+    from: vi.fn(),
+    select: vi.fn(),
+    eq: vi.fn(),
+    single: vi.fn(),
+    archive: vi.fn(),
+    restore: vi.fn(),
+    log: vi.fn(),
 }));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/auth', () => ({ requireAdmin: io.admin }));
@@ -17,8 +23,28 @@ const CLIENT_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const CLIENT_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const ADMIN = { email: 'operator@example.test' };
 const flows = [
-    { name: 'archive', post: archive, mutate: io.archive, target: 'archived', initial: 'active', fallback: 'prospect', blocked: ['archived'], allowed: ['prospect', 'onboarding', 'active', 'paused'], event: 'client_archived' },
-    { name: 'restore', post: restore, mutate: io.restore, target: 'active', initial: 'archived', fallback: 'archived', blocked: ['prospect', 'active'], allowed: ['onboarding', 'paused', 'archived'], event: 'client_restored' },
+    {
+        name: 'archive',
+        post: archive,
+        mutate: io.archive,
+        target: 'archived',
+        initial: 'active',
+        fallback: 'prospect',
+        blocked: ['archived'],
+        allowed: ['prospect', 'onboarding', 'active', 'paused'],
+        event: 'client_archived',
+    },
+    {
+        name: 'restore',
+        post: restore,
+        mutate: io.restore,
+        target: 'active',
+        initial: 'archived',
+        fallback: 'archived',
+        blocked: ['prospect', 'active'],
+        allowed: ['onboarding', 'paused', 'archived'],
+        event: 'client_restored',
+    },
 ];
 const request = (body = { clientId: CLIENT_A }) => ({ json: vi.fn().mockResolvedValue(body) });
 function expectNoMutation() {
@@ -41,7 +67,9 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe.each(flows)('client lifecycle endpoint $name', (flow) => {
-    beforeEach(() => { io.single.mockResolvedValue({ data: { lifecycle_status: flow.initial }, error: null }); });
+    beforeEach(() => {
+        io.single.mockResolvedValue({ data: { lifecycle_status: flow.initial }, error: null });
+    });
 
     it('refuses authorization before reading the body or accessing data', async () => {
         io.admin.mockResolvedValue(null);
@@ -68,15 +96,32 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
     it.each([{}, { clientId: 'invalid' }, null])('preserves schema validation issues for %j', async (body) => {
         const response = await flow.post(request(body));
         expect(response.status).toBe(400);
-        expect(await response.json()).toEqual({ error: 'Validation', details: clientIdSchema.safeParse(body).error.issues });
+        expect(await response.json()).toEqual({
+            error: 'Validation',
+            details: clientIdSchema.safeParse(body).error.issues,
+        });
         expect(io.from).not.toHaveBeenCalled();
         expectNoMutation();
     });
 
     it.each([
         { data: null, error: null },
-        { data: null, error: { code: 'PGRST116', details: 'The result contains 0 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
-        { data: null, error: { code: 'PGRST116', details: 'Results contain 0 rows, application/vnd.pgrst.object+json requires 1 row', message: 'JSON object requested, multiple (or no) rows returned' } },
+        {
+            data: null,
+            error: {
+                code: 'PGRST116',
+                details: 'The result contains 0 rows',
+                message: 'JSON object requested, multiple (or no) rows returned',
+            },
+        },
+        {
+            data: null,
+            error: {
+                code: 'PGRST116',
+                details: 'Results contain 0 rows, application/vnd.pgrst.object+json requires 1 row',
+                message: 'JSON object requested, multiple (or no) rows returned',
+            },
+        },
     ])('preserves 404 for confirmed client absence (%j)', async (result) => {
         io.single.mockResolvedValue(result);
         const response = await flow.post(request());
@@ -88,10 +133,27 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
     it.each([
         { data: null, error: { code: '08006', message: 'private database connection' } },
         { data: { lifecycle_status: 'active' }, error: { code: '08006', message: 'private database connection' } },
-        { data: null, error: { code: 'PGRST116', details: 'The result contains 2 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
-        { data: null, error: { code: 'PGRST116', details: 'The result contains 10 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
+        {
+            data: null,
+            error: {
+                code: 'PGRST116',
+                details: 'The result contains 2 rows',
+                message: 'JSON object requested, multiple (or no) rows returned',
+            },
+        },
+        {
+            data: null,
+            error: {
+                code: 'PGRST116',
+                details: 'The result contains 10 rows',
+                message: 'JSON object requested, multiple (or no) rows returned',
+            },
+        },
         { data: null, error: { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' } },
-        { data: null, error: { code: '08006', details: 'The result contains 0 rows', message: 'private database connection' } },
+        {
+            data: null,
+            error: { code: '08006', details: 'The result contains 0 rows', message: 'private database connection' },
+        },
         { data: null, error: { message: 'private unknown database error' } },
     ])('returns safe 500 for a failed or ambiguous client lookup (%j)', async (result) => {
         io.single.mockResolvedValue(result);
@@ -117,7 +179,9 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
         io.single.mockResolvedValue({ data: { lifecycle_status: from }, error: null });
         const response = await flow.post(request());
         expect(response.status).toBe(422);
-        expect(await response.json()).toEqual({ error: `[Lifecycle] Transition "${from}" → "${flow.target}" is not allowed` });
+        expect(await response.json()).toEqual({
+            error: `[Lifecycle] Transition "${from}" → "${flow.target}" is not allowed`,
+        });
         expectNoMutation();
     });
 
@@ -149,8 +213,10 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
         expect(io.single).toHaveBeenCalledExactlyOnceWith();
         expect(flow.mutate).toHaveBeenCalledExactlyOnceWith(clientId);
         expect(io.log).toHaveBeenCalledExactlyOnceWith({
-            client_id: clientId, action_type: flow.event,
-            details: { from: flow.initial, to: flow.target }, performed_by: ADMIN.email,
+            client_id: clientId,
+            action_type: flow.event,
+            details: { from: flow.initial, to: flow.target },
+            performed_by: ADMIN.email,
         });
         expect(io.admin.mock.invocationCallOrder[0]).toBeLessThan(req.json.mock.invocationCallOrder[0]);
         expect(req.json.mock.invocationCallOrder[0]).toBeLessThan(io.single.mock.invocationCallOrder[0]);
@@ -162,23 +228,25 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
     it.each([null, undefined, ''])('uses the existing fallback for lifecycle %j', async (lifecycle_status) => {
         io.single.mockResolvedValue({ data: { lifecycle_status }, error: null });
         expect((await flow.post(request())).status).toBe(200);
-        expect(io.log).toHaveBeenCalledWith(expect.objectContaining({ details: { from: flow.fallback, to: flow.target } }));
+        expect(io.log).toHaveBeenCalledWith(
+            expect.objectContaining({ details: { from: flow.fallback, to: flow.target } }),
+        );
     });
 
-    it.each(['read', 'mutation', 'journal'])('hides rejected %s details behind the endpoint-specific 500', async (stage) => {
-        const failure = new Error(`private ${stage} details`);
-        if (stage === 'read') io.single.mockRejectedValue(failure);
-        if (stage === 'mutation') flow.mutate.mockRejectedValue(failure);
-        if (stage === 'journal') io.log.mockRejectedValue(failure);
-        const response = await flow.post(request());
-        expect(response.status).toBe(500);
-        expect(await response.json()).toEqual({ error: 'Erreur interne du serveur.' });
-        expect(console.error).toHaveBeenCalledExactlyOnceWith(`[clients/${flow.name}]`, failure);
-        if (stage === 'read') expectNoMutation();
-        if (stage === 'mutation') expect(io.log).not.toHaveBeenCalled();
-        if (stage === 'journal') expect(flow.mutate).toHaveBeenCalledExactlyOnceWith(CLIENT_A);
-    });
+    it.each(['read', 'mutation', 'journal'])(
+        'hides rejected %s details behind the endpoint-specific 500',
+        async (stage) => {
+            const failure = new Error(`private ${stage} details`);
+            if (stage === 'read') io.single.mockRejectedValue(failure);
+            if (stage === 'mutation') flow.mutate.mockRejectedValue(failure);
+            if (stage === 'journal') io.log.mockRejectedValue(failure);
+            const response = await flow.post(request());
+            expect(response.status).toBe(500);
+            expect(await response.json()).toEqual({ error: 'Erreur interne du serveur.' });
+            expect(console.error).toHaveBeenCalledExactlyOnceWith(`[clients/${flow.name}]`, failure);
+            if (stage === 'read') expectNoMutation();
+            if (stage === 'mutation') expect(io.log).not.toHaveBeenCalled();
+            if (stage === 'journal') expect(flow.mutate).toHaveBeenCalledExactlyOnceWith(CLIENT_A);
+        },
+    );
 });
-
-
-

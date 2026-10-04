@@ -129,7 +129,9 @@ async function fetchJsonWithRetry(url) {
             // Retry on 429 and 5xx
             if (attempt < REDDIT_MAX_RETRIES && (status === 429 || status >= 500 || !status)) {
                 const delay = REDDIT_RETRY_BASE_MS * Math.pow(2, attempt);
-                console.warn(`[Community] Reddit fetch retry ${attempt + 1}/${REDDIT_MAX_RETRIES} after ${delay}ms (${err?.message})`);
+                console.warn(
+                    `[Community] Reddit fetch retry ${attempt + 1}/${REDDIT_MAX_RETRIES} after ${delay}ms (${err?.message})`,
+                );
                 await sleep(delay);
                 continue;
             }
@@ -146,7 +148,7 @@ async function collectRedditPosts(seedQueries, subredditTargets = []) {
     const queryPlan = [];
     for (const seed of seedQueries) {
         const query = typeof seed === 'string' ? seed : seed.query;
-        const strategy = typeof seed === 'string' ? 'legacy' : (seed.strategy || 'unknown');
+        const strategy = typeof seed === 'string' ? 'legacy' : seed.strategy || 'unknown';
         queryPlan.push({ query, strategy, subreddit: null });
     }
 
@@ -191,13 +193,17 @@ async function collectRedditPosts(seedQueries, subredditTargets = []) {
                     };
                 })
                 .filter((post) => post.id && post.title);
-            seedDiagnostics.push({ seed: query, strategy, subreddit: subreddit || null, results: posts.length, status: 'ok' });
+            seedDiagnostics.push({
+                seed: query,
+                strategy,
+                subreddit: subreddit || null,
+                results: posts.length,
+                status: 'ok',
+            });
             allPosts.push(...posts);
         } catch (err) {
             const httpStatus = err?.httpStatus || null;
-            const failureClass = httpStatus
-                ? classifyHttpError(httpStatus)
-                : classifyNetworkError(err);
+            const failureClass = httpStatus ? classifyHttpError(httpStatus) : classifyNetworkError(err);
             seedDiagnostics.push({
                 seed: query,
                 strategy,
@@ -293,7 +299,11 @@ export function classifyCollectionOutcome(seedDiagnostics, postsCount) {
             if (errorCount > okCount) {
                 const accessCount = errorBreakdown[COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE] || 0;
                 if (accessCount > 0) {
-                    return { failureClass: COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE, isAccessFailure: true, summary };
+                    return {
+                        failureClass: COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE,
+                        isAccessFailure: true,
+                        summary,
+                    };
                 }
             }
             return { failureClass: COLLECTION_FAILURE_CLASS.SEED_QUALITY_FAILURE, isAccessFailure: false, summary };
@@ -320,59 +330,67 @@ export function buildCollectionDiagnosis(failureClass, diagnosticSummary) {
     const accessErrors = errorBreakdown?.[COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE] || 0;
 
     switch (failureClass) {
-    case COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE:
-        return {
-            title: 'Échec d\'accès aux sources',
-            description: `${accessErrors}/${total} seed(s) ont été bloqués par la source (HTTP 403). `
-                    + 'Il s\'agit d\'un blocage technique d\'accès, pas d\'une absence de signal marché. '
-                    + 'Les seeds peuvent être pertinents, le problème est l\'accès à la source.',
-            severity: 'error',
-            operatorAction: 'Le problème est technique : la source bloque les requêtes. Aucune conclusion marché ne peut être tirée de cette collecte.',
-            isAccessFailure: true,
-        };
-    case COLLECTION_FAILURE_CLASS.SOURCE_RATE_LIMITED:
-        return {
-            title: 'Source temporairement limitée',
-            description: `La source a limité le débit des requêtes (${error}/${total} seeds en erreur). `
-                    + 'Cela devrait se résoudre automatiquement lors de la prochaine collecte.',
-            severity: 'warning',
-            operatorAction: 'Attendez la prochaine exécution planifiée. Si le problème persiste, réduisez le nombre de seeds.',
-            isAccessFailure: true,
-        };
-    case COLLECTION_FAILURE_CLASS.TEMPORARY_NETWORK_FAILURE:
-        return {
-            title: 'Erreur réseau temporaire',
-            description: `${error}/${total} seed(s) ont échoué à cause d'erreurs réseau temporaires. `
-                    + 'La prochaine collecte devrait fonctionner normalement.',
-            severity: 'warning',
-            operatorAction: 'Erreur transitoire, la prochaine exécution devrait réussir.',
-            isAccessFailure: true,
-        };
-    case COLLECTION_FAILURE_CLASS.SEED_QUALITY_FAILURE:
-        return {
-            title: 'Seeds sans résultats',
-            description: `Les ${total} seed(s) testés n'ont retourné aucune discussion. `
-                    + 'Cela peut signifier un marché de niche, des seeds trop spécifiques, ou un volume communautaire faible.',
-            severity: 'info',
-            operatorAction: 'Affinez les seeds ou ajoutez des termes plus larges dans la configuration Veille sociale.',
-            isAccessFailure: false,
-        };
-    case COLLECTION_FAILURE_CLASS.NO_SIGNAL_FOUND:
-        return {
-            title: 'Aucun signal pertinent détecté',
-            description: 'La collecte a fonctionné mais n\'a pas trouvé de discussions pertinentes pour ce profil.',
-            severity: 'info',
-            operatorAction: 'Élargissez les seeds ou vérifiez que le secteur a une présence communautaire en ligne.',
-            isAccessFailure: false,
-        };
-    default:
-        return {
-            title: 'Échec de collecte : cause indéterminée',
-            description: `La collecte a échoué (${error}/${total} seeds en erreur). Vérifiez les logs pour plus de détails.`,
-            severity: 'warning',
-            operatorAction: 'Vérifiez la configuration et relancez la collecte.',
-            isAccessFailure: false,
-        };
+        case COLLECTION_FAILURE_CLASS.SOURCE_ACCESS_FAILURE:
+            return {
+                title: "Échec d'accès aux sources",
+                description:
+                    `${accessErrors}/${total} seed(s) ont été bloqués par la source (HTTP 403). ` +
+                    "Il s'agit d'un blocage technique d'accès, pas d'une absence de signal marché. " +
+                    "Les seeds peuvent être pertinents, le problème est l'accès à la source.",
+                severity: 'error',
+                operatorAction:
+                    'Le problème est technique : la source bloque les requêtes. Aucune conclusion marché ne peut être tirée de cette collecte.',
+                isAccessFailure: true,
+            };
+        case COLLECTION_FAILURE_CLASS.SOURCE_RATE_LIMITED:
+            return {
+                title: 'Source temporairement limitée',
+                description:
+                    `La source a limité le débit des requêtes (${error}/${total} seeds en erreur). ` +
+                    'Cela devrait se résoudre automatiquement lors de la prochaine collecte.',
+                severity: 'warning',
+                operatorAction:
+                    'Attendez la prochaine exécution planifiée. Si le problème persiste, réduisez le nombre de seeds.',
+                isAccessFailure: true,
+            };
+        case COLLECTION_FAILURE_CLASS.TEMPORARY_NETWORK_FAILURE:
+            return {
+                title: 'Erreur réseau temporaire',
+                description:
+                    `${error}/${total} seed(s) ont échoué à cause d'erreurs réseau temporaires. ` +
+                    'La prochaine collecte devrait fonctionner normalement.',
+                severity: 'warning',
+                operatorAction: 'Erreur transitoire, la prochaine exécution devrait réussir.',
+                isAccessFailure: true,
+            };
+        case COLLECTION_FAILURE_CLASS.SEED_QUALITY_FAILURE:
+            return {
+                title: 'Seeds sans résultats',
+                description:
+                    `Les ${total} seed(s) testés n'ont retourné aucune discussion. ` +
+                    'Cela peut signifier un marché de niche, des seeds trop spécifiques, ou un volume communautaire faible.',
+                severity: 'info',
+                operatorAction:
+                    'Affinez les seeds ou ajoutez des termes plus larges dans la configuration Veille sociale.',
+                isAccessFailure: false,
+            };
+        case COLLECTION_FAILURE_CLASS.NO_SIGNAL_FOUND:
+            return {
+                title: 'Aucun signal pertinent détecté',
+                description: "La collecte a fonctionné mais n'a pas trouvé de discussions pertinentes pour ce profil.",
+                severity: 'info',
+                operatorAction:
+                    'Élargissez les seeds ou vérifiez que le secteur a une présence communautaire en ligne.',
+                isAccessFailure: false,
+            };
+        default:
+            return {
+                title: 'Échec de collecte : cause indéterminée',
+                description: `La collecte a échoué (${error}/${total} seeds en erreur). Vérifiez les logs pour plus de détails.`,
+                severity: 'warning',
+                operatorAction: 'Vérifiez la configuration et relancez la collecte.',
+                isAccessFailure: false,
+            };
     }
 }
 
@@ -397,7 +415,9 @@ export async function collectCommunityPosts(seedQueries, subredditTargets) {
             seedDiagnostics = webResult.seedDiagnostics;
             collectionSource = 'web_search';
             webSearchProvider = webResult.provider;
-            console.warn(`[Community] Web search fallback collected ${rawPosts.length} results via ${webSearchProvider}`);
+            console.warn(
+                `[Community] Web search fallback collected ${rawPosts.length} results via ${webSearchProvider}`,
+            );
         } else {
             // Web search also found nothing — merge diagnostics for full picture
             console.warn('[Community] Web search fallback also returned 0 results');

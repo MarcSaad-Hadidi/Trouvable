@@ -2,15 +2,8 @@
 
 import DimensionsRadar from '@/components/shared/metrics/DimensionsRadar';
 
-import {
-    LabEmptyState,
-    LabPill,
-    LabSectionHeader,
-} from './LabPrimitives';
-import {
-    getSeoGeoBucketsViewModel,
-    scoreToneClass,
-} from './audit-lab-model';
+import { LabEmptyState, LabPill, LabSectionHeader } from './LabPrimitives';
+import { getSeoGeoBucketsViewModel, scoreToneClass } from './audit-lab-model';
 import { humanizeCategoryKey, severityFr, severityTone } from './audit-lab-copy';
 
 /**
@@ -79,9 +72,7 @@ function DimensionRow({ entry }) {
                     <div className="text-[12px] font-semibold text-white/85">
                         {meta?.label || humanizeCategoryKey(entry.key)}
                     </div>
-                    {meta?.short && (
-                        <div className="text-[10px] leading-relaxed text-white/40">{meta.short}</div>
-                    )}
+                    {meta?.short && <div className="text-[10px] leading-relaxed text-white/40">{meta.short}</div>}
                 </div>
                 <div className="shrink-0 text-right">
                     <div className={`text-base font-extrabold tabular-nums ${tone}`}>
@@ -115,11 +106,7 @@ function SourceBadge({ source }) {
 }
 
 function PointsList({ label, items, tone, emptyText, showSource = false }) {
-    const toneClass = tone === 'bad'
-        ? 'text-red-300/85'
-        : tone === 'good'
-        ? 'text-emerald-300/85'
-        : 'text-white/65';
+    const toneClass = tone === 'bad' ? 'text-red-300/85' : tone === 'good' ? 'text-emerald-300/85' : 'text-white/65';
 
     return (
         <div>
@@ -145,7 +132,9 @@ function PointsList({ label, items, tone, emptyText, showSource = false }) {
                                     )}
                                     {showSource && item.source && <SourceBadge source={item.source} />}
                                     <span className="text-[11px] leading-snug text-white/80">
-                                        {item.title || item.message || humanizeCategoryKey(item.id || item.category || 'point')}
+                                        {item.title ||
+                                            item.message ||
+                                            humanizeCategoryKey(item.id || item.category || 'point')}
                                     </span>
                                 </div>
                                 {item.description && (
@@ -167,15 +156,16 @@ function BucketColumn({ bucketName, data }) {
     const score = data?.score ?? null;
     const scoreTone = score != null ? scoreToneClass(score) : 'text-white/30';
 
-    const readingLabel = score == null
-        ? 'Score indisponible'
-        : score >= 80
-            ? 'Point fort clair'
-            : score >= 60
+    const readingLabel =
+        score == null
+            ? 'Score indisponible'
+            : score >= 80
+              ? 'Point fort clair'
+              : score >= 60
                 ? 'Exploitable — à consolider'
                 : score >= 40
-                    ? 'Inégal — à renforcer'
-                    : 'Faible — chantier prioritaire';
+                  ? 'Inégal — à renforcer'
+                  : 'Faible — chantier prioritaire';
 
     return (
         <div className={`flex flex-col gap-4 rounded-2xl border p-4 ${meta.accent}`}>
@@ -192,14 +182,17 @@ function BucketColumn({ bucketName, data }) {
                     <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/45">
                         {bucketName === 'seo' ? 'Score SEO' : 'Score GEO & IA'}
                     </div>
-                    <div className={`mt-0.5 font-['Plus_Jakarta_Sans',sans-serif] text-[32px] font-extrabold leading-none tabular-nums ${scoreTone}`}>
+                    <div
+                        className={`mt-0.5 font-['Plus_Jakarta_Sans',sans-serif] text-[32px] font-extrabold leading-none tabular-nums ${scoreTone}`}
+                    >
                         {score != null ? score : '—'}
                         {score != null && <span className="ml-0.5 text-[12px] text-white/30">/100</span>}
                     </div>
                     <div className="mt-0.5 text-[10px] text-white/45">{readingLabel}</div>
                 </div>
                 <div className="text-right text-[10px] leading-relaxed text-white/35">
-                    moyenne des {data.dimensions.length} dimension{data.dimensions.length > 1 ? 's' : ''}<br />
+                    moyenne des {data.dimensions.length} dimension{data.dimensions.length > 1 ? 's' : ''}
+                    <br />
                     rattachée{data.dimensions.length > 1 ? 's' : ''} à ce bloc
                 </div>
             </div>
@@ -229,13 +222,15 @@ function BucketColumn({ bucketName, data }) {
                     emptyText={
                         score != null && score >= 95
                             ? 'Bucket proche du maximum — aucun point faible rattaché à ce bloc.'
-                            : 'Aucun point de correction n\'a pu être synthétisé — vérifier le contenu de l\'audit brut.'
+                            : "Aucun point de correction n'a pu être synthétisé — vérifier le contenu de l'audit brut."
                     }
                     showSource
                 />
                 {data.synthesisApplied && (
                     <p className="-mt-1 rounded-md border border-violet-400/15 bg-violet-500/[0.04] px-2 py-1.5 text-[10.5px] leading-snug text-violet-200/80">
-                        Les points à corriger ont été <strong className="font-semibold">synthétisés</strong> depuis les dimensions basses et les contrôles Layer 1 / Layer 2, car aucun « issue » n&apos;était explicitement tagué sur ce bucket alors que son score est inférieur à 95.
+                        Les points à corriger ont été <strong className="font-semibold">synthétisés</strong> depuis les
+                        dimensions basses et les contrôles Layer 1 / Layer 2, car aucun « issue » n&apos;était
+                        explicitement tagué sur ce bucket alors que son score est inférieur à 95.
                     </p>
                 )}
             </div>
@@ -296,9 +291,12 @@ export default function AuditLabSeoGeoInterpretation({ audit }) {
                 <div className="mb-5 grid grid-cols-1 items-center gap-4 rounded-xl border border-white/[0.06] bg-black/30 p-4 lg:grid-cols-[auto_minmax(0,1fr)]">
                     <DimensionsRadar dimensions={radarDimensions} accent="violet" size={240} />
                     <div className="space-y-2 text-[12px] leading-relaxed text-white/65">
-                        <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/45">Profil de scoring</div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/45">
+                            Profil de scoring
+                        </div>
                         <p>
-                            Chaque sommet représente une dimension applicable au profil du site. Le polygone reflète la couverture actuelle par rapport à un idéal (100/100 sur chaque dimension).
+                            Chaque sommet représente une dimension applicable au profil du site. Le polygone reflète la
+                            couverture actuelle par rapport à un idéal (100/100 sur chaque dimension).
                         </p>
                         <p className="text-white/50">
                             Les dimensions marquées « N/A » par la classification ne sont pas dessinées.
@@ -313,8 +311,9 @@ export default function AuditLabSeoGeoInterpretation({ audit }) {
             </div>
 
             <p className="mt-3 text-[10.5px] leading-relaxed text-white/40">
-                Un score bas dans une colonne ne rend pas le score Trouvable invalide : la pondération finale dépend du type de site détecté
-                (services locaux, e-commerce, média, etc.). Voir « Vérité normalisée » plus bas pour le détail du profil de pondération.
+                Un score bas dans une colonne ne rend pas le score Trouvable invalide : la pondération finale dépend du
+                type de site détecté (services locaux, e-commerce, média, etc.). Voir « Vérité normalisée » plus bas
+                pour le détail du profil de pondération.
             </p>
         </section>
     );

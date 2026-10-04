@@ -103,23 +103,47 @@ export function auditLlmsTxtDeep(content, siteUrl, options = {}) {
     }
 
     if (!h1Present) {
-        findings.push({ id: 'llms_txt.missing_h1', severity: 'medium', message: 'llms.txt should start with a top-level `# Brand` heading.' });
+        findings.push({
+            id: 'llms_txt.missing_h1',
+            severity: 'medium',
+            message: 'llms.txt should start with a top-level `# Brand` heading.',
+        });
     }
     if (details.h2_count === 0) {
-        findings.push({ id: 'llms_txt.no_sections', severity: 'medium', message: 'No `##` sections found; structure is too flat for AI discovery.' });
+        findings.push({
+            id: 'llms_txt.no_sections',
+            severity: 'medium',
+            message: 'No `##` sections found; structure is too flat for AI discovery.',
+        });
     }
     if (details.links === 0) {
-        findings.push({ id: 'llms_txt.no_links', severity: 'medium', message: 'No markdown links detected; AI assistants rely on explicit link lists.' });
+        findings.push({
+            id: 'llms_txt.no_links',
+            severity: 'medium',
+            message: 'No markdown links detected; AI assistants rely on explicit link lists.',
+        });
     }
     if (details.links > 0 && details.internal_links === 0) {
-        findings.push({ id: 'llms_txt.no_internal_links', severity: 'high', message: 'All links point off-site; llms.txt should primarily reference the site itself.' });
+        findings.push({
+            id: 'llms_txt.no_internal_links',
+            severity: 'high',
+            message: 'All links point off-site; llms.txt should primarily reference the site itself.',
+        });
         details.red_flags.push('all_external_links');
     }
     if (details.external_links > details.internal_links * 2 && details.links > 4) {
-        findings.push({ id: 'llms_txt.mostly_external', severity: 'low', message: 'Majority of links are off-site; ensure the site is well represented.' });
+        findings.push({
+            id: 'llms_txt.mostly_external',
+            severity: 'low',
+            message: 'Majority of links are off-site; ensure the site is well represented.',
+        });
     }
     if (details.character_count > 20_000 && details.h2_count < 3) {
-        findings.push({ id: 'llms_txt.verbose_unstructured', severity: 'low', message: 'Very long llms.txt without clear sections may reduce AI retrieval quality.' });
+        findings.push({
+            id: 'llms_txt.verbose_unstructured',
+            severity: 'low',
+            message: 'Very long llms.txt without clear sections may reduce AI retrieval quality.',
+        });
         details.red_flags.push('verbose_unstructured');
     }
 

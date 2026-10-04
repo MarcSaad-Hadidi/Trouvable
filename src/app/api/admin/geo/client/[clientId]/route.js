@@ -3,8 +3,6 @@ import { noStoreJson } from '@/lib/http-response';
 import { requireAdmin } from '@/lib/auth';
 import { getOperatorWorkspaceShell } from '@/lib/operator-intelligence/base';
 
-
-
 export async function GET(_, { params }) {
     try {
         const admin = await requireAdmin();

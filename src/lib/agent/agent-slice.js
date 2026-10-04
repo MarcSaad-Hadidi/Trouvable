@@ -6,19 +6,34 @@ import { loadAgentWorkspace } from './agent-workspace';
 import { buildAgentMajorBlockers } from './remediation-pipeline';
 
 function buildEmptyState({ hasAudit, hasRuns, unavailable }) {
-    if (unavailable) return { title: 'AGENT temporairement indisponible', description: 'Les sources nécessaires à cette lecture ne sont pas toutes disponibles.' };
+    if (unavailable)
+        return {
+            title: 'AGENT temporairement indisponible',
+            description: 'Les sources nécessaires à cette lecture ne sont pas toutes disponibles.',
+        };
     if (hasAudit || hasRuns) return null;
     return {
         title: 'AGENT indisponible',
         description:
-            "Aucun audit et aucune exécution moteur n'ont encore été enregistrés pour ce mandat. "
-            + 'Lancez un audit et les prompts suivis pour activer la lecture AGENT.',
+            "Aucun audit et aucune exécution moteur n'ont encore été enregistrés pour ce mandat. " +
+            'Lancez un audit et les prompts suivis pour activer la lecture AGENT.',
     };
 }
 
 export async function getAgentSlice(clientId) {
-    const { status, dataSources, errors, overviewSlice, readinessSlice, opportunitySlice,
-        actionabilityReport, protocolsReport, inputs, score, remediation } = await loadAgentWorkspace(clientId);
+    const {
+        status,
+        dataSources,
+        errors,
+        overviewSlice,
+        readinessSlice,
+        opportunitySlice,
+        actionabilityReport,
+        protocolsReport,
+        inputs,
+        score,
+        remediation,
+    } = await loadAgentWorkspace(clientId);
 
     const lastAuditAt = overviewSlice?.visibility?.lastAuditAt || null;
     const lastRunAt = overviewSlice?.visibility?.lastGeoRunAt || null;
@@ -29,7 +44,9 @@ export async function getAgentSlice(clientId) {
     const topBlockers = buildAgentMajorBlockers({ readinessSlice, remediation, limit: 4 });
 
     return {
-        status, dataSources, errors,
+        status,
+        dataSources,
+        errors,
         provenance: {
             observed: getProvenanceMeta('observed'),
             derived: getProvenanceMeta('derived'),
@@ -71,7 +88,14 @@ export async function getAgentSlice(clientId) {
             geoOpportunities: `/admin/clients/${clientId}/geo/opportunities`,
             geoRuns: `/admin/clients/${clientId}/geo/runs`,
         },
-        emptyState: buildEmptyState({ hasAudit, hasRuns, unavailable: dataSources.overview === 'unavailable' || dataSources.audit === 'unavailable' || dataSources.latestAudit === 'unavailable' || overviewSlice?.kpis?.completedRunsTotal === null }),
+        emptyState: buildEmptyState({
+            hasAudit,
+            hasRuns,
+            unavailable:
+                dataSources.overview === 'unavailable' ||
+                dataSources.audit === 'unavailable' ||
+                dataSources.latestAudit === 'unavailable' ||
+                overviewSlice?.kpis?.completedRunsTotal === null,
+        }),
     };
 }
-

@@ -105,7 +105,9 @@ function VariantCard({ variantKey, activeVariant, onChange }) {
             aria-pressed={active}
         >
             <div className="flex items-start justify-between gap-3">
-                <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${meta.tone}`}>
+                <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${meta.tone}`}
+                >
                     {meta.label}
                 </span>
                 {active ? <CheckCheck className="h-4 w-4 text-sky-200" aria-hidden="true" /> : null}
@@ -119,23 +121,30 @@ function VariantCard({ variantKey, activeVariant, onChange }) {
 
 function MetaRow({ payload }) {
     const validationStatus = payload?.validation?.status || 'invalid';
-    const validationLabel = validationStatus === 'valid'
-        ? 'Validation OK'
-        : validationStatus === 'partial'
-            ? 'Validation partielle'
-            : 'Validation invalide';
+    const validationLabel =
+        validationStatus === 'valid'
+            ? 'Validation OK'
+            : validationStatus === 'partial'
+              ? 'Validation partielle'
+              : 'Validation invalide';
 
     return (
         <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/52">
             <SeoStatusBadge status={validationStatus === 'valid' ? 'ok' : 'warning'} label={validationLabel} />
             {payload?.meta?.provider ? (
-                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">{payload.meta.provider}</span>
+                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">
+                    {payload.meta.provider}
+                </span>
             ) : null}
             {payload?.meta?.model ? (
-                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">{payload.meta.model}</span>
+                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">
+                    {payload.meta.model}
+                </span>
             ) : null}
             {payload?.meta?.latencyMs ? (
-                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">{payload.meta.latencyMs} ms</span>
+                <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1">
+                    {payload.meta.latencyMs} ms
+                </span>
             ) : null}
         </div>
     );
@@ -184,11 +193,14 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
 
     const copyTimeoutRef = useRef(null);
 
-    useEffect(() => () => {
-        if (copyTimeoutRef.current) {
-            clearTimeout(copyTimeoutRef.current);
-        }
-    }, []);
+    useEffect(
+        () => () => {
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+            }
+        },
+        [],
+    );
 
     // Auto-lancement quand autoGenerate passe à true (par ex. via query param
     // ?auto=1 dans l'URL). Ne re-tire pas tant que l'issue n'a pas changé.
@@ -209,19 +221,26 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
         autoGenerateTriggeredRef.current = false;
     }, [issue?.id]);
 
-    const selectedPrompt = useMemo(
-        () => payload?.prompts?.[activeVariant]?.text || '',
-        [activeVariant, payload],
-    );
+    const selectedPrompt = useMemo(() => payload?.prompts?.[activeVariant]?.text || '', [activeVariant, payload]);
     const selectedVariantMeta = VARIANT_META[activeVariant] || VARIANT_META.standard;
 
-    const resolvedIssue = useMemo(() => ({
-        title: payload?.issue?.title || issue?.title || issue?.label || 'Probleme technique',
-        category: normalizeLabel(payload?.issue?.category || issue?.category || 'seo'),
-        priority: normalizeLabel(payload?.issue?.priority || issue?.priority || 'medium'),
-        truthClass: normalizeLabel(payload?.issue?.truth_class || issue?.truth_class || payload?.contextSummary?.truthState || 'unavailable'),
-        confidence: normalizeLabel(payload?.issue?.confidence || issue?.confidence || payload?.contextSummary?.confidence || 'unavailable'),
-    }), [issue, payload]);
+    const resolvedIssue = useMemo(
+        () => ({
+            title: payload?.issue?.title || issue?.title || issue?.label || 'Probleme technique',
+            category: normalizeLabel(payload?.issue?.category || issue?.category || 'seo'),
+            priority: normalizeLabel(payload?.issue?.priority || issue?.priority || 'medium'),
+            truthClass: normalizeLabel(
+                payload?.issue?.truth_class ||
+                    issue?.truth_class ||
+                    payload?.contextSummary?.truthState ||
+                    'unavailable',
+            ),
+            confidence: normalizeLabel(
+                payload?.issue?.confidence || issue?.confidence || payload?.contextSummary?.confidence || 'unavailable',
+            ),
+        }),
+        [issue, payload],
+    );
 
     const contextSummary = payload?.contextSummary || null;
     const evidenceSummary = normalizeLabel(
@@ -297,12 +316,16 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                             <Sparkles className="h-3.5 w-3.5" />
                             Prompt de correction IA
                         </div>
-                        <h3 className="text-[20px] font-semibold tracking-[-0.03em] text-white/95">Assistant premium de correction SEO Health</h3>
+                        <h3 className="text-[20px] font-semibold tracking-[-0.03em] text-white/95">
+                            Assistant premium de correction SEO Health
+                        </h3>
                         <p className="text-[13px] leading-relaxed text-white/64">
-                            Trouvable assemble le contexte reel du probleme, puis genere via Mistral un prompt pret a donner a une IA de code.
+                            Trouvable assemble le contexte reel du probleme, puis genere via Mistral un prompt pret a
+                            donner a une IA de code.
                         </p>
                         <p className="text-[12px] leading-relaxed text-white/52">
-                            Objectif operateur: comprendre vite, choisir la bonne variante, copier sans friction, agir sans extrapolation.
+                            Objectif operateur: comprendre vite, choisir la bonne variante, copier sans friction, agir
+                            sans extrapolation.
                         </p>
                     </div>
 
@@ -313,7 +336,11 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                                 onClick={() => setIsExpanded((value) => !value)}
                                 className={`${getSeoActionClasses('subtle')} px-3.5 py-2 text-[11px]`}
                             >
-                                {isExpanded ? <EyeOff className="mr-1.5 h-3.5 w-3.5" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
+                                {isExpanded ? (
+                                    <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+                                ) : (
+                                    <Eye className="mr-1.5 h-3.5 w-3.5" />
+                                )}
                                 {isExpanded ? 'Masquer le prompt' : 'Afficher le prompt'}
                             </button>
                         ) : null}
@@ -347,15 +374,21 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                             status={priorityBadgeStatus(resolvedIssue.priority)}
                             label={`Priorite ${resolvedIssue.priority}`}
                         />
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${truthMeta.tone}`}>
+                        <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${truthMeta.tone}`}
+                        >
                             Verite {truthMeta.label}
                         </span>
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${confidenceMeta.tone}`}>
+                        <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${confidenceMeta.tone}`}
+                        >
                             Confiance {confidenceMeta.label}
                         </span>
                     </div>
 
-                    <div className="mt-3 text-[16px] font-semibold tracking-[-0.02em] text-white/94">{resolvedIssue.title}</div>
+                    <div className="mt-3 text-[16px] font-semibold tracking-[-0.02em] text-white/94">
+                        {resolvedIssue.title}
+                    </div>
 
                     <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                         <ContextMetaItem label="Categorie" value={resolvedIssue.category} />
@@ -383,7 +416,8 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
 
                     {missingFields.length > 0 ? (
                         <div className="mt-3 rounded-[18px] border border-amber-300/18 bg-amber-400/10 px-3 py-2.5 text-[11px] leading-relaxed text-amber-100">
-                            Certaines donnees restent manquantes dans le contexte reel. Elles sont listees plus bas dans la section Limites.
+                            Certaines donnees restent manquantes dans le contexte reel. Elles sont listees plus bas dans
+                            la section Limites.
                         </div>
                     ) : null}
                 </section>
@@ -394,7 +428,8 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                         Variantes du prompt
                     </div>
                     <p className="mt-2 text-[12px] leading-relaxed text-white/62">
-                        Choix operateur: Standard pour une correction guidee et efficace, Strict pour une execution fortement contrainte sans extrapolation.
+                        Choix operateur: Standard pour une correction guidee et efficace, Strict pour une execution
+                        fortement contrainte sans extrapolation.
                     </p>
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
                         <VariantCard variantKey="standard" activeVariant={activeVariant} onChange={setActiveVariant} />
@@ -409,7 +444,8 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                             Generation en cours
                         </div>
                         <div className="mt-2 text-sky-100/90">
-                            Appel Mistral, normalisation structuree et verification du contrat de sortie avant affichage.
+                            Appel Mistral, normalisation structuree et verification du contrat de sortie avant
+                            affichage.
                         </div>
                     </div>
                 ) : null}
@@ -434,9 +470,15 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                 <section className="rounded-[22px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(5,6,8,0.96)_0%,rgba(6,8,11,0.94)_100%)] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/42">Prompt genere</div>
-                            <div className="mt-1 text-[14px] font-semibold tracking-[-0.02em] text-white/92">{selectedVariantMeta.label}</div>
-                            <div className="mt-1 text-[12px] leading-relaxed text-white/62">{selectedVariantMeta.description}</div>
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/42">
+                                Prompt genere
+                            </div>
+                            <div className="mt-1 text-[14px] font-semibold tracking-[-0.02em] text-white/92">
+                                {selectedVariantMeta.label}
+                            </div>
+                            <div className="mt-1 text-[12px] leading-relaxed text-white/62">
+                                {selectedVariantMeta.description}
+                            </div>
                         </div>
 
                         {payload && isExpanded ? (
@@ -457,9 +499,12 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
 
                             {payload?.validation?.status === 'partial' ? (
                                 <div className="rounded-[18px] border border-amber-300/20 bg-amber-400/10 px-3 py-2.5 text-[11px] leading-relaxed text-amber-100">
-                                    <div className="font-semibold uppercase tracking-[0.1em] text-amber-50/92">Sortie IA normalisee</div>
+                                    <div className="font-semibold uppercase tracking-[0.1em] text-amber-50/92">
+                                        Sortie IA normalisee
+                                    </div>
                                     <div className="mt-1">
-                                        La sortie brute etait partiellement hors contrat. Le prompt affiche a ete recentre sur le contexte deterministe SEO Health.
+                                        La sortie brute etait partiellement hors contrat. Le prompt affiche a ete
+                                        recentre sur le contexte deterministe SEO Health.
                                     </div>
                                     {payload?.validation?.warnings?.length ? (
                                         <ul className="mt-2 space-y-1 text-amber-50/92">
@@ -491,7 +536,8 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                         </div>
                     ) : (
                         <div className="mt-3 rounded-[18px] border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-[12px] leading-relaxed text-white/58">
-                            Aucun prompt genere pour l instant. Lance la generation pour obtenir la version {selectedVariantMeta.label.toLowerCase()} prete a copier.
+                            Aucun prompt genere pour l instant. Lance la generation pour obtenir la version{' '}
+                            {selectedVariantMeta.label.toLowerCase()} prete a copier.
                         </div>
                     )}
                 </section>
@@ -502,7 +548,8 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                         Chemins verifies et reperes repo
                     </div>
                     <p className="mt-2 text-[12px] leading-relaxed text-white/62">
-                        Cette section montre ce qui ancre le prompt dans le repo reel: surfaces inspectees, preuves structurees et validations minimales attendues.
+                        Cette section montre ce qui ancre le prompt dans le repo reel: surfaces inspectees, preuves
+                        structurees et validations minimales attendues.
                     </p>
 
                     {payload ? (
@@ -546,7 +593,9 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                     </div>
                     <div className="mt-3 grid gap-3 lg:grid-cols-2">
                         <article className="rounded-[18px] border border-emerald-300/16 bg-emerald-400/10 p-3">
-                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-100/92">Verifie</div>
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-100/92">
+                                Verifie
+                            </div>
                             <div className="mt-2 text-[12px] leading-relaxed text-emerald-100/85">
                                 {payload
                                     ? `${verifiedPaths.length} chemin(s) verifies, ${repoFacts.length} repere(s) repo, ${validationTargets.length} validation(s) minimale(s).`
@@ -554,7 +603,9 @@ export default function CorrectionPromptGenerator({ clientId, issue, autoGenerat
                             </div>
                         </article>
                         <article className="rounded-[18px] border border-amber-300/16 bg-amber-400/10 p-3">
-                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-amber-100/92">Manquant ou non verifiable</div>
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-amber-100/92">
+                                Manquant ou non verifiable
+                            </div>
                             {missingFields.length > 0 ? (
                                 <ul className="mt-2 space-y-1 text-[12px] leading-relaxed text-amber-50/92">
                                     {missingFields.map((item) => (

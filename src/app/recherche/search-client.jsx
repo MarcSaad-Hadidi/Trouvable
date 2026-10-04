@@ -37,25 +37,29 @@ export default function SearchClient({ index, initialQuery = '' }) {
     }, [index, normalizedQuery]);
 
     // Bento grid recommendations for empty state (use static pages)
-    const recommendations = index.filter(item => item.isStatic).slice(0, 6);
+    const recommendations = index.filter((item) => item.isStatic).slice(0, 6);
 
     const getIcon = (href) => {
         if (href.startsWith('/villes')) return <MapPin className="h-5 w-5 text-emerald-400" />;
         if (href.startsWith('/expertises')) return <Briefcase className="h-5 w-5 text-amber-400" />;
-        if (href.startsWith('/services') || href.startsWith('/offres')) return <Zap className="h-5 w-5 text-indigo-400" />;
+        if (href.startsWith('/services') || href.startsWith('/offres'))
+            return <Zap className="h-5 w-5 text-indigo-400" />;
         return <FileText className="h-5 w-5 text-blue-400" />;
     };
 
     return (
         <div className="mx-auto w-full max-w-[1000px] pt-10">
             {/* Logo Link to Home */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="mb-8 flex justify-center"
             >
-                <Link href="/" className="group flex items-center gap-4 text-2xl sm:text-[28px] font-bold tracking-[-0.03em] text-white transition hover:opacity-80">
+                <Link
+                    href="/"
+                    className="group flex items-center gap-4 text-2xl sm:text-[28px] font-bold tracking-[-0.03em] text-white transition hover:opacity-80"
+                >
                     <Image
                         src="/logos/trouvable_logo_blanc1.png"
                         alt="Logo Trouvable"
@@ -70,7 +74,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
             </motion.div>
 
             {/* Header Section with Kinetic Typography */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -84,12 +88,13 @@ export default function SearchClient({ index, initialQuery = '' }) {
                     Que cherchez-vous ?
                 </h1>
                 <p className="mt-4 text-lg text-white/50 max-w-2xl mx-auto">
-                    Explorez notre documentation, nos services, nos expertises sectorielles et nos villes couvertes par l&#39;intelligence Trouvable.
+                    Explorez notre documentation, nos services, nos expertises sectorielles et nos villes couvertes par
+                    l&#39;intelligence Trouvable.
                 </p>
             </motion.div>
 
             {/* Premium Search Input */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -118,7 +123,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
                         autoFocus
                     />
                     {query && (
-                        <button 
+                        <button
                             onClick={() => setQuery('')}
                             className="mr-6 text-xs font-medium text-white/40 hover:text-white/80 transition-colors px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10"
                             aria-label="Effacer la recherche"
@@ -144,7 +149,8 @@ export default function SearchClient({ index, initialQuery = '' }) {
                         >
                             <div className="flex items-center justify-between px-2 mb-6">
                                 <h2 className="text-sm font-semibold text-white/50 uppercase tracking-widest">
-                                    {matches.length} résultat{matches.length > 1 ? 's' : ''} trouvé{matches.length > 1 ? 's' : ''}
+                                    {matches.length} résultat{matches.length > 1 ? 's' : ''} trouvé
+                                    {matches.length > 1 ? 's' : ''}
                                 </h2>
                             </div>
                             <div className="grid gap-3">
@@ -155,16 +161,16 @@ export default function SearchClient({ index, initialQuery = '' }) {
                                         transition={{ delay: i * 0.05 }}
                                         key={entry.href}
                                     >
-                                        <Link 
+                                        <Link
                                             href={entry.href}
                                             className="group relative flex items-center gap-4 sm:gap-6 rounded-xl border border-white/5 bg-white/[0.02] p-4 sm:p-5 transition-all hover:bg-white/[0.05] hover:border-white/10 hover:shadow-[0_0_30px_-10px_rgba(255,255,255,0.05)] overflow-hidden"
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
-                                            
+
                                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 group-hover:bg-white/10 group-hover:ring-white/20 transition-all">
                                                 {getIcon(entry.href)}
                                             </div>
-                                            
+
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-[17px] font-semibold text-white/90 group-hover:text-white transition-colors truncate">
                                                     {entry.title}
@@ -176,7 +182,7 @@ export default function SearchClient({ index, initialQuery = '' }) {
                                                     {entry.href}
                                                 </p>
                                             </div>
-                                            
+
                                             <div className="shrink-0 text-white/20 group-hover:text-white/60 group-hover:translate-x-1 transition-all">
                                                 <ArrowRight className="h-5 w-5" />
                                             </div>
@@ -198,7 +204,8 @@ export default function SearchClient({ index, initialQuery = '' }) {
                             </div>
                             <h3 className="text-xl font-medium text-white">Aucun résultat</h3>
                             <p className="mt-2 text-[#a0a0a0] max-w-md">
-                                La recherche &quot;{query}&quot; n&#39;a donné aucun résultat. Essayez d&#39;élargir votre requête ou naviguez via les recommandations ci-dessous.
+                                La recherche &quot;{query}&quot; n&#39;a donné aucun résultat. Essayez d&#39;élargir
+                                votre requête ou naviguez via les recommandations ci-dessous.
                             </p>
                         </motion.div>
                     ) : (
@@ -211,16 +218,18 @@ export default function SearchClient({ index, initialQuery = '' }) {
                         >
                             <div className="flex items-center gap-3 mb-8 px-2">
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#7b8fff]/70">Explorer l&#39;écosystème</span>
+                                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#7b8fff]/70">
+                                    Explorer l&#39;écosystème
+                                </span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                             </div>
-                            
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {recommendations.map((entry, i) => (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 + (i * 0.1) }}
+                                        transition={{ delay: 0.2 + i * 0.1 }}
                                         key={entry.href}
                                     >
                                         <Link

@@ -24,44 +24,51 @@ function formatRole(item) {
 }
 
 function inferFunnelStage(entry) {
-    const haystack = normalizeText(`${entry?.role || ''} ${entry?.detail || ''} ${entry?.label || ''} ${entry?.url || ''}`);
+    const haystack = normalizeText(
+        `${entry?.role || ''} ${entry?.detail || ''} ${entry?.label || ''} ${entry?.url || ''}`,
+    );
 
     if (/(devis|tarif|prix|demo|essai|contact|services?|solution|comparatif|logiciel)/.test(haystack)) return 'bofu';
-    if (/(faq|blog|guide|article|conseil|ressource|support confiance|a propos|about|reponse)/.test(haystack)) return 'tofu';
+    if (/(faq|blog|guide|article|conseil|ressource|support confiance|a propos|about|reponse)/.test(haystack))
+        return 'tofu';
     return 'mofu';
 }
 
 function buildMatrixRows(clusters, pageRoles, coverage) {
     const roleByUrl = new Map(
-        (pageRoles || [])
-            .filter((item) => item?.url)
-            .map((item) => [String(item.url).toLowerCase(), item]),
+        (pageRoles || []).filter((item) => item?.url).map((item) => [String(item.url).toLowerCase(), item]),
     );
 
     const roleByLabel = new Map(
-        (pageRoles || [])
-            .filter((item) => item?.label)
-            .map((item) => [String(item.label).toLowerCase(), item]),
+        (pageRoles || []).filter((item) => item?.label).map((item) => [String(item.label).toLowerCase(), item]),
     );
 
-    const rowsFromClusters = (clusters || []).slice(0, 5).map((cluster) => {
-        const members = [cluster?.hubPage, ...(cluster?.supportPages || [])]
-            .filter(Boolean)
-            .map((item) => roleByUrl.get(String(item?.url || '').toLowerCase()) || roleByLabel.get(String(item?.label || '').toLowerCase()) || item)
-            .filter(Boolean);
+    const rowsFromClusters = (clusters || [])
+        .slice(0, 5)
+        .map((cluster) => {
+            const members = [cluster?.hubPage, ...(cluster?.supportPages || [])]
+                .filter(Boolean)
+                .map(
+                    (item) =>
+                        roleByUrl.get(String(item?.url || '').toLowerCase()) ||
+                        roleByLabel.get(String(item?.label || '').toLowerCase()) ||
+                        item,
+                )
+                .filter(Boolean);
 
-        const stageCounts = { tofu: 0, mofu: 0, bofu: 0 };
-        members.forEach((item) => {
-            stageCounts[inferFunnelStage(item)] += 1;
-        });
+            const stageCounts = { tofu: 0, mofu: 0, bofu: 0 };
+            members.forEach((item) => {
+                stageCounts[inferFunnelStage(item)] += 1;
+            });
 
-        return {
-            label: cluster?.label || 'Cluster',
-            tofu: stageCounts.tofu,
-            mofu: stageCounts.mofu,
-            bofu: stageCounts.bofu,
-        };
-    }).filter((row) => row.label);
+            return {
+                label: cluster?.label || 'Cluster',
+                tofu: stageCounts.tofu,
+                mofu: stageCounts.mofu,
+                bofu: stageCounts.bofu,
+            };
+        })
+        .filter((row) => row.label);
 
     if (rowsFromClusters.length > 0) return rowsFromClusters;
 
@@ -75,7 +82,9 @@ function buildMatrixRows(clusters, pageRoles, coverage) {
 
 function buildClusterLookup(clusters, pageRoles) {
     const lookup = new Map();
-    const roleByUrl = new Map((pageRoles || []).filter((item) => item?.url).map((item) => [String(item.url).toLowerCase(), item]));
+    const roleByUrl = new Map(
+        (pageRoles || []).filter((item) => item?.url).map((item) => [String(item.url).toLowerCase(), item]),
+    );
 
     (clusters || []).forEach((cluster) => {
         [cluster?.hubPage, ...(cluster?.supportPages || [])].filter(Boolean).forEach((page) => {
@@ -132,21 +141,16 @@ export default function SeoContentPage() {
     const refreshItems = data?.refreshOpportunities?.items || [];
     const missingItems = data?.missingPages?.items || [];
     const mergeItems = data?.mergeOpportunities?.items || [];
-    const summaryCards = (data?.summaryCards || []).map((card) => (
-        card.id === 'priority_count'
-            ? { ...card, label: 'Signaux éditoriaux' }
-            : card
-    ));
+    const summaryCards = (data?.summaryCards || []).map((card) =>
+        card.id === 'priority_count' ? { ...card, label: 'Signaux éditoriaux' } : card,
+    );
 
     const matrixRows = useMemo(
         () => buildMatrixRows(clusters, pageRoles, data?.coverage),
         [clusters, pageRoles, data?.coverage],
     );
 
-    const clusterLookup = useMemo(
-        () => buildClusterLookup(clusters, pageRoles),
-        [clusters, pageRoles],
-    );
+    const clusterLookup = useMemo(() => buildClusterLookup(clusters, pageRoles), [clusters, pageRoles]);
 
     const auditCreatedAt = data?.auditMeta?.createdAt;
     const calendar = useMemo(() => {
@@ -161,10 +165,20 @@ export default function SeoContentPage() {
 
     if (loading) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Matrice de Contenu" subtitle="Chargement de la matrice éditoriale et des signaux de couverture." />}>
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Matrice de Contenu"
+                        subtitle="Chargement de la matrice éditoriale et des signaux de couverture."
+                    />
+                }
+            >
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/90">Chargement du contenu SEO</div>
-                    <p className="mt-2 text-[13px] text-white/55">Le cockpit attend la couverture éditoriale, les clusters et les signaux de retravail du dossier.</p>
+                    <p className="mt-2 text-[13px] text-white/55">
+                        Le cockpit attend la couverture éditoriale, les clusters et les signaux de retravail du dossier.
+                    </p>
                 </div>
             </CommandPageShell>
         );
@@ -172,8 +186,24 @@ export default function SeoContentPage() {
 
     if (error) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Matrice de Contenu" subtitle="Planification éditoriale, analyse des gaps sémantiques par étape du tunnel." />}>
-                <CommandEmptyState title="Contenu SEO indisponible" description={error} action={<Link href={`${baseHref}/seo/on-page`} className={COMMAND_BUTTONS.primary}>Optimisation on-page</Link>} />
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Matrice de Contenu"
+                        subtitle="Planification éditoriale, analyse des gaps sémantiques par étape du tunnel."
+                    />
+                }
+            >
+                <CommandEmptyState
+                    title="Contenu SEO indisponible"
+                    description={error}
+                    action={
+                        <Link href={`${baseHref}/seo/on-page`} className={COMMAND_BUTTONS.primary}>
+                            Optimisation on-page
+                        </Link>
+                    }
+                />
             </CommandPageShell>
         );
     }
@@ -186,12 +216,22 @@ export default function SeoContentPage() {
                         eyebrow="SEO Ops"
                         title="Matrice de Contenu"
                         subtitle={`Planification éditoriale, analyse des gaps sémantiques par étape du tunnel pour ${client?.client_name || 'ce mandat'}.`}
-                        actions={<Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.primary}>Opportunités SEO</Link>}
+                        actions={
+                            <Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.primary}>
+                                Opportunités SEO
+                            </Link>
+                        }
                     />
                 }
             >
                 <SourceStatusNotice status={data?.status} errors={data?.errors} />
-                <CommandEmptyState title={data?.emptyState?.title || 'Aucune lecture éditoriale disponible'} description={data?.emptyState?.description || 'Le dossier ne remonte pas encore de structure contenu exploitable.'} />
+                <CommandEmptyState
+                    title={data?.emptyState?.title || 'Aucune lecture éditoriale disponible'}
+                    description={
+                        data?.emptyState?.description ||
+                        'Le dossier ne remonte pas encore de structure contenu exploitable.'
+                    }
+                />
             </CommandPageShell>
         );
     }
@@ -203,11 +243,15 @@ export default function SeoContentPage() {
                     eyebrow="SEO Ops"
                     title="Matrice de Contenu"
                     subtitle="Planification éditoriale, analyse des gaps sémantiques par étape du tunnel."
-                    actions={<Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.primary}>Opportunités SEO</Link>}
+                    actions={
+                        <Link href={`${baseHref}/seo/opportunities`} className={COMMAND_BUTTONS.primary}>
+                            Opportunités SEO
+                        </Link>
+                    }
                 />
             }
         >
-                <SourceStatusNotice status={data?.status} errors={data?.errors} />
+            <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {summaryCards.map((card) => (
                     <CommandMetricCard
@@ -224,7 +268,9 @@ export default function SeoContentPage() {
                 <div className={cn(COMMAND_PANEL, 'flex h-[480px] flex-col overflow-hidden p-0')}>
                     <div className="border-b border-white/[0.05] bg-white/[0.02] p-5">
                         <h3 className="text-[12px] font-semibold text-white/90">Matrice Sémantique vs Tunnel</h3>
-                        <p className="mt-1 text-[11px] text-white/50">Identification des opportunités (&quot;gaps&quot;) par cluster thématique.</p>
+                        <p className="mt-1 text-[11px] text-white/50">
+                            Identification des opportunités (&quot;gaps&quot;) par cluster thématique.
+                        </p>
                     </div>
 
                     <div className="flex-1 overflow-x-auto overflow-y-auto p-5">
@@ -238,7 +284,9 @@ export default function SeoContentPage() {
                                         { id: 'bofu', label: 'Décision' },
                                     ].map((stage) => (
                                         <div key={stage.id} className="text-center">
-                                            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/60">{stage.id}</div>
+                                            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/60">
+                                                {stage.id}
+                                            </div>
                                             <div className="truncate px-1 text-[9px] text-white/30">{stage.label}</div>
                                         </div>
                                     ))}
@@ -248,7 +296,9 @@ export default function SeoContentPage() {
                                     {matrixRows.map((row) => (
                                         <div key={row.label} className="grid grid-cols-4 gap-2">
                                             <div className="col-span-1 flex items-center justify-end pr-3">
-                                                <span className="text-right text-[11px] font-medium text-white/80">{row.label}</span>
+                                                <span className="text-right text-[11px] font-medium text-white/80">
+                                                    {row.label}
+                                                </span>
                                             </div>
                                             {['tofu', 'mofu', 'bofu'].map((stageKey) => {
                                                 const count = Number(row?.[stageKey] || 0);
@@ -263,24 +313,33 @@ export default function SeoContentPage() {
                                                             isEmpty
                                                                 ? 'border-rose-400/20 bg-rose-400/5 hover:bg-rose-400/10'
                                                                 : isLow
-                                                                    ? 'border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10'
-                                                                    : 'border-white/[0.05] bg-white/[0.03] hover:bg-white/[0.08]',
+                                                                  ? 'border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10'
+                                                                  : 'border-white/[0.05] bg-white/[0.03] hover:bg-white/[0.08]',
                                                         )}
                                                     >
                                                         {isEmpty ? (
                                                             <div className="flex flex-col items-center">
-                                                                <span className="text-[14px] font-bold text-rose-400/50 group-hover:hidden">0</span>
+                                                                <span className="text-[14px] font-bold text-rose-400/50 group-hover:hidden">
+                                                                    0
+                                                                </span>
                                                                 <PlusIcon className="hidden h-4 w-4 text-rose-400 group-hover:block" />
                                                             </div>
                                                         ) : (
-                                                            <span className={cn('text-[14px] font-bold tabular-nums', isLow ? 'text-amber-400/80' : 'text-white/70')}>
+                                                            <span
+                                                                className={cn(
+                                                                    'text-[14px] font-bold tabular-nums',
+                                                                    isLow ? 'text-amber-400/80' : 'text-white/70',
+                                                                )}
+                                                            >
                                                                 {count}
                                                             </span>
                                                         )}
 
                                                         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/80 opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-sm">
                                                             <span className="text-[9px] font-semibold text-white/90">
-                                                                {isEmpty ? 'Aucune page classée' : `${count} page(s) observée(s)`}
+                                                                {isEmpty
+                                                                    ? 'Aucune page classée'
+                                                                    : `${count} page(s) observée(s)`}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -291,7 +350,10 @@ export default function SeoContentPage() {
                                 </div>
                             </div>
                         ) : (
-                            <CommandEmptyState title="Aucun cluster exploitable" description="Le dossier ne remonte pas encore de clustering éditorial suffisamment propre pour alimenter cette matrice." />
+                            <CommandEmptyState
+                                title="Aucun cluster exploitable"
+                                description="Le dossier ne remonte pas encore de clustering éditorial suffisamment propre pour alimenter cette matrice."
+                            />
                         )}
                     </div>
                 </div>
@@ -303,16 +365,30 @@ export default function SeoContentPage() {
                             <p className="mt-1 text-[11px] capitalize text-white/50">{calendar.label}</p>
                         </div>
                         <div className="flex gap-3">
-                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60"><div className="h-2 w-2 rounded-full bg-emerald-400/50" /> Publié {calendarLegend.published > 0 ? `(${calendarLegend.published})` : ''}</span>
-                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60"><div className="h-2 w-2 rounded-full bg-sky-400/50" /> Programmé {calendarLegend.scheduled > 0 ? `(${calendarLegend.scheduled})` : ''}</span>
-                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60"><div className="h-2 w-2 rounded-full bg-amber-400/50" /> Brouillon {calendarLegend.draft > 0 ? `(${calendarLegend.draft})` : ''}</span>
+                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60">
+                                <div className="h-2 w-2 rounded-full bg-emerald-400/50" /> Publié{' '}
+                                {calendarLegend.published > 0 ? `(${calendarLegend.published})` : ''}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60">
+                                <div className="h-2 w-2 rounded-full bg-sky-400/50" /> Programmé{' '}
+                                {calendarLegend.scheduled > 0 ? `(${calendarLegend.scheduled})` : ''}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-white/60">
+                                <div className="h-2 w-2 rounded-full bg-amber-400/50" /> Brouillon{' '}
+                                {calendarLegend.draft > 0 ? `(${calendarLegend.draft})` : ''}
+                            </span>
                         </div>
                     </div>
 
                     <div className="flex flex-1 flex-col overflow-hidden p-4">
                         <div className="mb-1 grid grid-cols-7 gap-1">
                             {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map((day) => (
-                                <div key={day} className="py-1 text-center text-[9px] font-bold uppercase tracking-widest text-white/30">{day}</div>
+                                <div
+                                    key={day}
+                                    className="py-1 text-center text-[9px] font-bold uppercase tracking-widest text-white/30"
+                                >
+                                    {day}
+                                </div>
                             ))}
                         </div>
 
@@ -325,11 +401,20 @@ export default function SeoContentPage() {
                                         day.isToday
                                             ? 'border-indigo-500/50 bg-indigo-500/10'
                                             : day.isCurrentMonth
-                                                ? 'border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.04]'
-                                                : 'border-white/[0.02] bg-white/[0.005] opacity-60',
+                                              ? 'border-white/[0.03] bg-white/[0.01] hover:bg-white/[0.04]'
+                                              : 'border-white/[0.02] bg-white/[0.005] opacity-60',
                                     )}
                                 >
-                                    <span className={cn('mb-1 w-full pr-1 text-right text-[9px] font-semibold', day.isToday ? 'text-indigo-300' : day.isCurrentMonth ? 'text-white/30' : 'text-white/15')}>
+                                    <span
+                                        className={cn(
+                                            'mb-1 w-full pr-1 text-right text-[9px] font-semibold',
+                                            day.isToday
+                                                ? 'text-indigo-300'
+                                                : day.isCurrentMonth
+                                                  ? 'text-white/30'
+                                                  : 'text-white/15',
+                                        )}
+                                    >
                                         {day.date.getDate()}
                                     </span>
                                 </div>
@@ -337,7 +422,9 @@ export default function SeoContentPage() {
                         </div>
 
                         <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/20 p-3 text-[11px] leading-relaxed text-white/52">
-                            Aucune date de publication par page n’est stockée dans le repo actuel. La grille est conservée pour le nouveau UI, mais elle reste volontairement honnête tant qu’un vrai planning éditorial n’existe pas côté backend.
+                            Aucune date de publication par page n’est stockée dans le repo actuel. La grille est
+                            conservée pour le nouveau UI, mais elle reste volontairement honnête tant qu’un vrai
+                            planning éditorial n’existe pas côté backend.
                         </div>
                     </div>
                 </div>
@@ -363,12 +450,27 @@ export default function SeoContentPage() {
                                 {pageRoles.slice(0, 6).map((item, index) => {
                                     const lookup = clusterLookup.get(String(item?.url || '').toLowerCase()) || null;
                                     return (
-                                        <tr key={item.id || `${item.label}-${index}`} className="group cursor-pointer transition-colors hover:bg-white/[0.02]">
+                                        <tr
+                                            key={item.id || `${item.label}-${index}`}
+                                            className="group cursor-pointer transition-colors hover:bg-white/[0.02]"
+                                        >
                                             <td className="px-5 py-3 font-medium text-white/90">
                                                 <div className="flex items-center gap-2">
-                                                    <StarIcon className={cn('h-3.5 w-3.5', index === 0 ? 'fill-amber-400/20 text-amber-400' : 'text-transparent')} />
+                                                    <StarIcon
+                                                        className={cn(
+                                                            'h-3.5 w-3.5',
+                                                            index === 0
+                                                                ? 'fill-amber-400/20 text-amber-400'
+                                                                : 'text-transparent',
+                                                        )}
+                                                    />
                                                     {item.url ? (
-                                                        <a href={item.url} target="_blank" rel="noreferrer" className="max-w-[280px] truncate text-white/90 hover:text-white">
+                                                        <a
+                                                            href={item.url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="max-w-[280px] truncate text-white/90 hover:text-white"
+                                                        >
                                                             {item.label || item.url}
                                                         </a>
                                                     ) : (
@@ -378,14 +480,22 @@ export default function SeoContentPage() {
                                             </td>
                                             <td className="px-5 py-3">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-white/60">{lookup?.label || 'Hors cluster'}</span>
+                                                    <span className="text-white/60">
+                                                        {lookup?.label || 'Hors cluster'}
+                                                    </span>
                                                     <span className="text-[10px] text-white/20">•</span>
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">{lookup?.stage || inferFunnelStage(item).toUpperCase()}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+                                                        {lookup?.stage || inferFunnelStage(item).toUpperCase()}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3 text-white/72">{formatRole(item)}</td>
-                                            <td className="px-5 py-3"><ReliabilityPill value={item.reliability || 'unavailable'} /></td>
-                                            <td className="px-5 py-3 text-white/55">{item.detail || item.evidence || 'Aucun détail.'}</td>
+                                            <td className="px-5 py-3">
+                                                <ReliabilityPill value={item.reliability || 'unavailable'} />
+                                            </td>
+                                            <td className="px-5 py-3 text-white/55">
+                                                {item.detail || item.evidence || 'Aucun détail.'}
+                                            </td>
                                         </tr>
                                     );
                                 })}
@@ -394,7 +504,10 @@ export default function SeoContentPage() {
                     </div>
                 ) : (
                     <div className="p-5">
-                        <CommandEmptyState title="Aucun contenu détaillé" description="Le dossier ne remonte pas encore de pages suffisamment structurées pour alimenter cette table." />
+                        <CommandEmptyState
+                            title="Aucun contenu détaillé"
+                            description="Le dossier ne remonte pas encore de pages suffisamment structurées pour alimenter cette table."
+                        />
                     </div>
                 )}
             </div>

@@ -40,9 +40,7 @@ describe('Mistral model normalization', () => {
             modelOverride: 'mistral-small-latest',
         });
 
-        expect(chatCompleteMock).toHaveBeenCalledWith(
-            expect.objectContaining({ model: 'mistral-small-2603' }),
-        );
+        expect(chatCompleteMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'mistral-small-2603' }));
     });
 
     it('normalizes deprecated mistral-small-2402 override', async () => {
@@ -53,9 +51,7 @@ describe('Mistral model normalization', () => {
             modelOverride: 'mistral-small-2402',
         });
 
-        expect(chatCompleteMock).toHaveBeenCalledWith(
-            expect.objectContaining({ model: 'mistral-small-2603' }),
-        );
+        expect(chatCompleteMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'mistral-small-2603' }));
     });
 
     it('passes valid model names through unchanged', async () => {
@@ -66,9 +62,7 @@ describe('Mistral model normalization', () => {
             modelOverride: 'mistral-small-2603',
         });
 
-        expect(chatCompleteMock).toHaveBeenCalledWith(
-            expect.objectContaining({ model: 'mistral-small-2603' }),
-        );
+        expect(chatCompleteMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'mistral-small-2603' }));
     });
 
     it('normalizes deprecated model name from env var', async () => {
@@ -82,9 +76,7 @@ describe('Mistral model normalization', () => {
             purpose: 'query',
         });
 
-        expect(chatCompleteMock).toHaveBeenCalledWith(
-            expect.objectContaining({ model: 'mistral-small-2603' }),
-        );
+        expect(chatCompleteMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'mistral-small-2603' }));
     });
 
     it('does not retry on invalid_model errors', async () => {

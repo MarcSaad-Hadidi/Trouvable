@@ -40,7 +40,8 @@ function buildModuleSummary(key, data) {
 
     switch (key) {
         case 'llms_txt_deep': {
-            if (!details.found) return 'Aucun fichier /llms.txt exposé sur l’origine — les assistants IA n’ont pas de porte d’entrée dédiée.';
+            if (!details.found)
+                return 'Aucun fichier /llms.txt exposé sur l’origine — les assistants IA n’ont pas de porte d’entrée dédiée.';
             const parts = [];
             if (details.h2_count) parts.push(pluralize(details.h2_count, 'section', 'sections'));
             if (details.links) parts.push(pluralize(details.links, 'lien', 'liens'));
@@ -51,13 +52,15 @@ function buildModuleSummary(key, data) {
         case 'ai_discovery_endpoints': {
             const endpoints = Array.isArray(data.endpoints) ? data.endpoints : [];
             const found = endpoints.filter((entry) => entry.found).length;
-            if (found === 0) return 'Aucun endpoint de découverte IA détecté. Ces points d’entrée restent optionnels mais utiles pour l’avenir.';
+            if (found === 0)
+                return 'Aucun endpoint de découverte IA détecté. Ces points d’entrée restent optionnels mais utiles pour l’avenir.';
             return `${pluralize(found, 'endpoint IA détecté', 'endpoints IA détectés')} sur ${endpoints.length} testés.`;
         }
         case 'brand_entity': {
             const hasOrg = Boolean(details.has_organization_schema || details.has_local_business_schema);
             const sameAs = details.same_as_count || details.sameAs || 0;
-            if (!hasOrg && (details.business_names_count || 0) === 0) return 'Pas d’entité de marque clairement déclarée. La visibilité IA reposera sur les indices textuels seuls.';
+            if (!hasOrg && (details.business_names_count || 0) === 0)
+                return 'Pas d’entité de marque clairement déclarée. La visibilité IA reposera sur les indices textuels seuls.';
             const parts = [];
             parts.push(hasOrg ? 'Entité Organization/LocalBusiness déclarée' : 'Pas de schéma Organization détecté');
             if (sameAs) parts.push(`${pluralize(sameAs, 'référence sameAs', 'références sameAs')}`);
@@ -70,7 +73,8 @@ function buildModuleSummary(key, data) {
             else if (details.proof_terms > 0) elements.push('preuves sociales faibles');
             else elements.push('pas de preuves sociales détectées');
             if (details.review_terms >= 1 || details.structured_review_schema) elements.push('mentions d’avis');
-            if ((details.social_profile_urls || 0) >= 2) elements.push(`${details.social_profile_urls} profils sociaux`);
+            if ((details.social_profile_urls || 0) >= 2)
+                elements.push(`${details.social_profile_urls} profils sociaux`);
             return `${elements.join(' · ')}.`;
         }
         case 'negative_signals': {
@@ -120,7 +124,9 @@ function ModuleCard({ moduleKey, label, data, clientId }) {
     const topFindings = findings.slice(0, 3);
     const extraFindings = findings.slice(3);
     const score = typeof data?.score === 'number' ? data.score : null;
-    const highCount = findings.filter((f) => ['high', 'critical'].includes(String(f?.severity || '').toLowerCase())).length;
+    const highCount = findings.filter((f) =>
+        ['high', 'critical'].includes(String(f?.severity || '').toLowerCase()),
+    ).length;
 
     return (
         <div className="flex flex-col rounded-xl border border-white/[0.07] bg-white/[0.02] p-3.5">
@@ -133,34 +139,40 @@ function ModuleCard({ moduleKey, label, data, clientId }) {
                     {highCount > 0 && <LabPill label={`${highCount} gravité élevée`} tone="bad" />}
                     {score != null && (
                         <div className="text-right">
-                            <div className="text-[11px] font-semibold tabular-nums text-white/70">{score}<span className="text-[9px] text-white/25">/100</span></div>
+                            <div className="text-[11px] font-semibold tabular-nums text-white/70">
+                                {score}
+                                <span className="text-[9px] text-white/25">/100</span>
+                            </div>
                             <div className="text-[9px] uppercase tracking-wider text-white/25">indicateur interne</div>
                         </div>
                     )}
                 </div>
             </div>
 
-            {summary && (
-                <p className="mt-2.5 text-[11.5px] leading-relaxed text-white/65">{summary}</p>
-            )}
+            {summary && <p className="mt-2.5 text-[11.5px] leading-relaxed text-white/65">{summary}</p>}
 
             {topFindings.length > 0 && (
                 <div className="mt-3 space-y-1">
                     {topFindings.map((finding, index) => {
                         const severityLabel = severityFr(finding.severity) || 'Info';
                         const tone = severityTone(finding.severity);
-                        const findingText = finding.message || finding.title || finding.label || humanizeCategoryKey(finding.id || 'point');
+                        const findingText =
+                            finding.message ||
+                            finding.title ||
+                            finding.label ||
+                            humanizeCategoryKey(finding.id || 'point');
                         const isActionable = tone === 'bad' || tone === 'warn';
-                        const problemRef = isActionable && clientId && finding.id
-                            ? {
-                                source: 'lab_layer2_finding',
-                                clientId,
-                                findingId: `${moduleKey}:${finding.id}`,
-                                layer: 'layer2',
-                                category: moduleKey,
-                                label: findingText.slice(0, 80),
-                            }
-                            : null;
+                        const problemRef =
+                            isActionable && clientId && finding.id
+                                ? {
+                                      source: 'lab_layer2_finding',
+                                      clientId,
+                                      findingId: `${moduleKey}:${finding.id}`,
+                                      layer: 'layer2',
+                                      category: moduleKey,
+                                      label: findingText.slice(0, 80),
+                                  }
+                                : null;
                         return (
                             <div
                                 key={`${finding.id || 'finding'}-${index}`}
@@ -168,11 +180,14 @@ function ModuleCard({ moduleKey, label, data, clientId }) {
                             >
                                 <div className="flex items-start gap-1.5">
                                     <LabPill label={severityLabel} tone={tone} />
-                                    <span className="flex-1 text-[11px] leading-snug text-white/75">
-                                        {findingText}
-                                    </span>
+                                    <span className="flex-1 text-[11px] leading-snug text-white/75">{findingText}</span>
                                     {problemRef ? (
-                                        <IssueQuickAction problemRef={problemRef} label="Prompt" size="xs" variant="primary" />
+                                        <IssueQuickAction
+                                            problemRef={problemRef}
+                                            label="Prompt"
+                                            size="xs"
+                                            variant="primary"
+                                        />
                                     ) : null}
                                 </div>
                             </div>
@@ -190,7 +205,11 @@ function ModuleCard({ moduleKey, label, data, clientId }) {
             {(extraFindings.length > 0 || data) && (
                 <div className="mt-auto pt-3">
                     <LabCollapsible
-                        label={extraFindings.length > 0 ? `Voir les autres points (${extraFindings.length}) et données brutes` : 'Voir les données brutes du module'}
+                        label={
+                            extraFindings.length > 0
+                                ? `Voir les autres points (${extraFindings.length}) et données brutes`
+                                : 'Voir les données brutes du module'
+                        }
                         hint="Diagnostic technique"
                     >
                         {extraFindings.length > 0 && (
@@ -206,7 +225,10 @@ function ModuleCard({ moduleKey, label, data, clientId }) {
                                             <div className="flex items-start gap-1.5">
                                                 <LabPill label={severityLabel} tone={tone} />
                                                 <span className="text-[11px] leading-snug text-white/65">
-                                                    {finding.message || finding.title || finding.label || humanizeCategoryKey(finding.id || 'point')}
+                                                    {finding.message ||
+                                                        finding.title ||
+                                                        finding.label ||
+                                                        humanizeCategoryKey(finding.id || 'point')}
                                                 </span>
                                             </div>
                                         </div>
@@ -250,10 +272,19 @@ export default function AuditLabLayer2Diagnostic({ audit, clientId = null }) {
     }
 
     const counts = model.summary?.finding_counts || null;
-    const totalFindings = model.modules.reduce((acc, m) => acc + (Array.isArray(m.data?.findings) ? m.data.findings.length : 0), 0);
-    const highFindings = model.modules.reduce((acc, m) => (
-        acc + (Array.isArray(m.data?.findings) ? m.data.findings.filter((f) => ['high', 'critical'].includes(String(f?.severity || '').toLowerCase())).length : 0)
-    ), 0);
+    const totalFindings = model.modules.reduce(
+        (acc, m) => acc + (Array.isArray(m.data?.findings) ? m.data.findings.length : 0),
+        0,
+    );
+    const highFindings = model.modules.reduce(
+        (acc, m) =>
+            acc +
+            (Array.isArray(m.data?.findings)
+                ? m.data.findings.filter((f) => ['high', 'critical'].includes(String(f?.severity || '').toLowerCase()))
+                      .length
+                : 0),
+        0,
+    );
 
     return (
         <LabDiagnosticSection ribbon={false}>
@@ -267,22 +298,38 @@ export default function AuditLabLayer2Diagnostic({ audit, clientId = null }) {
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Modules exécutés</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Modules exécutés
+                    </div>
                     <div className="mt-1 text-lg font-extrabold tabular-nums text-white/85">{model.modules.length}</div>
                 </div>
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Points relevés</div>
-                    <div className="mt-1 text-lg font-extrabold tabular-nums text-white/85">{counts?.total ?? totalFindings}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Points relevés
+                    </div>
+                    <div className="mt-1 text-lg font-extrabold tabular-nums text-white/85">
+                        {counts?.total ?? totalFindings}
+                    </div>
                 </div>
                 <div className="rounded-xl border border-red-400/15 bg-red-400/[0.03] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-red-300/70">Gravité élevée</div>
-                    <div className="mt-1 text-lg font-extrabold tabular-nums text-red-300/90">{counts?.high ?? highFindings}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-red-300/70">
+                        Gravité élevée
+                    </div>
+                    <div className="mt-1 text-lg font-extrabold tabular-nums text-red-300/90">
+                        {counts?.high ?? highFindings}
+                    </div>
                 </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {model.modules.map((module) => (
-                    <ModuleCard key={module.key} moduleKey={module.key} label={module.label} data={module.data} clientId={clientId || audit?.client_id || null} />
+                    <ModuleCard
+                        key={module.key}
+                        moduleKey={module.key}
+                        label={module.label}
+                        data={module.data}
+                        clientId={clientId || audit?.client_id || null}
+                    />
                 ))}
             </div>
         </LabDiagnosticSection>

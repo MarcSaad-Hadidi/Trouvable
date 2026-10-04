@@ -8,7 +8,12 @@ import {
     AgentPageFrame,
     pageActionLink,
 } from '@/features/admin/agent/agent-page-primitives';
-import { AgentStrengthMessage, AgentFixMessage, AgentDimensionGrid, AgentMessageList } from '@/features/admin/agent/agent-shared';
+import {
+    AgentStrengthMessage,
+    AgentFixMessage,
+    AgentDimensionGrid,
+    AgentMessageList,
+} from '@/features/admin/agent/agent-shared';
 import { scoreTone, formatAgentReliability } from '@/features/admin/agent/agent-copy';
 
 export default function AgentProtocolsPage() {
@@ -17,10 +22,14 @@ export default function AgentProtocolsPage() {
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const summary = data?.summary || {};
-    const emptyState = data?.emptyState || (!data?.available ? {
-        title: 'Protocoles AGENT indisponibles',
-        description: 'Le dossier ne remonte pas encore de lecture exploitable sur les protocoles exposés.',
-    } : null);
+    const emptyState =
+        data?.emptyState ||
+        (!data?.available
+            ? {
+                  title: 'Protocoles AGENT indisponibles',
+                  description: 'Le dossier ne remonte pas encore de lecture exploitable sur les protocoles exposés.',
+              }
+            : null);
 
     return (
         <AgentPageFrame
@@ -31,7 +40,11 @@ export default function AgentProtocolsPage() {
                 <>
                     {pageActionLink(`${baseHref}/agent/readiness`, 'Préparation AGENT')}
                     {pageActionLink(data?.links?.audit || `${baseHref}/dossier/audit`, 'Audit dossier')}
-                    {pageActionLink(data?.links?.opportunities || `${baseHref}/geo/opportunities`, 'File d’actions', 'primary')}
+                    {pageActionLink(
+                        data?.links?.opportunities || `${baseHref}/geo/opportunities`,
+                        'File d’actions',
+                        'primary',
+                    )}
                 </>
             }
             loading={loading}

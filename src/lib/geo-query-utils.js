@@ -8,9 +8,7 @@ export function extractUrlsFromText(text) {
     if (!text || typeof text !== 'string') return [];
     const urlRegex = /https?:\/\/[^\s\])"'<>]+/gi;
     const raw = text.match(urlRegex) || [];
-    const cleaned = raw
-        .map((u) => u.replace(/[.,;:)]+$/, ''))
-        .filter((u) => !isNonCitationUrl(u));
+    const cleaned = raw.map((u) => u.replace(/[.,;:)]+$/, '')).filter((u) => !isNonCitationUrl(u));
     return [...new Set(cleaned)].slice(0, 30);
 }
 

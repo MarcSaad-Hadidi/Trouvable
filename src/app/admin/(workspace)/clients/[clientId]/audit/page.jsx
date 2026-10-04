@@ -9,4 +9,3 @@ export default async function AuditPage({ params }) {
     const { clientId } = await params;
     redirect(`/admin/clients/${clientId}/dossier/audit`);
 }
-

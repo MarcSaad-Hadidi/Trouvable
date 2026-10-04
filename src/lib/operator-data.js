@@ -7,7 +7,9 @@ export async function listOperatorClients() {
     const supabase = getAdminSupabase();
     const { data, error } = await supabase
         .from('client_geo_profiles')
-        .select('id, client_name, client_slug, website_url, business_type, publication_status, is_published, lifecycle_status, updated_at, archived_at')
+        .select(
+            'id, client_name, client_slug, website_url, business_type, publication_status, is_published, lifecycle_status, updated_at, archived_at',
+        )
         .is('archived_at', null)
         .order('updated_at', { ascending: false });
 
@@ -48,15 +50,8 @@ export async function enrichClientsWithOperationalSignals(clients) {
             .in('client_id', ids)
             .order('created_at', { ascending: false })
             .limit(800),
-        supabase
-            .from('opportunities')
-            .select('client_id')
-            .in('client_id', ids)
-            .eq('status', 'open'),
-        supabase
-            .from('tracked_queries')
-            .select('client_id, is_active')
-            .in('client_id', ids),
+        supabase.from('opportunities').select('client_id').in('client_id', ids).eq('status', 'open'),
+        supabase.from('tracked_queries').select('client_id, is_active').in('client_id', ids),
     ]);
 
     if (runsRes.error) {
@@ -104,21 +99,22 @@ export async function enrichClientsWithOperationalSignals(clients) {
         const denom = completed + failed;
         const failRate = denom > 0 ? failed / denom : 0;
         const lowConf = runs.filter(
-            (r) => r.status === 'completed' && r.parse_confidence !== null && r.parse_confidence !== undefined && Number(r.parse_confidence) < 0.5,
+            (r) =>
+                r.status === 'completed' &&
+                r.parse_confidence !== null &&
+                r.parse_confidence !== undefined &&
+                Number(r.parse_confidence) < 0.5,
         ).length;
         const parseRisk = runs.filter(
-            (r) => r.status === 'completed' && (r.parse_status === 'parsed_failed' || r.parse_status === 'parsed_partial'),
+            (r) =>
+                r.status === 'completed' && (r.parse_status === 'parsed_failed' || r.parse_status === 'parsed_partial'),
         ).length;
 
         const latestRun = runs[0] || null;
 
         const latestAuditAt = latestAuditByClient.get(client.id) || null;
-        const hoursSinceAudit = latestAuditAt
-            ? (Date.now() - new Date(latestAuditAt).getTime()) / 3600000
-            : null;
-        const hoursSinceRun = latestRun
-            ? (Date.now() - new Date(latestRun.created_at).getTime()) / 3600000
-            : null;
+        const hoursSinceAudit = latestAuditAt ? (Date.now() - new Date(latestAuditAt).getTime()) / 3600000 : null;
+        const hoursSinceRun = latestRun ? (Date.now() - new Date(latestRun.created_at).getTime()) / 3600000 : null;
 
         const activePrompts = activePromptsByClient.get(client.id) || 0;
         const openOpportunities = openOppsByClient.get(client.id) || 0;

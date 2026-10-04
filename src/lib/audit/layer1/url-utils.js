@@ -9,7 +9,8 @@ import { hasBlockedNavigationScheme } from '../url-hosts.js';
  */
 
 const HTML_EXTENSION_RE = /\.(html?|php|aspx?|cfm|jsp)$/i;
-const NON_HTML_EXTENSION_RE = /\.(pdf|zip|rar|7z|tar|gz|bz2|xz|exe|dmg|pkg|mp3|mp4|m4a|m4v|mov|avi|wmv|mkv|webm|wav|flac|ogg|jpe?g|png|gif|webp|avif|svg|ico|bmp|tiff?|heic|json|xml|rss|atom|csv|tsv|txt|woff2?|ttf|otf|eot|css|js|map)$/i;
+const NON_HTML_EXTENSION_RE =
+    /\.(pdf|zip|rar|7z|tar|gz|bz2|xz|exe|dmg|pkg|mp3|mp4|m4a|m4v|mov|avi|wmv|mkv|webm|wav|flac|ogg|jpe?g|png|gif|webp|avif|svg|ico|bmp|tiff?|heic|json|xml|rss|atom|csv|tsv|txt|woff2?|ttf|otf|eot|css|js|map)$/i;
 const TRACKING_PARAM_RE = /^(utm_|fbclid$|gclid$|gbraid$|wbraid$|msclkid$|mc_cid$|mc_eid$|igshid$|ref$|ref_src$)/i;
 const NOISY_PATH_RE = /\/(search|recherche|calendar|calendrier|tag|tags|filter|filters|facet|facets)(\/|$)/i;
 const MAX_RETAINED_QUERY_PARAMS = 5;
@@ -44,7 +45,10 @@ export function normalizeUrl(input, baseHref = null) {
 
     parsed.hash = '';
     parsed.hostname = parsed.hostname.toLowerCase();
-    if ((parsed.protocol === 'http:' && parsed.port === '80') || (parsed.protocol === 'https:' && parsed.port === '443')) {
+    if (
+        (parsed.protocol === 'http:' && parsed.port === '80') ||
+        (parsed.protocol === 'https:' && parsed.port === '443')
+    ) {
         parsed.port = '';
     }
 
@@ -62,9 +66,9 @@ export function normalizeUrl(input, baseHref = null) {
     if (retainedParams.length > MAX_RETAINED_QUERY_PARAMS) return null;
     if (NOISY_PATH_RE.test(parsed.pathname) && retainedParams.length > MAX_NOISY_PATH_QUERY_PARAMS) return null;
 
-    retainedParams.sort(([aKey, aValue], [bKey, bValue]) => (
-        aKey.localeCompare(bKey) || String(aValue).localeCompare(String(bValue))
-    ));
+    retainedParams.sort(
+        ([aKey, aValue], [bKey, bValue]) => aKey.localeCompare(bKey) || String(aValue).localeCompare(String(bValue)),
+    );
     parsed.search = '';
     for (const [key, value] of retainedParams) {
         parsed.searchParams.append(key, value);
@@ -122,7 +126,13 @@ export function extractSameOriginLinks($, baseHref) {
         const rawHref = $(el).attr('href');
         if (!rawHref) return;
         const trimmed = rawHref.trim();
-        if (!trimmed || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:') || hasBlockedNavigationScheme(trimmed)) return;
+        if (
+            !trimmed ||
+            trimmed.startsWith('mailto:') ||
+            trimmed.startsWith('tel:') ||
+            hasBlockedNavigationScheme(trimmed)
+        )
+            return;
         const normalized = normalizeUrl(trimmed, baseHref);
         if (!normalized) return;
         if (!sameOrigin(normalized, baseHref)) return;

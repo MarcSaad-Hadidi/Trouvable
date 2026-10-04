@@ -65,8 +65,12 @@ describe('buildSeoHealthCorrectionPromptContext', () => {
         expect(context.inspectionTargets).toContain('src/features/public/shared/GeoSeoInjector.jsx');
         expect(context.inspectionTargets).toContain('src/app/layout.jsx');
         expect(context.missingFields).toContain('Fichier exact a modifier non confirme par les donnees detectees.');
-        expect(context.missingFields).toContain('Route ou page precise a confirmer humainement si le probleme n est pas sitewide.');
-        expect(context.constraints.absolute).toContain('Ne pas inventer de preuve, de fichier ou de donnees manquantes.');
+        expect(context.missingFields).toContain(
+            'Route ou page precise a confirmer humainement si le probleme n est pas sitewide.',
+        );
+        expect(context.constraints.absolute).toContain(
+            'Ne pas inventer de preuve, de fichier ou de donnees manquantes.',
+        );
     });
 
     it('adds repo-verified paths and validation hints for crawler blocking issues', () => {
@@ -123,11 +127,14 @@ describe('SEO correction paths after source relocation', () => {
     it('checks public robots at the repository root rather than under src', () => {
         const actualExists = fs.existsSync;
         const robots = path.resolve(process.cwd(), 'public/robots.txt');
-        const probe = vi.spyOn(fs, 'existsSync').mockImplementation((file) =>
-            path.resolve(String(file)) === robots || actualExists(file));
+        const probe = vi
+            .spyOn(fs, 'existsSync')
+            .mockImplementation((file) => path.resolve(String(file)) === robots || actualExists(file));
         try {
             const context = buildSeoHealthCorrectionPromptContext({
-                client: {}, audit: {}, issue: { title: 'Robots crawler issue' },
+                client: {},
+                audit: {},
+                issue: { title: 'Robots crawler issue' },
             });
             expect(context.repoFacts.some((fact) => fact.startsWith('Aucun fichier public/robots.txt'))).toBe(false);
         } finally {

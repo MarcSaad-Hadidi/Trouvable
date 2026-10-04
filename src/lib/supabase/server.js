@@ -30,7 +30,8 @@ export const getClientProfile = cache(async (slug) => {
     const { data, error } = await supabase
         .from('client_geo_profiles')
         // Liste explicite des colonnes nécessaires (réduction de la surface d'attaque/fuite)
-        .select(`
+        .select(
+            `
             client_slug, 
             client_name, 
             seo_title, 
@@ -42,7 +43,8 @@ export const getClientProfile = cache(async (slug) => {
             social_profiles,
             contact_info,
             business_details
-        `)
+        `,
+        )
         .eq('client_slug', slug)
         // Seules les données avec is_published à TRUE seront renvoyées (sécurité supplémentaire au RLS)
         .eq('is_published', true)

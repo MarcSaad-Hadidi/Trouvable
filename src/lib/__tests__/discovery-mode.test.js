@@ -75,7 +75,7 @@ describe('Prompt construction — blind_discovery (zero target priming)', () => 
         const systemMsg = messages.find((m) => m.role === 'system');
         expect(systemMsg).toBeDefined();
         expect(systemMsg.content).toContain('REGLES DE FIDELITE');
-        expect(systemMsg.content).toContain('N\'invente pas');
+        expect(systemMsg.content).toContain("N'invente pas");
     });
 
     it('does not contain the word "contexte" or "cible" or "profil" (no hidden hints)', () => {
@@ -86,13 +86,17 @@ describe('Prompt construction — blind_discovery (zero target priming)', () => 
 
     it('shares the same base fidelity rules as brand_aware', () => {
         const businessContext = {
-            name: 'X', description: '', area: '', services: [], known_competitors: [],
+            name: 'X',
+            description: '',
+            area: '',
+            services: [],
+            known_competitors: [],
         };
         const brandSystem = buildGeoQueryPrompt('test', businessContext).find((m) => m.role === 'system').content;
         const blindSystem = buildBlindGeoQueryPrompt('test').find((m) => m.role === 'system').content;
 
-        expect(brandSystem).toContain('N\'invente pas d\'entreprises');
-        expect(blindSystem).toContain('N\'invente pas d\'entreprises');
+        expect(brandSystem).toContain("N'invente pas d'entreprises");
+        expect(blindSystem).toContain("N'invente pas d'entreprises");
     });
 });
 
@@ -101,7 +105,7 @@ describe('Analysis prompt — remains target-aware in both modes', () => {
         const messages = buildGeoQueryAnalysisPrompt(
             'meilleur outil visibilite IA',
             'Voici une reponse avec Trouvable et CompetitorA...',
-            'Trouvable'
+            'Trouvable',
         );
         const fullText = messages.map((m) => m.content).join('\n');
 
@@ -141,78 +145,114 @@ describe('normalizeDiscoveryMode', () => {
 
 describe('inferDiscoveryMode — robust resolution', () => {
     it('brand category -> neutral_brand_check', () => {
-        expect(inferDiscoveryMode({ category: 'brand', intentFamily: 'brand', queryText: '', clientName: '' }))
-            .toBe('neutral_brand_check');
+        expect(inferDiscoveryMode({ category: 'brand', intentFamily: 'brand', queryText: '', clientName: '' })).toBe(
+            'neutral_brand_check',
+        );
     });
 
     it('competitor_comparison category -> competitor_discovery', () => {
-        expect(inferDiscoveryMode({ category: 'competitor_comparison', intentFamily: 'competitor', queryText: '', clientName: '' }))
-            .toBe('competitor_discovery');
+        expect(
+            inferDiscoveryMode({
+                category: 'competitor_comparison',
+                intentFamily: 'competitor',
+                queryText: '',
+                clientName: '',
+            }),
+        ).toBe('competitor_discovery');
     });
 
     it('buyer_guidance intent without brand can stay blind_discovery', () => {
-        expect(inferDiscoveryMode({ category: 'service_intent', intentFamily: 'buyer_guidance', queryText: 'quels criteres', clientName: 'X' }))
-            .toBe('blind_discovery');
+        expect(
+            inferDiscoveryMode({
+                category: 'service_intent',
+                intentFamily: 'buyer_guidance',
+                queryText: 'quels criteres',
+                clientName: 'X',
+            }),
+        ).toBe('blind_discovery');
     });
 
     it('pricing intent with brand -> neutral_brand_check', () => {
-        expect(inferDiscoveryMode({ category: 'brand', intentFamily: 'pricing', queryText: 'cout de X', clientName: 'X' }))
-            .toBe('neutral_brand_check');
+        expect(
+            inferDiscoveryMode({ category: 'brand', intentFamily: 'pricing', queryText: 'cout de X', clientName: 'X' }),
+        ).toBe('neutral_brand_check');
     });
 
     it('implementation intent with brand category -> neutral_brand_check', () => {
-        expect(inferDiscoveryMode({ category: 'brand', intentFamily: 'implementation', queryText: 'etapes pour deployer', clientName: '' }))
-            .toBe('neutral_brand_check');
+        expect(
+            inferDiscoveryMode({
+                category: 'brand',
+                intentFamily: 'implementation',
+                queryText: 'etapes pour deployer',
+                clientName: '',
+            }),
+        ).toBe('neutral_brand_check');
     });
 
     it('query text containing client name -> neutral_brand_check', () => {
-        expect(inferDiscoveryMode({
-            category: 'discovery',
-            intentFamily: 'discovery',
-            queryText: 'Est-ce que Trouvable est bon pour les dentistes ?',
-            clientName: 'Trouvable',
-        })).toBe('neutral_brand_check');
+        expect(
+            inferDiscoveryMode({
+                category: 'discovery',
+                intentFamily: 'discovery',
+                queryText: 'Est-ce que Trouvable est bon pour les dentistes ?',
+                clientName: 'Trouvable',
+            }),
+        ).toBe('neutral_brand_check');
     });
 
     it('skeptical query text containing client name -> skeptical_brand_evaluation', () => {
-        expect(inferDiscoveryMode({
-            category: 'brand',
-            intentFamily: 'brand',
-            queryText: "Trouvable, c'est vraiment efficace ou c'est du vent ?",
-            clientName: 'Trouvable',
-        })).toBe('skeptical_brand_evaluation');
+        expect(
+            inferDiscoveryMode({
+                category: 'brand',
+                intentFamily: 'brand',
+                queryText: "Trouvable, c'est vraiment efficace ou c'est du vent ?",
+                clientName: 'Trouvable',
+            }),
+        ).toBe('skeptical_brand_evaluation');
     });
 
     it('discovery category without client name → blind_discovery', () => {
-        expect(inferDiscoveryMode({
-            category: 'discovery',
-            intentFamily: 'discovery',
-            queryText: 'meilleur outil visibilite IA locale',
-            clientName: 'Trouvable',
-        })).toBe('blind_discovery');
+        expect(
+            inferDiscoveryMode({
+                category: 'discovery',
+                intentFamily: 'discovery',
+                queryText: 'meilleur outil visibilite IA locale',
+                clientName: 'Trouvable',
+            }),
+        ).toBe('blind_discovery');
     });
 
     it('local_intent without brand → blind_discovery', () => {
-        expect(inferDiscoveryMode({
-            category: 'local_intent',
-            intentFamily: 'local_recommendation',
-            queryText: 'meilleur dentiste a Montreal',
-            clientName: 'CliniqueDental',
-        })).toBe('blind_discovery');
+        expect(
+            inferDiscoveryMode({
+                category: 'local_intent',
+                intentFamily: 'local_recommendation',
+                queryText: 'meilleur dentiste a Montreal',
+                clientName: 'CliniqueDental',
+            }),
+        ).toBe('blind_discovery');
     });
 
     it('service_intent without brand → blind_discovery', () => {
-        expect(inferDiscoveryMode({
-            category: 'service_intent',
-            intentFamily: 'service_intent',
-            queryText: 'comment ameliorer sa visibilite IA',
-            clientName: 'Trouvable',
-        })).toBe('blind_discovery');
+        expect(
+            inferDiscoveryMode({
+                category: 'service_intent',
+                intentFamily: 'service_intent',
+                queryText: 'comment ameliorer sa visibilite IA',
+                clientName: 'Trouvable',
+            }),
+        ).toBe('blind_discovery');
     });
 
     it('unknown category defaults to brand_aware (conservative)', () => {
-        expect(inferDiscoveryMode({ category: 'unknown', intentFamily: 'unknown', queryText: 'general question', clientName: 'X' }))
-            .toBe('brand_aware');
+        expect(
+            inferDiscoveryMode({
+                category: 'unknown',
+                intentFamily: 'unknown',
+                queryText: 'general question',
+                clientName: 'X',
+            }),
+        ).toBe('brand_aware');
     });
 });
 
@@ -237,73 +277,87 @@ describe('isVisibilityEligible', () => {
 
 describe('classifyMeasurementOutcome', () => {
     it('blind + target found → spontaneous_mention', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: true,
-            runSignalTier: 'useful',
-            competitorCount: 2,
-            totalMentioned: 3,
-        })).toBe('spontaneous_mention');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: true,
+                runSignalTier: 'useful',
+                competitorCount: 2,
+                totalMentioned: 3,
+            }),
+        ).toBe('spontaneous_mention');
     });
 
     it('brand_aware + target found → assisted_mention', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'brand_aware',
-            targetFound: true,
-            runSignalTier: 'useful',
-            competitorCount: 0,
-            totalMentioned: 1,
-        })).toBe('assisted_mention');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'brand_aware',
+                targetFound: true,
+                runSignalTier: 'useful',
+                competitorCount: 0,
+                totalMentioned: 1,
+            }),
+        ).toBe('assisted_mention');
     });
 
     it('target NOT found + competitors present → competitor_dominated', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: false,
-            runSignalTier: 'useful',
-            competitorCount: 3,
-            totalMentioned: 4,
-        })).toBe('competitor_dominated');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: false,
+                runSignalTier: 'useful',
+                competitorCount: 3,
+                totalMentioned: 4,
+            }),
+        ).toBe('competitor_dominated');
     });
 
     it('target NOT found + no competitors + multiple mentions → competitor_dominated', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: false,
-            runSignalTier: 'useful',
-            competitorCount: 0,
-            totalMentioned: 3,
-        })).toBe('competitor_dominated');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: false,
+                runSignalTier: 'useful',
+                competitorCount: 0,
+                totalMentioned: 3,
+            }),
+        ).toBe('competitor_dominated');
     });
 
     it('target NOT found + no mentions → not_mentioned', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: false,
-            runSignalTier: 'useful',
-            competitorCount: 0,
-            totalMentioned: 1,
-        })).toBe('not_mentioned');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: false,
+                runSignalTier: 'useful',
+                competitorCount: 0,
+                totalMentioned: 1,
+            }),
+        ).toBe('not_mentioned');
     });
 
     it('empty_signal tier → low_quality regardless of other fields', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: true,
-            runSignalTier: 'empty_signal',
-            competitorCount: 0,
-            totalMentioned: 0,
-        })).toBe('low_quality');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: true,
+                runSignalTier: 'empty_signal',
+                competitorCount: 0,
+                totalMentioned: 0,
+            }),
+        ).toBe('low_quality');
     });
 
     it('low_yield + target found → spontaneous_mention (still counts)', () => {
-        expect(classifyMeasurementOutcome({
-            discoveryMode: 'blind_discovery',
-            targetFound: true,
-            runSignalTier: 'low_yield',
-            competitorCount: 0,
-            totalMentioned: 1,
-        })).toBe('spontaneous_mention');
+        expect(
+            classifyMeasurementOutcome({
+                discoveryMode: 'blind_discovery',
+                targetFound: true,
+                runSignalTier: 'low_yield',
+                competitorCount: 0,
+                totalMentioned: 1,
+            }),
+        ).toBe('spontaneous_mention');
     });
 });
 
@@ -322,28 +376,32 @@ describe('DISCOVERY_MODE_META completeness', () => {
     it('getDiscoveryModeOptions returns all generation modes plus legacy brand_aware', () => {
         const options = getDiscoveryModeOptions();
         expect(options.length).toBeGreaterThanOrEqual(7);
-        expect(options.map((o) => o.key)).toEqual(expect.arrayContaining([
-            'blind_discovery',
-            'neutral_brand_check',
-            'skeptical_brand_evaluation',
-            'competitor_discovery',
-            'source_grounded_evaluation',
-            'controlled_context_answer',
-            'brand_aware',
-        ]));
+        expect(options.map((o) => o.key)).toEqual(
+            expect.arrayContaining([
+                'blind_discovery',
+                'neutral_brand_check',
+                'skeptical_brand_evaluation',
+                'competitor_discovery',
+                'source_grounded_evaluation',
+                'controlled_context_answer',
+                'brand_aware',
+            ]),
+        );
     });
 });
 
 describe('MEASUREMENT_OUTCOMES completeness', () => {
     it('defines all 5 measurement outcomes', () => {
         const keys = Object.keys(MEASUREMENT_OUTCOMES);
-        expect(keys).toEqual(expect.arrayContaining([
-            'spontaneous_mention',
-            'assisted_mention',
-            'competitor_dominated',
-            'not_mentioned',
-            'low_quality',
-        ]));
+        expect(keys).toEqual(
+            expect.arrayContaining([
+                'spontaneous_mention',
+                'assisted_mention',
+                'competitor_dominated',
+                'not_mentioned',
+                'low_quality',
+            ]),
+        );
         expect(keys.length).toBe(5);
     });
 

@@ -34,11 +34,7 @@ export const PROMPT_CONTRACT_DB_FIELDS = [
     'differentiation_angle',
 ];
 
-export function serializePromptContractForDb({
-    contract = {},
-    existingPromptMetadata = {},
-    extraPromptMetadata = {},
-}) {
+export function serializePromptContractForDb({ contract = {}, existingPromptMetadata = {}, extraPromptMetadata = {} }) {
     const metadata = {
         ...asObject(existingPromptMetadata),
         ...asObject(extraPromptMetadata),
@@ -71,10 +67,7 @@ function fromRowOrMetadata(row, key) {
     return undefined;
 }
 
-export function deserializePromptContractFromRow({
-    row = {},
-    computed = {},
-}) {
+export function deserializePromptContractFromRow({ row = {}, computed = {} }) {
     const qualityReasons = fromRowOrMetadata(row, 'quality_reasons');
     const validationReasons = fromRowOrMetadata(row, 'validation_reasons');
 
@@ -89,14 +82,23 @@ export function deserializePromptContractFromRow({
         comparison_scope: fromRowOrMetadata(row, 'comparison_scope') || computed.comparison_scope,
         quality_status: fromRowOrMetadata(row, 'quality_status') || computed.quality_status,
         quality_score: fromRowOrMetadata(row, 'quality_score') ?? computed.quality_score,
-        quality_reasons: asArray(qualityReasons).length > 0 ? asArray(qualityReasons) : asArray(computed.quality_reasons),
+        quality_reasons:
+            asArray(qualityReasons).length > 0 ? asArray(qualityReasons) : asArray(computed.quality_reasons),
         prompt_mode: fromRowOrMetadata(row, 'prompt_mode') || computed.prompt_mode || 'user_like',
-        validation_status: fromRowOrMetadata(row, 'validation_status') || computed.validation_status || computed.quality_status,
-        validation_reasons: asArray(validationReasons).length > 0 ? asArray(validationReasons) : asArray(computed.validation_reasons || computed.quality_reasons),
+        validation_status:
+            fromRowOrMetadata(row, 'validation_status') || computed.validation_status || computed.quality_status,
+        validation_reasons:
+            asArray(validationReasons).length > 0
+                ? asArray(validationReasons)
+                : asArray(computed.validation_reasons || computed.quality_reasons),
         offer_anchor: toNullableString(fromRowOrMetadata(row, 'offer_anchor') ?? computed.offer_anchor),
-        user_visible_offering: toNullableString(fromRowOrMetadata(row, 'user_visible_offering') ?? computed.user_visible_offering),
+        user_visible_offering: toNullableString(
+            fromRowOrMetadata(row, 'user_visible_offering') ?? computed.user_visible_offering,
+        ),
         target_audience: toNullableString(fromRowOrMetadata(row, 'target_audience') ?? computed.target_audience),
         primary_use_case: toNullableString(fromRowOrMetadata(row, 'primary_use_case') ?? computed.primary_use_case),
-        differentiation_angle: toNullableString(fromRowOrMetadata(row, 'differentiation_angle') ?? computed.differentiation_angle),
+        differentiation_angle: toNullableString(
+            fromRowOrMetadata(row, 'differentiation_angle') ?? computed.differentiation_angle,
+        ),
     };
 }

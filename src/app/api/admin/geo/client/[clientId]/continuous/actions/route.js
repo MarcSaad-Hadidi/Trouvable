@@ -52,8 +52,6 @@ const actionSchema = z.discriminatedUnion('action', [
     }),
 ]);
 
-
-
 async function resolveJobForClient(clientId, jobId) {
     const health = await getRecurringJobHealthSlice(clientId);
     const job = (health.jobs || []).find((item) => item.id === jobId);

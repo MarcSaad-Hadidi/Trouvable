@@ -5,7 +5,16 @@ import { createSeoQueryMatcher } from './seo-query-matching';
 
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, getPathname, getPrimarySegment, buildGscFreshness, resolveConnectorStatus } from './seo-gsc';
+import {
+    getSinceDate,
+    filterRowsSince,
+    normalizeUrl,
+    aggregatePageRows,
+    getPathname,
+    getPrimarySegment,
+    buildGscFreshness,
+    resolveConnectorStatus,
+} from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
@@ -82,12 +91,14 @@ function buildPagePerformance(rows) {
             deltas: {
                 clicksDeltaPercent: deltaPercent(current.clicks, previous.clicks),
                 impressionsDeltaPercent: deltaPercent(current.impressions, previous.impressions),
-                ctrDeltaPercent: current.ctr === null || previous.ctr === null || previous.ctr === 0
-                    ? null
-                    : ((current.ctr - previous.ctr) / previous.ctr) * 100,
-                positionDelta: current.position === null || previous.position === null
-                    ? null
-                    : current.position - previous.position,
+                ctrDeltaPercent:
+                    current.ctr === null || previous.ctr === null || previous.ctr === 0
+                        ? null
+                        : ((current.ctr - previous.ctr) / previous.ctr) * 100,
+                positionDelta:
+                    current.position === null || previous.position === null
+                        ? null
+                        : current.position - previous.position,
             },
         });
     }
@@ -134,29 +145,36 @@ function pickRicherText(left, right) {
 }
 
 function getPageRichnessScore(page) {
-    return toNumber(page?.word_count)
-        + toNumber(page?.faq_pairs_count) * 20
-        + toNumber(page?.citability?.block_count) * 10
-        + toNumber(page?.service_signal_count) * 5;
+    return (
+        toNumber(page?.word_count) +
+        toNumber(page?.faq_pairs_count) * 20 +
+        toNumber(page?.citability?.block_count) * 10 +
+        toNumber(page?.service_signal_count) * 5
+    );
 }
 
 function mergePageSummaries(existingPage, incomingPage) {
-    const preferredPage = getPageRichnessScore(incomingPage) > getPageRichnessScore(existingPage)
-        ? incomingPage
-        : existingPage;
+    const preferredPage =
+        getPageRichnessScore(incomingPage) > getPageRichnessScore(existingPage) ? incomingPage : existingPage;
 
     return {
         ...existingPage,
         ...incomingPage,
         ...preferredPage,
         url: compactString(existingPage?.url) || compactString(incomingPage?.url) || compactString(preferredPage?.url),
-        page_type: compactString(existingPage?.page_type) || compactString(incomingPage?.page_type) || compactString(preferredPage?.page_type),
+        page_type:
+            compactString(existingPage?.page_type) ||
+            compactString(incomingPage?.page_type) ||
+            compactString(preferredPage?.page_type),
         title: pickRicherText(existingPage?.title, incomingPage?.title),
         description: pickRicherText(existingPage?.description, incomingPage?.description),
         h1: pickRicherText(existingPage?.h1, incomingPage?.h1),
         word_count: Math.max(toNumber(existingPage?.word_count), toNumber(incomingPage?.word_count)),
         faq_pairs_count: Math.max(toNumber(existingPage?.faq_pairs_count), toNumber(incomingPage?.faq_pairs_count)),
-        service_signal_count: Math.max(toNumber(existingPage?.service_signal_count), toNumber(incomingPage?.service_signal_count)),
+        service_signal_count: Math.max(
+            toNumber(existingPage?.service_signal_count),
+            toNumber(incomingPage?.service_signal_count),
+        ),
         citability: {
             ...(existingPage?.citability || {}),
             ...(incomingPage?.citability || {}),
@@ -196,7 +214,9 @@ function dedupePagesByUrl(pages) {
 }
 
 function buildCoverage(pages, audit) {
-    const directAnswerCount = pages.filter((page) => toNumber(page?.faq_pairs_count) > 0 || toNumber(page?.citability?.block_count) > 0).length;
+    const directAnswerCount = pages.filter(
+        (page) => toNumber(page?.faq_pairs_count) > 0 || toNumber(page?.citability?.block_count) > 0,
+    ).length;
     const citabilityPageCount = pages.filter((page) => toNumber(page?.citability?.block_count) > 0).length;
     const servicePageCount = pages.filter((page) => page?.page_type === 'services').length;
     const trustSupportCount = pages.filter((page) => ['about', 'contact'].includes(page?.page_type)).length;
@@ -209,7 +229,11 @@ function buildCoverage(pages, audit) {
         roleSummary: [
             { id: 'pivot', label: 'Pages pivot', value: pages.filter((page) => page?.page_type === 'homepage').length },
             { id: 'service', label: 'Pages service', value: servicePageCount },
-            { id: 'reponse', label: 'Pages réponse', value: pages.filter((page) => page?.page_type === 'faq' || toNumber(page?.faq_pairs_count) > 0).length },
+            {
+                id: 'reponse',
+                label: 'Pages réponse',
+                value: pages.filter((page) => page?.page_type === 'faq' || toNumber(page?.faq_pairs_count) > 0).length,
+            },
             { id: 'confiance', label: 'Supports confiance', value: trustSupportCount },
         ],
         summary: `${directAnswerCount}/${pages.length} page(s) exposent déjà FAQ ou blocs réutilisables.`,
@@ -246,9 +270,9 @@ function buildProvisionalClusters(pages) {
                 hasExplicitHub: getPathname(hubPage?.url) === exactHubPath,
                 hubPage: hubPage
                     ? {
-                        label: getPageLabel(hubPage),
-                        url: compactString(hubPage?.url),
-                    }
+                          label: getPageLabel(hubPage),
+                          url: compactString(hubPage?.url),
+                      }
                     : null,
                 supportPages: supportPages.map((page) => ({
                     label: getPageLabel(page),
@@ -268,7 +292,12 @@ function buildProvisionalClusters(pages) {
 
             return {
                 id: `type_${pageType}`,
-                label: pageType === 'services' ? 'Pages service' : pageType === 'faq' ? 'Pages réponse' : 'Pages locales observées',
+                label:
+                    pageType === 'services'
+                        ? 'Pages service'
+                        : pageType === 'faq'
+                          ? 'Pages réponse'
+                          : 'Pages locales observées',
                 detectionLabel: 'Groupement provisoire',
                 detectionDetail: 'Type de page détecté',
                 evidence: `${members.length} page(s) de type ${pageType} dans le dernier audit.`,
@@ -386,7 +415,8 @@ function buildContentDecay(pages, pagePerformance, gscFreshness) {
         return {
             status: 'unavailable',
             reliability: 'unavailable',
-            description: 'Aucune série Search Console exploitable n’est disponible pour mesurer un décrochage de pages.',
+            description:
+                'Aucune série Search Console exploitable n’est disponible pour mesurer un décrochage de pages.',
             items: [],
         };
     }
@@ -437,9 +467,10 @@ function buildContentDecay(pages, pagePerformance, gscFreshness) {
     return {
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Décrochages mesurés en comparant les 28 derniers jours au bloc précédent.'
-            : 'Aucun décrochage majeur ne ressort sur la fenêtre Search Console disponible.',
+        description:
+            items.length > 0
+                ? 'Décrochages mesurés en comparant les 28 derniers jours au bloc précédent.'
+                : 'Aucun décrochage majeur ne ressort sur la fenêtre Search Console disponible.',
         items,
     };
 }
@@ -458,11 +489,16 @@ function buildRefreshOpportunities(pages, pagePerformance) {
             const currentImpressions = toNumber(performance?.current?.impressions);
 
             if (titleLength === 0 || titleLength < 35) reasons.push('title absent ou trop court');
-            if (descriptionLength === 0 || descriptionLength < 70) reasons.push('meta description absente ou trop courte');
+            if (descriptionLength === 0 || descriptionLength < 70)
+                reasons.push('meta description absente ou trop courte');
             if (!compactString(page?.h1)) reasons.push('H1 absent');
             else if (compactString(page?.title) && h1Overlap < 0.35) reasons.push('H1 peu aligné avec le title');
-            if (importantTypes.has(page?.page_type) && !hasDirectAnswer) reasons.push('aucune réponse directe exploitable');
-            if (toNumber(page?.word_count) < 180 || (toNumber(page?.word_count) < 260 && toNumber(page?.service_signal_count) === 0)) {
+            if (importantTypes.has(page?.page_type) && !hasDirectAnswer)
+                reasons.push('aucune réponse directe exploitable');
+            if (
+                toNumber(page?.word_count) < 180 ||
+                (toNumber(page?.word_count) < 260 && toNumber(page?.service_signal_count) === 0)
+            ) {
                 reasons.push('contenu encore trop léger ou trop générique');
             }
             if (toNumber(page?.citability?.block_count) > 0 && toNumber(page?.citability?.page_score) < 40) {
@@ -471,15 +507,18 @@ function buildRefreshOpportunities(pages, pagePerformance) {
 
             if (reasons.length === 0) return null;
 
-            const priorityScore = reasons.length * 10
-                + currentImpressions
-                + (page?.page_type === 'homepage' ? 20 : 0)
-                + (page?.page_type === 'services' ? 10 : 0);
+            const priorityScore =
+                reasons.length * 10 +
+                currentImpressions +
+                (page?.page_type === 'homepage' ? 20 : 0) +
+                (page?.page_type === 'services' ? 10 : 0);
 
             let impact = 'Rendre la page plus claire, plus utile et plus exploitable côté SEO contenu.';
             if (reasons.some((reason) => reason.includes('réponse directe') || reason.includes('citables'))) {
                 impact = 'Renforcer la capacité de la page à répondre clairement et à être réutilisée.';
-            } else if (reasons.some((reason) => reason.includes('title') || reason.includes('H1') || reason.includes('meta'))) {
+            } else if (
+                reasons.some((reason) => reason.includes('title') || reason.includes('H1') || reason.includes('meta'))
+            ) {
                 impact = 'Clarifier l’intention servie et le cadrage éditorial de la page.';
             }
 
@@ -503,9 +542,10 @@ function buildRefreshOpportunities(pages, pagePerformance) {
     return {
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Pages à retravailler à partir des faiblesses on-page réellement observées.'
-            : 'Aucune page ne cumule de faiblesse éditoriale dominante sur les signaux actuels.',
+        description:
+            items.length > 0
+                ? 'Pages à retravailler à partir des faiblesses on-page réellement observées.'
+                : 'Aucune page ne cumule de faiblesse éditoriale dominante sur les signaux actuels.',
         items,
     };
 }
@@ -513,7 +553,10 @@ function buildRefreshOpportunities(pages, pagePerformance) {
 function buildMissingPages(audit, pages, clusters) {
     const extracted = audit?.extracted_data || {};
     const pageStats = extracted.page_stats || {};
-    const servicesPreview = toArray(extracted?.service_signals?.services).map((value) => compactString(value)).filter(Boolean).slice(0, 4);
+    const servicesPreview = toArray(extracted?.service_signals?.services)
+        .map((value) => compactString(value))
+        .filter(Boolean)
+        .slice(0, 4);
     const items = [];
 
     if (toNumber(pageStats.service_pages) === 0) {
@@ -522,9 +565,10 @@ function buildMissingPages(audit, pages, clusters) {
             title: 'Créer des pages service dédiées',
             source: 'Signaux service observés dans l’audit',
             why: 'Aucune page service n’a été détectée alors que des services ressortent du contenu.',
-            evidence: servicesPreview.length > 0
-                ? `Services observés: ${servicesPreview.join(' · ')}.`
-                : 'Aucune page de type service n’a été observée dans le crawl.',
+            evidence:
+                servicesPreview.length > 0
+                    ? `Services observés: ${servicesPreview.join(' · ')}.`
+                    : 'Aucune page de type service n’a été observée dans le crawl.',
             impact: 'Mieux cadrer l’offre et ses intentions de recherche sans surcharger la page pivot.',
             reliability: 'calculated',
         });
@@ -583,9 +627,10 @@ function buildMissingPages(audit, pages, clusters) {
     return {
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Manques structurels déduits du dernier audit et de la structure réellement observée.'
-            : 'Aucun manque structurel dominant ne ressort sur les types de pages déjà observés.',
+        description:
+            items.length > 0
+                ? 'Manques structurels déduits du dernier audit et de la structure réellement observée.'
+                : 'Aucun manque structurel dominant ne ressort sur les types de pages déjà observés.',
         items: items.slice(0, 6),
     };
 }
@@ -618,7 +663,8 @@ function buildMergeOpportunities(pages, clusters) {
                 `${left?.title || ''} ${left?.h1 || ''}`,
                 `${right?.title || ''} ${right?.h1 || ''}`,
             ).slice(0, 4);
-            const sameSegment = getPrimarySegment(left?.url) && getPrimarySegment(left?.url) === getPrimarySegment(right?.url);
+            const sameSegment =
+                getPrimarySegment(left?.url) && getPrimarySegment(left?.url) === getPrimarySegment(right?.url);
 
             if (shared.length < 2) continue;
             if (!(overlap >= 0.65 || (sameSegment && overlap >= 0.45))) continue;
@@ -643,16 +689,21 @@ function buildMergeOpportunities(pages, clusters) {
     return {
         status: mergeCandidates.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: mergeCandidates.length > 0
-            ? 'Rapprochements proposés uniquement quand le recouvrement lexical est réellement observable.'
-            : 'Aucun recouvrement thématique net n’est assez propre pour suggérer une consolidation.',
-        items: mergeCandidates
-            .sort((left, right) => right.score - left.score)
-            .slice(0, 5),
+        description:
+            mergeCandidates.length > 0
+                ? 'Rapprochements proposés uniquement quand le recouvrement lexical est réellement observable.'
+                : 'Aucun recouvrement thématique net n’est assez propre pour suggérer une consolidation.',
+        items: mergeCandidates.sort((left, right) => right.score - left.score).slice(0, 5),
     };
 }
 
-function buildTopOpportunities({ contentOpportunityCount, contentDecay, refreshOpportunities, missingPages, mergeOpportunities }) {
+function buildTopOpportunities({
+    contentOpportunityCount,
+    contentDecay,
+    refreshOpportunities,
+    missingPages,
+    mergeOpportunities,
+}) {
     const items = [];
 
     if (contentOpportunityCount > 0) {
@@ -722,9 +773,10 @@ function buildActionHooks(clientId, contentOpportunityCount, promptableHealthHoo
         {
             id: 'queue',
             title: 'File d’actions existante',
-            description: contentOpportunityCount > 0
-                ? `${contentOpportunityCount} opportunité(s) contenu sont déjà ouvertes dans la file opérateur.`
-                : 'La file d’actions reste aujourd’hui le point de traitement opérateur quand une action contenu doit être prise en charge.',
+            description:
+                contentOpportunityCount > 0
+                    ? `${contentOpportunityCount} opportunité(s) contenu sont déjà ouvertes dans la file opérateur.`
+                    : 'La file d’actions reste aujourd’hui le point de traitement opérateur quand une action contenu doit être prise en charge.',
             href: `${baseHref}/seo/opportunities`,
             cta: 'Ouvrir Opportunités SEO',
             reliability: 'calculated',
@@ -732,35 +784,43 @@ function buildActionHooks(clientId, contentOpportunityCount, promptableHealthHoo
         {
             id: 'on-page',
             title: 'Lecture on-page détaillée',
-            description: 'Les preuves page par page restent détaillées dans la surface on-page existante, sans dupliquer toute la lecture ici.',
+            description:
+                'Les preuves page par page restent détaillées dans la surface on-page existante, sans dupliquer toute la lecture ici.',
             href: `${baseHref}/seo/on-page`,
             cta: 'Ouvrir on-page',
             reliability: 'calculated',
         },
         promptableHealthHookCount > 0
             ? {
-                id: 'health-prompts',
-                title: 'Hooks de correction déjà branchés',
-                description: `${promptableHealthHookCount} signal(aux) disposent déjà d’une entrée de correction dans Santé SEO.`,
-                href: `${baseHref}/seo/health#issues`,
-                cta: 'Voir santé SEO',
-                reliability: 'calculated',
-            }
+                  id: 'health-prompts',
+                  title: 'Hooks de correction déjà branchés',
+                  description: `${promptableHealthHookCount} signal(aux) disposent déjà d’une entrée de correction dans Santé SEO.`,
+                  href: `${baseHref}/seo/health#issues`,
+                  cta: 'Voir santé SEO',
+                  reliability: 'calculated',
+              }
             : {
-                id: 'future-prompts',
-                title: 'Prompts contenu dédiés',
-                description: 'Le branchement d’un moteur de prompts contenu dédié n’est pas encore stabilisé. Aucun faux générateur n’est exposé ici.',
-                href: null,
-                cta: 'Branchement futur',
-                reliability: 'unavailable',
-            },
+                  id: 'future-prompts',
+                  title: 'Prompts contenu dédiés',
+                  description:
+                      'Le branchement d’un moteur de prompts contenu dédié n’est pas encore stabilisé. Aucun faux générateur n’est exposé ici.',
+                  href: null,
+                  cta: 'Branchement futur',
+                  reliability: 'unavailable',
+              },
     ];
 }
 
-function buildOperatorSummary({ pages, coverage, contentDecay, refreshOpportunities, missingPages, clusters, contentOpportunityCount }) {
-    const parts = [
-        `Lecture construite sur ${pages.length} page(s) auditées. ${coverage.summary}`,
-    ];
+function buildOperatorSummary({
+    pages,
+    coverage,
+    contentDecay,
+    refreshOpportunities,
+    missingPages,
+    clusters,
+    contentOpportunityCount,
+}) {
+    const parts = [`Lecture construite sur ${pages.length} page(s) auditées. ${coverage.summary}`];
 
     if (contentDecay.items.length > 0) {
         parts.push(`${contentDecay.items.length} décrochage(s) Search Console ressortent sur la fenêtre mesurée.`);
@@ -798,12 +858,20 @@ export async function getSeoContentSlice(clientId) {
     });
     const { audit, opportunities: latestOpportunities, connectors: connectorRows, gscRows } = values;
     if (dataSources.gscRows === 'empty') {
-        dataSources.gscRows = dataSources.connectors !== 'unavailable' && resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected' ? 'not_connected' : 'not_observed';
+        dataSources.gscRows =
+            dataSources.connectors !== 'unavailable' &&
+            resolveConnectorStatus(connectorRows, 'gsc').status === 'not_connected'
+                ? 'not_connected'
+                : 'not_observed';
     }
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
     const gscFreshness = buildGscFreshness(connectorRows, gscRows, dataSources, GSC_FRESHNESS_MESSAGES);
-    const contentOpportunityCount = dataSources.opportunities === 'unavailable' ? null : toArray(latestOpportunities?.active)
-        .filter((item) => item?.status === 'open' && item?.category === 'content').length;
+    const contentOpportunityCount =
+        dataSources.opportunities === 'unavailable'
+            ? null
+            : toArray(latestOpportunities?.active).filter(
+                  (item) => item?.status === 'open' && item?.category === 'content',
+              ).length;
 
     if (!audit) {
         return {
@@ -812,14 +880,15 @@ export async function getSeoContentSlice(clientId) {
             contentOpportunityCount,
             emptyState: {
                 title: 'Contenu SEO indisponible',
-                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles pour cette lecture contenu.' : 'Aucun audit exploitable n’est disponible pour ouvrir une surface contenu honnête. Relancez un audit avant de piloter cette lecture.',
+                description:
+                    dataSources.audit === 'unavailable'
+                        ? 'Données audit temporairement indisponibles pour cette lecture contenu.'
+                        : 'Aucun audit exploitable n’est disponible pour ouvrir une surface contenu honnête. Relancez un audit avant de piloter cette lecture.',
             },
         };
     }
 
-    const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries))
-        .slice()
-        .sort(comparePages);
+    const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries)).slice().sort(comparePages);
 
     if (pages.length === 0) {
         return {
@@ -828,7 +897,8 @@ export async function getSeoContentSlice(clientId) {
             contentOpportunityCount,
             emptyState: {
                 title: 'Contenu SEO indisponible',
-                description: 'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture contenu fiable.',
+                description:
+                    'Le dernier audit ne contient pas de `page_summaries` exploitables pour une lecture contenu fiable.',
             },
         };
     }
@@ -837,7 +907,10 @@ export async function getSeoContentSlice(clientId) {
     const coverage = buildCoverage(pages, audit);
     const clusters = buildProvisionalClusters(pages);
     const pageRoles = buildPageRoles(pages, clusters);
-    const contentDecay = { ...buildContentDecay(pages, pagePerformance, gscFreshness), availability: dataSources.gscRows };
+    const contentDecay = {
+        ...buildContentDecay(pages, pagePerformance, gscFreshness),
+        availability: dataSources.gscRows,
+    };
     const refreshOpportunities = buildRefreshOpportunities(pages, pagePerformance);
     const missingPages = buildMissingPages(audit, pages, clusters);
     const mergeOpportunities = buildMergeOpportunities(pages, clusters);
@@ -867,7 +940,8 @@ export async function getSeoContentSlice(clientId) {
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
-            siteTypeLabel: audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
+            siteTypeLabel:
+                audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
         },
         summaryCards: [
             {
@@ -897,7 +971,10 @@ export async function getSeoContentSlice(clientId) {
             {
                 id: 'priority_count',
                 label: 'Priorités visibles',
-                value: topOpportunities.length === 0 && availability.status !== 'available' ? null : topOpportunities.length,
+                value:
+                    topOpportunities.length === 0 && availability.status !== 'available'
+                        ? null
+                        : topOpportunities.length,
                 detail: 'Refresh, manques, merges ou décrochages réellement observés',
                 reliability: 'calculated',
                 accent: topOpportunities.length > 0 ? 'amber' : 'slate',

@@ -64,10 +64,14 @@ export default async function ClientPortalPage({ params }) {
                         Retour
                     </Link>
                     <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">Portail client</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                            Portail client
+                        </p>
                         <div className="mt-1 flex flex-wrap items-center gap-3">
                             <h1 className="text-lg font-bold text-white/95">{client.client_name}</h1>
-                            <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusCls}`}>
+                            <span
+                                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusCls}`}
+                            >
                                 {client.lifecycle_status || 'inconnu'}
                             </span>
                         </div>
@@ -95,7 +99,13 @@ export default async function ClientPortalPage({ params }) {
                     </Link>
                 </div>
 
-                <PortalAccessPanel clientId={client.id} clientName={client.client_name} clientSlug={client.client_slug} lifecycleStatus={client.lifecycle_status} initialMembers={members} />
+                <PortalAccessPanel
+                    clientId={client.id}
+                    clientName={client.client_name}
+                    clientSlug={client.client_slug}
+                    lifecycleStatus={client.lifecycle_status}
+                    initialMembers={members}
+                />
             </div>
 
             <section className="rounded-[28px] border border-[#5b73ff]/25 bg-[#5b73ff]/[0.06] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-6">
@@ -127,4 +137,3 @@ export default async function ClientPortalPage({ params }) {
         </div>
     );
 }
-

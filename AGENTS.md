@@ -23,16 +23,16 @@ Use Node.js 24.19.0 (`.node-version`) and npm 11.6.2 (`packageManager`). See [CO
 ## Architecture
 
 - **`src/app/`** — Next.js App Router (pages, layouts, route handlers)
-  - `admin/` — operator workspace (Clerk email-gated)
-  - `portal/` — client read-only portal (membership-scoped)
-  - `api/` — route handlers
-  - SEO/GEO pages: `villes/`, `expertises/`, `a-propos/`, `contact/`, `methodologie/`, `offres/`, `etudes-de-cas/`, `notre-mesure/`
+    - `admin/` — operator workspace (Clerk email-gated)
+    - `portal/` — client read-only portal (membership-scoped)
+    - `api/` — route handlers
+    - SEO/GEO pages: `villes/`, `expertises/`, `a-propos/`, `contact/`, `methodologie/`, `offres/`, `etudes-de-cas/`, `notre-mesure/`
 - **`src/lib/`** — server-only logic, data access, AI, server actions
-  - `auth.js` — Clerk helpers · `db/*` — domain data access · `supabase-admin.js` — service-role client
-  - `db/`, `actions/`, `queries/` — domain data modules
-  - `ai/`, `audit/`, `continuous/`, `seo/`, `llm-comparison/` — feature modules
+    - `auth.js` — Clerk helpers · `db/*` — domain data access · `supabase-admin.js` — service-role client
+    - `db/`, `actions/`, `queries/` — domain data modules
+    - `ai/`, `audit/`, `continuous/`, `seo/`, `llm-comparison/` — feature modules
 - **`src/components/`** — React components (server by default, `'use client'` explicit)
-  - `ui/` — reusable primitives · `shared/` — cross-product components; product implementations live in `src/features/`
+    - `ui/` — reusable primitives · `shared/` — cross-product components; product implementations live in `src/features/`
 - **`supabase/`** — schema DDL, setup scripts, migrations
 - **`src/features/`** — public, admin, portal, espace, auth product surfaces; admin sections live directly under `src/features/admin/`
 - **`src/proxy.js`** — Clerk request boundary and application security headers

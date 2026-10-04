@@ -74,7 +74,9 @@ export async function getAgentFixesSlice(clientId) {
     const { status, dataSources, errors, opportunitySlice, remediation } = await loadAgentWorkspace(clientId);
 
     return {
-        status, dataSources, errors,
+        status,
+        dataSources,
+        errors,
         provenance: {
             observed: getProvenanceMeta('observed'),
             derived: getProvenanceMeta('derived'),
@@ -85,14 +87,18 @@ export async function getAgentFixesSlice(clientId) {
             highPriorityOpen: remediation?.summary?.highPriorityOpen ?? null,
             inProgress: remediation?.summary?.inProgress ?? null,
             pendingMergeCount: opportunitySlice?.summary?.pendingMergeCount ?? null,
-            reviewQueueCount: remediation?.summary?.reviewQueue === null || opportunitySlice?.summary?.reviewQueueCount === null ? null : Math.max(
-                remediation?.summary?.reviewQueue ?? 0,
-                opportunitySlice?.summary?.reviewQueueCount ?? 0,
-            ),
+            reviewQueueCount:
+                remediation?.summary?.reviewQueue === null || opportunitySlice?.summary?.reviewQueueCount === null
+                    ? null
+                    : Math.max(
+                          remediation?.summary?.reviewQueue ?? 0,
+                          opportunitySlice?.summary?.reviewQueueCount ?? 0,
+                      ),
             remediationDraftCount: opportunitySlice?.summary?.remediationDraftCount ?? null,
             derivedOpen: remediation?.summary?.derivedOpen ?? null,
             opportunityOpen: opportunitySlice?.summary?.open ?? null,
-            uncoveredSubscores: remediation.status === 'available' ? remediation.coverage.uncoveredSubscores.length : null,
+            uncoveredSubscores:
+                remediation.status === 'available' ? remediation.coverage.uncoveredSubscores.length : null,
         },
         byPriority: remediation?.byPriority || { high: 0, medium: 0, low: 0 },
         bySource: remediation?.bySource || {},
@@ -115,4 +121,3 @@ export async function getAgentFixesSlice(clientId) {
         emptyState: buildAgentFixesEmptyState({ opportunitySlice, remediation }),
     };
 }
-

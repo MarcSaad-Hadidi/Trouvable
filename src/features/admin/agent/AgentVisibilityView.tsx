@@ -1,7 +1,13 @@
 'use client';
 
 import { useGeoClient, useGeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
-import { GenericTablePanel, KeyValuePanel, MetricGrid, AgentPageFrame, pageActionLink } from '@/features/admin/agent/agent-page-primitives';
+import {
+    GenericTablePanel,
+    KeyValuePanel,
+    MetricGrid,
+    AgentPageFrame,
+    pageActionLink,
+} from '@/features/admin/agent/agent-page-primitives';
 
 export default function AgentVisibilityPage() {
     const { client, clientId } = useGeoClient();
@@ -19,7 +25,11 @@ export default function AgentVisibilityPage() {
                 <>
                     {pageActionLink(data?.links?.prompts || `${baseHref}/geo/prompts`, 'Requêtes GEO')}
                     {pageActionLink(data?.links?.runs || `${baseHref}/geo/runs`, 'Exécutions GEO')}
-                    {pageActionLink(data?.links?.continuous || `${baseHref}/geo/continuous`, 'Suivi continu', 'primary')}
+                    {pageActionLink(
+                        data?.links?.continuous || `${baseHref}/geo/continuous`,
+                        'Suivi continu',
+                        'primary',
+                    )}
                 </>
             }
             loading={loading}
@@ -28,7 +38,12 @@ export default function AgentVisibilityPage() {
             loadingMessage="Lecture du taux de mention, de la couverture source et des modèles réellement actifs."
         >
             {data?.status === 'partial' || data?.status === 'unavailable' ? (
-                <p role="status" className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Données partielles : certains signaux AGENT sont indisponibles.</p>
+                <p
+                    role="status"
+                    className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200"
+                >
+                    Données partielles : certains signaux AGENT sont indisponibles.
+                </p>
             ) : null}
             <MetricGrid
                 items={[
@@ -36,7 +51,10 @@ export default function AgentVisibilityPage() {
                         id: 'mention',
                         label: 'Taux de mention',
                         value: kpis?.mentionRatePercent != null ? `${kpis.mentionRatePercent}%` : 'n.d.',
-                        detail: (kpis?.completedRunsTotal ?? null) === null ? 'Exécutions indisponibles' : `${kpis.completedRunsTotal} exécution(s) complétée(s)`,
+                        detail:
+                            (kpis?.completedRunsTotal ?? null) === null
+                                ? 'Exécutions indisponibles'
+                                : `${kpis.completedRunsTotal} exécution(s) complétée(s)`,
                         tone: 'ok',
                     },
                     {
@@ -50,14 +68,20 @@ export default function AgentVisibilityPage() {
                         id: 'sources',
                         label: 'Couverture citations',
                         value: kpis?.citationCoveragePercent != null ? `${kpis.citationCoveragePercent}%` : 'n.d.',
-                        detail: (kpis?.genericMentionsCount ?? null) === null ? 'Mentions génériques indisponibles' : `${kpis.genericMentionsCount} mention(s) générique(s)`,
+                        detail:
+                            (kpis?.genericMentionsCount ?? null) === null
+                                ? 'Mentions génériques indisponibles'
+                                : `${kpis.genericMentionsCount} mention(s) générique(s)`,
                         tone: 'neutral',
                     },
                     {
                         id: 'competitors',
                         label: 'Concurrents cités',
                         value: kpis?.competitorMentionsCount ?? 'n.d.',
-                        detail: (kpis?.trackedPromptsTotal ?? null) === null ? 'Prompts indisponibles' : `${kpis.trackedPromptsTotal} prompt(s) suivi(s)`,
+                        detail:
+                            (kpis?.trackedPromptsTotal ?? null) === null
+                                ? 'Prompts indisponibles'
+                                : `${kpis.trackedPromptsTotal} prompt(s) suivi(s)`,
                         tone: (kpis?.competitorMentionsCount ?? 0) > 0 ? 'warning' : 'neutral',
                     },
                 ]}
@@ -72,7 +96,13 @@ export default function AgentVisibilityPage() {
                     { label: 'Avec cible trouvée', value: promptCoverage?.withTargetFound },
                     { label: 'Exécution sans cible', value: promptCoverage?.withRunNoTarget },
                     { label: 'Sans exécution', value: promptCoverage?.noRunYet },
-                    { label: 'Taux de mention', value: promptCoverage?.mentionRatePercent != null ? `${promptCoverage.mentionRatePercent}%` : 'n.d.' },
+                    {
+                        label: 'Taux de mention',
+                        value:
+                            promptCoverage?.mentionRatePercent != null
+                                ? `${promptCoverage.mentionRatePercent}%`
+                                : 'n.d.',
+                    },
                 ]}
             />
 

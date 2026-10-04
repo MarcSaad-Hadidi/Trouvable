@@ -1,7 +1,11 @@
 import 'server-only';
 import { executeTask } from '@/lib/ai/tasks/registry';
 import { getSocialWatchConfig } from './community-context';
-import { extractMentionsFromDocuments, deriveOpportunitiesFromClusters, buildOpportunityMetadata } from './community-signals';
+import {
+    extractMentionsFromDocuments,
+    deriveOpportunitiesFromClusters,
+    buildOpportunityMetadata,
+} from './community-signals';
 
 // Register once at import, before any collection or enrichment request.
 import '@/lib/ai/tasks/community-classify';
@@ -34,20 +38,24 @@ async function extractMentionsWithLLM(documents, clientId, client) {
             source: d.source || 'unknown',
         }));
 
-        const result = await executeTask('community-classify', {
-            clientId,
-            clientName,
-            businessType,
-            competitors: mandate.known_competitors,
-            documents: docSummaries,
-            // Mandate context for richer classification
-            mandateContext: {
-                goals: mandate.goals,
-                monitored_topics: mandate.monitored_topics,
-                target_customer_description: mandate.target_customer_description,
-                seo_description: String(client?.seo_description || '').trim(),
+        const result = await executeTask(
+            'community-classify',
+            {
+                clientId,
+                clientName,
+                businessType,
+                competitors: mandate.known_competitors,
+                documents: docSummaries,
+                // Mandate context for richer classification
+                mandateContext: {
+                    goals: mandate.goals,
+                    monitored_topics: mandate.monitored_topics,
+                    target_customer_description: mandate.target_customer_description,
+                    seo_description: String(client?.seo_description || '').trim(),
+                },
             },
-        }, { clientId, triggerSource: 'pipeline' });
+            { clientId, triggerSource: 'pipeline' },
+        );
 
         if (result.data) {
             allMentions.push(...result.data);
@@ -65,7 +73,9 @@ export async function enrichCommunityDocuments(unprocessed, clientId, client, re
     if (COMMUNITY_USE_LLM_ENRICHMENT && unprocessed.length > 0) {
         const docCount = unprocessed.length;
         const estimatedBatches = Math.ceil(docCount / LLM_ENRICHMENT_BATCH_SIZE);
-        console.warn(`[Community] LLM enrichment enabled — processing ${docCount} docs in ${estimatedBatches} batches for client ${clientId}`);
+        console.warn(
+            `[Community] LLM enrichment enabled — processing ${docCount} docs in ${estimatedBatches} batches for client ${clientId}`,
+        );
 
         try {
             const llmStart = Date.now();
@@ -74,7 +84,9 @@ export async function enrichCommunityDocuments(unprocessed, clientId, client, re
 
             // Validation: check that LLM produced reasonable output
             if (mentions.length === 0 && docCount > 0) {
-                console.warn(`[Community] LLM enrichment returned 0 mentions for ${docCount} docs — falling back to keyword`);
+                console.warn(
+                    `[Community] LLM enrichment returned 0 mentions for ${docCount} docs — falling back to keyword`,
+                );
                 mentions = extractMentionsFromDocuments(unprocessed, clientId, relevanceAnchors);
             } else {
                 enrichmentMethod = 'llm';
@@ -94,13 +106,17 @@ export async function normalizeCommunityClusterLabels(persistedClusters, clientI
     // Stage 5.5: Optional — normalize cluster labels via LLM
     if (COMMUNITY_USE_LLM_ENRICHMENT && persistedClusters.length > 0) {
         try {
-            const labelResult = await executeTask('community-labels', {
-                clusters: persistedClusters.map((c) => ({
-                    label: c.label,
-                    cluster_type: c.cluster_type,
-                    mention_count: c.mention_count,
-                })),
-            }, { clientId, triggerSource: 'pipeline' });
+            const labelResult = await executeTask(
+                'community-labels',
+                {
+                    clusters: persistedClusters.map((c) => ({
+                        label: c.label,
+                        cluster_type: c.cluster_type,
+                        mention_count: c.mention_count,
+                    })),
+                },
+                { clientId, triggerSource: 'pipeline' },
+            );
 
             if (labelResult.data && Array.isArray(labelResult.data)) {
                 const labelMap = new Map(labelResult.data.map((l) => [l.original, l]));
@@ -117,32 +133,42 @@ export async function normalizeCommunityClusterLabels(persistedClusters, clientI
     }
 }
 
-export async function synthesizeCommunityOpportunities(persistedClusters, clientId, client, relevanceAnchors, scoringContext) {
+export async function synthesizeCommunityOpportunities(
+    persistedClusters,
+    clientId,
+    client,
+    relevanceAnchors,
+    scoringContext,
+) {
     const { mandate, businessDesc, city: clientCity } = scoringContext;
     // Stage 6: Derive opportunities
     let opportunities;
 
     if (COMMUNITY_USE_LLM_ENRICHMENT && persistedClusters.length > 0) {
         try {
-            const synthResult = await executeTask('community-synthesize', {
-                clientId,
-                clientName: client?.client_name || '',
-                businessType: client?.business_type || '',
-                mandateContext: {
-                    goals: mandate.goals,
-                    monitored_topics: mandate.monitored_topics,
-                    target_customer_description: mandate.target_customer_description,
-                    businessDesc,
-                    city: clientCity,
+            const synthResult = await executeTask(
+                'community-synthesize',
+                {
+                    clientId,
+                    clientName: client?.client_name || '',
+                    businessType: client?.business_type || '',
+                    mandateContext: {
+                        goals: mandate.goals,
+                        monitored_topics: mandate.monitored_topics,
+                        target_customer_description: mandate.target_customer_description,
+                        businessDesc,
+                        city: clientCity,
+                    },
+                    clusters: persistedClusters.map((c) => ({
+                        label: c.label,
+                        cluster_type: c.cluster_type,
+                        mention_count: c.mention_count,
+                        sources: c.sources || [],
+                        signal_families: c.metadata?.signal_families || [],
+                    })),
                 },
-                clusters: persistedClusters.map((c) => ({
-                    label: c.label,
-                    cluster_type: c.cluster_type,
-                    mention_count: c.mention_count,
-                    sources: c.sources || [],
-                    signal_families: c.metadata?.signal_families || [],
-                })),
-            }, { clientId, triggerSource: 'pipeline' });
+                { clientId, triggerSource: 'pipeline' },
+            );
 
             if (synthResult.data && Array.isArray(synthResult.data)) {
                 opportunities = synthResult.data
@@ -158,7 +184,12 @@ export async function synthesizeCommunityOpportunities(persistedClusters, client
                             opportunity_type: opp.opportunity_type,
                             title: opp.headline,
                             rationale: opp.rationale,
-                            evidence_level: opp.evidence_strength === 'strong' ? 'strong' : opp.evidence_strength === 'moderate' ? 'medium' : 'low',
+                            evidence_level:
+                                opp.evidence_strength === 'strong'
+                                    ? 'strong'
+                                    : opp.evidence_strength === 'moderate'
+                                      ? 'medium'
+                                      : 'low',
                             mention_count: matchedCluster?.mention_count || 0,
                             provenance: 'inferred',
                             source_cluster_id: matchedCluster?.id || null,

@@ -80,9 +80,7 @@ function compactUrlPath(value) {
 }
 
 function pageLabel(page) {
-    return compactString(page?.title)
-        || compactString(page?.h1)
-        || compactUrlPath(page?.url);
+    return compactString(page?.title) || compactString(page?.h1) || compactUrlPath(page?.url);
 }
 
 function localizeAuditValue(value, fallback) {
@@ -102,7 +100,7 @@ function flattenCitabilityBlocks(pageSummaries = []) {
             page_title: compactString(page?.title) || compactString(page?.h1),
             page_type: page?.page_type || 'unknown',
             page_text_sample: compactString(page?.text_sample),
-        }))
+        })),
     );
 }
 
@@ -127,10 +125,12 @@ function collectReadinessMetrics(audit) {
         ...toArray(extracted.trust_signals?.review_terms),
     ]);
     const scannedPages = toArray(audit?.scanned_pages);
-    const successPageCount = scannedPages.filter((page) => page?.success).length || Number(extracted.page_stats?.successful_pages || 0);
-    const averageCitabilityScore = citabilityPages.length > 0
-        ? Math.round(average(citabilityPages.map((page) => Number(page?.citability?.page_score || 0))))
-        : 0;
+    const successPageCount =
+        scannedPages.filter((page) => page?.success).length || Number(extracted.page_stats?.successful_pages || 0);
+    const averageCitabilityScore =
+        citabilityPages.length > 0
+            ? Math.round(average(citabilityPages.map((page) => Number(page?.citability?.page_score || 0))))
+            : 0;
 
     return {
         extracted,
@@ -163,9 +163,18 @@ function collectReadinessMetrics(audit) {
         h2Rich: toArray(extracted.h2_clusters).some((cluster) => Array.isArray(cluster) && cluster.length >= 3),
         averageCitabilityScore,
         citabilityPageCount: citabilityPages.length,
-        citabilityBlockCount: citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.block_count || 0), 0),
-        highCitabilityBlockCount: citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.high_citability_count || 0), 0),
-        lowCitabilityBlockCount: citabilityPages.reduce((sum, page) => sum + Number(page?.citability?.low_citability_count || 0), 0),
+        citabilityBlockCount: citabilityPages.reduce(
+            (sum, page) => sum + Number(page?.citability?.block_count || 0),
+            0,
+        ),
+        highCitabilityBlockCount: citabilityPages.reduce(
+            (sum, page) => sum + Number(page?.citability?.high_citability_count || 0),
+            0,
+        ),
+        lowCitabilityBlockCount: citabilityPages.reduce(
+            (sum, page) => sum + Number(page?.citability?.low_citability_count || 0),
+            0,
+        ),
         aiAnswerabilitySummary: compactString(audit?.geo_breakdown?.ai_analysis?.answerability_summary),
         aiBusinessSummary: compactString(audit?.geo_breakdown?.ai_analysis?.business_summary),
         llmStatus: compactString(audit?.geo_breakdown?.overall?.llm_status),
@@ -179,13 +188,21 @@ function buildCitabilityDimension(metrics, schemaSlice) {
     const strongPages = metrics.pageSummaries.filter((page) => Number(page?.citability?.page_score || 0) >= 60).length;
 
     const score = clamp(
-        Math.round(metrics.averageCitabilityScore * 0.42)
-        + (metrics.highCitabilityBlockCount >= 4 ? 18 : metrics.highCitabilityBlockCount >= 2 ? 14 : metrics.highCitabilityBlockCount === 1 ? 9 : metrics.citabilityBlockCount > 0 ? 4 : 0)
-        + (metrics.faqCount >= 4 || metrics.hasFaqSchema ? 18 : metrics.faqCount > 0 ? 10 : 0)
-        + scoreStatus(organizationCoverage?.operatorStatus, 6, 4)
-        + scoreStatus(localCoverage?.operatorStatus, 6, 4)
-        + scoreStatus(faqCoverage?.operatorStatus, 6, 3)
-        + (strongPages >= 2 ? 10 : strongPages === 1 ? 6 : 0),
+        Math.round(metrics.averageCitabilityScore * 0.42) +
+            (metrics.highCitabilityBlockCount >= 4
+                ? 18
+                : metrics.highCitabilityBlockCount >= 2
+                  ? 14
+                  : metrics.highCitabilityBlockCount === 1
+                    ? 9
+                    : metrics.citabilityBlockCount > 0
+                      ? 4
+                      : 0) +
+            (metrics.faqCount >= 4 || metrics.hasFaqSchema ? 18 : metrics.faqCount > 0 ? 10 : 0) +
+            scoreStatus(organizationCoverage?.operatorStatus, 6, 4) +
+            scoreStatus(localCoverage?.operatorStatus, 6, 4) +
+            scoreStatus(faqCoverage?.operatorStatus, 6, 3) +
+            (strongPages >= 2 ? 10 : strongPages === 1 ? 6 : 0),
         0,
         100,
     );
@@ -198,15 +215,15 @@ function buildCitabilityDimension(metrics, schemaSlice) {
         metrics.faqCount > 0
             ? `${metrics.faqCount} paire(s) FAQ / QA extraites.`
             : metrics.hasFaqSchema
-                ? 'Schema FAQ observé sans paire FAQ/QA stockée.'
-                : 'Aucune FAQ exploitable observée.',
+              ? 'Schema FAQ observé sans paire FAQ/QA stockée.'
+              : 'Aucune FAQ exploitable observée.',
         organizationCoverage?.evidence,
         localCoverage?.evidence,
     ].filter(Boolean);
 
     const gaps = [];
     if (metrics.citabilityBlockCount === 0) {
-        gaps.push("Aucun bloc autoportant n’a été coté pour la citation.");
+        gaps.push('Aucun bloc autoportant n’a été coté pour la citation.');
     } else if (metrics.averageCitabilityScore < 45) {
         gaps.push('Les passages observés restent encore peu autoportants pour être repris proprement.');
     }
@@ -230,11 +247,12 @@ function buildCitabilityDimension(metrics, schemaSlice) {
         reliability: 'calculated',
         score,
         scoreLabel: `${score}/100`,
-        summary: status === 'couvert'
-            ? 'Des passages réutilisables ressortent déjà dans le crawl, sans que cela garantisse une citation réelle par les modèles.'
-            : status === 'partiel'
-                ? 'La base de citation existe, mais elle reste inégale selon les pages et les formats observés.'
-                : status === 'à confirmer'
+        summary:
+            status === 'couvert'
+                ? 'Des passages réutilisables ressortent déjà dans le crawl, sans que cela garantisse une citation réelle par les modèles.'
+                : status === 'partiel'
+                  ? 'La base de citation existe, mais elle reste inégale selon les pages et les formats observés.'
+                  : status === 'à confirmer'
                     ? 'Quelques indices existent, mais le repo ne peut pas encore conclure à une base de citation solide.'
                     : 'La base de citation reste faible dans les preuves actuellement stockées.',
         evidence,
@@ -265,13 +283,23 @@ function buildExtractabilityDimension(metrics, crawlerSlice, schemaSlice) {
     }
 
     const score = clamp(
-        crawlComponent
-        + Math.round(coveragePercent * 0.22)
-        + (metrics.schemaEntityCount >= 3 && metrics.businessNames.length > 0 ? 16 : metrics.schemaEntityCount > 0 || metrics.businessNames.length > 0 ? 9 : 0)
-        + (metrics.localEvidenceCount >= 5 ? 14 : metrics.localEvidenceCount >= 2 ? 8 : 0)
-        + (metrics.h2Rich ? 10 : compactString(metrics.extracted?.h1s?.[0]) ? 5 : 0)
-        + (consistencyGapCount === 0 && consistencyAlignedCount > 0 ? 8 : consistencyGapCount === 0 ? 5 : consistencyAlignedCount > 0 ? 3 : 0)
-        + (metrics.totalWordCount >= 800 ? 6 : metrics.totalWordCount >= 400 ? 3 : 0),
+        crawlComponent +
+            Math.round(coveragePercent * 0.22) +
+            (metrics.schemaEntityCount >= 3 && metrics.businessNames.length > 0
+                ? 16
+                : metrics.schemaEntityCount > 0 || metrics.businessNames.length > 0
+                  ? 9
+                  : 0) +
+            (metrics.localEvidenceCount >= 5 ? 14 : metrics.localEvidenceCount >= 2 ? 8 : 0) +
+            (metrics.h2Rich ? 10 : compactString(metrics.extracted?.h1s?.[0]) ? 5 : 0) +
+            (consistencyGapCount === 0 && consistencyAlignedCount > 0
+                ? 8
+                : consistencyGapCount === 0
+                  ? 5
+                  : consistencyAlignedCount > 0
+                    ? 3
+                    : 0) +
+            (metrics.totalWordCount >= 800 ? 6 : metrics.totalWordCount >= 400 ? 3 : 0),
         0,
         100,
     );
@@ -288,13 +316,13 @@ function buildExtractabilityDimension(metrics, crawlerSlice, schemaSlice) {
         metrics.h2Rich
             ? 'Structure H2 riche observée dans le crawl.'
             : compactString(metrics.extracted?.h1s?.[0])
-                ? 'Au moins un H1 clair observé, mais peu de structure secondaire forte.'
-                : 'Structure de titres limitée dans les preuves stockées.',
+              ? 'Au moins un H1 clair observé, mais peu de structure secondaire forte.'
+              : 'Structure de titres limitée dans les preuves stockées.',
     ].filter(Boolean);
 
     const gaps = [];
     if (!crawlerSlice?.available) {
-        gaps.push("Aucune relecture robots/page d’accueil n’est disponible pour confirmer les blocages techniques.");
+        gaps.push('Aucune relecture robots/page d’accueil n’est disponible pour confirmer les blocages techniques.');
     }
     if (homepageBlocked || blockedBots > 0) {
         gaps.push('Des blocages robots ou indexation réduisent directement l’extraction potentielle.');
@@ -303,7 +331,7 @@ function buildExtractabilityDimension(metrics, crawlerSlice, schemaSlice) {
         gaps.push(`${criticalSchemaGaps} lacune(s) schema critique(s) restent ouvertes dans la lecture actuelle.`);
     }
     if (consistencyGapCount > 0) {
-        gaps.push("Certaines coordonnées d’entité divergent encore du dossier partagé.");
+        gaps.push('Certaines coordonnées d’entité divergent encore du dossier partagé.');
     }
     if (metrics.localEvidenceCount < 2) {
         gaps.push('Peu d’indices locaux ou de zones desservies sont extractibles proprement.');
@@ -322,11 +350,12 @@ function buildExtractabilityDimension(metrics, crawlerSlice, schemaSlice) {
         reliability: 'calculated',
         score,
         scoreLabel: `${score}/100`,
-        summary: status === 'couvert'
-            ? 'Les faits utiles ressortent de façon relativement lisible entre structure, entités et accès crawlables.'
-            : status === 'partiel'
-                ? 'La base extractable existe, mais elle reste fragilisée par des lacunes structurelles ou d’accès.'
-                : status === 'à confirmer'
+        summary:
+            status === 'couvert'
+                ? 'Les faits utiles ressortent de façon relativement lisible entre structure, entités et accès crawlables.'
+                : status === 'partiel'
+                  ? 'La base extractable existe, mais elle reste fragilisée par des lacunes structurelles ou d’accès.'
+                  : status === 'à confirmer'
                     ? 'Le repo voit quelques signaux utiles, sans base assez propre pour conclure à une extraction robuste.'
                     : 'L’extractabilité reste trop faible ou trop incomplète dans les données actuellement disponibles.',
         evidence,
@@ -336,11 +365,25 @@ function buildExtractabilityDimension(metrics, crawlerSlice, schemaSlice) {
 
 function buildAnswerabilityDimension(metrics, crawlerSlice) {
     const score = clamp(
-        (metrics.totalWordCount >= 1600 ? 24 : metrics.totalWordCount >= 900 ? 18 : metrics.totalWordCount >= 400 ? 10 : 4)
-        + (metrics.serviceEvidenceCount >= 5 || metrics.servicePageCount > 0 ? 22 : metrics.serviceEvidenceCount >= 2 ? 14 : 4)
-        + (metrics.faqCount >= 4 || metrics.hasFaqSchema ? 20 : metrics.faqCount > 0 ? 10 : 0)
-        + (metrics.averageCitabilityScore > 0 ? Math.round(metrics.averageCitabilityScore * 0.22) : 0)
-        + (metrics.localEvidenceCount >= 2 && metrics.businessNames.length > 0 ? 14 : metrics.localEvidenceCount > 0 || metrics.businessNames.length > 0 ? 7 : 0),
+        (metrics.totalWordCount >= 1600
+            ? 24
+            : metrics.totalWordCount >= 900
+              ? 18
+              : metrics.totalWordCount >= 400
+                ? 10
+                : 4) +
+            (metrics.serviceEvidenceCount >= 5 || metrics.servicePageCount > 0
+                ? 22
+                : metrics.serviceEvidenceCount >= 2
+                  ? 14
+                  : 4) +
+            (metrics.faqCount >= 4 || metrics.hasFaqSchema ? 20 : metrics.faqCount > 0 ? 10 : 0) +
+            (metrics.averageCitabilityScore > 0 ? Math.round(metrics.averageCitabilityScore * 0.22) : 0) +
+            (metrics.localEvidenceCount >= 2 && metrics.businessNames.length > 0
+                ? 14
+                : metrics.localEvidenceCount > 0 || metrics.businessNames.length > 0
+                  ? 7
+                  : 0),
         0,
         100,
     );
@@ -353,16 +396,16 @@ function buildAnswerabilityDimension(metrics, crawlerSlice) {
         metrics.faqCount > 0
             ? `${metrics.faqCount} paire(s) FAQ / QA extraites.`
             : metrics.hasFaqSchema
-                ? 'Schema FAQ observé.'
-                : 'Aucune FAQ ou réponse directe observée.',
+              ? 'Schema FAQ observé.'
+              : 'Aucune FAQ ou réponse directe observée.',
         metrics.averageCitabilityScore > 0
             ? `Citabilité moyenne des pages avec blocs : ${metrics.averageCitabilityScore}/100.`
             : 'Aucune page n’a fourni de score de citabilité exploitable.',
         metrics.localPageCount > 0
             ? `${metrics.localPageCount} page(s) locale(s) détectée(s).`
             : metrics.localEvidenceCount > 0
-                ? `${metrics.localEvidenceCount} signal(s) local(aux) observé(s) sans page locale nette.`
-                : 'Aucun appui local net observé pour soutenir une réponse ciblée.',
+              ? `${metrics.localEvidenceCount} signal(s) local(aux) observé(s) sans page locale nette.`
+              : 'Aucun appui local net observé pour soutenir une réponse ciblée.',
     ].filter(Boolean);
 
     const gaps = [];
@@ -370,7 +413,7 @@ function buildAnswerabilityDimension(metrics, crawlerSlice) {
         gaps.push('Le volume de texte visible reste trop faible pour soutenir des réponses complètes.');
     }
     if (metrics.serviceEvidenceCount < 2 && metrics.servicePageCount === 0) {
-        gaps.push("L’offre ou les cas d’usage ressortent encore trop peu pour une réponse directe.");
+        gaps.push('L’offre ou les cas d’usage ressortent encore trop peu pour une réponse directe.');
     }
     if (metrics.faqCount === 0 && !metrics.hasFaqSchema) {
         gaps.push('Aucune FAQ ou bloc de réponse directe n’a été observé.');
@@ -382,7 +425,9 @@ function buildAnswerabilityDimension(metrics, crawlerSlice) {
         gaps.push('La réponse manque encore de précision locale ou de zone desservie lisible.');
     }
     if (Number(crawlerSlice?.summary?.criticalBlockedCount || 0) > 0) {
-        gaps.push("Des bots IA critiques restent bloqués : la capacité de réponse observée n’implique pas une extraction réelle.");
+        gaps.push(
+            'Des bots IA critiques restent bloqués : la capacité de réponse observée n’implique pas une extraction réelle.',
+        );
     }
 
     const status = getDimensionStatus(score, evidence.length);
@@ -395,21 +440,22 @@ function buildAnswerabilityDimension(metrics, crawlerSlice) {
         reliability: 'calculated',
         score,
         scoreLabel: `${score}/100`,
-        summary: status === 'couvert'
-            ? 'Le site montre déjà une base raisonnable pour soutenir des réponses directes, sans certitude d’usage réel par les IA.'
-            : status === 'partiel'
-                ? 'La capacité de réponse semble plausible, mais encore trop irrégulière selon les contenus observés.'
-                : status === 'à confirmer'
+        summary:
+            status === 'couvert'
+                ? 'Le site montre déjà une base raisonnable pour soutenir des réponses directes, sans certitude d’usage réel par les IA.'
+                : status === 'partiel'
+                  ? 'La capacité de réponse semble plausible, mais encore trop irrégulière selon les contenus observés.'
+                  : status === 'à confirmer'
                     ? 'Quelques appuis existent, mais ils restent trop limités pour conclure à une base de réponse solide.'
                     : 'La capacité de réponse reste faible dans les preuves actuellement stockées.',
         evidence,
         gaps,
         analysis: metrics.aiAnswerabilitySummary
             ? {
-                label: 'Lecture IA persistée',
-                text: metrics.aiAnswerabilitySummary,
-                reliability: 'ai_analysis',
-            }
+                  label: 'Lecture IA persistée',
+                  text: metrics.aiAnswerabilitySummary,
+                  reliability: 'ai_analysis',
+              }
             : null,
     };
 }
@@ -425,12 +471,12 @@ function buildPageReadinessRows(metrics) {
         const wordCount = Number(page?.word_count || 0);
 
         const score = clamp(
-            Math.round(citabilityScore * 0.45)
-            + (faqPairsCount >= 2 ? 18 : faqPairsCount === 1 ? 10 : 0)
-            + (highCount > 0 ? 15 : blockCount > 0 ? 6 : 0)
-            + (wordCount >= 400 ? 10 : wordCount >= 180 ? 6 : 0)
-            + (localSignalCount >= 2 ? 6 : 0)
-            + (serviceSignalCount >= 2 ? 6 : 0),
+            Math.round(citabilityScore * 0.45) +
+                (faqPairsCount >= 2 ? 18 : faqPairsCount === 1 ? 10 : 0) +
+                (highCount > 0 ? 15 : blockCount > 0 ? 6 : 0) +
+                (wordCount >= 400 ? 10 : wordCount >= 180 ? 6 : 0) +
+                (localSignalCount >= 2 ? 6 : 0) +
+                (serviceSignalCount >= 2 ? 6 : 0),
             0,
             100,
         );
@@ -461,8 +507,14 @@ function buildPageReadinessRows(metrics) {
         };
     });
 
-    const stronger = rows.filter((row) => row.score >= 55).sort((left, right) => right.score - left.score).slice(0, 4);
-    const weaker = rows.filter((row) => row.score < 55).sort((left, right) => left.score - right.score).slice(0, 4);
+    const stronger = rows
+        .filter((row) => row.score >= 55)
+        .sort((left, right) => right.score - left.score)
+        .slice(0, 4);
+    const weaker = rows
+        .filter((row) => row.score < 55)
+        .sort((left, right) => left.score - right.score)
+        .slice(0, 4);
 
     return { rows, stronger, weaker };
 }
@@ -479,10 +531,12 @@ function buildPassageCollections(metrics, pageGroups) {
             path: compactUrlPath(block.page_url),
             score: Number(block.citability_score || 0),
             scoreLabel: `${Number(block.citability_score || 0)}/100`,
-            textSample: compactString(block.text_sample) || compactString(block.page_text_sample) || 'Extrait non disponible.',
-            reason: block.block_type === 'faq_answer'
-                ? 'Bloc FAQ directement réutilisable.'
-                : 'Bloc autoportant avec structure exploitable.',
+            textSample:
+                compactString(block.text_sample) || compactString(block.page_text_sample) || 'Extrait non disponible.',
+            reason:
+                block.block_type === 'faq_answer'
+                    ? 'Bloc FAQ directement réutilisable.'
+                    : 'Bloc autoportant avec structure exploitable.',
             reliability: 'calculated',
         }));
 
@@ -497,7 +551,8 @@ function buildPassageCollections(metrics, pageGroups) {
             path: compactUrlPath(block.page_url),
             score: Number(block.citability_score || 0),
             scoreLabel: `${Number(block.citability_score || 0)}/100`,
-            textSample: compactString(block.text_sample) || compactString(block.page_text_sample) || 'Extrait non disponible.',
+            textSample:
+                compactString(block.text_sample) || compactString(block.page_text_sample) || 'Extrait non disponible.',
             reason: 'Bloc trop peu spécifique ou trop peu autoportant pour une reprise fiable.',
             reliability: 'calculated',
         }));
@@ -533,18 +588,25 @@ function buildRecommendations({ metrics, crawlerSlice, schemaSlice, pageGroups }
     if (homepageBlocked || blockedBots > 0) {
         recommendations.push({
             title: 'Lever les blocages crawl/indexation en premier',
-            description: 'La préparation structurelle restera théorique tant que des bots ou la page d’accueil portent des blocages observés.',
+            description:
+                'La préparation structurelle restera théorique tant que des bots ou la page d’accueil portent des blocages observés.',
             evidence: homepageBlocked
-                ? "La page d’accueil présente un signal de blocage d’indexation ou de robots."
+                ? 'La page d’accueil présente un signal de blocage d’indexation ou de robots.'
                 : `${criticalBlockedCount || blockedBots} bot(s) suivis restent bloqué(s) dans la lecture live.`,
             reliability: crawlerSlice?.available ? 'measured' : 'unavailable',
         });
     }
 
-    if (criticalSchemaGaps > 0 || toArray(schemaSlice?.coverageItems).some((item) => item.key === 'localbusiness' && item.operatorStatus === 'absent')) {
+    if (
+        criticalSchemaGaps > 0 ||
+        toArray(schemaSlice?.coverageItems).some(
+            (item) => item.key === 'localbusiness' && item.operatorStatus === 'absent',
+        )
+    ) {
         recommendations.push({
             title: "Compléter le schema d'entité prioritaire",
-            description: 'L’extractabilité et la citabilité souffrent encore d’un schema trop incomplet sur l’entité principale, l’ancrage local ou les FAQ.',
+            description:
+                'L’extractabilité et la citabilité souffrent encore d’un schema trop incomplet sur l’entité principale, l’ancrage local ou les FAQ.',
             evidence: `${criticalSchemaGaps} lacune(s) critique(s) schema relevée(s) dans la lecture actuelle.`,
             reliability: 'calculated',
         });
@@ -553,7 +615,8 @@ function buildRecommendations({ metrics, crawlerSlice, schemaSlice, pageGroups }
     if (metrics.faqCount === 0 && !metrics.hasFaqSchema) {
         recommendations.push({
             title: 'Ajouter des réponses directes visibles',
-            description: 'Le site manque encore de blocs FAQ ou Q/R qui aident les moteurs à reformuler des réponses courtes.',
+            description:
+                'Le site manque encore de blocs FAQ ou Q/R qui aident les moteurs à reformuler des réponses courtes.',
             evidence: 'Aucune FAQ/QA exploitable ni schema FAQ n’a été observé.',
             reliability: 'measured',
         });
@@ -562,10 +625,12 @@ function buildRecommendations({ metrics, crawlerSlice, schemaSlice, pageGroups }
     if (metrics.highCitabilityBlockCount === 0 || metrics.averageCitabilityScore < 45) {
         recommendations.push({
             title: 'Réécrire les sections trop peu citables',
-            description: 'Les passages observés doivent être plus autoportants, plus précis et mieux ancrés sous des titres clairs.',
-            evidence: metrics.citabilityBlockCount > 0
-                ? `Citabilité moyenne observée : ${metrics.averageCitabilityScore}/100.`
-                : 'Aucun bloc cotable n’a été retenu par le crawl.',
+            description:
+                'Les passages observés doivent être plus autoportants, plus précis et mieux ancrés sous des titres clairs.',
+            evidence:
+                metrics.citabilityBlockCount > 0
+                    ? `Citabilité moyenne observée : ${metrics.averageCitabilityScore}/100.`
+                    : 'Aucun bloc cotable n’a été retenu par le crawl.',
             reliability: 'calculated',
         });
     }
@@ -573,22 +638,30 @@ function buildRecommendations({ metrics, crawlerSlice, schemaSlice, pageGroups }
     if (weakerPages.length > 0) {
         recommendations.push({
             title: 'Commencer par les pages les plus faibles',
-            description: 'Le gain opérateur le plus rapide viendra des pages déjà détectées mais encore trop minces ou trop ambiguës.',
-            evidence: weakerPages.slice(0, 3).map((page) => page.label).join(' · '),
+            description:
+                'Le gain opérateur le plus rapide viendra des pages déjà détectées mais encore trop minces ou trop ambiguës.',
+            evidence: weakerPages
+                .slice(0, 3)
+                .map((page) => page.label)
+                .join(' · '),
             reliability: 'calculated',
         });
     }
 
-    if (toArray(schemaSlice?.consistencyRows).some((row) => row.status === 'écart') || schemaSlice?.sameAsSummary?.status === 'incohérent') {
+    if (
+        toArray(schemaSlice?.consistencyRows).some((row) => row.status === 'écart') ||
+        schemaSlice?.sameAsSummary?.status === 'incohérent'
+    ) {
         recommendations.push({
             title: 'Réaligner identité dossier ↔ schema',
-            description: 'Les écarts d’identité réduisent la capacité à extraire proprement qui parle, où et pour quels services.',
-            evidence: toArray(schemaSlice?.consistencyRows)
-                .filter((row) => row.status === 'écart')
-                .map((row) => row.label)
-                .slice(0, 3)
-                .join(' · ')
-                || 'Des profils sameAs divergent du dossier partagé.',
+            description:
+                'Les écarts d’identité réduisent la capacité à extraire proprement qui parle, où et pour quels services.',
+            evidence:
+                toArray(schemaSlice?.consistencyRows)
+                    .filter((row) => row.status === 'écart')
+                    .map((row) => row.label)
+                    .slice(0, 3)
+                    .join(' · ') || 'Des profils sameAs divergent du dossier partagé.',
             reliability: 'calculated',
         });
     }
@@ -597,7 +670,8 @@ function buildRecommendations({ metrics, crawlerSlice, schemaSlice, pageGroups }
         recommendations.push({
             title: 'Aucun correctif prioritaire détecté',
             description: 'La base observée est déjà exploitable pour cette étape de fondation GEO.',
-            evidence: 'Le pilotage peut se concentrer ensuite sur la cohérence inter-pages et les futures surfaces GEO.',
+            evidence:
+                'Le pilotage peut se concentrer ensuite sur la cohérence inter-pages et les futures surfaces GEO.',
             reliability: 'calculated',
         });
     }
@@ -639,8 +713,8 @@ function buildEvidenceLayers({ metrics, crawlerSlice, dimensions, pageGroups }) 
                 : 'Aucune synthèse IA persistée n’est disponible pour cette surface à ce stade.',
             reliability: metrics.aiAnswerabilitySummary ? 'ai_analysis' : 'unavailable',
             items: [
-                metrics.aiAnswerabilitySummary
-                    || 'Le repo ne fournit pas encore de lecture IA dédiée à la préparation sur cette page.',
+                metrics.aiAnswerabilitySummary ||
+                    'Le repo ne fournit pas encore de lecture IA dédiée à la préparation sur cette page.',
             ],
         },
         unavailable: {
@@ -703,11 +777,12 @@ function buildOperatorSummary({ client, metrics, dimensions, topBlockers }) {
     const globalScore = Math.round(average(dimensions.map((dimension) => dimension.score)));
     const globalStatus = getDimensionStatus(globalScore, dimensions.length);
 
-    const description = globalStatus === 'couvert'
-        ? `${client?.client_name || 'Le mandat'} montre une préparation structurelle probable pour être extrait et réutilisé, sans que cette vue ne confirme une visibilité IA réelle.`
-        : globalStatus === 'partiel'
-            ? `${client?.client_name || 'Le mandat'} présente une préparation structurelle partielle : certaines pages et certains signaux sont exploitables, mais les lacunes restent encore visibles.`
-            : globalStatus === 'à confirmer'
+    const description =
+        globalStatus === 'couvert'
+            ? `${client?.client_name || 'Le mandat'} montre une préparation structurelle probable pour être extrait et réutilisé, sans que cette vue ne confirme une visibilité IA réelle.`
+            : globalStatus === 'partiel'
+              ? `${client?.client_name || 'Le mandat'} présente une préparation structurelle partielle : certaines pages et certains signaux sont exploitables, mais les lacunes restent encore visibles.`
+              : globalStatus === 'à confirmer'
                 ? `${client?.client_name || 'Le mandat'} laisse voir quelques signaux utiles, mais la préparation reste trop partielle pour conclure sereinement.`
                 : `${client?.client_name || 'Le mandat'} ne montre pas encore une base structurelle assez forte pour parler d’une préparation GEO exploitable.`;
 
@@ -737,9 +812,10 @@ function buildLatestReadinessSignal(audit) {
     return {
         kind: readinessSignal.kind,
         title: localizeAuditValue(readinessSignal.item.title, 'Signal de préparation'),
-        evidence: localizeAuditValue(readinessSignal.item.evidence_summary, null)
-            || localizeAuditValue(readinessSignal.item.description, null)
-            || null,
+        evidence:
+            localizeAuditValue(readinessSignal.item.evidence_summary, null) ||
+            localizeAuditValue(readinessSignal.item.description, null) ||
+            null,
         reliability: auditItemReliability(readinessSignal.item),
     };
 }
@@ -766,7 +842,8 @@ export async function getReadinessSlice(clientId) {
             available: false,
             emptyState: {
                 title: 'Préparation GEO indisponible',
-                description: "Aucun audit exploitable n’est disponible pour mesurer la citabilité, l’extractabilité et la capacité de réponse de ce mandat.",
+                description:
+                    'Aucun audit exploitable n’est disponible pour mesurer la citabilité, l’extractabilité et la capacité de réponse de ce mandat.',
             },
         };
     }
@@ -814,7 +891,7 @@ export async function getReadinessSlice(clientId) {
                 value: crawlerSlice?.summary?.liveFreshness || 'Indisponible',
                 detail: crawlerSlice?.available
                     ? 'Les directives robots et la page d’accueil ont été relues au chargement de cette page.'
-                    : "Aucune relecture directe n’est disponible pour compléter l’audit stocké.",
+                    : 'Aucune relecture directe n’est disponible pour compléter l’audit stocké.',
                 reliability: crawlerSlice?.available ? 'measured' : 'unavailable',
             },
         },
@@ -830,9 +907,9 @@ export async function getReadinessSlice(clientId) {
             latestSignal: buildLatestReadinessSignal(audit),
             aiSummary: metrics.aiAnswerabilitySummary
                 ? {
-                    text: metrics.aiAnswerabilitySummary,
-                    reliability: 'ai_analysis',
-                }
+                      text: metrics.aiAnswerabilitySummary,
+                      reliability: 'ai_analysis',
+                  }
                 : null,
         },
         emptyState: null,

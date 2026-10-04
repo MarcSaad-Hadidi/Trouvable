@@ -22,13 +22,20 @@ function inferAudienceFromSignals(rawType, siteType, servicesText) {
 }
 
 function isGenericSchemaToken(rawType) {
-    const t = String(rawType || '').trim().toLowerCase().replace(/^https?:\/\/schema\.org\//i, '');
+    const t = String(rawType || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\/schema\.org\//i, '');
     if (!t) return true;
-    return /^(localbusiness|organization|organisation|business|company|corporation|thing|webpage|website|service|place|establishment|store|shop|professional_service|professionalservice)$/i.test(t);
+    return /^(localbusiness|organization|organisation|business|company|corporation|thing|webpage|website|service|place|establishment|store|shop|professional_service|professionalservice)$/i.test(
+        t,
+    );
 }
 
 function firstSentence(value, maxLen = 140) {
-    const s = String(value || '').replace(/\s+/g, ' ').trim();
+    const s = String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim();
     if (!s) return '';
     const m = s.match(/^.{1,400}?[.!?](?=\s|$)/);
     const cut = (m ? m[0] : s).trim();
@@ -42,11 +49,14 @@ export function resolveBusinessType(businessType, siteClassification = {}, clien
     const siteLabel = String(siteClassification?.label || '').trim();
     const services = Array.isArray(siteClassification?.services_preview)
         ? siteClassification.services_preview
-        : (Array.isArray(siteClassification?.detected_services) ? siteClassification.detected_services : []);
+        : Array.isArray(siteClassification?.detected_services)
+          ? siteClassification.detected_services
+          : [];
     const servicesText = services.slice(0, 12).join(' ');
     const shortPreview = String(siteClassification?.short_description_preview || '').trim();
     const seoTeaser = String(siteClassification?.seo_teaser || '').trim();
-    const narrativeHay = `${servicesText} ${firstSentence(shortPreview, 200)} ${firstSentence(seoTeaser, 160)}`.toLowerCase();
+    const narrativeHay =
+        `${servicesText} ${firstSentence(shortPreview, 200)} ${firstSentence(seoTeaser, 160)}`.toLowerCase();
 
     let businessModelDetected = siteType || 'generic_business';
     let canonicalCategory = 'unknown';
@@ -61,9 +71,12 @@ export function resolveBusinessType(businessType, siteClassification = {}, clien
     let offeringAnchor = '';
     let displayLabel = '';
 
-    const descriptiveLabel = (!isGenericSchemaToken(rawType) && rawType.length >= 3)
-        ? rawType
-        : (siteLabel && !isGenericSchemaToken(siteLabel) ? siteLabel : '');
+    const descriptiveLabel =
+        !isGenericSchemaToken(rawType) && rawType.length >= 3
+            ? rawType
+            : siteLabel && !isGenericSchemaToken(siteLabel)
+              ? siteLabel
+              : '';
 
     if (descriptiveLabel) {
         canonicalCategory = slugifyLabel(descriptiveLabel) || 'unknown';
@@ -83,9 +96,10 @@ export function resolveBusinessType(businessType, siteClassification = {}, clien
     } else if (shortPreview.length >= 14) {
         offeringAnchor = firstSentence(shortPreview, 120);
         primaryUseCase = `Livrer / réaliser : ${offeringAnchor}`;
-        categoryResolutionReason = services.length === 0 && descriptiveLabel
-            ? `${categoryResolutionReason} ; complété par la description courte`
-            : 'Ancre offre dérivée de la description courte (profil)';
+        categoryResolutionReason =
+            services.length === 0 && descriptiveLabel
+                ? `${categoryResolutionReason} ; complété par la description courte`
+                : 'Ancre offre dérivée de la description courte (profil)';
         if (!descriptiveLabel) needsReview = true;
     } else if (seoTeaser.length >= 14) {
         offeringAnchor = firstSentence(seoTeaser, 100);
@@ -106,27 +120,36 @@ export function resolveBusinessType(businessType, siteClassification = {}, clien
         targetAudience = 'b2b';
         categoryConfidence = saasSignals.test(rawType) ? 'high' : 'medium';
         categoryResolutionReason = 'Signaux logiciel / SaaS (type, audit ou services)';
-        differentiationAngle = 'Préciser intégrations, preuve ROI et segment cible plutôt que la catégorie générique « logiciel ».';
+        differentiationAngle =
+            'Préciser intégrations, preuve ROI et segment cible plutôt que la catégorie générique « logiciel ».';
     }
 
-    if (/(restaurant|cafe|bar|hotel|clinique|clinic|dentiste|plombier|electricien|avocat|notaire|agence immobiliere|garage|salon)/i.test(typeHay)) {
+    if (
+        /(restaurant|cafe|bar|hotel|clinique|clinic|dentiste|plombier|electricien|avocat|notaire|agence immobiliere|garage|salon)/i.test(
+            typeHay,
+        )
+    ) {
         businessModelDetected = 'local_service';
         targetAudience = /(avocat|clinique|agence|b2b)/i.test(typeHay) ? 'b2b' : 'b2c';
         categoryConfidence = 'high';
         categoryResolutionReason = 'Signaux forte intention locale / métier réglementé';
-        differentiationAngle = 'Mettre l’accent sur preuves locales, délais, garanties et prise en charge géographique.';
+        differentiationAngle =
+            'Mettre l’accent sur preuves locales, délais, garanties et prise en charge géographique.';
     }
 
     // Service-led / operated-service detection — firms that provide strategy, consulting,
     // execution or managed services using internal tech. These are NOT selling software
     // as a self-serve product, even if they use platforms/AI internally.
-    const serviceLedSignals = /agence|agency|consulting|conseil|cabinet|firme|mandat|strateg|execution|managed.?service|operated|accompagnement|pilotage|service.?professionnel/i;
+    const serviceLedSignals =
+        /agence|agency|consulting|conseil|cabinet|firme|mandat|strateg|execution|managed.?service|operated|accompagnement|pilotage|service.?professionnel/i;
     if (serviceLedSignals.test(typeHay) && businessModelDetected === 'saas') {
         businessModelDetected = 'operated_service';
         targetAudience = 'b2b';
         categoryConfidence = 'medium';
-        categoryResolutionReason = 'Signaux service opéré / firme de services (priorité sur SaaS quand les deux sont détectés)';
-        differentiationAngle = "Mettre l'accent sur l'exécution, les résultats mesurés et l'accompagnement humain plutôt que sur les fonctionnalités logicielles.";
+        categoryResolutionReason =
+            'Signaux service opéré / firme de services (priorité sur SaaS quand les deux sont détectés)';
+        differentiationAngle =
+            "Mettre l'accent sur l'exécution, les résultats mesurés et l'accompagnement humain plutôt que sur les fonctionnalités logicielles.";
     }
 
     if (isGenericSchemaToken(rawType) && !descriptiveLabel) {

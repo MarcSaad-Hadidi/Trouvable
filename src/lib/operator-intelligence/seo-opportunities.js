@@ -4,7 +4,14 @@ import { getSourceStatus, loadIndependentSources } from './source-availability';
 
 import { toArray, compactString, timeSince } from './geo-foundation-shared';
 
-import { getSinceDate, filterRowsSince, normalizeUrl, aggregatePageRows, getLatestObservedDate, getObservedAgeDays } from './seo-gsc';
+import {
+    getSinceDate,
+    filterRowsSince,
+    normalizeUrl,
+    aggregatePageRows,
+    getLatestObservedDate,
+    getObservedAgeDays,
+} from './seo-gsc';
 
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getRecentGscRows } from '@/lib/db/gsc';
@@ -154,7 +161,8 @@ function buildPagesInBandSection(clientId, pageMetricsMap, pageIndex, gscFreshne
         return createSection({
             status: 'unavailable',
             reliability: 'unavailable',
-            description: 'Search Console n’est pas disponible pour repérer les pages déjà visibles entre les positions 4 et 20.',
+            description:
+                'Search Console n’est pas disponible pour repérer les pages déjà visibles entre les positions 4 et 20.',
             items: [],
         });
     }
@@ -179,11 +187,13 @@ function buildPagesInBandSection(clientId, pageMetricsMap, pageIndex, gscFreshne
                 score,
                 href: baseHref,
                 cta: 'Ouvrir Visibilité SEO',
-                pages: [{
-                    label,
-                    url: compactString(page.url),
-                    role: pageType ? pageTypeLabel(pageType) : null,
-                }],
+                pages: [
+                    {
+                        label,
+                        url: compactString(page.url),
+                        role: pageType ? pageTypeLabel(pageType) : null,
+                    },
+                ],
                 metrics: buildMetrics([
                     { label: 'Position', type: 'position', value: page.position },
                     { label: 'Impressions', type: 'number', value: page.impressions },
@@ -199,9 +209,10 @@ function buildPagesInBandSection(clientId, pageMetricsMap, pageIndex, gscFreshne
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Pages déjà visibles hors top 3, où un travail ciblé peut encore faire progresser le trafic organique.'
-            : 'Aucune page ne ressort proprement dans la bande 4 à 20 avec assez de visibilité pour ouvrir une priorité dédiée.',
+        description:
+            items.length > 0
+                ? 'Pages déjà visibles hors top 3, où un travail ciblé peut encore faire progresser le trafic organique.'
+                : 'Aucune page ne ressort proprement dans la bande 4 à 20 avec assez de visibilité pour ouvrir une priorité dédiée.',
         items,
     });
 }
@@ -236,11 +247,13 @@ function buildClickGapSection(clientId, pageMetricsMap, pageIndex, gscFreshness)
                 score,
                 href: baseHref,
                 cta: 'Creuser la visibilité',
-                pages: [{
-                    label,
-                    url: compactString(page.url),
-                    role: pageType ? pageTypeLabel(pageType) : null,
-                }],
+                pages: [
+                    {
+                        label,
+                        url: compactString(page.url),
+                        role: pageType ? pageTypeLabel(pageType) : null,
+                    },
+                ],
                 metrics: buildMetrics([
                     { label: 'Position', type: 'position', value: page.position },
                     { label: 'Impressions', type: 'number', value: page.impressions },
@@ -254,9 +267,10 @@ function buildClickGapSection(clientId, pageMetricsMap, pageIndex, gscFreshness)
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Pages où l’exposition organique existe déjà et où un retravail rapide peut d’abord viser le clic avant d’ouvrir un nouveau chantier.'
-            : 'Aucun écart de clic dominant ne ressort sur la fenêtre Search Console courante.',
+        description:
+            items.length > 0
+                ? 'Pages où l’exposition organique existe déjà et où un retravail rapide peut d’abord viser le clic avant d’ouvrir un nouveau chantier.'
+                : 'Aucun écart de clic dominant ne ressort sur la fenêtre Search Console courante.',
         items,
     });
 }
@@ -304,29 +318,35 @@ function buildMetadataSection(clientId, onPage, pageMetricsMap, pageIndex) {
             const score = Math.round(config.baseScore + toNumber(metrics?.impressions) + getPageWeight(pageType));
             const label = blockItem?.label || getPageLabelFromUrl(blockItem?.url);
 
-            items.push(makeOpportunityItem({
-                id: `${block.id}_${pageKey || label}`,
-                title: `${config.titlePrefix} ${label}`,
-                source: block.title,
-                why: blockItem?.evidence || block.summary || 'Signal on-page observé dans le dernier audit.',
-                evidence: metrics
-                    ? `${toNumber(metrics.impressions).toLocaleString('fr-FR')} impressions et position moyenne ${metrics.position?.toFixed(1) || 'n.d.'} sur Search Console.`
-                    : `Signal issu du dernier audit sur ${label}.`,
-                impact: config.impact,
-                reliability: block.reliability || 'calculated',
-                score,
-                href: baseHref,
-                cta: 'Ouvrir l’on-page',
-                pages: blockItem?.url ? [{
-                    label,
-                    url: compactString(blockItem.url),
-                    role: pageType ? pageTypeLabel(pageType) : blockItem?.context || null,
-                }] : [],
-                metrics: buildMetrics([
-                    { label: 'Impressions', type: 'number', value: metrics?.impressions ?? null },
-                    { label: 'Position', type: 'position', value: metrics?.position ?? null },
-                ]),
-            }));
+            items.push(
+                makeOpportunityItem({
+                    id: `${block.id}_${pageKey || label}`,
+                    title: `${config.titlePrefix} ${label}`,
+                    source: block.title,
+                    why: blockItem?.evidence || block.summary || 'Signal on-page observé dans le dernier audit.',
+                    evidence: metrics
+                        ? `${toNumber(metrics.impressions).toLocaleString('fr-FR')} impressions et position moyenne ${metrics.position?.toFixed(1) || 'n.d.'} sur Search Console.`
+                        : `Signal issu du dernier audit sur ${label}.`,
+                    impact: config.impact,
+                    reliability: block.reliability || 'calculated',
+                    score,
+                    href: baseHref,
+                    cta: 'Ouvrir l’on-page',
+                    pages: blockItem?.url
+                        ? [
+                              {
+                                  label,
+                                  url: compactString(blockItem.url),
+                                  role: pageType ? pageTypeLabel(pageType) : blockItem?.context || null,
+                              },
+                          ]
+                        : [],
+                    metrics: buildMetrics([
+                        { label: 'Impressions', type: 'number', value: metrics?.impressions ?? null },
+                        { label: 'Position', type: 'position', value: metrics?.position ?? null },
+                    ]),
+                }),
+            );
         }
     }
 
@@ -337,9 +357,10 @@ function buildMetadataSection(clientId, onPage, pageMetricsMap, pageIndex) {
     return createSection({
         status: sortedItems.length > 0 ? 'warning' : 'ok',
         reliability: sortedItems.length > 0 ? sortedItems[0].reliability : 'calculated',
-        description: sortedItems.length > 0
-            ? 'Titles, metas et H1 à reprendre d’abord sur les pages déjà visibles ou structurellement importantes.'
-            : 'Aucun chantier metadata prioritaire ne ressort proprement du dernier audit on-page.',
+        description:
+            sortedItems.length > 0
+                ? 'Titles, metas et H1 à reprendre d’abord sur les pages déjà visibles ou structurellement importantes.'
+                : 'Aucun chantier metadata prioritaire ne ressort proprement du dernier audit on-page.',
         items: sortedItems,
     });
 }
@@ -354,33 +375,37 @@ function buildRefreshSection(clientId, content) {
         });
     }
 
-    const decayItems = toArray(content?.contentDecay?.items).map((item) => makeOpportunityItem({
-        id: item.id,
-        title: item.title,
-        source: item.source,
-        why: item.why,
-        evidence: item.evidence,
-        impact: item.impact,
-        reliability: item.reliability,
-        score: toNumber(item.severityScore) + 32,
-        href: `/admin/clients/${clientId}/seo/content#decay`,
-        cta: 'Ouvrir Contenu SEO',
-        pages: item.url ? [{ label: item.label || getPageLabelFromUrl(item.url), url: item.url }] : [],
-    }));
+    const decayItems = toArray(content?.contentDecay?.items).map((item) =>
+        makeOpportunityItem({
+            id: item.id,
+            title: item.title,
+            source: item.source,
+            why: item.why,
+            evidence: item.evidence,
+            impact: item.impact,
+            reliability: item.reliability,
+            score: toNumber(item.severityScore) + 32,
+            href: `/admin/clients/${clientId}/seo/content#decay`,
+            cta: 'Ouvrir Contenu SEO',
+            pages: item.url ? [{ label: item.label || getPageLabelFromUrl(item.url), url: item.url }] : [],
+        }),
+    );
 
-    const refreshItems = toArray(content?.refreshOpportunities?.items).map((item) => makeOpportunityItem({
-        id: item.id,
-        title: item.title,
-        source: item.source,
-        why: item.why,
-        evidence: item.evidence,
-        impact: item.impact,
-        reliability: item.reliability,
-        score: toNumber(item.priorityScore),
-        href: `/admin/clients/${clientId}/seo/content#refresh`,
-        cta: 'Ouvrir Contenu SEO',
-        pages: item.url ? [{ label: item.label || getPageLabelFromUrl(item.url), url: item.url }] : [],
-    }));
+    const refreshItems = toArray(content?.refreshOpportunities?.items).map((item) =>
+        makeOpportunityItem({
+            id: item.id,
+            title: item.title,
+            source: item.source,
+            why: item.why,
+            evidence: item.evidence,
+            impact: item.impact,
+            reliability: item.reliability,
+            score: toNumber(item.priorityScore),
+            href: `/admin/clients/${clientId}/seo/content#refresh`,
+            cta: 'Ouvrir Contenu SEO',
+            pages: item.url ? [{ label: item.label || getPageLabelFromUrl(item.url), url: item.url }] : [],
+        }),
+    );
 
     const items = dedupeItems([...decayItems, ...refreshItems])
         .sort((left, right) => right.score - left.score)
@@ -389,9 +414,10 @@ function buildRefreshSection(clientId, content) {
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: items.length > 0 ? 'calculated' : 'calculated',
-        description: items.length > 0
-            ? 'Pages à retravailler ou à réactualiser en priorité à partir des faiblesses et décrochages réellement observés.'
-            : 'Aucune page ne cumule de décrochage ou de faiblesse éditoriale assez nette pour ouvrir un retravail prioritaire.',
+        description:
+            items.length > 0
+                ? 'Pages à retravailler ou à réactualiser en priorité à partir des faiblesses et décrochages réellement observés.'
+                : 'Aucune page ne cumule de décrochage ou de faiblesse éditoriale assez nette pour ouvrir un retravail prioritaire.',
         items,
     });
 }
@@ -416,27 +442,30 @@ function buildCoverageSection(clientId, content) {
     }
 
     const items = toArray(content?.missingPages?.items)
-        .map((item) => makeOpportunityItem({
-            id: item.id,
-            title: item.title,
-            source: item.source,
-            why: item.why,
-            evidence: item.evidence,
-            impact: item.impact,
-            reliability: item.reliability,
-            score: getCoverageScore(item),
-            href: `/admin/clients/${clientId}/seo/content#missing`,
-            cta: 'Voir la couverture',
-        }))
+        .map((item) =>
+            makeOpportunityItem({
+                id: item.id,
+                title: item.title,
+                source: item.source,
+                why: item.why,
+                evidence: item.evidence,
+                impact: item.impact,
+                reliability: item.reliability,
+                score: getCoverageScore(item),
+                href: `/admin/clients/${clientId}/seo/content#missing`,
+                cta: 'Voir la couverture',
+            }),
+        )
         .sort((left, right) => right.score - left.score)
         .slice(0, 6);
 
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: 'calculated',
-        description: items.length > 0
-            ? 'Manques de couverture éditoriale et de structure repérés sans inventer de nouvelles pages hors des preuves actuelles.'
-            : 'Aucun manque structurel dominant ne ressort sur la couverture actuelle.',
+        description:
+            items.length > 0
+                ? 'Manques de couverture éditoriale et de structure repérés sans inventer de nouvelles pages hors des preuves actuelles.'
+                : 'Aucun manque structurel dominant ne ressort sur la couverture actuelle.',
         items,
     });
 }
@@ -453,29 +482,32 @@ function buildInternalLinkingSection(clientId, content) {
 
     const items = toArray(content?.clusters)
         .filter((cluster) => cluster?.hubPage?.url && toArray(cluster?.supportPages).length > 0)
-        .map((cluster) => makeOpportunityItem({
-            id: `internal_${cluster.id}`,
-            title: `Structurer le maillage autour de ${cluster.label}`,
-            source: cluster.detectionDetail,
-            why: `${toArray(cluster.supportPages).length} page(s) support existent déjà autour d’un hub identifiable.`,
-            evidence: `${cluster.evidence} Aucun graphe de liens page à page n’est stocké: il s’agit d’une opportunité structurelle, pas d’un défaut mesuré.`,
-            impact: `Donner un chemin plus clair entre ${cluster.hubPage.label} et les pages support quand cela sert réellement l’intention.` ,
-            reliability: cluster.reliability || 'calculated',
-            score: 48 + toArray(cluster.supportPages).length * 12,
-            href: `/admin/clients/${clientId}/seo/content#clusters`,
-            cta: 'Ouvrir Contenu SEO',
-            pages: [cluster.hubPage, ...toArray(cluster.supportPages).slice(0, 3)],
-            note: 'Le repo ne mesure pas encore les liens internes réellement présents. Cette section ne propose donc que des pistes de structure.',
-        }))
+        .map((cluster) =>
+            makeOpportunityItem({
+                id: `internal_${cluster.id}`,
+                title: `Structurer le maillage autour de ${cluster.label}`,
+                source: cluster.detectionDetail,
+                why: `${toArray(cluster.supportPages).length} page(s) support existent déjà autour d’un hub identifiable.`,
+                evidence: `${cluster.evidence} Aucun graphe de liens page à page n’est stocké: il s’agit d’une opportunité structurelle, pas d’un défaut mesuré.`,
+                impact: `Donner un chemin plus clair entre ${cluster.hubPage.label} et les pages support quand cela sert réellement l’intention.`,
+                reliability: cluster.reliability || 'calculated',
+                score: 48 + toArray(cluster.supportPages).length * 12,
+                href: `/admin/clients/${clientId}/seo/content#clusters`,
+                cta: 'Ouvrir Contenu SEO',
+                pages: [cluster.hubPage, ...toArray(cluster.supportPages).slice(0, 3)],
+                note: 'Le repo ne mesure pas encore les liens internes réellement présents. Cette section ne propose donc que des pistes de structure.',
+            }),
+        )
         .sort((left, right) => right.score - left.score)
         .slice(0, 5);
 
     return createSection({
         status: items.length > 0 ? 'warning' : 'unavailable',
         reliability: items.length > 0 ? 'calculated' : 'unavailable',
-        description: items.length > 0
-            ? 'Pistes de maillage fondées sur des hubs et pages support réellement observés, sans prétendre mesurer les liens existants.'
-            : 'Aucune piste de maillage interne suffisamment nette ne peut être proposée honnêtement sans graphe de liens interne persisté.',
+        description:
+            items.length > 0
+                ? 'Pistes de maillage fondées sur des hubs et pages support réellement observés, sans prétendre mesurer les liens existants.'
+                : 'Aucune piste de maillage interne suffisamment nette ne peut être proposée honnêtement sans graphe de liens interne persisté.',
         items,
     });
 }
@@ -492,21 +524,37 @@ function buildConsolidationSection(clientId, cannibalization) {
 
     const items = toArray(cannibalization?.groups)
         .map((group) => {
-            const measuredScore = toNumber(group?.measured?.sharedImpressions) + toNumber(group?.measured?.sharedQueryCount) * 22;
-            const confidenceBonus = group?.confidenceLabel === 'Confiance élevée' ? 70 : group?.confidenceLabel === 'Confiance moyenne' ? 40 : 16;
+            const measuredScore =
+                toNumber(group?.measured?.sharedImpressions) + toNumber(group?.measured?.sharedQueryCount) * 22;
+            const confidenceBonus =
+                group?.confidenceLabel === 'Confiance élevée'
+                    ? 70
+                    : group?.confidenceLabel === 'Confiance moyenne'
+                      ? 40
+                      : 16;
 
             return makeOpportunityItem({
                 id: `consolidation_${group.id}`,
                 title: group.title,
                 source: group.conflictTypeLabel,
-                why: group?.action?.why || group?.summary || 'Arbitrage SEO à confirmer depuis les signaux de recouvrement observés.',
-                evidence: group?.measured?.text || group?.calculated?.text || 'Aucune preuve de recouvrement exploitable.',
-                impact: group?.action?.guardrail || 'Confirmer l’arbitrage avant fusion, repositionnement ou différenciation.',
+                why:
+                    group?.action?.why ||
+                    group?.summary ||
+                    'Arbitrage SEO à confirmer depuis les signaux de recouvrement observés.',
+                evidence:
+                    group?.measured?.text || group?.calculated?.text || 'Aucune preuve de recouvrement exploitable.',
+                impact:
+                    group?.action?.guardrail ||
+                    'Confirmer l’arbitrage avant fusion, repositionnement ou différenciation.',
                 reliability: group?.action?.reliability || 'calculated',
                 score: measuredScore + confidenceBonus,
                 href: `/admin/clients/${clientId}/seo/cannibalization#actions`,
                 cta: 'Ouvrir Cannibalisation SEO',
-                pages: toArray(group?.pages).map((page) => ({ label: page.label, url: page.url, role: page.pageTypeLabel || null })),
+                pages: toArray(group?.pages).map((page) => ({
+                    label: page.label,
+                    url: page.url,
+                    role: page.pageTypeLabel || null,
+                })),
                 metrics: buildMetrics([
                     { label: 'Req. partagées', type: 'number', value: group?.measured?.sharedQueryCount ?? null },
                     { label: 'Impressions', type: 'number', value: group?.measured?.sharedImpressions ?? null },
@@ -521,9 +569,10 @@ function buildConsolidationSection(clientId, cannibalization) {
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: items.length > 0 ? 'calculated' : 'calculated',
-        description: items.length > 0
-            ? 'Arbitrages de fusion, différenciation ou repositionnement appuyés par la surface cannibalisation existante.'
-            : 'Aucun arbitrage de consolidation ne dépasse aujourd’hui le seuil minimum de confiance opérateur.',
+        description:
+            items.length > 0
+                ? 'Arbitrages de fusion, différenciation ou repositionnement appuyés par la surface cannibalisation existante.'
+                : 'Aucun arbitrage de consolidation ne dépasse aujourd’hui le seuil minimum de confiance opérateur.',
         items,
     });
 }
@@ -541,37 +590,49 @@ function buildQuickWinsSection(clickGap, metadata, refresh, coverage) {
     return createSection({
         status: items.length > 0 ? 'warning' : 'ok',
         reliability: items.length > 0 ? 'calculated' : 'calculated',
-        description: items.length > 0
-            ? 'Sous-ensemble des actions pouvant faire bouger la visibilité ou clarifier l’offre sans lancer une refonte complète.'
-            : 'Aucune action rapide dominante ne ressort sur les données actuellement disponibles.',
+        description:
+            items.length > 0
+                ? 'Sous-ensemble des actions pouvant faire bouger la visibilité ou clarifier l’offre sans lancer une refonte complète.'
+                : 'Aucune action rapide dominante ne ressort sur les données actuellement disponibles.',
         items,
     });
 }
 
-function buildReliabilityBreakdown({ clickGap, positionBand, metadata, refresh, coverage, internalLinking, consolidation }) {
+function buildReliabilityBreakdown({
+    clickGap,
+    positionBand,
+    metadata,
+    refresh,
+    coverage,
+    internalLinking,
+    consolidation,
+}) {
     const measuredCount = toArray(clickGap?.items).length + toArray(positionBand?.items).length;
-    const calculatedCount = toArray(metadata?.items).length
-        + toArray(refresh?.items).length
-        + toArray(coverage?.items).length
-        + toArray(internalLinking?.items).length
-        + toArray(consolidation?.items).length;
+    const calculatedCount =
+        toArray(metadata?.items).length +
+        toArray(refresh?.items).length +
+        toArray(coverage?.items).length +
+        toArray(internalLinking?.items).length +
+        toArray(consolidation?.items).length;
 
     return [
         {
             id: 'measured',
             title: 'Mesurée',
             reliability: 'measured',
-            text: measuredCount > 0
-                ? `${measuredCount} opportunité(s) s’appuient directement sur la visibilité Search Console déjà observée.`
-                : 'Aucune opportunité mesurée n’est ouverte tant que Search Console ne fournit pas une bande 4 à 20 exploitable.',
+            text:
+                measuredCount > 0
+                    ? `${measuredCount} opportunité(s) s’appuient directement sur la visibilité Search Console déjà observée.`
+                    : 'Aucune opportunité mesurée n’est ouverte tant que Search Console ne fournit pas une bande 4 à 20 exploitable.',
         },
         {
             id: 'calculated',
             title: 'Calculée',
             reliability: 'calculated',
-            text: calculatedCount > 0
-                ? `${calculatedCount} opportunité(s) sont dérivées de l’audit, de la structure de pages et de calculs déterministes.`
-                : 'Aucune priorité calculée supplémentaire ne ressort de l’audit courant.',
+            text:
+                calculatedCount > 0
+                    ? `${calculatedCount} opportunité(s) sont dérivées de l’audit, de la structure de pages et de calculs déterministes.`
+                    : 'Aucune priorité calculée supplémentaire ne ressort de l’audit courant.',
         },
         {
             id: 'ai',
@@ -588,7 +649,15 @@ function buildReliabilityBreakdown({ clickGap, positionBand, metadata, refresh, 
     ];
 }
 
-function buildOperatorSummary({ totalBacklogCount, quickWins, positionBand, metadata, refresh, coverage, internalLinking }) {
+function buildOperatorSummary({
+    totalBacklogCount,
+    quickWins,
+    positionBand,
+    metadata,
+    refresh,
+    coverage,
+    internalLinking,
+}) {
     const parts = [];
 
     if (totalBacklogCount === 0) {
@@ -598,7 +667,9 @@ function buildOperatorSummary({ totalBacklogCount, quickWins, positionBand, meta
     }
 
     if (toArray(quickWins?.items).length > 0) {
-        parts.push(`${toArray(quickWins.items).length} action(s) rapide(s) peuvent être traitée(s) sans ouvrir un nouveau chantier de production.`);
+        parts.push(
+            `${toArray(quickWins.items).length} action(s) rapide(s) peuvent être traitée(s) sans ouvrir un nouveau chantier de production.`,
+        );
     }
 
     if (toArray(positionBand?.items).length > 0) {
@@ -618,7 +689,9 @@ function buildOperatorSummary({ totalBacklogCount, quickWins, positionBand, meta
     }
 
     if (toArray(internalLinking?.items).length === 0) {
-        parts.push('Le maillage interne reste une lecture structurelle uniquement tant qu’aucun graphe de liens n’est persisté.');
+        parts.push(
+            'Le maillage interne reste une lecture structurelle uniquement tant qu’aucun graphe de liens n’est persisté.',
+        );
     }
 
     return {
@@ -634,7 +707,8 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         {
             id: 'visibility',
             title: 'Creuser requêtes et pages visibles',
-            description: 'La surface Visibilité SEO reste le bon endroit pour trier requêtes, CTR et pages organiques avant arbitrage.',
+            description:
+                'La surface Visibilité SEO reste le bon endroit pour trier requêtes, CTR et pages organiques avant arbitrage.',
             href: `${baseHref}/seo/visibility`,
             cta: 'Ouvrir Visibilité SEO',
             reliability: 'calculated',
@@ -642,7 +716,8 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         {
             id: 'on-page',
             title: 'Reprendre le cadrage éditorial',
-            description: 'La surface Optimisation on-page détaille titles, metas, H1, réponses directes et faiblesses éditoriales page par page.',
+            description:
+                'La surface Optimisation on-page détaille titles, metas, H1, réponses directes et faiblesses éditoriales page par page.',
             href: `${baseHref}/seo/on-page`,
             cta: 'Ouvrir Optimisation on-page',
             reliability: 'calculated',
@@ -650,9 +725,10 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         {
             id: 'content',
             title: 'Piloter couverture et retravails',
-            description: totalBacklogCount > 0
-                ? 'Contenu SEO reste la meilleure surface pour détailler retravails, manques de pages et consolidations éditoriales.'
-                : 'Contenu SEO reste le meilleur point d’entrée pour confirmer qu’aucun chantier éditorial prioritaire n’est en attente.',
+            description:
+                totalBacklogCount > 0
+                    ? 'Contenu SEO reste la meilleure surface pour détailler retravails, manques de pages et consolidations éditoriales.'
+                    : 'Contenu SEO reste le meilleur point d’entrée pour confirmer qu’aucun chantier éditorial prioritaire n’est en attente.',
             href: `${baseHref}/seo/content`,
             cta: 'Ouvrir Contenu SEO',
             reliability: 'calculated',
@@ -660,7 +736,8 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         {
             id: 'health',
             title: 'Valider les prérequis techniques',
-            description: 'Avant de pousser une page ou de produire un nouveau contenu, vérifiez que les blocages techniques ne dégradent pas déjà le potentiel SEO.',
+            description:
+                'Avant de pousser une page ou de produire un nouveau contenu, vérifiez que les blocages techniques ne dégradent pas déjà le potentiel SEO.',
             href: `${baseHref}/seo/health`,
             cta: 'Ouvrir Santé SEO',
             reliability: 'calculated',
@@ -671,7 +748,8 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         hooks.push({
             id: 'connect-gsc',
             title: 'Connecter Search Console',
-            description: 'Sans Search Console proprement synchronisée, la page ne peut pas ouvrir d’actions rapides mesurées ni de bande 4 à 20 fiable.',
+            description:
+                'Sans Search Console proprement synchronisée, la page ne peut pas ouvrir d’actions rapides mesurées ni de bande 4 à 20 fiable.',
             href: `${baseHref}/dossier/connectors`,
             cta: 'Voir les connecteurs',
             reliability: 'unavailable',
@@ -682,7 +760,8 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
         hooks.push({
             id: 'run-audit',
             title: 'Relancer un audit structurel',
-            description: 'Sans audit récent, metadata, couverture, maillage structurel et arbitrages de consolidation restent incomplets.',
+            description:
+                'Sans audit récent, metadata, couverture, maillage structurel et arbitrages de consolidation restent incomplets.',
             href: `${baseHref}/seo/health`,
             cta: 'Relancer l’audit',
             reliability: 'unavailable',
@@ -693,9 +772,10 @@ function buildActionHooks(clientId, { gscFreshness, hasAudit, totalBacklogCount 
 }
 
 export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit } = {}) {
-    const auditRead = providedAudit == null
-        ? await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) })
-        : { values: { audit: providedAudit }, dataSources: { audit: 'available' }, errors: [] };
+    const auditRead =
+        providedAudit == null
+            ? await loadIndependentSources({ audit: () => dbGetLatestAudit(clientId) })
+            : { values: { audit: providedAudit }, dataSources: { audit: 'available' }, errors: [] };
     const audit = auditRead.values.audit;
     const reads = await loadIndependentSources({
         visibility: () => getVisibilitySlice(clientId),
@@ -711,7 +791,8 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
         if (!reading) continue;
         if (reading.status === 'partial' || reading.status === 'unavailable') dataSources[source] = reading.status;
         for (const [name, state] of Object.entries(reading.dataSources || {})) dataSources[source + '.' + name] = state;
-        for (const error of reading.errors || []) errors.push({ source: source + '.' + error.source, message: 'Données temporairement indisponibles.' });
+        for (const error of reading.errors || [])
+            errors.push({ source: source + '.' + error.source, message: 'Données temporairement indisponibles.' });
     }
     const unavailableReading = { emptyState: { description: 'Données temporairement indisponibles.' } };
     const visibility = reads.values.visibility;
@@ -720,7 +801,8 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
     const cannibalization = reads.values.cannibalization || unavailableReading;
     const gscRows = reads.values.gscRows;
     if (dataSources.gscRows === 'empty') {
-        dataSources.gscRows = visibility?.dataSources?.gscQueries === 'not_connected' ? 'not_connected' : 'not_observed';
+        dataSources.gscRows =
+            visibility?.dataSources?.gscQueries === 'not_connected' ? 'not_connected' : 'not_observed';
     }
     const availability = { status: getSourceStatus(dataSources), dataSources, errors };
 
@@ -735,9 +817,25 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
         lastObservedDate,
         lastLiveObservedDate: visibility?.freshness?.gsc?.lastObservedDate || null,
         lastSyncedAt: visibility?.freshness?.gsc?.lastSyncedAt || null,
-        status: dataSources.gscRows === 'unavailable' ? 'unavailable' : currentGscRows.length > 0 ? ageDays === null ? 'warning' : ageDays <= 3 ? 'ok' : ageDays <= 7 ? 'warning' : 'critical' : 'unavailable',
+        status:
+            dataSources.gscRows === 'unavailable'
+                ? 'unavailable'
+                : currentGscRows.length > 0
+                  ? ageDays === null
+                      ? 'warning'
+                      : ageDays <= 3
+                        ? 'ok'
+                        : ageDays <= 7
+                          ? 'warning'
+                          : 'critical'
+                  : 'unavailable',
         reliability: currentGscRows.length > 0 ? 'measured' : 'unavailable',
-        detail: dataSources.gscRows === 'unavailable' ? 'Données Search Console temporairement indisponibles.' : currentGscRows.length > 0 ? 'Données Search Console persistées utilisées pour cette file.' : 'Aucune donnée Search Console observée pour cette file.',
+        detail:
+            dataSources.gscRows === 'unavailable'
+                ? 'Données Search Console temporairement indisponibles.'
+                : currentGscRows.length > 0
+                  ? 'Données Search Console persistées utilisées pour cette file.'
+                  : 'Aucune donnée Search Console observée pour cette file.',
     };
 
     if (!hasAudit && currentGscRows.length === 0) {
@@ -746,7 +844,10 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
             freshness: { gsc: gscFreshness },
             emptyState: {
                 title: 'Opportunités SEO indisponibles',
-                description: errors.length > 0 ? 'Données temporairement indisponibles pour cette file SEO.' : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Relancez un audit ou connectez Search Console avant d’ouvrir cette file SEO.',
+                description:
+                    errors.length > 0
+                        ? 'Données temporairement indisponibles pour cette file SEO.'
+                        : 'Ni audit structurel ni données Search Console exploitables ne sont disponibles. Relancez un audit ou connectez Search Console avant d’ouvrir cette file SEO.',
             },
         };
     }
@@ -763,11 +864,29 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
     const consolidation = buildConsolidationSection(clientId, cannibalization);
     positionBand.availability = dataSources.gscRows;
     clickGap.availability = dataSources.gscRows;
-    metadata.availability = onPage.emptyState ? (dataSources.onPage === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus(onPage.dataSources || {});
-    refresh.availability = content.emptyState ? (dataSources.content === 'partial' || dataSources.content === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus({ audit: content.dataSources?.audit, gscRows: content.dataSources?.gscRows });
-    coverage.availability = content.emptyState ? refresh.availability : getSourceStatus({ audit: content.dataSources?.audit });
+    metadata.availability = onPage.emptyState
+        ? dataSources.onPage === 'unavailable'
+            ? 'unavailable'
+            : 'not_observed'
+        : getSourceStatus(onPage.dataSources || {});
+    refresh.availability = content.emptyState
+        ? dataSources.content === 'partial' || dataSources.content === 'unavailable'
+            ? 'unavailable'
+            : 'not_observed'
+        : getSourceStatus({ audit: content.dataSources?.audit, gscRows: content.dataSources?.gscRows });
+    coverage.availability = content.emptyState
+        ? refresh.availability
+        : getSourceStatus({ audit: content.dataSources?.audit });
     internalLinking.availability = coverage.availability;
-    consolidation.availability = cannibalization.emptyState ? (dataSources.cannibalization === 'partial' || dataSources.cannibalization === 'unavailable' ? 'unavailable' : 'not_observed') : getSourceStatus({ audit: cannibalization.dataSources?.audit, gscRows: cannibalization.dataSources?.gscRows, client: cannibalization.dataSources?.client });
+    consolidation.availability = cannibalization.emptyState
+        ? dataSources.cannibalization === 'partial' || dataSources.cannibalization === 'unavailable'
+            ? 'unavailable'
+            : 'not_observed'
+        : getSourceStatus({
+              audit: cannibalization.dataSources?.audit,
+              gscRows: cannibalization.dataSources?.gscRows,
+              client: cannibalization.dataSources?.client,
+          });
     for (const section of [refresh, consolidation]) {
         if (section.availability === 'partial' && section.items.length === 0) {
             section.status = 'unavailable';
@@ -776,7 +895,12 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
         }
     }
     const quickWins = buildQuickWinsSection(clickGap, metadata, refresh, coverage);
-    quickWins.availability = getSourceStatus({ clickGap: clickGap.availability, metadata: metadata.availability, refresh: refresh.availability, coverage: coverage.availability });
+    quickWins.availability = getSourceStatus({
+        clickGap: clickGap.availability,
+        metadata: metadata.availability,
+        refresh: refresh.availability,
+        coverage: coverage.availability,
+    });
     if (quickWins.availability === 'partial' && quickWins.items.length === 0) {
         quickWins.status = 'unavailable';
         quickWins.reliability = 'unavailable';
@@ -818,21 +942,30 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
         auditMeta: {
             createdAt: audit?.created_at || null,
             sourceUrl: audit?.resolved_url || audit?.source_url || null,
-            siteTypeLabel: audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
+            siteTypeLabel:
+                audit?.site_classification?.label || audit?.seo_breakdown?.site_classification?.label || null,
         },
         summaryCards: [
             {
                 id: 'backlog_total',
                 label: 'Backlog SEO',
                 value: totalBacklogCount === 0 && availability.status !== 'available' ? null : totalBacklogCount,
-                detail: totalBacklogCount > 0 ? 'Opportunités réellement ouvertes par la mesure ou par l’audit' : availability.status === 'available' ? 'Aucune opportunité dominante' : 'Lecture incomplète des opportunités',
+                detail:
+                    totalBacklogCount > 0
+                        ? 'Opportunités réellement ouvertes par la mesure ou par l’audit'
+                        : availability.status === 'available'
+                          ? 'Aucune opportunité dominante'
+                          : 'Lecture incomplète des opportunités',
                 reliability: 'calculated',
                 accent: totalBacklogCount > 0 ? 'amber' : 'slate',
             },
             {
                 id: 'quick_wins',
                 label: 'Actions rapides',
-                value: quickWins.items.length === 0 && quickWins.availability !== 'available' ? null : quickWins.items.length,
+                value:
+                    quickWins.items.length === 0 && quickWins.availability !== 'available'
+                        ? null
+                        : quickWins.items.length,
                 detail: 'Actions prioritaires à faible friction',
                 reliability: 'calculated',
                 accent: toArray(quickWins.items).length > 0 ? 'emerald' : 'slate',
@@ -854,21 +987,37 @@ export async function getSeoOpportunitiesSlice(clientId, { audit: providedAudit 
                 accent: toArray(clickGap.items).length > 0 ? 'emerald' : 'slate',
             },
         ],
-        operatorSummary: availability.status === 'available' ? operatorSummary : { ...operatorSummary, text: totalBacklogCount > 0 ? operatorSummary.text : 'Lecture incomplète : aucune conclusion complète sur les opportunités SEO ne peut être tirée des sources disponibles.' },
+        operatorSummary:
+            availability.status === 'available'
+                ? operatorSummary
+                : {
+                      ...operatorSummary,
+                      text:
+                          totalBacklogCount > 0
+                              ? operatorSummary.text
+                              : 'Lecture incomplète : aucune conclusion complète sur les opportunités SEO ne peut être tirée des sources disponibles.',
+                  },
         freshness: {
             audit: {
                 status: audit?.created_at ? 'ok' : 'unavailable',
                 reliability: audit?.created_at ? 'measured' : 'unavailable',
                 label: 'Audit structurel',
                 value: timeSince(audit?.created_at) || 'Indisponible',
-                detail: audit?.created_at ? 'Fraîcheur de l’audit utilisé pour cette file SEO.' : 'Aucun audit récent pour confirmer metadata, couverture et structure.',
+                detail: audit?.created_at
+                    ? 'Fraîcheur de l’audit utilisé pour cette file SEO.'
+                    : 'Aucun audit récent pour confirmer metadata, couverture et structure.',
             },
             gsc: gscFreshness,
             backlog: {
                 status: totalBacklogCount > 0 ? 'ok' : 'unavailable',
                 reliability: 'calculated',
                 label: 'Backlog recalculé',
-                value: totalBacklogCount > 0 ? `${totalBacklogCount} opportunité(s)` : availability.status === 'available' ? 'Aucune' : 'Indisponible',
+                value:
+                    totalBacklogCount > 0
+                        ? `${totalBacklogCount} opportunité(s)`
+                        : availability.status === 'available'
+                          ? 'Aucune'
+                          : 'Indisponible',
                 detail: 'Synthèse recalculée à partir des signaux disponibles au chargement.',
             },
         },

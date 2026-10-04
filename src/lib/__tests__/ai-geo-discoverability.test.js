@@ -1,13 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { AI_SERVICE_PAYLOAD, AI_SUMMARY_PAYLOAD } from '@/lib/agent-discovery/public-data';
 import { buildMcpDescriptorPayload } from '@/lib/agent-discovery/mcp-tools';
-import { SEO_GROWTH_PAGES, buildSeoGrowthArticleSchema, buildSeoGrowthItemListSchema, buildSeoGrowthMetadata } from '@/lib/data/seo-growth-pages';
+import {
+    SEO_GROWTH_PAGES,
+    buildSeoGrowthArticleSchema,
+    buildSeoGrowthItemListSchema,
+    buildSeoGrowthMetadata,
+} from '@/lib/data/seo-growth-pages';
 import { HOME_FAQS } from '@/features/public/home/home-faqs';
 import { META_DESCRIPTION_MAX, META_DESCRIPTION_MIN, fitMetaDescription } from '@/lib/seo/metadata';
 import { SITE_NAME, SITE_SAME_AS, SITE_URL } from '@/lib/site-config';
 
 function wordCount(value) {
-    return String(value || '').trim().split(/\s+/).filter(Boolean).length;
+    return String(value || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
 }
 
 describe('AI and GEO public discovery', () => {
@@ -35,7 +43,11 @@ describe('AI and GEO public discovery', () => {
         const descriptor = buildMcpDescriptorPayload();
         expect(descriptor.url).toBe(`${SITE_URL}/mcp`);
         expect(descriptor.declarationUrl).toBe(`${SITE_URL}/.well-known/webmcp.json`);
-        expect(descriptor.tools.map((tool) => tool.name)).toEqual(['navigate_page', 'open_contact_page', 'search_site']);
+        expect(descriptor.tools.map((tool) => tool.name)).toEqual([
+            'navigate_page',
+            'open_contact_page',
+            'search_site',
+        ]);
 
         const mod = await import('../../app/.well-known/webmcp.json/route.js');
         const response = mod.GET();

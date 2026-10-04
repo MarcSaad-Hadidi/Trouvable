@@ -131,8 +131,12 @@ export default function SeoHealthPage() {
     }, [issues]);
 
     const summaryCards = useMemo(() => {
-        const criticalCount = issues.filter((issue) => ['critical', 'high'].includes(String(issue?.priority || '').toLowerCase())).length;
-        const warningCount = issues.filter((issue) => !['critical', 'high'].includes(String(issue?.priority || '').toLowerCase())).length;
+        const criticalCount = issues.filter((issue) =>
+            ['critical', 'high'].includes(String(issue?.priority || '').toLowerCase()),
+        ).length;
+        const warningCount = issues.filter(
+            (issue) => !['critical', 'high'].includes(String(issue?.priority || '').toLowerCase()),
+        ).length;
         const healthyCount = checks.filter((check) => check?.status === 'ok' || check?.status === 'pass').length;
 
         return [
@@ -141,7 +145,12 @@ export default function SeoHealthPage() {
                 label: 'Score technique',
                 value: data?.seoScore != null ? `${data.seoScore}/100` : 'n.d.',
                 detail: scoreDetail(history, data?.seoScore),
-                tone: data?.seoScore != null && data.seoScore >= 80 ? 'ok' : data?.seoScore != null && data.seoScore >= 50 ? 'warning' : 'critical',
+                tone:
+                    data?.seoScore != null && data.seoScore >= 80
+                        ? 'ok'
+                        : data?.seoScore != null && data.seoScore >= 50
+                          ? 'warning'
+                          : 'critical',
             },
             {
                 id: 'critical-issues',
@@ -234,7 +243,9 @@ export default function SeoHealthPage() {
             >
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/90">Chargement de la santé SEO</div>
-                    <p className="mt-2 text-[13px] text-white/60">Le cockpit attend l audit, l historique récent et les contrôles techniques persistés.</p>
+                    <p className="mt-2 text-[13px] text-white/60">
+                        Le cockpit attend l audit, l historique récent et les contrôles techniques persistés.
+                    </p>
                 </div>
             </CommandPageShell>
         );
@@ -254,7 +265,11 @@ export default function SeoHealthPage() {
                 <CommandEmptyState
                     title="Santé SEO indisponible"
                     description={error}
-                    action={<Link href={`${baseHref}/seo/visibility`} className={COMMAND_BUTTONS.primary}>Voir la visibilité</Link>}
+                    action={
+                        <Link href={`${baseHref}/seo/visibility`} className={COMMAND_BUTTONS.primary}>
+                            Voir la visibilité
+                        </Link>
+                    }
                 />
             </CommandPageShell>
         );
@@ -268,14 +283,21 @@ export default function SeoHealthPage() {
                         eyebrow="SEO Ops"
                         title="Santé SEO"
                         subtitle={`Audit technique, checks structurels et erreurs de crawl pour ${client?.client_name || 'ce dossier'}.`}
-                        actions={<Link href={`${baseHref}/dossier/connectors`} className={COMMAND_BUTTONS.primary}>Connecteurs</Link>}
+                        actions={
+                            <Link href={`${baseHref}/dossier/connectors`} className={COMMAND_BUTTONS.primary}>
+                                Connecteurs
+                            </Link>
+                        }
                     />
                 }
             >
                 <SourceStatusNotice status={data?.status} errors={data?.errors} />
                 <CommandEmptyState
                     title={data?.emptyState?.title || 'Aucune lecture technique disponible'}
-                    description={data?.emptyState?.description || 'Le dernier audit ne remonte pas encore de signaux techniques exploitables.'}
+                    description={
+                        data?.emptyState?.description ||
+                        'Le dernier audit ne remonte pas encore de signaux techniques exploitables.'
+                    }
                 />
             </CommandPageShell>
         );
@@ -289,7 +311,12 @@ export default function SeoHealthPage() {
                     title="Santé SEO"
                     subtitle="Audit technique, Core Web Vitals et erreurs de crawl."
                     actions={
-                        <button type="button" onClick={startScan} disabled={scanning || !clientId} className={COMMAND_BUTTONS.primary}>
+                        <button
+                            type="button"
+                            onClick={startScan}
+                            disabled={scanning || !clientId}
+                            className={COMMAND_BUTTONS.primary}
+                        >
                             <RefreshCwIcon className={cn('h-3.5 w-3.5', scanning && 'animate-spin')} />
                             {scanning ? 'Audit en cours...' : 'Lancer un audit complet'}
                         </button>
@@ -297,7 +324,7 @@ export default function SeoHealthPage() {
                 />
             }
         >
-                <SourceStatusNotice status={data?.status} errors={data?.errors} />
+            <SourceStatusNotice status={data?.status} errors={data?.errors} />
             {scanError ? (
                 <div className="rounded-[20px] border border-rose-300/18 bg-rose-400/10 px-4 py-3 text-[12px] text-rose-100">
                     {scanError}
@@ -306,7 +333,13 @@ export default function SeoHealthPage() {
 
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {summaryCards.map((card) => (
-                    <CommandMetricCard key={card.id} label={card.label} value={card.value} detail={card.detail} tone={card.tone} />
+                    <CommandMetricCard
+                        key={card.id}
+                        label={card.label}
+                        value={card.value}
+                        detail={card.detail}
+                        tone={card.tone}
+                    />
                 ))}
             </div>
 
@@ -316,8 +349,19 @@ export default function SeoHealthPage() {
                         <div className="h-[220px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={chartData} margin={{ top: 12, right: 8, left: -18, bottom: 0 }}>
-                                    <XAxis dataKey="label" stroke="rgba(255,255,255,0.22)" fontSize={11} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="rgba(255,255,255,0.22)" fontSize={11} tickLine={false} axisLine={false} />
+                                    <XAxis
+                                        dataKey="label"
+                                        stroke="rgba(255,255,255,0.22)"
+                                        fontSize={11}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <YAxis
+                                        stroke="rgba(255,255,255,0.22)"
+                                        fontSize={11}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
                                     <Tooltip
                                         contentStyle={{
                                             backgroundColor: '#0b0d13',
@@ -345,27 +389,34 @@ export default function SeoHealthPage() {
                 </CommandChartCard>
 
                 <div className={cn(COMMAND_PANEL, 'flex flex-col justify-center p-5')}>
-                    <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">Signaux techniques</div>
+                    <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                        Signaux techniques
+                    </div>
                     <div className="space-y-4">
                         {signalRows.map((signal) => (
                             <div key={signal.id}>
                                 <div className="mb-1 flex items-center justify-between gap-3 text-xs">
                                     <span className="text-white/78">{signal.label}</span>
-                                    <span className={cn(
-                                        'font-semibold',
-                                        signal.status === 'ok' || signal.status === 'pass'
-                                            ? 'text-emerald-300'
-                                            : signal.status === 'warning' || signal.status === 'partial'
-                                                ? 'text-amber-300'
-                                                : signal.status === 'critical' || signal.status === 'failed'
+                                    <span
+                                        className={cn(
+                                            'font-semibold',
+                                            signal.status === 'ok' || signal.status === 'pass'
+                                                ? 'text-emerald-300'
+                                                : signal.status === 'warning' || signal.status === 'partial'
+                                                  ? 'text-amber-300'
+                                                  : signal.status === 'critical' || signal.status === 'failed'
                                                     ? 'text-rose-300'
                                                     : 'text-white/38',
-                                    )}>
+                                        )}
+                                    >
                                         {statusLabel(signal.status)}
                                     </span>
                                 </div>
                                 <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
-                                    <div className={cn('h-full rounded-full', statusColor(signal.status))} style={{ width: `${statusToPercent(signal.status)}%` }} />
+                                    <div
+                                        className={cn('h-full rounded-full', statusColor(signal.status))}
+                                        style={{ width: `${statusToPercent(signal.status)}%` }}
+                                    />
                                 </div>
                                 <div className="mt-2 text-[11px] leading-relaxed text-white/48">
                                     {signal.evidence || 'Aucune preuve disponible.'}
@@ -387,8 +438,16 @@ export default function SeoHealthPage() {
                 <CommandTable
                     headers={['Problème', 'Priorité', 'Fiabilité', 'Preuve']}
                     rows={sortedIssues.map((issue) => [
-                        <div key={`${issue.id}-title`} className="min-w-[220px] whitespace-normal text-white/92">{issue.title}</div>,
-                        <span key={`${issue.id}-priority`} className={cn('inline-flex rounded border px-2 py-0.5 text-[10px]', priorityTone(issue.priority))}>
+                        <div key={`${issue.id}-title`} className="min-w-[220px] whitespace-normal text-white/92">
+                            {issue.title}
+                        </div>,
+                        <span
+                            key={`${issue.id}-priority`}
+                            className={cn(
+                                'inline-flex rounded border px-2 py-0.5 text-[10px]',
+                                priorityTone(issue.priority),
+                            )}
+                        >
                             {issue.priority || 'medium'}
                         </span>,
                         <ReliabilityPill key={`${issue.id}-reliability`} value={issue.reliability || 'unavailable'} />,
@@ -401,7 +460,11 @@ export default function SeoHealthPage() {
                 <CommandEmptyState
                     title="Aucun problème technique majeur"
                     description="Le dernier audit ne remonte pas de problème prioritaire sur ce dossier."
-                    action={<Link href={`${baseHref}/seo/visibility`} className={COMMAND_BUTTONS.secondary}>Voir la visibilité</Link>}
+                    action={
+                        <Link href={`${baseHref}/seo/visibility`} className={COMMAND_BUTTONS.secondary}>
+                            Voir la visibilité
+                        </Link>
+                    }
                 />
             )}
         </CommandPageShell>

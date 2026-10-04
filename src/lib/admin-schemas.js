@@ -16,7 +16,11 @@ const discoveryModeSchema = z.enum([
 
 export const clientCreateSchema = z.object({
     client_name: z.string().min(1).max(200),
-    client_slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/),
+    client_slug: z
+        .string()
+        .min(1)
+        .max(120)
+        .regex(/^[a-z0-9-]+$/),
     website_url: z.string().url(),
     business_type: z.string().max(120).optional(),
     target_region: z.string().max(200).optional().nullable(),
@@ -26,7 +30,12 @@ export const clientCreateSchema = z.object({
 export const clientUpdateSchema = z.object({
     id: z.string().uuid(),
     client_name: z.string().min(1).max(200).optional(),
-    client_slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/).optional(),
+    client_slug: z
+        .string()
+        .min(1)
+        .max(120)
+        .regex(/^[a-z0-9-]+$/)
+        .optional(),
     website_url: z.string().url().optional(),
     business_type: z.string().max(120).optional().nullable(),
     target_region: z.string().max(200).optional().nullable(),

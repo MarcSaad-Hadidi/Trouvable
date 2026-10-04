@@ -10,7 +10,9 @@ import { getAdminAccessState, requireAdmin, resolveOperatorRole } from '../auth.
 import { GET } from '../../app/api/admin/geo/clients/route.js';
 
 function clerkUser(email, role) {
-    return { id: 'operator-id', primaryEmailAddressId: 'primary',
+    return {
+        id: 'operator-id',
+        primaryEmailAddressId: 'primary',
         emailAddresses: [{ id: 'primary', emailAddress: email, verification: { status: 'verified' } }],
         publicMetadata: role === undefined ? {} : { operatorRole: role },
     };
@@ -49,16 +51,22 @@ describe('actual server admin authorization boundaries', () => {
         expect((await GET()).status).toBe(401);
         expect(boundary.listClients).not.toHaveBeenCalled();
     });
-    it.each(['admin', 'consultant', 'viewer'])('preserves allowlisted %s role identity without inventing permissions', async (role) => {
-        boundary.auth.mockResolvedValue({ userId: 'operator-id' });
-        boundary.currentUser.mockResolvedValue(clerkUser('operator@example.test', role));
-        expect(await getAdminAccessState()).toMatchObject({ kind: 'clerk', operatorRole: role,
-            admin: { userId: 'operator-id', email: 'operator@example.test' } });
-        expect(await requireAdmin()).toEqual({ userId: 'operator-id', email: 'operator@example.test' });
-        const response = await GET();
-        expect(response.status).toBe(200);
-        expect(await response.json()).toEqual({ clients: [{ id: 'client-a' }] });
-    });
+    it.each(['admin', 'consultant', 'viewer'])(
+        'preserves allowlisted %s role identity without inventing permissions',
+        async (role) => {
+            boundary.auth.mockResolvedValue({ userId: 'operator-id' });
+            boundary.currentUser.mockResolvedValue(clerkUser('operator@example.test', role));
+            expect(await getAdminAccessState()).toMatchObject({
+                kind: 'clerk',
+                operatorRole: role,
+                admin: { userId: 'operator-id', email: 'operator@example.test' },
+            });
+            expect(await requireAdmin()).toEqual({ userId: 'operator-id', email: 'operator@example.test' });
+            const response = await GET();
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({ clients: [{ id: 'client-a' }] });
+        },
+    );
     it('defaults an allowlisted identity with no role metadata to admin', async () => {
         boundary.auth.mockResolvedValue({ userId: 'operator-id' });
         boundary.currentUser.mockResolvedValue(clerkUser('operator@example.test'));

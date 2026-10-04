@@ -70,7 +70,10 @@ export default function PortalActivityStory({ items = [] }) {
                                     <div className="absolute left-0 top-[22px] flex h-[27px] w-[27px] items-center justify-center">
                                         <div
                                             className="h-[9px] w-[9px] rounded-full border-2 transition-all duration-300 group-hover:scale-125"
-                                            style={{ borderColor: `${meta.color}50`, backgroundColor: `${meta.color}10` }}
+                                            style={{
+                                                borderColor: `${meta.color}50`,
+                                                backgroundColor: `${meta.color}10`,
+                                            }}
                                         />
                                     </div>
 

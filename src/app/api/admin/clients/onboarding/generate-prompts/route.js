@@ -19,7 +19,12 @@ const generateSchema = z.object({
 });
 
 const VALID_INTENT_FAMILIES = new Set([
-    'discovery', 'brand', 'competitor', 'pricing', 'buyer_guidance', 'implementation',
+    'discovery',
+    'brand',
+    'competitor',
+    'pricing',
+    'buyer_guidance',
+    'implementation',
 ]);
 const VALID_MODES = new Set(['user_like', 'operator_probe']);
 
@@ -146,10 +151,7 @@ Pour CHAQUE prompt, vérifie :
 }
 
 function buildUserMessage(data) {
-    const parts = [
-        `## Entreprise à évaluer`,
-        `Nom : ${data.business_name}`,
-    ];
+    const parts = [`## Entreprise à évaluer`, `Nom : ${data.business_name}`];
     if (data.business_type) parts.push(`Type d'entreprise : ${data.business_type}`);
     if (data.classification_label) parts.push(`Classification détectée : ${data.classification_label}`);
     if (data.city) parts.push(`Ville principale : ${data.city}`);
@@ -158,7 +160,9 @@ function buildUserMessage(data) {
     if (data.services) parts.push(`Services offerts : ${data.services}`);
     if (data.short_description) parts.push(`Résumé d'activité : ${data.short_description}`);
     if (data.areas_served) parts.push(`Zones desservies : ${data.areas_served}`);
-    parts.push(`\nGénère les 7 prompts GEO optimaux pour cette entreprise. Adapte chaque prompt au secteur d'activité, aux services réels et au contexte géographique.`);
+    parts.push(
+        `\nGénère les 7 prompts GEO optimaux pour cette entreprise. Adapte chaque prompt au secteur d'activité, aux services réels et au contexte géographique.`,
+    );
     return parts.join('\n');
 }
 
@@ -247,9 +251,12 @@ export async function POST(request) {
                 query_text: contract.query_text,
                 intent_family: contract.intent_family,
                 prompt_mode: contract.prompt_mode,
-                category: item.intent_family === 'brand' ? 'brand'
-                    : item.intent_family === 'competitor' ? 'competitor_comparison'
-                    : 'discovery',
+                category:
+                    item.intent_family === 'brand'
+                        ? 'brand'
+                        : item.intent_family === 'competitor'
+                          ? 'competitor_comparison'
+                          : 'discovery',
                 locale: 'fr-CA',
                 rationale: item.rationale,
                 quality_status: contract.quality_status,

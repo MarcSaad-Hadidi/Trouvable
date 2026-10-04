@@ -31,17 +31,17 @@ npm run verify
 
 Elle s'arrête au premier échec et exécute **en série** : formatage, lint, types, tests applicatifs, tests de l'outillage, tests de garde-fous, build, validateur d'hibernation, contrôle du dépôt puis `git diff --check`. Ne pas lancer simultanément `typecheck` et `build` : ils écrivent les mêmes types Next.
 
-| Commande | Périmètre |
-|---|---|
-| `npm run format:check` | Prettier selon `.prettierrc.json` et `.prettierignore`. `npm run format` écrit le formatage ; séparer ce diff des changements de comportement. |
-| `npm run lint` | ESLint sur JS/JSX/TS/TSX, seuil de zéro avertissement. `lint:fix` applique les corrections automatiques. |
-| `npm run typecheck` | Types de routes Next générés avec webpack, puis programme TypeScript configuré ; ne type pas intégralement le JavaScript. |
-| `npm test` | Tests Vitest JS/JSX/TS/TSX, fixtures et mocks locaux. Exemple ciblé : `npm test -- src/lib/__tests__/portal-access.test.js`. |
-| `npm run test:tooling` | Tests Node du graphe de dépôt, de la vérification en série et de l’isolation QA navigateur. |
-| `npm run test:hibernation` | Tests Node des protections dans `scripts/__tests__/hibernation.test.mjs`. |
-| `npm run build` | Compilation et routes de l'application dormante avec webpack ; aucun déploiement. |
-| `npm run check:hibernation` | Contrat fermé du parking, configuration Vercel et workflows dormants. |
-| `npm run check:repository` | Imports/réexports/mocks et imports dynamiques littéraux, casse, cycles de production, liens Markdown locaux et ancres, références JSX littérales d'assets et motifs d'artefacts générés suivis. |
+| Commande                    | Périmètre                                                                                                                                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run format:check`      | Prettier selon `.prettierrc.json` et `.prettierignore`. `npm run format` écrit le formatage ; séparer ce diff des changements de comportement.                                                  |
+| `npm run lint`              | ESLint sur JS/JSX/TS/TSX, seuil de zéro avertissement. `lint:fix` applique les corrections automatiques.                                                                                        |
+| `npm run typecheck`         | Types de routes Next générés avec webpack, puis programme TypeScript configuré ; ne type pas intégralement le JavaScript.                                                                       |
+| `npm test`                  | Tests Vitest JS/JSX/TS/TSX, fixtures et mocks locaux. Exemple ciblé : `npm test -- src/lib/__tests__/portal-access.test.js`.                                                                    |
+| `npm run test:tooling`      | Tests Node du graphe de dépôt, de la vérification en série et de l’isolation QA navigateur.                                                                                                     |
+| `npm run test:hibernation`  | Tests Node des protections dans `scripts/__tests__/hibernation.test.mjs`.                                                                                                                       |
+| `npm run build`             | Compilation et routes de l'application dormante avec webpack ; aucun déploiement.                                                                                                               |
+| `npm run check:hibernation` | Contrat fermé du parking, configuration Vercel et workflows dormants.                                                                                                                           |
+| `npm run check:repository`  | Imports/réexports/mocks et imports dynamiques littéraux, casse, cycles de production, liens Markdown locaux et ancres, références JSX littérales d'assets et motifs d'artefacts générés suivis. |
 
 Le [contrôle du dépôt](scripts/check-repository.mjs) compte les imports calculés sans résoudre toutes leurs destinations. Il ne certifie pas les assets référencés dynamiquement, tout le CSS ou tous les chemins runtime ; ses liens HTTP externes ne sont pas vérifiés. `assets:check` et `lfs:check` sont absents : les vérifications d'assets littéraux ne constituent pas un contrôle Git LFS.
 

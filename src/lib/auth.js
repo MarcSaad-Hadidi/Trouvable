@@ -32,9 +32,11 @@ function getAllUserEmails(user) {
 }
 
 function getPrimaryUserEmail(user) {
-    return user?.emailAddresses?.find((entry) => entry.id === user?.primaryEmailAddressId)?.emailAddress
-        || user?.emailAddresses?.[0]?.emailAddress
-        || '';
+    return (
+        user?.emailAddresses?.find((entry) => entry.id === user?.primaryEmailAddressId)?.emailAddress ||
+        user?.emailAddresses?.[0]?.emailAddress ||
+        ''
+    );
 }
 
 export async function getAdminAccessState() {

@@ -22,27 +22,31 @@ import { Pill } from './audit-helpers';
  */
 
 function ImpactPill({ value }) {
-    const meta = value === 'fort'
-        ? { tone: 'bg-emerald-400/15 text-emerald-200 border-emerald-400/25', label: 'Impact fort' }
-        : value === 'moyen'
-        ? { tone: 'bg-sky-400/10 text-sky-200 border-sky-400/20', label: 'Impact moyen' }
-        : { tone: 'bg-white/[0.05] text-white/55 border-white/10', label: 'Impact variable' };
+    const meta =
+        value === 'fort'
+            ? { tone: 'bg-emerald-400/15 text-emerald-200 border-emerald-400/25', label: 'Impact fort' }
+            : value === 'moyen'
+              ? { tone: 'bg-sky-400/10 text-sky-200 border-sky-400/20', label: 'Impact moyen' }
+              : { tone: 'bg-white/[0.05] text-white/55 border-white/10', label: 'Impact variable' };
     return <Pill label={meta.label} tone={meta.tone} />;
 }
 
 function EffortPill({ value }) {
-    const meta = value === 'faible'
-        ? { tone: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20', label: 'Effort faible' }
-        : value === 'moyen'
-        ? { tone: 'bg-amber-400/10 text-amber-200 border-amber-400/20', label: 'Effort moyen' }
-        : { tone: 'bg-rose-400/10 text-rose-200 border-rose-400/20', label: 'Effort élevé' };
+    const meta =
+        value === 'faible'
+            ? { tone: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20', label: 'Effort faible' }
+            : value === 'moyen'
+              ? { tone: 'bg-amber-400/10 text-amber-200 border-amber-400/20', label: 'Effort moyen' }
+              : { tone: 'bg-rose-400/10 text-rose-200 border-rose-400/20', label: 'Effort élevé' };
     return <Pill label={meta.label} tone={meta.tone} />;
 }
 
 function KindPill({ kind }) {
-    return kind === 'gap'
-        ? <Pill label="Manque" tone="bg-red-400/10 text-red-200 border-red-400/20" />
-        : <Pill label="Levier" tone="bg-emerald-400/10 text-emerald-300 border-emerald-400/20" />;
+    return kind === 'gap' ? (
+        <Pill label="Manque" tone="bg-red-400/10 text-red-200 border-red-400/20" />
+    ) : (
+        <Pill label="Levier" tone="bg-emerald-400/10 text-emerald-300 border-emerald-400/20" />
+    );
 }
 
 function OpportunityCard({ opportunity }) {
@@ -85,7 +89,9 @@ function FamilyBlock({ family, maxItems }) {
         <div className={`rounded-2xl border p-4 ${family.accent}`}>
             <div className="mb-3 flex items-center justify-between gap-2">
                 <div>
-                    <div className={`text-[10px] font-bold uppercase tracking-[0.1em] ${family.accentText}`}>{family.label}</div>
+                    <div className={`text-[10px] font-bold uppercase tracking-[0.1em] ${family.accentText}`}>
+                        {family.label}
+                    </div>
                     <p className="mt-0.5 text-[11px] leading-relaxed text-white/50">{family.description}</p>
                 </div>
                 <Pill
@@ -100,7 +106,8 @@ function FamilyBlock({ family, maxItems }) {
             </div>
             {remaining > 0 && (
                 <p className="mt-2 text-[10.5px] text-white/40">
-                    + {remaining} opportunité{remaining > 1 ? 's' : ''} supplémentaire{remaining > 1 ? 's' : ''} dans cette famille.
+                    + {remaining} opportunité{remaining > 1 ? 's' : ''} supplémentaire{remaining > 1 ? 's' : ''} dans
+                    cette famille.
                 </p>
             )}
         </div>
@@ -117,7 +124,8 @@ export default function AuditOpportunitySummary({ audit, maxItemsPerFamily = 4 }
                 <div>
                     <div className="text-base font-bold text-white/95">Opportunités détectées</div>
                     <div className="mt-0.5 text-[11px] text-white/45">
-                        Classées par famille d&apos;action. Chaque carte indique quoi, pourquoi, action, impact et effort.
+                        Classées par famille d&apos;action. Chaque carte indique quoi, pourquoi, action, impact et
+                        effort.
                     </div>
                 </div>
                 <Pill
@@ -128,11 +136,7 @@ export default function AuditOpportunitySummary({ audit, maxItemsPerFamily = 4 }
 
             <div className="mt-4 space-y-3">
                 {model.families.map((family) => (
-                    <FamilyBlock
-                        key={family.key}
-                        family={family}
-                        maxItems={maxItemsPerFamily}
-                    />
+                    <FamilyBlock key={family.key} family={family} maxItems={maxItemsPerFamily} />
                 ))}
             </div>
         </div>

@@ -22,10 +22,7 @@ export async function insertTaskRun(payload) {
  */
 export async function updateTaskRun(runId, updates) {
     const supabase = getAdminSupabase();
-    const { error } = await supabase
-        .from('ai_task_runs')
-        .update(updates)
-        .eq('id', runId);
+    const { error } = await supabase.from('ai_task_runs').update(updates).eq('id', runId);
     if (error) throw new Error(`[AI/TaskLog] updateTaskRun: ${error.message}`);
 }
 

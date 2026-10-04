@@ -21,13 +21,17 @@ async function failWithError({ clientId, returnTo, appUrl, code, fallbackMessage
                     clientId,
                     provider: 'gsc',
                     status: 'error',
-                    lastError: remedy ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}` : (fallbackMessage || 'oauth_failed'),
+                    lastError: remedy
+                        ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}`
+                        : fallbackMessage || 'oauth_failed',
                 }),
                 updateConnectorState({
                     clientId,
                     provider: 'ga4',
                     status: 'error',
-                    lastError: remedy ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}` : (fallbackMessage || 'oauth_failed'),
+                    lastError: remedy
+                        ? `[${remedy.code}] ${remedy.headline}: ${remedy.body}`
+                        : fallbackMessage || 'oauth_failed',
                 }),
             ]);
         } catch (persistError) {
@@ -53,11 +57,14 @@ export async function GET(request) {
 
     const verifiedState = await verifyGoogleOAuthState(statePayload);
     if (!verifiedState.valid) {
-        return NextResponse.json({
-            error: 'invalid_google_oauth_state',
-            status: 400,
-            detail: verifiedState.error,
-        }, { status: 400 });
+        return NextResponse.json(
+            {
+                error: 'invalid_google_oauth_state',
+                status: 400,
+                detail: verifiedState.error,
+            },
+            { status: 400 },
+        );
     }
 
     const { clientId, returnTo } = verifiedState.payload;
@@ -89,7 +96,7 @@ export async function GET(request) {
         oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_OAUTH_CLIENT_ID,
             process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-            `${appUrl}/api/connectors/google/callback`
+            `${appUrl}/api/connectors/google/callback`,
         );
 
         ({ tokens } = await oauth2Client.getToken(code));
@@ -97,13 +104,8 @@ export async function GET(request) {
         /* invalid_client → mauvais GOOGLE_OAUTH_CLIENT_ID/SECRET (voir
            lib/seo/gsc-property.js + mapGoogleOAuthError). Même remédiation
            côté UI connecteurs. Autres: invalid_grant, redirect_uri_mismatch. */
-        const oauthCode =
-            tokenError?.response?.data?.error
-            || tokenError?.code
-            || tokenError?.message;
-        const fallbackMessage = tokenError?.response?.data?.error_description
-            || tokenError?.message
-            || null;
+        const oauthCode = tokenError?.response?.data?.error || tokenError?.code || tokenError?.message;
+        const fallbackMessage = tokenError?.response?.data?.error_description || tokenError?.message || null;
         console.error('[Google OAuth] Token exchange failed:', { code: oauthCode, message: fallbackMessage });
         return failWithError({ clientId, returnTo, appUrl, code: oauthCode, fallbackMessage });
     }
@@ -116,8 +118,8 @@ export async function GET(request) {
         const googleEmail = userInfo.data.email;
 
         const existingConnectors = await getClientConnectorRows(clientId);
-        const gscConnector = existingConnectors.find(c => c.provider === 'gsc') || {};
-        const ga4Connector = existingConnectors.find(c => c.provider === 'ga4') || {};
+        const gscConnector = existingConnectors.find((c) => c.provider === 'gsc') || {};
+        const ga4Connector = existingConnectors.find((c) => c.provider === 'ga4') || {};
 
         const gscConfig = {
             ...(gscConnector.config || {}),
@@ -141,8 +143,12 @@ export async function GET(request) {
                 const analyticsadmin = google.analyticsadmin({ version: 'v1beta', auth: oauth2Client });
                 const accountsResp = await analyticsadmin.accountSummaries.list();
                 const summaries = accountsResp?.data?.accountSummaries || [];
-                
-                if (summaries.length > 0 && summaries[0].propertySummaries && summaries[0].propertySummaries.length > 0) {
+
+                if (
+                    summaries.length > 0 &&
+                    summaries[0].propertySummaries &&
+                    summaries[0].propertySummaries.length > 0
+                ) {
                     const propertyName = summaries[0].propertySummaries[0].property;
                     if (propertyName) {
                         ga4Config.propertyId = propertyName.replace('properties/', '');
@@ -167,7 +173,7 @@ export async function GET(request) {
                 status: 'configured',
                 config: ga4Config,
                 lastError: null,
-            })
+            }),
         ]);
 
         const succUrl = new URL(returnTo, appUrl);

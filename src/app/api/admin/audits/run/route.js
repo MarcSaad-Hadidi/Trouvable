@@ -6,7 +6,11 @@ import { requireAdmin } from '@/lib/auth';
 import { auditRunPayloadSchema } from '@/lib/ai/schemas';
 import { runFullAudit } from '@/lib/audit/run-audit';
 import { upsertVisibilitySnapshotForClient } from '@/lib/continuous/jobs';
-import { getClientById as dbGetClientById, getClientBySlug as dbGetClientBySlug, createClient as dbCreateClient } from '@/lib/db/clients';
+import {
+    getClientById as dbGetClientById,
+    getClientBySlug as dbGetClientBySlug,
+    createClient as dbCreateClient,
+} from '@/lib/db/clients';
 
 export async function POST(request) {
     const admin = await requireAdmin();
@@ -34,7 +38,8 @@ export async function POST(request) {
         } else if (websiteUrl && clientName) {
             const slug = clientName
                 .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
 

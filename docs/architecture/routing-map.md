@@ -5,114 +5,114 @@ The application is dormant; production serves parking only. This map links prese
 ## Public marketing routes
 
 - `/`
-  - route: `src/app/page.jsx`
-  - implementation: `src/features/public/home/HomePage.jsx`
+    - route: `src/app/page.jsx`
+    - implementation: `src/features/public/home/HomePage.jsx`
 - `/a-propos`
-  - route layout: `src/app/a-propos/layout.jsx`
-  - implementation: `src/features/public/about/AboutLayout.jsx`
-  - page: `src/features/public/about/AboutPage.jsx`
+    - route layout: `src/app/a-propos/layout.jsx`
+    - implementation: `src/features/public/about/AboutLayout.jsx`
+    - page: `src/features/public/about/AboutPage.jsx`
 - `/contact`
-  - route: `src/app/contact/page.jsx`
-  - implementation: `src/features/public/contact/ContactPage.jsx`
+    - route: `src/app/contact/page.jsx`
+    - implementation: `src/features/public/contact/ContactPage.jsx`
 - `/methodologie`
-  - route: `src/app/methodologie/page.jsx`
-  - implementation: `src/features/public/methodology/MethodologyPage.jsx`
+    - route: `src/app/methodologie/page.jsx`
+    - implementation: `src/features/public/methodology/MethodologyPage.jsx`
 - `/offres`
-  - route: `src/app/offres/page.jsx`
-  - implementation: `src/features/public/offers/OffersPage.jsx`
+    - route: `src/app/offres/page.jsx`
+    - implementation: `src/features/public/offers/OffersPage.jsx`
 - `/notre-mesure`
-  - route: `src/app/notre-mesure/page.jsx`
-  - implementation: `src/features/public/measurement/MeasurementPage.jsx`
+    - route: `src/app/notre-mesure/page.jsx`
+    - implementation: `src/features/public/measurement/MeasurementPage.jsx`
 - `/etudes-de-cas`
-  - route: `src/app/etudes-de-cas/page.jsx`
-  - implementation: `src/features/public/case-studies/CaseStudiesPage.jsx`
+    - route: `src/app/etudes-de-cas/page.jsx`
+    - implementation: `src/features/public/case-studies/CaseStudiesPage.jsx`
 - `/etudes-de-cas/dossier-type`
-  - route: `src/app/etudes-de-cas/dossier-type/page.jsx`
-  - implementation: `src/features/public/case-study-sample/CaseStudySamplePage.jsx`
+    - route: `src/app/etudes-de-cas/dossier-type/page.jsx`
+    - implementation: `src/features/public/case-study-sample/CaseStudySamplePage.jsx`
 - `/mentions-legales`
-  - route: `src/app/mentions-legales/page.jsx`
-  - implementation: `src/features/public/legal-notice/LegalNoticePage.jsx`
+    - route: `src/app/mentions-legales/page.jsx`
+    - implementation: `src/features/public/legal-notice/LegalNoticePage.jsx`
 - `/politique-confidentialite`
-  - route: `src/app/politique-confidentialite/page.jsx`
-  - implementation: `src/features/public/privacy-policy/PrivacyPolicyPage.jsx`
+    - route: `src/app/politique-confidentialite/page.jsx`
+    - implementation: `src/features/public/privacy-policy/PrivacyPolicyPage.jsx`
 - `/clients/[clientSlug]`
-  - route: `src/app/clients/[clientSlug]/page.jsx`
-  - implementation: `src/features/public/client-profile/ClientProfilePage.jsx`
+    - route: `src/app/clients/[clientSlug]/page.jsx`
+    - implementation: `src/features/public/client-profile/ClientProfilePage.jsx`
 - `/expertises/[expertiseSlug]`
-  - route: `src/app/expertises/[expertiseSlug]/page.jsx`
-  - implementation: `src/features/public/expertise/ExpertisePage.jsx`
+    - route: `src/app/expertises/[expertiseSlug]/page.jsx`
+    - implementation: `src/features/public/expertise/ExpertisePage.jsx`
 - `/villes/[villeSlug]`
-  - route: `src/app/villes/[villeSlug]/page.jsx`
-  - implementation: `src/features/public/city/VillePage.jsx`
+    - route: `src/app/villes/[villeSlug]/page.jsx`
+    - implementation: `src/features/public/city/VillePage.jsx`
 
 ## Portal routes
 
 - `/portal`
-  - outer layout: `src/app/portal/layout.jsx`
-  - implementation: `src/features/portal/PortalLayout.jsx`
+    - outer layout: `src/app/portal/layout.jsx`
+    - implementation: `src/features/portal/PortalLayout.jsx`
 - `/portal`
-  - app layout: `src/app/portal/(app)/layout.jsx`
-  - implementation: `src/features/portal/PortalAppLayout.jsx`
+    - app layout: `src/app/portal/(app)/layout.jsx`
+    - implementation: `src/features/portal/PortalAppLayout.jsx`
 - `/portal`
-  - route: `src/app/portal/(app)/page.jsx`
-  - implementation: `src/features/portal/PortalIndexPage.jsx`
+    - route: `src/app/portal/(app)/page.jsx`
+    - implementation: `src/features/portal/PortalIndexPage.jsx`
 - `/portal/[clientSlug]`
-  - route: `src/app/portal/(app)/[clientSlug]/page.jsx`
-  - implementation: `src/features/portal/PortalClientPage.jsx`
+    - route: `src/app/portal/(app)/[clientSlug]/page.jsx`
+    - implementation: `src/features/portal/PortalClientPage.jsx`
 - `/portal/sign-in`
-  - route: `src/app/portal/sign-in/[[...sign-in]]/page.jsx`
-  - implementation: `src/features/auth/portal/PortalSignInPage.jsx`
+    - route: `src/app/portal/sign-in/[[...sign-in]]/page.jsx`
+    - implementation: `src/features/auth/portal/PortalSignInPage.jsx`
 
 ## Espace routes
 
 - `/espace`
-  - route layout: `src/app/espace/layout.jsx`
-  - implementation: `src/features/espace/EspaceLayout.jsx`
+    - route layout: `src/app/espace/layout.jsx`
+    - implementation: `src/features/espace/EspaceLayout.jsx`
 - `/espace`
-  - route: `src/app/espace/[[...sign-in]]/page.jsx`
-  - implementation: `src/features/auth/espace/EspaceSignInPage.jsx`
+    - route: `src/app/espace/[[...sign-in]]/page.jsx`
+    - implementation: `src/features/auth/espace/EspaceSignInPage.jsx`
 - `/espace/apres-connexion`
-  - route: `src/app/espace/apres-connexion/page.jsx`
-  - implementation: `src/features/espace/PostSignInPage.jsx`
+    - route: `src/app/espace/apres-connexion/page.jsx`
+    - implementation: `src/features/espace/PostSignInPage.jsx`
 
 ## Admin access and workspace shell
 
 - `/admin`
-  - outer layout: `src/app/admin/layout.jsx`
-  - implementation: metadata shell only
+    - outer layout: `src/app/admin/layout.jsx`
+    - implementation: metadata shell only
 - `/admin/sign-in`
-  - layout: `src/app/admin/sign-in/layout.jsx`
-  - implementation: `src/features/auth/admin/AdminClerkProvider.jsx`
+    - layout: `src/app/admin/sign-in/layout.jsx`
+    - implementation: `src/features/auth/admin/AdminClerkProvider.jsx`
 - `/admin/sign-in`
-  - route: `src/app/admin/sign-in/[[...sign-in]]/page.jsx`
-  - implementation: `src/features/auth/admin/AdminSignInPage.jsx`
+    - route: `src/app/admin/sign-in/[[...sign-in]]/page.jsx`
+    - implementation: `src/features/auth/admin/AdminSignInPage.jsx`
 - `/admin`
-  - workspace layout: `src/app/admin/(workspace)/layout.jsx`
-  - implementation: `src/features/admin/shared/layout/AdminWorkspaceLayout.jsx`
+    - workspace layout: `src/app/admin/(workspace)/layout.jsx`
+    - implementation: `src/features/admin/shared/layout/AdminWorkspaceLayout.jsx`
 - `/admin`
-  - route: `src/app/admin/(workspace)/page.jsx`
-  - implementation: `src/features/admin/home/AdminDashboardPage.jsx`
+    - route: `src/app/admin/(workspace)/page.jsx`
+    - implementation: `src/features/admin/home/AdminDashboardPage.jsx`
 
 ## Admin portfolio routes
 
 - `/admin/clients`
-  - route: `src/app/admin/(workspace)/clients/page.jsx`
-  - implementation: `src/features/admin/portfolio/AdminClientsPage.jsx`
+    - route: `src/app/admin/(workspace)/clients/page.jsx`
+    - implementation: `src/features/admin/portfolio/AdminClientsPage.jsx`
 - `/admin/clients/onboarding`
-  - route: `src/app/admin/(workspace)/clients/onboarding/page.jsx`
-  - implementation: `src/features/admin/portfolio/ClientOnboardingPage.jsx`
+    - route: `src/app/admin/(workspace)/clients/onboarding/page.jsx`
+    - implementation: `src/features/admin/portfolio/ClientOnboardingPage.jsx`
 - `/admin/clients/new`
-  - route: `src/app/admin/(workspace)/clients/new/page.jsx`
-  - behavior: redirect to `/admin/clients/onboarding`
+    - route: `src/app/admin/(workspace)/clients/new/page.jsx`
+    - behavior: redirect to `/admin/clients/onboarding`
 - `/admin/clients/create`
-  - route: `src/app/admin/(workspace)/clients/create/page.jsx`
-  - behavior: redirect to `/admin/clients/onboarding`
+    - route: `src/app/admin/(workspace)/clients/create/page.jsx`
+    - behavior: redirect to `/admin/clients/onboarding`
 - `/admin/clients/[clientId]/edit`
-  - route: `src/app/admin/(workspace)/clients/[clientId]/edit/page.jsx`
-  - implementation: `src/features/admin/portfolio/ClientEditPage.jsx`
+    - route: `src/app/admin/(workspace)/clients/[clientId]/edit/page.jsx`
+    - implementation: `src/features/admin/portfolio/ClientEditPage.jsx`
 - `/admin/clients/[clientId]`
-  - layout: `src/app/admin/(workspace)/clients/[clientId]/layout.jsx`
-  - implementation: `src/features/admin/shared/layout/ClientWorkspaceLayout.jsx`
+    - layout: `src/app/admin/(workspace)/clients/[clientId]/layout.jsx`
+    - implementation: `src/features/admin/shared/layout/ClientWorkspaceLayout.jsx`
 
 ## Admin dossier section
 
@@ -174,8 +174,8 @@ Thin route files under `src/app/admin/(workspace)/clients/[clientId]/agent/**` m
 ## Admin portal section
 
 - `/admin/clients/[clientId]/portal`
-  - route: `src/app/admin/(workspace)/clients/[clientId]/portal/page.jsx`
-  - implementation: `src/features/admin/portal/ClientPortalPage.jsx`
+    - route: `src/app/admin/(workspace)/clients/[clientId]/portal/page.jsx`
+    - implementation: `src/features/admin/portal/ClientPortalPage.jsx`
 
 ## Admin compatibility aliases
 

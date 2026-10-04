@@ -57,19 +57,27 @@ describe('resolveBusinessType', () => {
 
     // ── True SaaS (must remain SaaS) ────────────────────────
     it('resolves pure SaaS product from services — no agency/consulting override', () => {
-        const result = resolveBusinessType('', {
-            type: 'generic_business',
-            services_preview: ['Cloud platform', 'API integration'],
-        }, 'TechCo');
+        const result = resolveBusinessType(
+            '',
+            {
+                type: 'generic_business',
+                services_preview: ['Cloud platform', 'API integration'],
+            },
+            'TechCo',
+        );
         expect(result.business_model_detected).toBe('saas');
         expect(result.target_audience).toBe('b2b');
     });
 
     it('preserves SaaS for a self-serve software product with no service-led signals', () => {
-        const result = resolveBusinessType('SoftwareApplication', {
-            type: 'saas_software',
-            label: 'Project management tool',
-        }, 'TaskMaster Pro');
+        const result = resolveBusinessType(
+            'SoftwareApplication',
+            {
+                type: 'saas_software',
+                label: 'Project management tool',
+            },
+            'TaskMaster Pro',
+        );
         expect(result.business_model_detected).toBe('saas');
         expect(result.canonical_category).not.toBe('unknown');
     });
@@ -77,19 +85,27 @@ describe('resolveBusinessType', () => {
     // ── Service-led / operated-service (generalizable) ──────
     it('overrides SaaS to operated_service when agency/consulting signals are present', () => {
         // A digital agency that uses a platform internally but sells services
-        const result = resolveBusinessType('', {
-            type: 'generic_business',
-            services_preview: ['Consulting stratégique', 'Cloud platform'],
-        }, 'Agence Digitale XYZ');
+        const result = resolveBusinessType(
+            '',
+            {
+                type: 'generic_business',
+                services_preview: ['Consulting stratégique', 'Cloud platform'],
+            },
+            'Agence Digitale XYZ',
+        );
         expect(result.business_model_detected).toBe('operated_service');
         expect(result.target_audience).toBe('b2b');
     });
 
     it('detects operated_service for a cabinet/firme with SaaS-like services', () => {
-        const result = resolveBusinessType('', {
-            type: 'generic_business',
-            services_preview: ['Platform SaaS', 'Accompagnement stratégique'],
-        }, 'Cabinet Stratégie Numérique');
+        const result = resolveBusinessType(
+            '',
+            {
+                type: 'generic_business',
+                services_preview: ['Platform SaaS', 'Accompagnement stratégique'],
+            },
+            'Cabinet Stratégie Numérique',
+        );
         expect(result.business_model_detected).toBe('operated_service');
         expect(result.target_audience).toBe('b2b');
     });

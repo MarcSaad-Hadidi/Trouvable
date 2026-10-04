@@ -25,22 +25,24 @@ function normalizeSchemaNameMatch(left, right) {
 
 function extractRelevantEntities(entities = []) {
     return toArray(entities).filter((entity) => {
-        const types = toArray(entity?.types?.length ? entity.types : entity?.type).map(t => String(t).toLowerCase());
-        return types.some((type) => /(organization|localbusiness|professionalservice|store|restaurant|corporation)/.test(type));
+        const types = toArray(entity?.types?.length ? entity.types : entity?.type).map((t) => String(t).toLowerCase());
+        return types.some((type) =>
+            /(organization|localbusiness|professionalservice|store|restaurant|corporation)/.test(type),
+        );
     });
 }
 
 function extractServiceEntities(entities = [], nodes = []) {
     const fromEntities = toArray(entities).filter((e) => {
-        const types = toArray(e?.types?.length ? e.types : e?.type).map(t => String(t).toLowerCase());
-        return types.some(t => t === 'service');
+        const types = toArray(e?.types?.length ? e.types : e?.type).map((t) => String(t).toLowerCase());
+        return types.some((t) => t === 'service');
     });
 
     const fromNodes = toArray(nodes).filter((node) => {
-        const types = toArray(node?.['@type']).map(t => String(t).toLowerCase());
-        return types.some(t => t === 'service');
+        const types = toArray(node?.['@type']).map((t) => String(t).toLowerCase());
+        return types.some((t) => t === 'service');
     });
-    
+
     return { fromEntities, fromNodes };
 }
 
@@ -52,7 +54,7 @@ function buildBrandConsistency(client, entities) {
     let status;
     let reliability;
     const contradictions = [];
-    
+
     if (!canonicalName) {
         status = 'à confirmer';
         reliability = 'unavailable';
@@ -62,7 +64,7 @@ function buildBrandConsistency(client, entities) {
         reliability = 'measured';
         contradictions.push('Aucun nom d’entité (Organization/LocalBusiness) observé dans le schema audité.');
     } else {
-        const matched = observedNames.some(name => normalizeSchemaNameMatch(canonicalName, name));
+        const matched = observedNames.some((name) => normalizeSchemaNameMatch(canonicalName, name));
         if (matched) {
             status = 'alignée';
             reliability = 'calculated';
@@ -80,9 +82,10 @@ function buildBrandConsistency(client, entities) {
         reliability,
         observedSignals: observedNames,
         contradictions,
-        evidence: observedNames.length > 0 
-            ? `Noms trouvés dans les sources structurées : ${observedNames.join(' · ')}` 
-            : 'Aucun signal structuré exploitable pour le nom.',
+        evidence:
+            observedNames.length > 0
+                ? `Noms trouvés dans les sources structurées : ${observedNames.join(' · ')}`
+                : 'Aucun signal structuré exploitable pour le nom.',
     };
 }
 
@@ -95,21 +98,29 @@ function buildNAPConsistency(client, entities) {
     const normalizedCanonicalAddress = normalizeComparableText(canonicalAddress);
 
     const relevantEntities = extractRelevantEntities(entities);
-    const observedPhones = uniqueStrings(relevantEntities.map((e) => normalizeComparablePhone(e?.telephone)).filter(Boolean));
-    const observedEmails = uniqueStrings(relevantEntities.map((e) => normalizeComparableText(e?.email)).filter(Boolean));
-    const observedAddresses = uniqueStrings(relevantEntities.map((e) => compactString(e?.address?.line || e?.address)).filter(Boolean));
+    const observedPhones = uniqueStrings(
+        relevantEntities.map((e) => normalizeComparablePhone(e?.telephone)).filter(Boolean),
+    );
+    const observedEmails = uniqueStrings(
+        relevantEntities.map((e) => normalizeComparableText(e?.email)).filter(Boolean),
+    );
+    const observedAddresses = uniqueStrings(
+        relevantEntities.map((e) => compactString(e?.address?.line || e?.address)).filter(Boolean),
+    );
 
     const contradictions = [];
     const gaps = [];
 
     if (canonicalPhone) {
         if (observedPhones.length === 0) gaps.push('Téléphone structuré manquant');
-        else if (!observedPhones.includes(canonicalPhone)) contradictions.push(`Téléphone canonique non trouvé parmi les téléphones structurés.`);
+        else if (!observedPhones.includes(canonicalPhone))
+            contradictions.push(`Téléphone canonique non trouvé parmi les téléphones structurés.`);
     }
 
     if (canonicalEmail) {
         if (observedEmails.length === 0) gaps.push('Email structuré manquant');
-        else if (!observedEmails.includes(canonicalEmail)) contradictions.push(`Courriel canonique non trouvé parmi les courriels structurés.`);
+        else if (!observedEmails.includes(canonicalEmail))
+            contradictions.push(`Courriel canonique non trouvé parmi les courriels structurés.`);
     }
 
     if (normalizedCanonicalAddress) {
@@ -167,11 +178,12 @@ function buildNAPConsistency(client, entities) {
 function buildServicesConsistency(client, entities, nodes) {
     const canonicalServices = uniqueStrings(toArray(client?.business_details?.services));
     const { fromEntities, fromNodes } = extractServiceEntities(entities, nodes);
-    
-    const observedServices = uniqueStrings([
-        ...fromEntities.map(e => compactString(e?.name)),
-        ...fromNodes.map(n => compactString(n?.name))
-    ].filter(Boolean));
+
+    const observedServices = uniqueStrings(
+        [...fromEntities.map((e) => compactString(e?.name)), ...fromNodes.map((n) => compactString(n?.name))].filter(
+            Boolean,
+        ),
+    );
 
     let status;
     let reliability = 'unavailable';
@@ -188,8 +200,12 @@ function buildServicesConsistency(client, entities, nodes) {
         reliability = 'measured';
         gaps.push('Aucune entité Service structurée découverte');
     } else {
-        canonicalServices.forEach(srv => {
-            const match = observedServices.some(obs => normalizeComparableText(obs).includes(normalizeComparableText(srv)) || normalizeComparableText(srv).includes(normalizeComparableText(obs)));
+        canonicalServices.forEach((srv) => {
+            const match = observedServices.some(
+                (obs) =>
+                    normalizeComparableText(obs).includes(normalizeComparableText(srv)) ||
+                    normalizeComparableText(srv).includes(normalizeComparableText(obs)),
+            );
             if (match) aligned.push(srv);
             else notAligned.push(srv);
         });
@@ -217,9 +233,10 @@ function buildServicesConsistency(client, entities, nodes) {
         unalignedSignals: notAligned,
         gaps,
         contradictions,
-        evidence: observedServices.length > 0
-            ? `${observedServices.length} entité(s) Service relevée(s) lors du dernier audit.`
-            : 'Aucun découpage de service détectable dans le JSON-LD.',
+        evidence:
+            observedServices.length > 0
+                ? `${observedServices.length} entité(s) Service relevée(s) lors du dernier audit.`
+                : 'Aucun découpage de service détectable dans le JSON-LD.',
     };
 }
 
@@ -227,14 +244,16 @@ function buildZonesConsistency(client, entities, nodes) {
     const canonicalZones = uniqueStrings([
         ...toArray(client?.seo_data?.target_cities),
         ...toArray(client?.business_details?.areas_served),
-        compactString(client?.address?.city)
+        compactString(client?.address?.city),
     ]);
 
     const relevantEntities = extractRelevantEntities(entities);
-    const observedAreas = uniqueStrings(relevantEntities.flatMap(e => toArray(e?.areaServed)));
-    
+    const observedAreas = uniqueStrings(relevantEntities.flatMap((e) => toArray(e?.areaServed)));
+
     // Also check raw nodes just in case
-    const rawAreas = uniqueStrings(toArray(nodes).flatMap(n => toArray(n?.areaServed).map(a => compactString(a?.name || a))));
+    const rawAreas = uniqueStrings(
+        toArray(nodes).flatMap((n) => toArray(n?.areaServed).map((a) => compactString(a?.name || a))),
+    );
     const allObserved = uniqueStrings([...observedAreas, ...rawAreas]);
 
     let status;
@@ -252,8 +271,8 @@ function buildZonesConsistency(client, entities, nodes) {
         reliability = 'measured';
         gaps.push('Aucune propriété areaServed relevée dans le schema');
     } else {
-        canonicalZones.forEach(zone => {
-            const match = allObserved.some(obs => normalizeSchemaNameMatch(zone, obs));
+        canonicalZones.forEach((zone) => {
+            const match = allObserved.some((obs) => normalizeSchemaNameMatch(zone, obs));
             if (match) aligned.push(zone);
             else notAligned.push(zone);
         });
@@ -281,18 +300,20 @@ function buildZonesConsistency(client, entities, nodes) {
         unalignedSignals: notAligned,
         gaps,
         contradictions,
-        evidence: allObserved.length > 0
-            ? `${allObserved.length} mention(s) de zone d’intervention trouvée(s) (ex: ${allObserved.slice(0,2).join(', ')}).`
-            : 'Les données de couverture spatiale sont invisibles dans les structures de site.',
+        evidence:
+            allObserved.length > 0
+                ? `${allObserved.length} mention(s) de zone d’intervention trouvée(s) (ex: ${allObserved.slice(0, 2).join(', ')}).`
+                : 'Les données de couverture spatiale sont invisibles dans les structures de site.',
     };
 }
 
 function buildDescriptionConsistency(client, entities, pageSummaries) {
-    const canonicalDesc = compactString(client?.business_details?.short_desc) || compactString(client?.business_details?.long_desc);
+    const canonicalDesc =
+        compactString(client?.business_details?.short_desc) || compactString(client?.business_details?.long_desc);
     const relevantEntities = extractRelevantEntities(entities);
-    
-    const schemaDesc = relevantEntities.map(e => compactString(e?.description)).find(Boolean);
-    const pageDesc = toArray(pageSummaries).find(p => p?.page_type === 'home')?.summary;
+
+    const schemaDesc = relevantEntities.map((e) => compactString(e?.description)).find(Boolean);
+    const pageDesc = toArray(pageSummaries).find((p) => p?.page_type === 'home')?.summary;
 
     const observedDesc = schemaDesc || pageDesc;
 
@@ -309,12 +330,12 @@ function buildDescriptionConsistency(client, entities, pageSummaries) {
         // We only do a very soft check based on tokens overlapping or length since LLMs summaries aren't verbatim
         const canonNorm = normalizeComparableText(canonicalDesc);
         const obsNorm = normalizeComparableText(observedDesc);
-        
+
         // simple token overlap
-        const canonWords = canonNorm.split(' ').filter(w => w.length > 3);
-        const obsWords = obsNorm.split(' ').filter(w => w.length > 3);
-        
-        const intersection = canonWords.filter(w => obsWords.includes(w));
+        const canonWords = canonNorm.split(' ').filter((w) => w.length > 3);
+        const obsWords = obsNorm.split(' ').filter((w) => w.length > 3);
+
+        const intersection = canonWords.filter((w) => obsWords.includes(w));
         const overlap = canonWords.length > 0 ? intersection.length / canonWords.length : 0;
 
         if (overlap > 0.2) {
@@ -323,11 +344,15 @@ function buildDescriptionConsistency(client, entities, pageSummaries) {
         } else if (overlap > 0.05) {
             status = 'partiellement alignée';
             reliability = 'calculated';
-            contradictions.push('Décalage de lexique ou d’intention significatif entre la présentation dossier et la lecture site/schema.');
+            contradictions.push(
+                'Décalage de lexique ou d’intention significatif entre la présentation dossier et la lecture site/schema.',
+            );
         } else {
             status = 'écart notable';
             reliability = 'calculated';
-            contradictions.push('Les termes constitutifs de la description canonique sont absents du résumé principal.');
+            contradictions.push(
+                'Les termes constitutifs de la description canonique sont absents du résumé principal.',
+            );
         }
     }
 
@@ -337,10 +362,11 @@ function buildDescriptionConsistency(client, entities, pageSummaries) {
         status,
         reliability,
         contradictions,
-        evidence: schemaDesc 
+        evidence: schemaDesc
             ? 'Description lue directement dans les propriétés de l’entité.'
-            : pageDesc ? 'Description lue depuis le résumé IA de la page d’accueil.'
-            : 'Aucun paragraphe macro n’a pu être extrait.',
+            : pageDesc
+              ? 'Description lue depuis le résumé IA de la page d’accueil.'
+              : 'Aucun paragraphe macro n’a pu être extrait.',
     };
 }
 
@@ -348,7 +374,7 @@ function buildProfilesConsistency(client, entities, nodes) {
     const dossierProfiles = uniqueStrings(toArray(client?.social_profiles));
     const extractRawSameAs = toArray(nodes).flatMap((node) => toArray(node?.sameAs));
     const entitySameAs = toArray(entities).flatMap((entity) => toArray(entity?.sameAs));
-    
+
     const observedSameAs = uniqueStrings([...extractRawSameAs, ...entitySameAs]);
 
     const dossierSet = new Set(dossierProfiles.map(normalizeComparableUrl));
@@ -370,8 +396,10 @@ function buildProfilesConsistency(client, entities, nodes) {
     } else if (missingFromSchema.length > 0 || unexpectedInSchema.length > 0) {
         status = 'incohérent';
         reliability = 'calculated';
-        if (missingFromSchema.length > 0) contradictions.push(`${missingFromSchema.length} profil(s) canonique(s) absent(s) du schema.`);
-        if (unexpectedInSchema.length > 0) contradictions.push(`${unexpectedInSchema.length} lien(s) sameAs non identifié(s) dans le dossier.`);
+        if (missingFromSchema.length > 0)
+            contradictions.push(`${missingFromSchema.length} profil(s) canonique(s) absent(s) du schema.`);
+        if (unexpectedInSchema.length > 0)
+            contradictions.push(`${unexpectedInSchema.length} lien(s) sameAs non identifié(s) dans le dossier.`);
     } else {
         status = 'alignée';
         reliability = 'calculated';
@@ -386,27 +414,28 @@ function buildProfilesConsistency(client, entities, nodes) {
         missingFromSchema,
         unexpectedInSchema,
         contradictions,
-        evidence: observedSameAs.length > 0 
-            ? `${observedSameAs.length} mention(s) sameAs exploitées.`
-            : 'Aucun sameAs.'
+        evidence:
+            observedSameAs.length > 0 ? `${observedSameAs.length} mention(s) sameAs exploitées.` : 'Aucun sameAs.',
     };
 }
 
 function extractCriticalContradictions(dimensions) {
-    return dimensions.flatMap(dim => 
-        (dim.contradictions || []).map(text => ({ dimension: dim.label, text, severity: 'high' }))
+    return dimensions.flatMap((dim) =>
+        (dim.contradictions || []).map((text) => ({ dimension: dim.label, text, severity: 'high' })),
     );
 }
 
 function buildGlobalStateAndRecommendations(dimensions) {
     const recommendations = [];
-    const unavailableCount = dimensions.filter(d => ['indisponible', 'à confirmer'].includes(d.status)).length;
-    const missingCount = dimensions.filter(d => ['manquant'].includes(d.status)).length;
-    const issueCount = dimensions.filter(d => ['incohérent', 'écart', 'écart notable', 'partiellement alignée'].includes(d.status)).length;
+    const unavailableCount = dimensions.filter((d) => ['indisponible', 'à confirmer'].includes(d.status)).length;
+    const missingCount = dimensions.filter((d) => ['manquant'].includes(d.status)).length;
+    const issueCount = dimensions.filter((d) =>
+        ['incohérent', 'écart', 'écart notable', 'partiellement alignée'].includes(d.status),
+    ).length;
 
     let globalState;
     let reliability = 'unavailable';
-    
+
     if (unavailableCount === dimensions.length) {
         globalState = 'indisponible';
     } else if (missingCount > dimensions.length / 2) {
@@ -415,7 +444,7 @@ function buildGlobalStateAndRecommendations(dimensions) {
     } else if (issueCount > 1) {
         globalState = 'divergence observée';
         reliability = 'calculated';
-    } else if (dimensions.filter(d => d.status === 'alignée').length >= 3) {
+    } else if (dimensions.filter((d) => d.status === 'alignée').length >= 3) {
         globalState = 'cohérence probable';
         reliability = 'calculated';
     } else {
@@ -423,28 +452,31 @@ function buildGlobalStateAndRecommendations(dimensions) {
         reliability = 'calculated';
     }
 
-    dimensions.forEach(dim => {
+    dimensions.forEach((dim) => {
         if (dim.key === 'brand' && ['incohérent', 'écart', 'manquant'].includes(dim.status)) {
             recommendations.push({
                 title: 'Clarifier ou consolider la marque canonique',
-                explanation: dim.status === 'manquant' 
-                    ? 'L’absence de nom dans le JSON-LD d’entité principale dégrade fortement la clarté GEO.' 
-                    : 'Le dossier partagé et la lecture locale du site déploient des identités divergentes.',
-                reliability: 'calculated'
+                explanation:
+                    dim.status === 'manquant'
+                        ? 'L’absence de nom dans le JSON-LD d’entité principale dégrade fortement la clarté GEO.'
+                        : 'Le dossier partagé et la lecture locale du site déploient des identités divergentes.',
+                reliability: 'calculated',
             });
         }
         if (dim.key === 'nap' && (dim.missingFields?.length > 0 || dim.contradictions?.length > 0)) {
             recommendations.push({
                 title: 'Harmoniser le socle NAP',
-                explanation: 'Les coordonnées (téléphone, adresse) doivent faire office de source de vérité unique pour faciliter l’élicitation algorithmique.',
-                reliability: 'calculated'
+                explanation:
+                    'Les coordonnées (téléphone, adresse) doivent faire office de source de vérité unique pour faciliter l’élicitation algorithmique.',
+                reliability: 'calculated',
             });
         }
         if (dim.key === 'services' && ['manquant', 'incohérent', 'partiellement alignée'].includes(dim.status)) {
             recommendations.push({
                 title: 'Déployer les entités Service manquantes',
-                explanation: 'Les offres mentionnées dans le dossier ne se retrouvent pas en tant que nœuds sémantiques isolés et vérifiables.',
-                reliability: 'calculated'
+                explanation:
+                    'Les offres mentionnées dans le dossier ne se retrouvent pas en tant que nœuds sémantiques isolés et vérifiables.',
+                reliability: 'calculated',
             });
         }
     });
@@ -453,7 +485,7 @@ function buildGlobalStateAndRecommendations(dimensions) {
         recommendations.push({
             title: 'Base de cohérence saine reconnue',
             explanation: 'Les signaux observés actuellement concordent globalement avec le dossier opérateur.',
-            reliability: 'calculated'
+            reliability: 'calculated',
         });
     }
 
@@ -478,7 +510,8 @@ export async function getConsistencySlice(clientId) {
             available: false,
             emptyState: {
                 title: 'Données insuffisantes',
-                description: 'Aucun audit exploitable n’est disponible pour extraire des comparaisons tangibles sur ce mandat.',
+                description:
+                    'Aucun audit exploitable n’est disponible pour extraire des comparaisons tangibles sur ce mandat.',
             },
         };
     }
@@ -496,7 +529,11 @@ export async function getConsistencySlice(clientId) {
 
     const dimensions = [brand, nap, services, zones, descriptions, profiles];
     const criticalContradictions = extractCriticalContradictions(dimensions);
-    const { globalState, reliability: globalReliability, recommendations } = buildGlobalStateAndRecommendations(dimensions);
+    const {
+        globalState,
+        reliability: globalReliability,
+        recommendations,
+    } = buildGlobalStateAndRecommendations(dimensions);
 
     return {
         available: true,

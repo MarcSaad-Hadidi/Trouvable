@@ -73,8 +73,6 @@ export function getPublicationStatus(profile = {}) {
     return profile?.is_published ? 'published' : 'draft';
 }
 
-
-
 export function normalizeClientProfileShape(profile) {
     if (!profile || typeof profile !== 'object') return profile;
 
@@ -116,11 +114,14 @@ function nonEmptyString(value) {
 }
 
 function hasNonEmptyArray(value) {
-    return Array.isArray(value) && value.some((item) => {
-        if (typeof item === 'string') return item.trim().length > 0;
-        if (item && typeof item === 'object') return Object.values(item).some(nonEmptyString);
-        return Boolean(item);
-    });
+    return (
+        Array.isArray(value) &&
+        value.some((item) => {
+            if (typeof item === 'string') return item.trim().length > 0;
+            if (item && typeof item === 'object') return Object.values(item).some(nonEmptyString);
+            return Boolean(item);
+        })
+    );
 }
 
 export function getProfileCompletenessSummary(profile) {
@@ -141,7 +142,10 @@ export function getProfileCompletenessSummary(profile) {
         {
             key: 'service_clarity',
             label: "Clarte de l'offre",
-            complete: nonEmptyString(business.short_desc) || hasNonEmptyArray(business.services) || nonEmptyString(business.long_desc),
+            complete:
+                nonEmptyString(business.short_desc) ||
+                hasNonEmptyArray(business.services) ||
+                nonEmptyString(business.long_desc),
             detail: 'Description claire et services renseignes',
         },
         {
@@ -160,7 +164,9 @@ export function getProfileCompletenessSummary(profile) {
             complete:
                 nonEmptyString(client.business_type) &&
                 nonEmptyString(address.city) &&
-                (nonEmptyString(address.street) || nonEmptyString(business.maps_url) || hasNonEmptyArray(business.opening_hours)),
+                (nonEmptyString(address.street) ||
+                    nonEmptyString(business.maps_url) ||
+                    hasNonEmptyArray(business.opening_hours)),
             detail: 'Adresse, type d activite et elements locaux',
         },
         {
@@ -181,9 +187,7 @@ export function getProfileCompletenessSummary(profile) {
     ];
 
     const completedCount = sections.filter((section) => section.complete).length;
-    const percentage = sections.length > 0
-        ? Math.round((completedCount / sections.length) * 100)
-        : 0;
+    const percentage = sections.length > 0 ? Math.round((completedCount / sections.length) * 100) : 0;
 
     return {
         percentage,

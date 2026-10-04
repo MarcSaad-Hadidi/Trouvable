@@ -39,7 +39,9 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
             .catch((error) => {
                 if (!cancelled) setRuntimeError(error.message || 'Erreur de configuration');
             });
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     async function handleRun() {
@@ -101,8 +103,8 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
         ? runtime.shadowMode
             ? { label: 'Pipeline en observation', tone: 'warn' }
             : runtime.layeredPipeline
-            ? { label: 'Pipeline complet actif', tone: 'info' }
-            : { label: 'Pipeline hérité', tone: 'neutral' }
+              ? { label: 'Pipeline complet actif', tone: 'info' }
+              : { label: 'Pipeline hérité', tone: 'neutral' }
         : null;
 
     return (
@@ -111,17 +113,19 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
                 eyebrow="Lancer un audit"
                 title={clientName ? `Lancer un audit — ${clientName}` : 'Lancer un audit'}
                 subtitle="Déclenche l'exploration complète du site (exploration, vérifications, enrichissements experts, calcul du score Trouvable). Le résultat affiché ci-dessous se met à jour automatiquement à la fin."
-                right={(
+                right={
                     <div className="flex flex-col items-end gap-1">
                         {modePill && <LabPill label={modePill.label} tone={modePill.tone} />}
                         {runtime?.auditVersion && (
                             <span className="text-[10px] text-white/35">version {runtime.auditVersion}</span>
                         )}
                         {runtime?.crawlBudget != null && (
-                            <span className="text-[10px] text-white/35">budget d&apos;exploration : {runtime.crawlBudget} pages</span>
+                            <span className="text-[10px] text-white/35">
+                                budget d&apos;exploration : {runtime.crawlBudget} pages
+                            </span>
                         )}
                     </div>
-                )}
+                }
             />
 
             {runtimeError && (
@@ -157,7 +161,9 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
 
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Dernier audit enregistré</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Dernier audit enregistré
+                    </div>
                     <div className="mt-1 text-[12px] font-semibold text-white/80">{formatDate(latestAuditAt)}</div>
                 </div>
 
@@ -167,18 +173,18 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
                         {running
                             ? 'En cours…'
                             : lastRun
-                                ? lastRun.success
-                                    ? `Succès · ${formatMs(lastRun.elapsedMs)}`
-                                    : `Échec · ${formatMs(lastRun.elapsedMs)}`
-                                : 'Aucun lancement dans cette session'}
+                              ? lastRun.success
+                                  ? `Succès · ${formatMs(lastRun.elapsedMs)}`
+                                  : `Échec · ${formatMs(lastRun.elapsedMs)}`
+                              : 'Aucun lancement dans cette session'}
                     </div>
                 </div>
 
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Identifiant de l&apos;audit</div>
-                    <div className="mt-1 truncate font-mono text-[11px] text-white/70">
-                        {lastRun?.auditId || '—'}
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Identifiant de l&apos;audit
                     </div>
+                    <div className="mt-1 truncate font-mono text-[11px] text-white/70">{lastRun?.auditId || '—'}</div>
                 </div>
             </div>
 
@@ -197,8 +203,14 @@ export default function AuditLabRunner({ clientId, clientName, defaultUrl, onRun
                                         className={`flex items-center justify-between rounded-md border px-2 py-1 ${isError ? 'border-red-400/20 bg-red-400/[0.04]' : 'border-white/[0.04] bg-white/[0.02]'}`}
                                         title={isError ? step.error || 'Étape en erreur' : undefined}
                                     >
-                                        <span className={`truncate text-[11px] ${isError ? 'text-red-300/80' : 'text-white/60'}`}>{step.step || 'étape'}</span>
-                                        <span className="font-mono text-[11px] tabular-nums text-white/80">{formatMs(step.duration_ms ?? step.elapsed_ms ?? step.ms)}</span>
+                                        <span
+                                            className={`truncate text-[11px] ${isError ? 'text-red-300/80' : 'text-white/60'}`}
+                                        >
+                                            {step.step || 'étape'}
+                                        </span>
+                                        <span className="font-mono text-[11px] tabular-nums text-white/80">
+                                            {formatMs(step.duration_ms ?? step.elapsed_ms ?? step.ms)}
+                                        </span>
                                     </div>
                                 );
                             })}

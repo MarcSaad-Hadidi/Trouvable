@@ -25,14 +25,7 @@ export default function ScoreRing({
             style={{ width: size, height: size }}
         >
             <svg width={size} height={size} className="-rotate-90">
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={r}
-                    fill="none"
-                    stroke={trackColor}
-                    strokeWidth={strokeWidth}
-                />
+                <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={trackColor} strokeWidth={strokeWidth} />
                 {pct != null && (
                     <motion.circle
                         cx={size / 2}

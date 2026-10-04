@@ -48,10 +48,13 @@ export async function getGeoResponsesSlice(clientId) {
             runs: `/admin/clients/${clientId}/geo/runs`,
             prompts: `/admin/clients/${clientId}/geo/prompts`,
         },
-        emptyState: items.length === 0 ? {
-            title: 'Aucune réponse exploitable',
-            description:
-                'Les exécutions avec texte de réponse apparaîtront ici. Lancez des runs depuis Prompts ou Exécutions.',
-        } : null,
+        emptyState:
+            items.length === 0
+                ? {
+                      title: 'Aucune réponse exploitable',
+                      description:
+                          'Les exécutions avec texte de réponse apparaîtront ici. Lancez des runs depuis Prompts ou Exécutions.',
+                  }
+                : null,
     };
 }

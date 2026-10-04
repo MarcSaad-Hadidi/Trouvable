@@ -55,7 +55,12 @@ export async function listActiveClientIds() {
 
 export async function updateClient(id, updates) {
     const normalizedUpdates = syncClientProfileCompatibilityFields(updates);
-    const { data, error } = await db().from('client_geo_profiles').update(normalizedUpdates).eq('id', id).select().single();
+    const { data, error } = await db()
+        .from('client_geo_profiles')
+        .update(normalizedUpdates)
+        .eq('id', id)
+        .select()
+        .single();
     if (error) throw new Error(`[DB/clients] updateClient ${id}: ${error.message}`);
     return data;
 }
@@ -66,9 +71,15 @@ export async function getClientBySlug(slug) {
     return data || null;
 }
 
-
-
-export async function createClient({ client_name, client_slug, website_url, business_type, notes, target_region, lifecycle_status }) {
+export async function createClient({
+    client_name,
+    client_slug,
+    website_url,
+    business_type,
+    notes,
+    target_region,
+    lifecycle_status,
+}) {
     const row = syncClientProfileCompatibilityFields({
         client_name,
         client_slug,

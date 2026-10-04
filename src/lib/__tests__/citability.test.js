@@ -3,11 +3,7 @@ import { load } from 'cheerio';
 
 vi.mock('server-only', () => ({}));
 
-import {
-    collectContentBlocks,
-    scoreBlockCitability,
-    scorePageCitability,
-} from '../audit/citability.js';
+import { collectContentBlocks, scoreBlockCitability, scorePageCitability } from '../audit/citability.js';
 
 describe('citability', () => {
     it('extracts heading-bound blocks and preserves FAQ/list context', () => {

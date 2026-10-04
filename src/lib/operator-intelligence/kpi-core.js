@@ -46,17 +46,26 @@ export function deriveAuditMetrics(latestAudit) {
         };
     }
 
-    const llmStatus = latestAudit.seo_breakdown?.overall?.llm_status
-        || latestAudit.geo_breakdown?.overall?.llm_status
-        || 'unknown';
+    const llmStatus =
+        latestAudit.seo_breakdown?.overall?.llm_status || latestAudit.geo_breakdown?.overall?.llm_status || 'unknown';
 
     const warnings = [];
     if (llmStatus === 'failed') warnings.push('Analyse LLM indisponible, score déterministe uniquement.');
     if (llmStatus === 'skipped') warnings.push('Analyse LLM non exécutée.');
 
     return {
-        seoScore: kpi(finiteNumberOrNull(latestAudit.seo_score), 'observed', finiteNumberOrNull(latestAudit.seo_score) !== null ? 'high' : 'low', warnings),
-        geoScore: kpi(finiteNumberOrNull(latestAudit.geo_score), 'observed', finiteNumberOrNull(latestAudit.geo_score) !== null ? 'high' : 'low', warnings),
+        seoScore: kpi(
+            finiteNumberOrNull(latestAudit.seo_score),
+            'observed',
+            finiteNumberOrNull(latestAudit.seo_score) !== null ? 'high' : 'low',
+            warnings,
+        ),
+        geoScore: kpi(
+            finiteNumberOrNull(latestAudit.geo_score),
+            'observed',
+            finiteNumberOrNull(latestAudit.geo_score) !== null ? 'high' : 'low',
+            warnings,
+        ),
         lastAuditAt: kpi(latestAudit.created_at ?? null, 'observed', 'high'),
         strengths: latestAudit.strengths || [],
         issues: latestAudit.issues || [],
@@ -68,7 +77,8 @@ export function deriveRunMetrics(completedRuns, { totalQueryRuns = 0, brandRecom
     const tq = totalQueryRuns;
     const br = brandRecommendations;
 
-    const visibilityProxyPercent = typeof tq === 'number' && typeof br === 'number' && tq > 0 ? Math.round((br / tq) * 100) : null;
+    const visibilityProxyPercent =
+        typeof tq === 'number' && typeof br === 'number' && tq > 0 ? Math.round((br / tq) * 100) : null;
     const reliability = tq >= 10 ? 'high' : tq >= 5 ? 'medium' : tq > 0 ? 'low' : null;
 
     const runsByProvider = {};
@@ -83,7 +93,13 @@ export function deriveRunMetrics(completedRuns, { totalQueryRuns = 0, brandRecom
 
         const mk = `${r.provider || 'unknown'}|||${r.model || 'unknown'}`;
         if (!modelAgg.has(mk)) {
-            modelAgg.set(mk, { provider: r.provider || 'unknown', model: r.model || 'unknown', runs: 0, targetFound: 0, sources: 0 });
+            modelAgg.set(mk, {
+                provider: r.provider || 'unknown',
+                model: r.model || 'unknown',
+                runs: 0,
+                targetFound: 0,
+                sources: 0,
+            });
         }
         const row = modelAgg.get(mk);
         row.runs += 1;
@@ -99,22 +115,26 @@ export function deriveRunMetrics(completedRuns, { totalQueryRuns = 0, brandRecom
     }
 
     const modelPerformance = [...modelAgg.values()]
-        .map((row) => ({ ...row, targetRatePercent: row.runs > 0 ? Math.round((row.targetFound / row.runs) * 100) : 0 }))
+        .map((row) => ({
+            ...row,
+            targetRatePercent: row.runs > 0 ? Math.round((row.targetFound / row.runs) * 100) : 0,
+        }))
         .sort((a, b) => b.runs - a.runs);
 
-    const avgParseConfidence = parseConfidenceCount > 0
-        ? Math.round((parseConfidenceSum / parseConfidenceCount) * 100) / 100
-        : null;
+    const avgParseConfidence =
+        parseConfidenceCount > 0 ? Math.round((parseConfidenceSum / parseConfidenceCount) * 100) / 100 : null;
 
     const totalCompleted = (completedRuns || []).length;
-    const parseFailureRate = totalCompleted > 0
-        ? Math.round((parseFailedCount / totalCompleted) * 100)
-        : null;
+    const parseFailureRate = totalCompleted > 0 ? Math.round((parseFailedCount / totalCompleted) * 100) : null;
 
     return {
         totalQueryRuns: kpi(tq, 'observed', 'high'),
-        visibilityProxyPercent: kpi(visibilityProxyPercent, 'derived', reliability || 'low',
-            tq < 5 && tq > 0 ? ['Proxy basé sur un volume insuffisant.'] : []),
+        visibilityProxyPercent: kpi(
+            visibilityProxyPercent,
+            'derived',
+            reliability || 'low',
+            tq < 5 && tq > 0 ? ['Proxy basé sur un volume insuffisant.'] : [],
+        ),
         visibilityProxyReliability: reliability,
         runsByProvider,
         modelPerformance,
@@ -125,7 +145,12 @@ export function deriveRunMetrics(completedRuns, { totalQueryRuns = 0, brandRecom
 }
 
 export function deriveMentionMetrics(mentionRows, completedRuns = []) {
-    const { sources: sourceBucket, competitors: competitorBucket, generics: genericBucket, targets: targetBucket } = bucketMentionsByType(mentionRows);
+    const {
+        sources: sourceBucket,
+        competitors: competitorBucket,
+        generics: genericBucket,
+        targets: targetBucket,
+    } = bucketMentionsByType(mentionRows);
 
     const confirmedCompetitors = competitorBucket.length;
     const genericMentions = genericBucket.length;
@@ -187,8 +212,12 @@ export function deriveMentionMetrics(mentionRows, completedRuns = []) {
 
     return {
         confirmedCompetitorMentions: kpi(confirmedCompetitors, 'observed', 'high'),
-        genericMentions: kpi(genericMentions, 'observed', 'medium',
-            genericMentions > 0 ? ['Mentions non confirmées comme concurrents.'] : []),
+        genericMentions: kpi(
+            genericMentions,
+            'observed',
+            'medium',
+            genericMentions > 0 ? ['Mentions non confirmées comme concurrents.'] : [],
+        ),
         sourceMentions: kpi(sourceMentions, 'observed', 'high'),
         externalSourceMentions: kpi(externalSources, 'derived', 'high'),
         brandTargetMentions: kpi(brandTargetMentions, 'observed', 'high'),
@@ -198,8 +227,12 @@ export function deriveMentionMetrics(mentionRows, completedRuns = []) {
         topGenericMentions,
         sourceMentionsTimeline,
         runsWithSourceCitation: runsWithSourceCount,
-        citationCoveragePercent: kpi(citationCoverage, 'derived', citationReliability || 'low',
-            totalRuns > 0 && totalRuns < 5 ? ['Volume insuffisant pour une couverture fiable.'] : []),
+        citationCoveragePercent: kpi(
+            citationCoverage,
+            'derived',
+            citationReliability || 'low',
+            totalRuns > 0 && totalRuns < 5 ? ['Volume insuffisant pour une couverture fiable.'] : [],
+        ),
         avgSourceMentionsPerRun: kpi(avgSourcePerRun, 'derived', citationReliability || 'low'),
     };
 }
@@ -225,12 +258,24 @@ export function derivePromptMetrics(trackedQueries, lastRunMap) {
         withTargetFound,
         withRunNoTarget,
         noRunYet,
-        mentionRatePercent: kpi(mentionRate, 'derived', total >= 5 ? 'medium' : 'low',
-            total > 0 && total < 5 ? ['Faible nombre de prompts suivis.'] : []),
+        mentionRatePercent: kpi(
+            mentionRate,
+            'derived',
+            total >= 5 ? 'medium' : 'low',
+            total > 0 && total < 5 ? ['Faible nombre de prompts suivis.'] : [],
+        ),
     };
 }
 
-export function buildGeoKpiSnapshot({ audit, runs, mentions, prompts, counts, lastRunAt, citationDiagnosticHistogram = null }) {
+export function buildGeoKpiSnapshot({
+    audit,
+    runs,
+    mentions,
+    prompts,
+    counts,
+    lastRunAt,
+    citationDiagnosticHistogram = null,
+}) {
     const guardrails = computeGuardrails({ audit, runs, mentions, prompts, citationDiagnosticHistogram });
 
     return { audit, runs, mentions, prompts, counts, lastRunAt, guardrails };
@@ -261,54 +306,95 @@ export function computeGuardrails({ audit, runs, mentions, prompts, citationDiag
     const tq = runs?.totalQueryRuns?.value ?? null;
 
     if (tq === 0) {
-        warnings.push({ code: 'NO_RUNS', message: 'Aucune exécution complétée. Lancez les prompts suivis.', severity: 'info' });
+        warnings.push({
+            code: 'NO_RUNS',
+            message: 'Aucune exécution complétée. Lancez les prompts suivis.',
+            severity: 'info',
+        });
     } else if (tq !== null && tq < 5) {
-        warnings.push({ code: 'LOW_SAMPLE_SIZE', message: `Seulement ${tq} exécution(s), les tendances ne sont pas fiables.`, severity: 'warning' });
+        warnings.push({
+            code: 'LOW_SAMPLE_SIZE',
+            message: `Seulement ${tq} exécution(s), les tendances ne sont pas fiables.`,
+            severity: 'warning',
+        });
     }
 
     const extSrcVal = mentions?.externalSourceMentions?.value ?? null;
     if (tq > 0 && extSrcVal === 0) {
-        let detail = 'Le produit ne matérialise une “citation” que lorsqu’une URL externe apparaît dans la réponse brute. Si le modèle répond sans liens, la couverture citation reste à 0 même si le run est “terminé”.';
+        let detail =
+            'Le produit ne matérialise une “citation” que lorsqu’une URL externe apparaît dans la réponse brute. Si le modèle répond sans liens, la couverture citation reste à 0 même si le run est “terminé”.';
         const dom = citationDiagnosticHistogram?.dominant;
         const domCount = citationDiagnosticHistogram?.dominantCount ?? 0;
         const sample = citationDiagnosticHistogram?.sampleWithReason ?? 0;
         if (dom && domCount >= 2 && sample >= Math.min(3, tq)) {
             if (dom === 'non_grounded_lane') {
-                detail += ' Sur les runs récents, la cause dominante ressemble à une réponse sans liens / non ancrée web.';
+                detail +=
+                    ' Sur les runs récents, la cause dominante ressemble à une réponse sans liens / non ancrée web.';
             } else if (dom === 'no_source_detected') {
                 detail += ' Sur les runs récents, la cause dominante est l’absence d’URL exploitable dans le texte.';
             }
         }
-        warnings.push({ code: 'NO_SOURCES', message: `Aucune citation source externe capturée sur ${tq} exécution(s). ${detail}`, severity: 'warning' });
+        warnings.push({
+            code: 'NO_SOURCES',
+            message: `Aucune citation source externe capturée sur ${tq} exécution(s). ${detail}`,
+            severity: 'warning',
+        });
     }
 
     const cc = mentions?.confirmedCompetitorMentions?.value ?? null;
     const gm = mentions?.genericMentions?.value ?? null;
     if (tq >= 5 && cc === 0 && gm > 3) {
-        warnings.push({ code: 'UNCONFIRMED_COMPETITORS', message: `${gm} mentions génériques non confirmées. Ajoutez des concurrents connus au profil.`, severity: 'warning' });
+        warnings.push({
+            code: 'UNCONFIRMED_COMPETITORS',
+            message: `${gm} mentions génériques non confirmées. Ajoutez des concurrents connus au profil.`,
+            severity: 'warning',
+        });
     }
 
     if (audit?.llmStatus === 'failed') {
-        warnings.push({ code: 'LLM_DEGRADED', message: 'Analyse LLM en échec, scores déterministes uniquement.', severity: 'warning' });
+        warnings.push({
+            code: 'LLM_DEGRADED',
+            message: 'Analyse LLM en échec, scores déterministes uniquement.',
+            severity: 'warning',
+        });
     }
 
-    if ([audit?.seoScore?.value, audit?.geoScore?.value].every((value) => value === null || value === undefined) && audit?.seoScore?.warnings?.includes('Aucun audit disponible.')) {
-        warnings.push({ code: 'NO_AUDIT', message: 'Aucun audit. Lancez un audit pour obtenir les scores.', severity: 'info' });
+    if (
+        [audit?.seoScore?.value, audit?.geoScore?.value].every((value) => value === null || value === undefined) &&
+        audit?.seoScore?.warnings?.includes('Aucun audit disponible.')
+    ) {
+        warnings.push({
+            code: 'NO_AUDIT',
+            message: 'Aucun audit. Lancez un audit pour obtenir les scores.',
+            severity: 'info',
+        });
     }
 
     const promptTotal = prompts?.total?.value ?? null;
     if (promptTotal === 0) {
-        warnings.push({ code: 'NO_PROMPTS', message: 'Aucun prompt suivi. Ajoutez des prompts pour alimenter le moteur.', severity: 'info' });
+        warnings.push({
+            code: 'NO_PROMPTS',
+            message: 'Aucun prompt suivi. Ajoutez des prompts pour alimenter le moteur.',
+            severity: 'info',
+        });
     }
 
     const avgPc = runs?.avgParseConfidence?.value;
     if (typeof avgPc === 'number' && avgPc < 0.5) {
-        warnings.push({ code: 'LOW_PARSE_CONFIDENCE', message: `Confiance d'extraction moyenne faible (${avgPc}). Les données extraites sont peu fiables.`, severity: 'warning' });
+        warnings.push({
+            code: 'LOW_PARSE_CONFIDENCE',
+            message: `Confiance d'extraction moyenne faible (${avgPc}). Les données extraites sont peu fiables.`,
+            severity: 'warning',
+        });
     }
 
     const failRate = runs?.parseFailureRate?.value;
     if (typeof failRate === 'number' && failRate > 30) {
-        warnings.push({ code: 'HIGH_PARSE_FAILURE', message: `${failRate}% des exécutions ont échoué au parsing. Vérifiez la qualité des réponses.`, severity: 'warning' });
+        warnings.push({
+            code: 'HIGH_PARSE_FAILURE',
+            message: `${failRate}% des exécutions ont échoué au parsing. Vérifiez la qualité des réponses.`,
+            severity: 'warning',
+        });
     }
 
     return warnings;

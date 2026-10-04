@@ -53,4 +53,3 @@ export async function changeClientLifecycle(clientId, targetState, performedBy) 
     });
     return { body: { success: true, client }, status: 200 };
 }
-

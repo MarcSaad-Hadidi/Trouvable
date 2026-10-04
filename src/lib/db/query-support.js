@@ -60,19 +60,20 @@ export function isTrackedQueryConstraintDriftError(error) {
     const constraint = String(error.constraint || '').toLowerCase();
     const message = String(error.message || '').toLowerCase();
     const details = String(error.details || '').toLowerCase();
-    const trackedQueriesContext = constraint.includes('tracked_queries')
-        || message.includes('tracked_queries')
-        || details.includes('tracked_queries');
+    const trackedQueriesContext =
+        constraint.includes('tracked_queries') ||
+        message.includes('tracked_queries') ||
+        details.includes('tracked_queries');
 
     if (!trackedQueriesContext) return false;
 
     return (
-        constraint.includes('query_type')
-        || constraint.includes('category')
-        || message.includes('query_type')
-        || message.includes('category')
-        || message.includes('check constraint')
-        || details.includes('check constraint')
+        constraint.includes('query_type') ||
+        constraint.includes('category') ||
+        message.includes('query_type') ||
+        message.includes('category') ||
+        message.includes('check constraint') ||
+        details.includes('check constraint')
     );
 }
 

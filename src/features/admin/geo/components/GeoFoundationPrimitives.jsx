@@ -4,18 +4,18 @@ import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import { CommandPageShell } from '@/features/admin/shared/components/command';
 
 const STATUS_META = {
-    'autorisé': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    'bloqué': 'border-red-400/20 bg-red-400/10 text-red-200',
-    'ambigu': 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+    autorisé: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
+    bloqué: 'border-red-400/20 bg-red-400/10 text-red-200',
+    ambigu: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
     'à confirmer': 'border-white/10 bg-white/[0.05] text-white/60',
-    'couvert': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    'partiel': 'border-amber-400/20 bg-amber-400/10 text-amber-100',
-    'absent': 'border-red-400/20 bg-red-400/10 text-red-200',
-    'présents': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    'incohérent': 'border-red-400/20 bg-red-400/10 text-red-200',
-    'aligné': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    'écart': 'border-red-400/20 bg-red-400/10 text-red-200',
-    'manquant': 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+    couvert: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
+    partiel: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+    absent: 'border-red-400/20 bg-red-400/10 text-red-200',
+    présents: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
+    incohérent: 'border-red-400/20 bg-red-400/10 text-red-200',
+    aligné: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
+    écart: 'border-red-400/20 bg-red-400/10 text-red-200',
+    manquant: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
 };
 
 const ACCENT_META = {
@@ -43,7 +43,14 @@ export function GeoStatusBadge({ status, className = '' }) {
     );
 }
 
-export function GeoFoundationStatCard({ label, value, detail, reliability = 'unavailable', status = null, accent = 'violet' }) {
+export function GeoFoundationStatCard({
+    label,
+    value,
+    detail,
+    reliability = 'unavailable',
+    status = null,
+    accent = 'violet',
+}) {
     return (
         <div className="geo-card border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-4">
             <div className="flex items-start justify-between gap-3">
@@ -53,7 +60,9 @@ export function GeoFoundationStatCard({ label, value, detail, reliability = 'una
                     <ReliabilityPill value={reliability} />
                 </div>
             </div>
-            <div className={`mt-3 text-[28px] font-bold leading-none tracking-[-0.03em] ${ACCENT_META[accent] || ACCENT_META.violet}`}>
+            <div
+                className={`mt-3 text-[28px] font-bold leading-none tracking-[-0.03em] ${ACCENT_META[accent] || ACCENT_META.violet}`}
+            >
                 {value ?? 'n.d.'}
             </div>
             {detail ? <p className="mt-2 text-[12px] leading-relaxed text-white/48">{detail}</p> : null}
@@ -61,7 +70,15 @@ export function GeoFoundationStatCard({ label, value, detail, reliability = 'una
     );
 }
 
-export function GeoFoundationPanel({ title, subtitle = null, reliability = null, status = null, action = null, className = '', children }) {
+export function GeoFoundationPanel({
+    title,
+    subtitle = null,
+    reliability = null,
+    status = null,
+    action = null,
+    className = '',
+    children,
+}) {
     return (
         <div className={`geo-premium-card border border-white/[0.08] bg-black/18 p-5 ${className}`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -80,7 +97,10 @@ export function GeoFoundationPanel({ title, subtitle = null, reliability = null,
     );
 }
 
-export function GeoReliabilityLegend({ values = ['measured', 'calculated', 'ai_analysis', 'unavailable'], className = '' }) {
+export function GeoReliabilityLegend({
+    values = ['measured', 'calculated', 'ai_analysis', 'unavailable'],
+    className = '',
+}) {
     return (
         <div className={`flex flex-wrap gap-2 ${className}`}>
             {values.map((value) => (

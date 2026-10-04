@@ -40,8 +40,6 @@ export function normalizeIntentFamily(rawValue, queryText = '') {
     return normalizeOnboardingIntentFamily(rawValue, queryText);
 }
 
-
-
 export function buildPromptMetadata({
     queryText,
     clientName = '',
@@ -75,7 +73,10 @@ export function buildPromptMetadata({
         userVisibleOffering: String(userVisibleOffering || primaryService || category || ''),
         targetAudience: String(targetAudience || ''),
         primaryUseCase: String(primaryUseCase || ''),
-        differentiationAngle: String(differentiationAngle || (Array.isArray(knownCompetitors) && knownCompetitors.length > 0 ? 'competitive' : '')),
+        differentiationAngle: String(
+            differentiationAngle ||
+                (Array.isArray(knownCompetitors) && knownCompetitors.length > 0 ? 'competitive' : ''),
+        ),
     });
 
     return {

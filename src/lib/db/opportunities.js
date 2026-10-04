@@ -45,8 +45,6 @@ export async function getOpportunitiesBySource(clientId, source) {
     return data || [];
 }
 
-
-
 export async function archiveOldOpportunitiesExceptAudit(clientId, auditId) {
     let query = sb()
         .from('opportunities')
@@ -69,7 +67,9 @@ export async function createOpportunities(opps) {
     const compactRows = opps.slice(0, 5).map((row) => compactOpportunityDebugRow(row));
 
     if (invalidClientIdRows.length > 0) {
-        throw new Error(`[DB] createOpportunities: invalid opportunity payload(s) missing client_id: ${JSON.stringify(invalidClientIdRows)}`);
+        throw new Error(
+            `[DB] createOpportunities: invalid opportunity payload(s) missing client_id: ${JSON.stringify(invalidClientIdRows)}`,
+        );
     }
 
     await validateClientAuditReferences(opps, 'createOpportunities');
@@ -87,7 +87,9 @@ export async function createOpportunities(opps) {
             },
         });
         if (error.code === '23503' && typeof error.details === 'string' && error.details.includes('table "clients"')) {
-            throw new Error('[DB] createOpportunities: live opportunities.client_id foreign key still points to legacy table "clients". Apply the foreign-key repair migration before rerunning the audit.');
+            throw new Error(
+                '[DB] createOpportunities: live opportunities.client_id foreign key still points to legacy table "clients". Apply the foreign-key repair migration before rerunning the audit.',
+            );
         }
         throw new Error(`[DB] createOpportunities: ${error.message}`);
     }
@@ -101,10 +103,7 @@ export async function updateOpportunity(id, updates) {
 }
 
 export async function getLatestOpportunities(clientId) {
-    const [latestAudit, allOpps] = await Promise.all([
-        getLatestAudit(clientId),
-        getOpportunities(clientId),
-    ]);
+    const [latestAudit, allOpps] = await Promise.all([getLatestAudit(clientId), getOpportunities(clientId)]);
 
     const latestAuditId = latestAudit?.id ?? null;
     const active = [];

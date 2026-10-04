@@ -29,6 +29,7 @@ description: Verify SEO/GEO content truthfulness — metadata, JSON-LD, citation
 ### 2. JSON-LD validation
 
 For every structured data block:
+
 - Schema type is appropriate (LocalBusiness, Service, FAQPage, BreadcrumbList, etc.)
 - `@context` is `"https://schema.org"`
 - Required fields are present and truthful
@@ -39,6 +40,7 @@ For every structured data block:
 ### 3. GEO page checklist
 
 For city/expertise pages:
+
 - [ ] City name and region are correct
 - [ ] No invented statistics about market presence
 - [ ] Service descriptions match actual offerings
@@ -67,14 +69,17 @@ For city/expertise pages:
 ## Truthfulness Report: [Page/Feature]
 
 ### Data Sources: ✅/⚠️/❌
+
 - Source: [database/API/hardcoded/unknown]
 - Verified: [yes/no/partially]
 
 ### JSON-LD: ✅/⚠️/❌
+
 - Schema type: ...
 - Fabricated fields: [none/list]
 
 ### Citations: ✅/⚠️/❌
+
 - Total: N
 - Verified: N
 - Flagged: N

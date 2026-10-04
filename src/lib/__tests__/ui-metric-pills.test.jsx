@@ -5,7 +5,11 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 import { PROVENANCE_META, getProvenanceMeta as getClientMeta } from '@/lib/operator-intelligence/provenance-meta';
-import { getNotConnectedMeta, getProvenanceMeta, mapOpportunitySourceToProvenance } from '@/lib/operator-intelligence/provenance';
+import {
+    getNotConnectedMeta,
+    getProvenanceMeta,
+    mapOpportunitySourceToProvenance,
+} from '@/lib/operator-intelligence/provenance';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import { ProvenancePill } from '@/components/shared/metrics/ProvenancePill';
 
@@ -17,7 +21,11 @@ describe.each([ReliabilityPill, ProvenancePill])('metric pill', (Component) => {
         expect(render(Component, { meta: {} })).toBe('');
     });
     it('keeps metadata priority, description and class names', () => {
-        const html = render(Component, { value: 'observed', meta: { label: 'Long', shortLabel: 'Court', description: 'Source', tone: 'amber' }, className: 'custom' });
+        const html = render(Component, {
+            value: 'observed',
+            meta: { label: 'Long', shortLabel: 'Court', description: 'Source', tone: 'amber' },
+            className: 'custom',
+        });
         expect(html).toContain('title="Source"');
         expect(html).toContain('>Court</span>');
         expect(html).toContain('text-amber-200');
@@ -40,10 +48,13 @@ it('preserves each concept’s palette and fallback', () => {
     expect(render(ProvenancePill, { value: 'unknown' })).toContain('Dérivé');
 });
 
-it.each(['observed', 'derived', 'inferred', 'not_connected', 'unknown', null, undefined])('uses the same provenance contract for %s on server and client', (value) => {
-    expect(getProvenanceMeta(value)).toBe(getClientMeta(value));
-    expect(getClientMeta(value)).toBe(PROVENANCE_META[value] || PROVENANCE_META.derived);
-});
+it.each(['observed', 'derived', 'inferred', 'not_connected', 'unknown', null, undefined])(
+    'uses the same provenance contract for %s on server and client',
+    (value) => {
+        expect(getProvenanceMeta(value)).toBe(getClientMeta(value));
+        expect(getClientMeta(value)).toBe(PROVENANCE_META[value] || PROVENANCE_META.derived);
+    },
+);
 
 it('keeps server opportunity mapping and not-connected metadata', () => {
     expect(mapOpportunitySourceToProvenance('observed')).toBe(PROVENANCE_META.observed);

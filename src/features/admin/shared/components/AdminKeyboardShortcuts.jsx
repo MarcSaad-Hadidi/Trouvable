@@ -79,8 +79,12 @@ export default function AdminKeyboardShortcuts() {
             >
                 <div className="flex items-start justify-between">
                     <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Raccourcis clavier</div>
-                        <h2 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">Navigation rapide</h2>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                            Raccourcis clavier
+                        </div>
+                        <h2 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">
+                            Navigation rapide
+                        </h2>
                     </div>
                     <button
                         type="button"
@@ -120,7 +124,8 @@ export default function AdminKeyboardShortcuts() {
                 </div>
 
                 <p className="mt-4 text-[11px] leading-relaxed text-white/45">
-                    Pressez <span className="font-semibold text-white/70">G</span> puis la touche correspondante pour naviguer.
+                    Pressez <span className="font-semibold text-white/70">G</span> puis la touche correspondante pour
+                    naviguer.
                 </p>
             </div>
         </div>

@@ -10,24 +10,24 @@ Des environnements créés avec les anciens scripts peuvent posséder les tables
 
 Le diagnostic historique rapporte notamment un insert `opportunities` refusé parce que `client_id` visait encore `public.clients`. Le contrat applicatif utilise `public.client_geo_profiles(id)`. Cette observation explique la réparation explicite des relations ; elle ne prouve pas leur état actuel.
 
-| Migration | Rôle |
-|---|---|
-| [Réconciliation DB](../supabase/migrations/20260320143000_db_reconciliation.sql) | Réaffirme colonnes/defaults/checks, normalise les anciennes données, ajoute triggers de compatibilité, index et permissions nécessaires. |
-| [Réparation des clés étrangères](../supabase/migrations/20260321003000_repair_legacy_foreign_keys.sql) | Remplace les relations anciennes par les liens vers clients, audits, prompts et runs canoniques. |
-| [Réconciliation du type de prompt](../supabase/migrations/20260321113000_tracked_queries_query_type_reconciliation.sql) | Conserve la lecture des classifications historiques. |
+| Migration                                                                                                               | Rôle                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [Réconciliation DB](../supabase/migrations/20260320143000_db_reconciliation.sql)                                        | Réaffirme colonnes/defaults/checks, normalise les anciennes données, ajoute triggers de compatibilité, index et permissions nécessaires. |
+| [Réparation des clés étrangères](../supabase/migrations/20260321003000_repair_legacy_foreign_keys.sql)                  | Remplace les relations anciennes par les liens vers clients, audits, prompts et runs canoniques.                                         |
+| [Réconciliation du type de prompt](../supabase/migrations/20260321113000_tracked_queries_query_type_reconciliation.sql) | Conserve la lecture des classifications historiques.                                                                                     |
 
 Les accès actuels sont dans [src/lib/db](../src/lib/db/) et les loaders portail dans [src/features/portal/server](../src/features/portal/server/). Ne pas déduire la forme complète du schéma d'un seul consommateur : les migrations ultérieures étendent notamment prompts, captures et preuves.
 
 ## Compatibilités à préserver
 
-| Contrat | Compatibilité et limite |
-|---|---|
-| Profil client | `publication_status/is_published`, `contact_info.public_email/email`, `business_details.short_desc/short_description` restent pris en charge par les écritures et lecteurs concernés. |
-| Prompts | `category/query_type` et les formes historiques de metadata restent lisibles selon le [contrat prompt](prompt-contract-unification.md). Une normalisation conservatrice peut perdre une nuance d'intention à revoir par l'opérateur. |
-| Runs | `query_text` conserve le prompt au moment du run. Un ancien run sans référence ni texte exploitable ne permet pas de reconstruire le prompt exact. |
-| Opportunités | `priority/severity` préserve les formats historiques ; l'équivalence des anciennes significations reste une hypothèse de compatibilité à vérifier avant retrait. |
-| Audits | Les JSON conservent les formes attendues, notamment un tableau pour `prefill_suggestions`. |
-| Portail | Email normalisé, membership actif et identité Clerk vérifiée définissent le scope serveur. L'authentification seule n'autorise pas un client. |
+| Contrat       | Compatibilité et limite                                                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Profil client | `publication_status/is_published`, `contact_info.public_email/email`, `business_details.short_desc/short_description` restent pris en charge par les écritures et lecteurs concernés.                                                |
+| Prompts       | `category/query_type` et les formes historiques de metadata restent lisibles selon le [contrat prompt](prompt-contract-unification.md). Une normalisation conservatrice peut perdre une nuance d'intention à revoir par l'opérateur. |
+| Runs          | `query_text` conserve le prompt au moment du run. Un ancien run sans référence ni texte exploitable ne permet pas de reconstruire le prompt exact.                                                                                   |
+| Opportunités  | `priority/severity` préserve les formats historiques ; l'équivalence des anciennes significations reste une hypothèse de compatibilité à vérifier avant retrait.                                                                     |
+| Audits        | Les JSON conservent les formes attendues, notamment un tableau pour `prefill_suggestions`.                                                                                                                                           |
+| Portail       | Email normalisé, membership actif et identité Clerk vérifiée définissent le scope serveur. L'authentification seule n'autorise pas un client.                                                                                        |
 
 ## Vérification avant une reprise autorisée
 

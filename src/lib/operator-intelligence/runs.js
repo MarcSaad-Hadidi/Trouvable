@@ -1,8 +1,16 @@
 import 'server-only';
 
-import { getQueryRunsHistory as dbGetQueryRunsHistory, getQueryRunById as dbGetQueryRunById, getQueryRunMentions as dbGetQueryRunMentions } from '@/lib/db/query-runs';
+import {
+    getQueryRunsHistory as dbGetQueryRunsHistory,
+    getQueryRunById as dbGetQueryRunById,
+    getQueryRunMentions as dbGetQueryRunMentions,
+} from '@/lib/db/query-runs';
 import { getTrackedQueriesAll as dbGetTrackedQueriesAll } from '@/lib/db/tracked-queries';
-import { getDiscoveryModeMeta, getTrackedQueryCategoryMeta, isVisibilityEligible } from '@/lib/operator-intelligence/prompt-taxonomy';
+import {
+    getDiscoveryModeMeta,
+    getTrackedQueryCategoryMeta,
+    isVisibilityEligible,
+} from '@/lib/operator-intelligence/prompt-taxonomy';
 import { getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 import { createRunStatusCounts, normalizeRunParseStatus } from '@/lib/operator-intelligence/run-lifecycle';
 import { getAdminSupabase } from '@/lib/supabase-admin';
@@ -42,7 +50,8 @@ function buildRunSummary(run, trackedQuery, mentions = []) {
     const grouped = buildGroupedMentions(mentions);
     const queryText = run.query_text || trackedQuery?.query_text || 'Prompt suivi';
     const parseStatus = normalizeRunParseStatus(run);
-    const discoveryMode = run.discovery_mode || run.parsed_response?.discovery_mode || trackedQuery?.discovery_mode || 'brand_aware';
+    const discoveryMode =
+        run.discovery_mode || run.parsed_response?.discovery_mode || trackedQuery?.discovery_mode || 'brand_aware';
     const promptMetadata = run.parsed_response || run.prompt_payload || {};
     const discoveryModeMeta = getDiscoveryModeMeta(discoveryMode);
     return {
@@ -57,7 +66,8 @@ function buildRunSummary(run, trackedQuery, mentions = []) {
         discovery_mode: discoveryMode,
         discovery_mode_label: discoveryModeMeta.label,
         answer_generation_mode: promptMetadata.answer_generation_mode || discoveryMode,
-        context_injected: promptMetadata.context_injected === true || discoveryModeMeta.bias_risk === 'context_injected',
+        context_injected:
+            promptMetadata.context_injected === true || discoveryModeMeta.bias_risk === 'context_injected',
         source_grounded: promptMetadata.source_grounded === true || discoveryModeMeta.bias_risk === 'source_grounded',
         evidence_level: promptMetadata.evidence_level || discoveryModeMeta.evidence_level,
         bias_risk: promptMetadata.bias_risk || discoveryModeMeta.bias_risk,
@@ -80,7 +90,11 @@ function buildRunSummary(run, trackedQuery, mentions = []) {
             sources: grouped.sourceMentions.length,
         },
         run_signal_tier: run.parsed_response?.run_signal_tier || run.raw_analysis?.diagnostics?.run_signal_tier || null,
-        source_hosts_preview: [...new Set(grouped.sourceMentions.map((item) => item.normalized_domain || item.business_name).filter(Boolean))].slice(0, 4),
+        source_hosts_preview: [
+            ...new Set(
+                grouped.sourceMentions.map((item) => item.normalized_domain || item.business_name).filter(Boolean),
+            ),
+        ].slice(0, 4),
     };
 }
 
@@ -96,7 +110,9 @@ export async function getRunsSlice(clientId) {
     if (runIds.length > 0) {
         const { data, error } = await supabase
             .from('query_mentions')
-            .select('query_run_id, business_name, entity_type, is_target, position, mention_kind, normalized_domain, confidence')
+            .select(
+                'query_run_id, business_name, entity_type, is_target, position, mention_kind, normalized_domain, confidence',
+            )
             .in('query_run_id', runIds);
         if (error) throw new Error(`[OperatorIntelligence/runs] mentions: ${error.message}`);
         mentionRows = data || [];
@@ -164,7 +180,8 @@ export async function getRunsSlice(clientId) {
         emptyState: {
             noRuns: {
                 title: 'Aucune execution pour le moment',
-                description: 'Lancez les prompts suivis pour generer des observations de visibilite, citations et concurrents.',
+                description:
+                    'Lancez les prompts suivis pour generer des observations de visibilite, citations et concurrents.',
             },
         },
     };
@@ -188,10 +205,12 @@ export async function getRunInspectorSlice(clientId, runId) {
     const engineVariant = run.engine_variant || 'tavily_orchestrated';
     const variantMeta = ENGINE_VARIANTS[engineVariant] || {};
 
-    const promptPayload = run.prompt_payload && typeof run.prompt_payload === 'object' && Object.keys(run.prompt_payload).length > 0
-        ? run.prompt_payload
-        : (run.raw_analysis?.prompt_payload || {});
-    const discoveryMode = run.discovery_mode || run.parsed_response?.discovery_mode || promptPayload.discovery_mode || 'brand_aware';
+    const promptPayload =
+        run.prompt_payload && typeof run.prompt_payload === 'object' && Object.keys(run.prompt_payload).length > 0
+            ? run.prompt_payload
+            : run.raw_analysis?.prompt_payload || {};
+    const discoveryMode =
+        run.discovery_mode || run.parsed_response?.discovery_mode || promptPayload.discovery_mode || 'brand_aware';
     const promptMetadata = run.parsed_response || promptPayload || {};
     const discoveryModeMeta = getDiscoveryModeMeta(discoveryMode);
     const reviewContract = run.raw_analysis?.review_contract || {
@@ -217,11 +236,22 @@ export async function getRunInspectorSlice(clientId, runId) {
             web_enabled: variantMeta.web_enabled ?? false,
             discovery_mode: discoveryMode,
             discovery_mode_label: discoveryModeMeta.label,
-            answer_generation_mode: promptMetadata.answer_generation_mode || promptPayload.answer_generation_mode || discoveryMode,
-            context_injected: promptMetadata.context_injected === true || promptPayload.context_injected === true || discoveryModeMeta.bias_risk === 'context_injected',
-            business_context_used: promptMetadata.business_context_used === true || promptPayload.business_context_used === true || discoveryModeMeta.bias_risk === 'context_injected',
-            source_grounded: promptMetadata.source_grounded === true || promptPayload.source_grounded === true || discoveryModeMeta.bias_risk === 'source_grounded',
-            evidence_level: promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level,
+            answer_generation_mode:
+                promptMetadata.answer_generation_mode || promptPayload.answer_generation_mode || discoveryMode,
+            context_injected:
+                promptMetadata.context_injected === true ||
+                promptPayload.context_injected === true ||
+                discoveryModeMeta.bias_risk === 'context_injected',
+            business_context_used:
+                promptMetadata.business_context_used === true ||
+                promptPayload.business_context_used === true ||
+                discoveryModeMeta.bias_risk === 'context_injected',
+            source_grounded:
+                promptMetadata.source_grounded === true ||
+                promptPayload.source_grounded === true ||
+                discoveryModeMeta.bias_risk === 'source_grounded',
+            evidence_level:
+                promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level,
             bias_risk: promptMetadata.bias_risk || promptPayload.bias_risk || discoveryModeMeta.bias_risk,
             answer_type: promptMetadata.answer_type || promptPayload.answer_type || discoveryModeMeta.answer_type,
             prompt_version: promptMetadata.prompt_version || promptPayload.prompt_version || null,
@@ -280,12 +310,22 @@ export async function getRunInspectorSlice(clientId, runId) {
             evidence_span: mention.evidence_span || mention.context || null,
         })),
         diagnostics: {
-            zero_citation_reason: diagnostics.zero_citation_reason || (grouped.sourceMentions.length === 0 ? 'no_source_detected' : null),
-            zero_competitor_reason: diagnostics.zero_competitor_reason || (grouped.competitorMentions.length === 0 ? 'no_competitor_detected' : null),
+            zero_citation_reason:
+                diagnostics.zero_citation_reason || (grouped.sourceMentions.length === 0 ? 'no_source_detected' : null),
+            zero_competitor_reason:
+                diagnostics.zero_competitor_reason ||
+                (grouped.competitorMentions.length === 0 ? 'no_competitor_detected' : null),
             run_signal_tier: diagnostics.run_signal_tier || run.parsed_response?.run_signal_tier || null,
-            evidence_level: promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level,
-            insufficient_evidence: grouped.sourceMentions.length === 0 && ['none', 'weak'].includes(promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level),
-            operator_reason_codes: Array.isArray(diagnostics.operator_reason_codes) ? diagnostics.operator_reason_codes : (run.parsed_response?.operator_reason_codes || []),
+            evidence_level:
+                promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level,
+            insufficient_evidence:
+                grouped.sourceMentions.length === 0 &&
+                ['none', 'weak'].includes(
+                    promptMetadata.evidence_level || promptPayload.evidence_level || discoveryModeMeta.evidence_level,
+                ),
+            operator_reason_codes: Array.isArray(diagnostics.operator_reason_codes)
+                ? diagnostics.operator_reason_codes
+                : run.parsed_response?.operator_reason_codes || [],
             entity_breakdown: diagnostics.entity_breakdown || null,
         },
         review: reviewContract,

@@ -1,4 +1,3 @@
-
 import 'server-only';
 
 import { getClientById as dbGetClientById } from '@/lib/db/clients';
@@ -50,7 +49,7 @@ function nowIso() {
 
 function addMinutes(iso, minutes) {
     const base = iso ? new Date(iso) : new Date();
-    return new Date(base.getTime() + (minutes * 60 * 1000)).toISOString();
+    return new Date(base.getTime() + minutes * 60 * 1000).toISOString();
 }
 
 function startOfTodayDateString() {
@@ -93,7 +92,7 @@ export async function ensureDefaultRecurringJobs(clientId) {
         retry_backoff_minutes: config.retry_backoff_minutes,
         status: 'pending',
         is_active: true,
-        next_run_at: addMinutes(nowIso(), 5 + (index * 10)),
+        next_run_at: addMinutes(nowIso(), 5 + index * 10),
         metadata: {
             seeded_by: 'continuous_visibility_engine',
             default_seed: true,
@@ -423,7 +422,7 @@ async function executeAuditRefresh(jobRun) {
 
     return {
         success: result.success === true,
-        error: result.success === true ? null : (result.error || 'Audit refresh failed'),
+        error: result.success === true ? null : result.error || 'Audit refresh failed',
         summary: {
             audit_id: result.auditId || null,
             seo_score: result.seo_score ?? null,
@@ -470,54 +469,54 @@ async function executePromptRerun(jobRun) {
 
 async function executeRunByType(run) {
     switch (run.job_type) {
-    case 'audit_refresh':
-        return executeAuditRefresh(run);
-    case 'prompt_rerun':
-        return executePromptRerun(run);
-    case 'gsc_sync_daily': {
-        const result = await runGscSyncForClient(run.client_id);
-        return {
-            success: true,
-            error: null,
-            summary: {
-                fetched_rows: result.fetchedRows || 0,
-                synced_rows: result.syncedRows || 0,
-                skipped: result.skipped === true,
-                reason: result.reason || null,
-                site_url: result.siteUrl || null,
-            },
-        };
-    }
-    case 'ga4_sync_daily': {
-        const result = await runGa4SyncForClient(run.client_id);
-        return {
-            success: true,
-            error: null,
-            summary: {
-                fetched_traffic_rows: result.fetchedTrafficRows || 0,
-                synced_traffic_rows: result.syncedTrafficRows || 0,
-                fetched_page_rows: result.fetchedPageRows || 0,
-                synced_page_rows: result.syncedPageRows || 0,
-                skipped: result.skipped === true,
-                reason: result.reason || null,
-                property_id: result.propertyId || null,
-            },
-        };
-    }
-    case 'community_sync': {
-        const result = await runCommunityPipeline(run.client_id, { triggerSource: 'cron' });
-        return {
-            success: result.success,
-            error: result.error || null,
-            summary: result.summary || {},
-        };
-    }
-    default:
-        return {
-            success: false,
-            error: `Unsupported job type: ${run.job_type}`,
-            summary: {},
-        };
+        case 'audit_refresh':
+            return executeAuditRefresh(run);
+        case 'prompt_rerun':
+            return executePromptRerun(run);
+        case 'gsc_sync_daily': {
+            const result = await runGscSyncForClient(run.client_id);
+            return {
+                success: true,
+                error: null,
+                summary: {
+                    fetched_rows: result.fetchedRows || 0,
+                    synced_rows: result.syncedRows || 0,
+                    skipped: result.skipped === true,
+                    reason: result.reason || null,
+                    site_url: result.siteUrl || null,
+                },
+            };
+        }
+        case 'ga4_sync_daily': {
+            const result = await runGa4SyncForClient(run.client_id);
+            return {
+                success: true,
+                error: null,
+                summary: {
+                    fetched_traffic_rows: result.fetchedTrafficRows || 0,
+                    synced_traffic_rows: result.syncedTrafficRows || 0,
+                    fetched_page_rows: result.fetchedPageRows || 0,
+                    synced_page_rows: result.syncedPageRows || 0,
+                    skipped: result.skipped === true,
+                    reason: result.reason || null,
+                    property_id: result.propertyId || null,
+                },
+            };
+        }
+        case 'community_sync': {
+            const result = await runCommunityPipeline(run.client_id, { triggerSource: 'cron' });
+            return {
+                success: result.success,
+                error: result.error || null,
+                summary: result.summary || {},
+            };
+        }
+        default:
+            return {
+                success: false,
+                error: `Unsupported job type: ${run.job_type}`,
+                summary: {},
+            };
     }
 }
 async function finalizeRunSuccess({ run, job, summary }) {
@@ -664,7 +663,9 @@ export async function updateRecurringJobCadence({ jobId, cadenceMinutes, retryLi
     const payload = {
         cadence_minutes: effectiveCadence,
         ...(retryLimit !== null && retryLimit !== undefined ? { retry_limit: clamp(Number(retryLimit), 0, 10) } : {}),
-        ...(retryBackoffMinutes !== null && retryBackoffMinutes !== undefined ? { retry_backoff_minutes: clamp(Number(retryBackoffMinutes), 5, 1440) } : {}),
+        ...(retryBackoffMinutes !== null && retryBackoffMinutes !== undefined
+            ? { retry_backoff_minutes: clamp(Number(retryBackoffMinutes), 5, 1440) }
+            : {}),
         next_run_at: nowIso(),
         status: 'pending',
     };
@@ -758,7 +759,8 @@ export async function getTrendSlice(clientId) {
                 category: 'profile_fixes',
                 priority: 'high',
                 title: `${metric.label} en baisse (${metric.delta})`,
-                rationale: 'La tendance recente signale un recul. Relancez un audit et priorisez les corrections en attente.',
+                rationale:
+                    'La tendance recente signale un recul. Relancez un audit et priorisez les corrections en attente.',
                 evidence: 'derived_from_snapshots',
             });
         }
@@ -769,7 +771,8 @@ export async function getTrendSlice(clientId) {
                 category: 'citation_source_opportunities',
                 priority: 'high',
                 title: 'Couverture des citations en recul',
-                rationale: 'La couverture des sources observées baisse. Renforcez les prompts qui generent des citations fiables.',
+                rationale:
+                    'La couverture des sources observées baisse. Renforcez les prompts qui generent des citations fiables.',
                 evidence: 'derived_from_snapshots',
             });
         }
@@ -780,7 +783,8 @@ export async function getTrendSlice(clientId) {
                 category: 'prompt_coverage_gaps',
                 priority: 'medium',
                 title: 'Taux de mention des prompts en baisse',
-                rationale: 'La visibilite issue des prompts suivis faiblit. Revoyez le pack de prompts avant la prochaine actualisation quotidienne.',
+                rationale:
+                    'La visibilite issue des prompts suivis faiblit. Revoyez le pack de prompts avant la prochaine actualisation quotidienne.',
                 evidence: 'derived_from_snapshots',
             });
         }
@@ -819,7 +823,11 @@ export async function getTrendSlice(clientId) {
         });
     }
 
-    if (Number.isFinite(metrics.competitorMentions) && Number.isFinite(metrics.brandRecommendationRuns) && metrics.competitorMentions > Math.max(10, metrics.brandRecommendationRuns)) {
+    if (
+        Number.isFinite(metrics.competitorMentions) &&
+        Number.isFinite(metrics.brandRecommendationRuns) &&
+        metrics.competitorMentions > Math.max(10, metrics.brandRecommendationRuns)
+    ) {
         actionCenter.push({
             id: 'competitor_pressure',
             category: 'competitor_pressure_alerts',
@@ -959,11 +967,12 @@ async function processSingleWorkerRun(runnable) {
         }
 
         return {
-            status: claimed.reason === 'overlap'
-                ? 'skipped_overlap'
-                : claimed.reason === 'family_lock'
-                    ? 'skipped_family_lock'
-                    : 'skipped_claimed',
+            status:
+                claimed.reason === 'overlap'
+                    ? 'skipped_overlap'
+                    : claimed.reason === 'family_lock'
+                      ? 'skipped_family_lock'
+                      : 'skipped_claimed',
             runId: runnable.id,
             jobType: runnable.job_type,
         };
@@ -973,11 +982,7 @@ async function processSingleWorkerRun(runnable) {
     await markJobRunning(job, lockToken);
 
     try {
-        const execution = await withRunTimeout(
-            claimed.run.id,
-            executeRunByType(claimed.run),
-            RUN_EXECUTION_TIMEOUT_MS
-        );
+        const execution = await withRunTimeout(claimed.run.id, executeRunByType(claimed.run), RUN_EXECUTION_TIMEOUT_MS);
 
         if (execution.success) {
             await finalizeRunSuccess({

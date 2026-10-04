@@ -29,15 +29,25 @@ const WEB_SEARCH_REQUEST_DELAY_MS = 500;
 
 // Community source domains to prioritize in web search queries
 const COMMUNITY_SOURCE_DOMAINS = [
-    'reddit.com', 'quora.com', 'trustpilot.com', 'avis-verifies.com',
-    'glassdoor.com', 'indeed.com', 'facebook.com', 'lesjeudis.com',
+    'reddit.com',
+    'quora.com',
+    'trustpilot.com',
+    'avis-verifies.com',
+    'glassdoor.com',
+    'indeed.com',
+    'facebook.com',
+    'lesjeudis.com',
 ];
 
 // ──────────────────────────────────────────────────────────────
 // Provider: Tavily
 // ──────────────────────────────────────────────────────────────
 
-async function searchWithTavily({ query, maxResults = WEB_SEARCH_MAX_RESULTS_PER_QUERY, timeoutMs = WEB_SEARCH_TIMEOUT_MS }) {
+async function searchWithTavily({
+    query,
+    maxResults = WEB_SEARCH_MAX_RESULTS_PER_QUERY,
+    timeoutMs = WEB_SEARCH_TIMEOUT_MS,
+}) {
     const apiKey = process.env.TAVILY_API_KEY;
     if (!apiKey) return null;
 
@@ -80,7 +90,11 @@ async function searchWithTavily({ query, maxResults = WEB_SEARCH_MAX_RESULTS_PER
 // Provider: Google CSE
 // ──────────────────────────────────────────────────────────────
 
-async function searchWithGoogleCse({ query, maxResults = WEB_SEARCH_MAX_RESULTS_PER_QUERY, timeoutMs = WEB_SEARCH_TIMEOUT_MS }) {
+async function searchWithGoogleCse({
+    query,
+    maxResults = WEB_SEARCH_MAX_RESULTS_PER_QUERY,
+    timeoutMs = WEB_SEARCH_TIMEOUT_MS,
+}) {
     const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
     const engineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
     if (!apiKey || !engineId) return null;
@@ -178,10 +192,7 @@ async function searchWeb({ query, maxResults = WEB_SEARCH_MAX_RESULTS_PER_QUERY 
  * Returns true if at least one web search provider is configured.
  */
 export function isWebSearchAvailable() {
-    return !!(
-        process.env.TAVILY_API_KEY
-        || (process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID)
-    );
+    return !!(process.env.TAVILY_API_KEY || (process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID));
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -237,7 +248,7 @@ export async function collectViaWebSearch(seedQueries) {
             posts: [],
             seedDiagnostics: seedQueries.map((seed) => ({
                 seed: typeof seed === 'string' ? seed : seed.query,
-                strategy: typeof seed === 'string' ? 'legacy' : (seed.strategy || 'unknown'),
+                strategy: typeof seed === 'string' ? 'legacy' : seed.strategy || 'unknown',
                 subreddit: null,
                 results: 0,
                 status: 'error',
@@ -256,7 +267,7 @@ export async function collectViaWebSearch(seedQueries) {
     for (let i = 0; i < seedQueries.length; i++) {
         const seed = seedQueries[i];
         const query = typeof seed === 'string' ? seed : seed.query;
-        const strategy = typeof seed === 'string' ? 'legacy' : (seed.strategy || 'unknown');
+        const strategy = typeof seed === 'string' ? 'legacy' : seed.strategy || 'unknown';
 
         // Append community-focused terms to improve discovery
         const searchQuery = `${query} site:reddit.com OR site:quora.com OR forum OR avis OR discussion`;
@@ -334,8 +345,13 @@ export async function collectViaWebSearch(seedQueries) {
     // Fallback: use a content hash when URL is missing (unlikely for web search results).
     const dedupe = new Map();
     for (const post of allResults) {
-        const key = post.permalink
-            || crypto.createHash('sha256').update(`${post.title}:${post.body || ''}`).digest('hex').slice(0, 32);
+        const key =
+            post.permalink ||
+            crypto
+                .createHash('sha256')
+                .update(`${post.title}:${post.body || ''}`)
+                .digest('hex')
+                .slice(0, 32);
         if (!dedupe.has(key)) {
             dedupe.set(key, post);
         }

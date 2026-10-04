@@ -3,20 +3,22 @@
 import { motion } from 'framer-motion';
 import { useGeoClient, useSeoWorkspaceSlice } from '@/features/admin/shared/context/ClientContext';
 import ScoreRing from '@/components/shared/metrics/ScoreRing';
-import {
-    GeoEmptyPanel,
-    GeoSectionTitle,
-    GeoPremiumCard,
-} from '@/features/admin/geo/components/GeoPremium';
+import { GeoEmptyPanel, GeoSectionTitle, GeoPremiumCard } from '@/features/admin/geo/components/GeoPremium';
 
 const EASE = [0.16, 1, 0.3, 1];
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } } };
+const fadeUp = {
+    hidden: { opacity: 0, y: 12 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+};
 
 function formatDate(value) {
     if (!value) return 'n.d.';
-    try { return new Date(value).toLocaleDateString('fr-CA', { dateStyle: 'medium' }); }
-    catch { return 'n.d.'; }
+    try {
+        return new Date(value).toLocaleDateString('fr-CA', { dateStyle: 'medium' });
+    } catch {
+        return 'n.d.';
+    }
 }
 
 function recommendabilityColor(level) {
@@ -53,10 +55,7 @@ export default function SeoLocalView() {
                     title="Préparation locale"
                     subtitle={`Indicateurs de préparation locale pour ${client?.client_name || 'ce client'}.`}
                 />
-                <GeoEmptyPanel
-                    title="Préparation locale indisponible"
-                    description={error}
-                />
+                <GeoEmptyPanel title="Préparation locale indisponible" description={error} />
             </div>
         );
     }
@@ -96,7 +95,8 @@ export default function SeoLocalView() {
                     <ScoreRing value={data.localScore} color="#a78bfa" size={64} strokeWidth={5} />
                     <div>
                         <div className="text-[22px] font-bold text-white/90 tabular-nums">
-                            {data.localScore ?? 'n.d.'}<span className="text-[14px] text-white/35">/100</span>
+                            {data.localScore ?? 'n.d.'}
+                            <span className="text-[14px] text-white/35">/100</span>
                         </div>
                         <div className="text-[11px] text-white/40 font-bold uppercase tracking-[0.06em]">
                             {data.localScoreLabel}
@@ -109,7 +109,9 @@ export default function SeoLocalView() {
 
                 {data.aiRecommendability && (
                     <div className="geo-card p-5 border border-white/[0.06]">
-                        <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.08em] mb-2">Recommandabilité IA</div>
+                        <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.08em] mb-2">
+                            Recommandabilité IA
+                        </div>
                         <div className={`text-[16px] font-bold ${recommendabilityColor(data.aiRecommendability)}`}>
                             {recommendabilityLabel(data.aiRecommendability)}
                         </div>
@@ -122,7 +124,9 @@ export default function SeoLocalView() {
                 )}
 
                 <div className="geo-card p-5 border border-white/[0.06]">
-                    <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.08em] mb-2">Problèmes locaux</div>
+                    <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.08em] mb-2">
+                        Problèmes locaux
+                    </div>
                     <div className="text-[28px] font-bold text-amber-300/90 tabular-nums">{data.localIssueCount}</div>
                     <div className="text-[10px] text-white/30 mt-1">sur {data.totalIssueCount} total</div>
                 </div>
@@ -131,9 +135,13 @@ export default function SeoLocalView() {
             {/* Site classification */}
             {data.siteClassification && (
                 <motion.div variants={fadeUp} className="geo-card p-4 border border-white/[0.06]">
-                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">Classification du site</div>
+                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">
+                        Classification du site
+                    </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-[13px] font-semibold text-white/85">{data.siteClassification.label || data.siteClassification.type}</span>
+                        <span className="text-[13px] font-semibold text-white/85">
+                            {data.siteClassification.label || data.siteClassification.type}
+                        </span>
                     </div>
                 </motion.div>
             )}
@@ -141,7 +149,9 @@ export default function SeoLocalView() {
             {/* Business summary from LLM */}
             {data.businessSummary && (
                 <motion.div variants={fadeUp} className="geo-card p-4 border border-white/[0.06]">
-                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">Résumé IA de l&#39;activité</div>
+                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">
+                        Résumé IA de l&#39;activité
+                    </div>
                     <div className="text-[12px] text-white/60 leading-relaxed">{data.businessSummary}</div>
                 </motion.div>
             )}
@@ -149,7 +159,9 @@ export default function SeoLocalView() {
             {/* Answerability summary */}
             {data.answerabilitySummary && (
                 <motion.div variants={fadeUp} className="geo-card p-4 border border-white/[0.06]">
-                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">Capacité de réponse IA</div>
+                    <div className="text-[11px] font-bold text-white/35 uppercase tracking-wider mb-2">
+                        Capacité de réponse IA
+                    </div>
                     <div className="text-[12px] text-white/60 leading-relaxed">{data.answerabilitySummary}</div>
                 </motion.div>
             )}
@@ -160,16 +172,22 @@ export default function SeoLocalView() {
                     <GeoPremiumCard className="p-0 overflow-hidden">
                         <div className="px-5 py-4 border-b border-white/[0.08] bg-black/25">
                             <div className="text-sm font-semibold text-white/95">Problèmes de préparation locale</div>
-                            <div className="text-[11px] text-white/35">{data.localIssues.length} problèmes locaux/GEO identifiés.</div>
+                            <div className="text-[11px] text-white/35">
+                                {data.localIssues.length} problèmes locaux/GEO identifiés.
+                            </div>
                         </div>
                         <div className="divide-y divide-white/[0.04]">
                             {data.localIssues.map((issue, i) => (
                                 <div key={issue.key || i} className="px-5 py-3 hover:bg-white/[0.02] transition-colors">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0 flex-1">
-                                            <div className="text-[12px] text-white/80 font-medium">{issue.label || issue.key}</div>
+                                            <div className="text-[12px] text-white/80 font-medium">
+                                                {issue.label || issue.key}
+                                            </div>
                                             {issue.description && (
-                                                <div className="text-[10px] text-white/35 mt-0.5 line-clamp-2">{issue.description}</div>
+                                                <div className="text-[10px] text-white/35 mt-0.5 line-clamp-2">
+                                                    {issue.description}
+                                                </div>
                                             )}
                                         </div>
                                         {issue.severity && (
@@ -189,9 +207,10 @@ export default function SeoLocalView() {
             <motion.div variants={fadeUp} className="geo-card p-4 border border-white/[0.06]">
                 <div className="text-[11px] font-bold text-white/25 uppercase tracking-wider mb-2">Provenance</div>
                 <div className="text-[10px] text-white/30 leading-relaxed">
-                    • {data.localScoreProvenance}<br />
-                    • Cette vue affiche les indicateurs locaux depuis la perspective SEO.<br />
-                    • L&#39;espace GEO Ops contient sa propre grille d&#39;analyse GEO.
+                    • {data.localScoreProvenance}
+                    <br />
+                    • Cette vue affiche les indicateurs locaux depuis la perspective SEO.
+                    <br />• L&#39;espace GEO Ops contient sa propre grille d&#39;analyse GEO.
                 </div>
             </motion.div>
         </motion.div>

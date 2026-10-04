@@ -14,12 +14,12 @@ La [route autorisée côté serveur](../src/app/api/admin/llm-compare/route.js) 
 
 ```json
 {
-  "source_type": "url",
-  "url": "https://example.com/article",
-  "prompt": "Résume les points clés et les risques SEO",
-  "provider_timeout_ms": 30000,
-  "max_content_chars": 16000,
-  "enable_google_grounding": true
+    "source_type": "url",
+    "url": "https://example.com/article",
+    "prompt": "Résume les points clés et les risques SEO",
+    "provider_timeout_ms": 30000,
+    "max_content_chars": 16000,
+    "enable_google_grounding": true
 }
 ```
 
@@ -29,13 +29,13 @@ La réponse `v1` contient `input` (source, URL, prompt, aperçu), `grounding` (a
 
 ## Configuration dans un environnement autorisé
 
-| Usage | Variables consommées |
-|---|---|
-| Gemini | `GOOGLE_API_KEY` ou `GEMINI_API_KEY` ; `GOOGLE_MODEL_COMPARE` ou `GEMINI_MODEL_COMPARE`. |
-| Groq | `GROQ_API_KEY`, `GROQ_MODEL_COMPARE`. |
-| Mistral | `MISTRAL_API_KEY`, `MISTRAL_MODEL_COMPARE`. |
-| OpenRouter | `OPENROUTER_API_KEY` ; `OPENROUTER_MODEL_COMPARE` ou `OPENROUTER_MODEL_QUERY`. |
-| Grounding partagé | `GOOGLE_SEARCH_API_KEY` et `GOOGLE_SEARCH_ENGINE_ID`, avec repli `TAVILY_API_KEY`. |
+| Usage             | Variables consommées                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Gemini            | `GOOGLE_API_KEY` ou `GEMINI_API_KEY` ; `GOOGLE_MODEL_COMPARE` ou `GEMINI_MODEL_COMPARE`. |
+| Groq              | `GROQ_API_KEY`, `GROQ_MODEL_COMPARE`.                                                    |
+| Mistral           | `MISTRAL_API_KEY`, `MISTRAL_MODEL_COMPARE`.                                              |
+| OpenRouter        | `OPENROUTER_API_KEY` ; `OPENROUTER_MODEL_COMPARE` ou `OPENROUTER_MODEL_QUERY`.           |
+| Grounding partagé | `GOOGLE_SEARCH_API_KEY` et `GOOGLE_SEARCH_ENGINE_ID`, avec repli `TAVILY_API_KEY`.       |
 
 Les modèles par défaut et priorités de configuration sont choisis par la couche d'adaptation appelée depuis le [comparateur](../src/lib/llm-comparison/compare-models.js). Aucun secret ne doit figurer dans les payloads, captures ou sorties JSON.
 

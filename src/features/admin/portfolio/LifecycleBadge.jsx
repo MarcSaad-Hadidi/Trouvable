@@ -25,9 +25,7 @@ export default function LifecycleBadge({ status, size = 'sm' }) {
     const cls = BADGE_STYLES[state] || BADGE_STYLES.prospect;
     const dot = DOT_STYLES[state] || DOT_STYLES.prospect;
 
-    const sizeClasses = size === 'sm'
-        ? 'text-[9px] px-2 py-[3px]'
-        : 'text-[10px] px-2.5 py-[4px]';
+    const sizeClasses = size === 'sm' ? 'text-[9px] px-2 py-[3px]' : 'text-[10px] px-2.5 py-[4px]';
 
     return (
         <span

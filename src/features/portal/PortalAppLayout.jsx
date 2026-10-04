@@ -9,7 +9,7 @@ export const metadata = {
 
 function getPrimaryEmail(user) {
     const primary = user?.emailAddresses?.find(
-        (emailAddress) => emailAddress.id === user?.primaryEmailAddressId
+        (emailAddress) => emailAddress.id === user?.primaryEmailAddressId,
     )?.emailAddress;
 
     return primary || user?.emailAddresses?.[0]?.emailAddress || '';
@@ -43,9 +43,7 @@ export default async function PortalAppLayout({ children }) {
                             className="h-9 w-9 rounded-md border border-white/[0.08] bg-white/[0.03] p-1"
                         />
                         <div className="flex flex-col leading-none">
-                            <span className="font-display text-[15px] font-semibold tracking-[-0.02em]">
-                                Trouvable
-                            </span>
+                            <span className="font-display text-[15px] font-semibold tracking-[-0.02em]">Trouvable</span>
                             <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.20em] text-white/35">
                                 Espace de restitution
                             </span>

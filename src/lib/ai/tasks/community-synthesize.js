@@ -4,9 +4,16 @@ import { z } from 'zod';
 import { registerTask } from './registry.js';
 
 const VALID_OPPORTUNITY_TYPES = [
-    'response', 'faq', 'content', 'differentiation',
-    'recurring_buyer_question', 'comparison_discussion', 'recurring_pain_point',
-    'response_opportunity', 'ai_mention_opportunity', 'content_opportunity',
+    'response',
+    'faq',
+    'content',
+    'differentiation',
+    'recurring_buyer_question',
+    'comparison_discussion',
+    'recurring_pain_point',
+    'response_opportunity',
+    'ai_mention_opportunity',
+    'content_opportunity',
 ];
 
 // Quality gate thresholds for LLM output normalization
@@ -34,9 +41,12 @@ const outputSchema = z.object({
 function buildMessages(input) {
     const { clientName, businessType, clusters, mandateContext } = input;
 
-    const clusterSummary = clusters.map((c, i) =>
-        `${i + 1}. [${c.cluster_type}] "${c.label}" — ${c.mention_count} mentions, sources: ${c.sources?.join(', ') || 'unknown'}${c.signal_families?.length ? `, signals: ${c.signal_families.join(', ')}` : ''}`
-    ).join('\n');
+    const clusterSummary = clusters
+        .map(
+            (c, i) =>
+                `${i + 1}. [${c.cluster_type}] "${c.label}" — ${c.mention_count} mentions, sources: ${c.sources?.join(', ') || 'unknown'}${c.signal_families?.length ? `, signals: ${c.signal_families.join(', ')}` : ''}`,
+        )
+        .join('\n');
 
     // Build mandate context for richer synthesis
     const mandateLines = [];
@@ -57,9 +67,7 @@ function buildMessages(input) {
             mandateLines.push(`Location: ${mandateContext.city}`);
         }
     }
-    const mandateSection = mandateLines.length > 0
-        ? ['', 'Business context:', ...mandateLines].join('\n')
-        : '';
+    const mandateSection = mandateLines.length > 0 ? ['', 'Business context:', ...mandateLines].join('\n') : '';
 
     return [
         {
@@ -96,7 +104,9 @@ function buildMessages(input) {
                 '',
                 'Synthesize into opportunities as JSON: { "opportunities": [...] }',
                 'Remember: skip weak clusters. Produce fewer, stronger, more actionable opportunities.',
-            ].filter(Boolean).join('\n'),
+            ]
+                .filter(Boolean)
+                .join('\n'),
         },
     ];
 }
@@ -124,7 +134,9 @@ function normalize(raw, input) {
             suggested_action: String(opp.suggested_action || '').slice(0, 500),
             why_it_matters: opp.why_it_matters ? String(opp.why_it_matters).slice(0, 500) : null,
             priority: ['high', 'medium', 'low'].includes(opp.priority) ? opp.priority : 'medium',
-            evidence_strength: ['strong', 'moderate', 'weak'].includes(opp.evidence_strength) ? opp.evidence_strength : 'weak',
+            evidence_strength: ['strong', 'moderate', 'weak'].includes(opp.evidence_strength)
+                ? opp.evidence_strength
+                : 'weak',
             client_id: input?.clientId || null,
         }));
 }

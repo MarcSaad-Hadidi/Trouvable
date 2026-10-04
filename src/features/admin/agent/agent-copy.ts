@@ -71,7 +71,9 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 function normalizeToken(value?: string | null): string {
-    return String(value || '').trim().toLowerCase();
+    return String(value || '')
+        .trim()
+        .toLowerCase();
 }
 
 function titleCase(text: string): string {
@@ -135,4 +137,3 @@ export function toneForStatus(value?: string | null): 'critical' | 'warning' | '
     if (['couvert', 'covered', 'done', 'resolved'].includes(normalized)) return 'ok';
     return 'neutral';
 }
-

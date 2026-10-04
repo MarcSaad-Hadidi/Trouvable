@@ -182,10 +182,14 @@ function buildRepoSignals(issueCategory, issue = {}, sourceUrl = null) {
     if (CANONICAL_PATTERN.test(haystack)) {
         const layoutContent = readRepoText('appLayout');
         if (layoutContent && /(alternates\s*:\s*{[\s\S]*canonical|canonical\s*:)/.test(layoutContent)) {
-            repoFacts.push("src/app/layout.jsx contient deja une declaration canonique dans metadata; verifier pourquoi le rendu audite ne l expose pas avant d ajouter une seconde source.");
+            repoFacts.push(
+                'src/app/layout.jsx contient deja une declaration canonique dans metadata; verifier pourquoi le rendu audite ne l expose pas avant d ajouter une seconde source.',
+            );
         }
 
-        validationTargets.push('Verifier qu une seule balise canonical correcte est rendue sur la page observee apres correction.');
+        validationTargets.push(
+            'Verifier qu une seule balise canonical correcte est rendue sur la page observee apres correction.',
+        );
     }
 
     if (validationTargets.length === 0) {
@@ -245,7 +249,7 @@ function getMissingFields(issue = {}, repoSignals = {}) {
     }
 
     if (!compactString(issue.recommendedFix)) {
-        missing.push("Suggestion de correction existante indisponible dans la source actuelle.");
+        missing.push('Suggestion de correction existante indisponible dans la source actuelle.');
     }
 
     if (!compactString(issue.evidence)) {
@@ -261,9 +265,11 @@ function getMissingFields(issue = {}, repoSignals = {}) {
 
 export function buildSeoHealthCorrectionPromptContext({ client, audit, issue }) {
     const category = getCorrectionPromptCategory(issue);
-    const sourceUrl = compactString(issue?.sourceUrl) || compactString(audit?.resolved_url) || compactString(audit?.source_url);
+    const sourceUrl =
+        compactString(issue?.sourceUrl) || compactString(audit?.resolved_url) || compactString(audit?.source_url);
     const truthState = compactString(issue?.truth_class) || 'unavailable';
-    const evidenceSummary = compactString(issue?.evidence) || 'Preuve textuelle indisponible dans la lecture SEO Health.';
+    const evidenceSummary =
+        compactString(issue?.evidence) || 'Preuve textuelle indisponible dans la lecture SEO Health.';
     const repoSignals = buildRepoSignals(category, issue, sourceUrl);
 
     return {
@@ -291,17 +297,24 @@ export function buildSeoHealthCorrectionPromptContext({ client, audit, issue }) 
             recommendedFix: compactString(issue?.recommendedFix) || 'Correction existante indisponible.',
             sourceUrl,
         },
-        inspectionTargets: getInspectionTargets(category, {
-            ...issue,
-            sourceUrl,
-        }, repoSignals),
+        inspectionTargets: getInspectionTargets(
+            category,
+            {
+                ...issue,
+                sourceUrl,
+            },
+            repoSignals,
+        ),
         verifiedPaths: repoSignals.verifiedPaths,
         repoFacts: repoSignals.repoFacts,
         validationTargets: repoSignals.validationTargets,
-        missingFields: getMissingFields({
-            ...issue,
-            sourceUrl,
-        }, repoSignals),
+        missingFields: getMissingFields(
+            {
+                ...issue,
+                sourceUrl,
+            },
+            repoSignals,
+        ),
         constraints: {
             absolute: [
                 'Ne pas inventer de preuve, de fichier ou de donnees manquantes.',

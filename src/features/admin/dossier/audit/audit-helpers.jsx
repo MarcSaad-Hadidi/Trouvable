@@ -57,9 +57,12 @@ export function getPriorityTone(priority) {
 }
 
 export function getEvidenceStatusMeta(value) {
-    if (value === 'detected') return { label: 'Détecté', tone: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' };
-    if (value === 'weak_evidence') return { label: 'Preuve faible', tone: 'bg-amber-400/10 text-amber-200 border-amber-400/20' };
-    if (value === 'not_applicable') return { label: 'Pertinence faible', tone: 'bg-white/[0.05] text-white/55 border-white/10' };
+    if (value === 'detected')
+        return { label: 'Détecté', tone: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' };
+    if (value === 'weak_evidence')
+        return { label: 'Preuve faible', tone: 'bg-amber-400/10 text-amber-200 border-amber-400/20' };
+    if (value === 'not_applicable')
+        return { label: 'Pertinence faible', tone: 'bg-white/[0.05] text-white/55 border-white/10' };
     return { label: 'Non trouvé', tone: 'bg-red-400/10 text-red-300 border-red-400/20' };
 }
 
@@ -78,7 +81,9 @@ export function getScoreBg(score) {
 
 export function Pill({ label, tone }) {
     return (
-        <span className={`inline-flex items-center leading-none rounded-full border px-1.5 py-px text-[9px] font-semibold uppercase tracking-[0.06em] ${tone}`}>
+        <span
+            className={`inline-flex items-center leading-none rounded-full border px-1.5 py-px text-[9px] font-semibold uppercase tracking-[0.06em] ${tone}`}
+        >
             {label}
         </span>
     );
@@ -117,26 +122,70 @@ export function computePageStats(audit) {
             scoreCount++;
         }
     }
-    return { totalPages, totalBlocks, highBlocks, lowBlocks, avgScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount) : null };
+    return {
+        totalPages,
+        totalBlocks,
+        highBlocks,
+        lowBlocks,
+        avgScore: scoreCount > 0 ? Math.round(scoreSum / scoreCount) : null,
+    };
 }
 
 export function extractLlmsTxtStatus(audit) {
     const issues = toArray(audit?.issues);
     const strengths = toArray(audit?.strengths);
-    const llmsIssue = issues.find((i) => String(i?.title || '').toLowerCase().includes('llms.txt'));
-    const llmsStrength = strengths.find((s) => String(s?.title || '').toLowerCase().includes('llms.txt'));
-    if (llmsStrength) return { found: true, valid: true, label: llmsStrength.title, detail: llmsStrength.evidence_summary || llmsStrength.description };
-    if (llmsIssue) return { found: false, valid: false, label: llmsIssue.title, detail: llmsIssue.recommended_fix || llmsIssue.evidence_summary };
+    const llmsIssue = issues.find((i) =>
+        String(i?.title || '')
+            .toLowerCase()
+            .includes('llms.txt'),
+    );
+    const llmsStrength = strengths.find((s) =>
+        String(s?.title || '')
+            .toLowerCase()
+            .includes('llms.txt'),
+    );
+    if (llmsStrength)
+        return {
+            found: true,
+            valid: true,
+            label: llmsStrength.title,
+            detail: llmsStrength.evidence_summary || llmsStrength.description,
+        };
+    if (llmsIssue)
+        return {
+            found: false,
+            valid: false,
+            label: llmsIssue.title,
+            detail: llmsIssue.recommended_fix || llmsIssue.evidence_summary,
+        };
     return null;
 }
 
 export function extractCrawlerStatus(audit) {
     const issues = toArray(audit?.issues);
     const strengths = toArray(audit?.strengths);
-    const crawlerIssue = issues.find((i) => String(i?.title || '').toLowerCase().includes('ai crawler'));
-    const crawlerStrength = strengths.find((s) => String(s?.title || '').toLowerCase().includes('ai crawler'));
-    if (crawlerStrength) return { ok: true, label: crawlerStrength.title, detail: crawlerStrength.evidence_summary || crawlerStrength.description };
-    if (crawlerIssue) return { ok: false, label: crawlerIssue.title, detail: crawlerIssue.evidence_summary || crawlerIssue.recommended_fix };
+    const crawlerIssue = issues.find((i) =>
+        String(i?.title || '')
+            .toLowerCase()
+            .includes('ai crawler'),
+    );
+    const crawlerStrength = strengths.find((s) =>
+        String(s?.title || '')
+            .toLowerCase()
+            .includes('ai crawler'),
+    );
+    if (crawlerStrength)
+        return {
+            ok: true,
+            label: crawlerStrength.title,
+            detail: crawlerStrength.evidence_summary || crawlerStrength.description,
+        };
+    if (crawlerIssue)
+        return {
+            ok: false,
+            label: crawlerIssue.title,
+            detail: crawlerIssue.evidence_summary || crawlerIssue.recommended_fix,
+        };
     return null;
 }
 
@@ -146,9 +195,11 @@ export function extractCrawlerStatus(audit) {
 export function getRemediationType(issue) {
     const title = String(issue?.title || '').toLowerCase();
     const category = String(issue?.category || '').toLowerCase();
-    if (title.includes('faq') || (category === 'content' && title.includes('question'))) return 'missing_faq_for_intent';
+    if (title.includes('faq') || (category === 'content' && title.includes('question')))
+        return 'missing_faq_for_intent';
     if (title.includes('local') || title.includes('nap') || title.includes('adresse')) return 'weak_local_clarity';
-    if (title.includes('schema') || title.includes('json-ld') || title.includes('données structurées')) return 'schema_missing_or_incoherent';
+    if (title.includes('schema') || title.includes('json-ld') || title.includes('données structurées'))
+        return 'schema_missing_or_incoherent';
     if (title.includes('llms.txt')) return 'llms_txt_missing';
     if (title.includes('crawler') || title.includes('robots') || title.includes('bot')) return 'ai_crawlers_blocked';
     return null;

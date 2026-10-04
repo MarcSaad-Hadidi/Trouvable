@@ -3,11 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import {
-    inferTaskType,
-    normalizeProblemRef,
-    problemRefToQueryString,
-} from '@/lib/correction-prompts/problem-ref';
+import { inferTaskType, normalizeProblemRef, problemRefToQueryString } from '@/lib/correction-prompts/problem-ref';
 
 /**
  * IssueHandoffContext — store transitoire « problème → prompt ».
@@ -60,13 +56,16 @@ export function IssueHandoffProvider({ children }) {
     // Ferme le drawer automatiquement à chaque navigation (changement de route
     // ou de query params), y compris quand on reste dans le même layout admin.
 
-    const value = useMemo(() => ({
-        open,
-        ref,
-        openHandoff,
-        closeHandoff,
-        clearHandoff,
-    }), [open, ref, openHandoff, closeHandoff, clearHandoff]);
+    const value = useMemo(
+        () => ({
+            open,
+            ref,
+            openHandoff,
+            closeHandoff,
+            clearHandoff,
+        }),
+        [open, ref, openHandoff, closeHandoff, clearHandoff],
+    );
 
     return <HandoffContext.Provider value={value}>{children}</HandoffContext.Provider>;
 }

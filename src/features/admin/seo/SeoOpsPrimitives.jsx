@@ -1,11 +1,7 @@
 ﻿import Link from 'next/link';
 
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
-import {
-    CommandEmptyState,
-    CommandHeader,
-    CommandPageShell,
-} from '@/features/admin/shared/components/command';
+import { CommandEmptyState, CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
 
 const ACCENT_LINE_CLASSES = {
     emerald: 'from-emerald-300/70 via-emerald-300/18 to-transparent',
@@ -16,10 +12,13 @@ const ACCENT_LINE_CLASSES = {
 
 const PANEL_TONE_CLASSES = {
     default: 'border-white/[0.08] bg-[#0b0d11]/92 shadow-[0_20px_60px_rgba(0,0,0,0.26)]',
-    success: 'border-emerald-400/14 bg-[linear-gradient(180deg,rgba(10,20,16,0.98)_0%,rgba(9,12,13,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
+    success:
+        'border-emerald-400/14 bg-[linear-gradient(180deg,rgba(10,20,16,0.98)_0%,rgba(9,12,13,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
     info: 'border-sky-400/14 bg-[linear-gradient(180deg,rgba(8,16,22,0.98)_0%,rgba(9,12,15,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
-    warning: 'border-amber-400/16 bg-[linear-gradient(180deg,rgba(22,17,8,0.98)_0%,rgba(13,11,9,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
-    critical: 'border-red-400/16 bg-[linear-gradient(180deg,rgba(23,11,11,0.98)_0%,rgba(15,10,10,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
+    warning:
+        'border-amber-400/16 bg-[linear-gradient(180deg,rgba(22,17,8,0.98)_0%,rgba(13,11,9,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
+    critical:
+        'border-red-400/16 bg-[linear-gradient(180deg,rgba(23,11,11,0.98)_0%,rgba(15,10,10,0.94)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
 };
 
 const ACTION_VARIANTS = {
@@ -96,7 +95,9 @@ export function SeoStatusBadge({ status, label = null, className = '' }) {
     const resolved = STATUS_META[status] || STATUS_META.unavailable;
 
     return (
-        <span className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${resolved.className} ${className}`}>
+        <span
+            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${resolved.className} ${className}`}
+        >
             {label || resolved.label}
         </span>
     );
@@ -121,15 +122,13 @@ function buildSparklinePoints(values) {
 
     return values.map((value, index) => {
         const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
-        const y = 40 - (((value - min) / range) * 32);
+        const y = 40 - ((value - min) / range) * 32;
         return { x, y };
     });
 }
 
 export function SeoSparkline({ points, valueKey, color = 'emerald' }) {
-    const values = (points || [])
-        .map((point) => Number(point?.[valueKey]))
-        .filter((value) => Number.isFinite(value));
+    const values = (points || []).map((point) => Number(point?.[valueKey])).filter((value) => Number.isFinite(value));
 
     if (values.length < 2) return null;
 
@@ -154,11 +153,7 @@ export function SeoSparkline({ points, valueKey, color = 'emerald' }) {
 }
 
 export function SeoPageShell({ children }) {
-    return (
-        <CommandPageShell className="seo-lens">
-            {children}
-        </CommandPageShell>
-    );
+    return <CommandPageShell className="seo-lens">{children}</CommandPageShell>;
 }
 
 export function SeoSectionNav({ items = [] }) {
@@ -187,7 +182,10 @@ export function SeoLoadingState({ title, description }) {
             <CommandHeader eyebrow="SEO Ops" title={title} subtitle={description} />
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={index} className="animate-pulse rounded-[26px] border border-white/[0.08] bg-[#0b0d11]/80 p-5">
+                    <div
+                        key={index}
+                        className="animate-pulse rounded-[26px] border border-white/[0.08] bg-[#0b0d11]/80 p-5"
+                    >
                         <div className="h-3 w-24 rounded-full bg-white/[0.08]" />
                         <div className="mt-5 h-8 w-20 rounded-full bg-white/[0.10]" />
                         <div className="mt-4 h-20 rounded-[20px] bg-white/[0.04]" />
@@ -204,26 +202,30 @@ export function SeoPageHeader({ eyebrow = 'SEO Ops', title, subtitle, actions = 
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/30 to-transparent" />
             <div className="pointer-events-none absolute -right-20 top-0 h-40 w-40 rounded-full bg-sky-400/10 blur-3xl" />
             <div className="relative">
-                <CommandHeader
-                    eyebrow={eyebrow}
-                    title={title}
-                    subtitle={subtitle}
-                    actions={actions}
-                    meta={meta}
-                />
+                <CommandHeader eyebrow={eyebrow} title={title} subtitle={subtitle} actions={actions} meta={meta} />
             </div>
         </section>
     );
 }
 
-export function SeoStatCard({ label, value, detail, reliability = 'unavailable', accent = 'emerald', href = null, trend = null }) {
+export function SeoStatCard({
+    label,
+    value,
+    detail,
+    reliability = 'unavailable',
+    accent = 'emerald',
+    href = null,
+    trend = null,
+}) {
     const content = (
-        <div className={`group relative flex h-full min-h-[188px] flex-col overflow-hidden rounded-[26px] border border-white/[0.08] bg-[#0b0d10]/90 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] ${href ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.16] hover:bg-[#0d1014]' : ''}`}>
-            <div className={`absolute inset-x-5 top-0 h-px bg-gradient-to-r ${ACCENT_LINE_CLASSES[accent] || ACCENT_LINE_CLASSES.emerald}`} />
+        <div
+            className={`group relative flex h-full min-h-[188px] flex-col overflow-hidden rounded-[26px] border border-white/[0.08] bg-[#0b0d10]/90 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.24)] ${href ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.16] hover:bg-[#0d1014]' : ''}`}
+        >
+            <div
+                className={`absolute inset-x-5 top-0 h-px bg-gradient-to-r ${ACCENT_LINE_CLASSES[accent] || ACCENT_LINE_CLASSES.emerald}`}
+            />
             <div className="flex items-start justify-between gap-3">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/50">
-                    {label}
-                </div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/50">{label}</div>
                 <ReliabilityPill value={reliability} />
             </div>
 
@@ -231,38 +233,48 @@ export function SeoStatCard({ label, value, detail, reliability = 'unavailable',
                 {value}
             </div>
 
-            {detail ? (
-                <p className="mt-3 text-[13px] leading-relaxed text-white/55">
-                    {detail}
-                </p>
-            ) : null}
+            {detail ? <p className="mt-3 text-[13px] leading-relaxed text-white/55">{detail}</p> : null}
 
             {trend ? (
                 <div className="mt-auto pt-5 -mx-1">
                     <SeoSparkline points={trend.points} valueKey={trend.valueKey} color={trend.color || accent} />
                 </div>
-            ) : <div className="mt-auto pt-5" />}
+            ) : (
+                <div className="mt-auto pt-5" />
+            )}
         </div>
     );
 
     if (!href) return content;
 
     return (
-        <Link href={href} className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608] rounded-[26px]">
+        <Link
+            href={href}
+            className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050608] rounded-[26px]"
+        >
             {content}
         </Link>
     );
 }
 
-export function SeoPanel({ id, title, subtitle = null, action = null, reliability = null, tone = 'default', children }) {
+export function SeoPanel({
+    id,
+    title,
+    subtitle = null,
+    action = null,
+    reliability = null,
+    tone = 'default',
+    children,
+}) {
     return (
-        <section id={id} className={`scroll-mt-24 rounded-[30px] border p-5 sm:p-6 lg:p-7 ${PANEL_TONE_CLASSES[tone] || PANEL_TONE_CLASSES.default}`}>
+        <section
+            id={id}
+            className={`scroll-mt-24 rounded-[30px] border p-5 sm:p-6 lg:p-7 ${PANEL_TONE_CLASSES[tone] || PANEL_TONE_CLASSES.default}`}
+        >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-white/95">
-                            {title}
-                        </h2>
+                        <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-white/95">{title}</h2>
                         {reliability && <ReliabilityPill value={reliability} />}
                     </div>
                     {subtitle ? (
@@ -275,15 +287,11 @@ export function SeoPanel({ id, title, subtitle = null, action = null, reliabilit
                 {action ? <div className="shrink-0">{action}</div> : null}
             </div>
 
-            <div className="space-y-4">
-                {children}
-            </div>
+            <div className="space-y-4">{children}</div>
         </section>
     );
 }
 
 export function SeoEmptyState({ title, description, action = null }) {
-    return (
-        <CommandEmptyState title={title} description={description} action={action} />
-    );
+    return <CommandEmptyState title={title} description={description} action={action} />;
 }

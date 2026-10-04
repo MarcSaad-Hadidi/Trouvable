@@ -1,10 +1,12 @@
 function uniqueStrings(values = []) {
-    return [...new Set(
-        values
-            .filter((value) => typeof value === 'string')
-            .map((value) => value.trim())
-            .filter(Boolean)
-    )];
+    return [
+        ...new Set(
+            values
+                .filter((value) => typeof value === 'string')
+                .map((value) => value.trim())
+                .filter(Boolean),
+        ),
+    ];
 }
 
 function pushReason(reasons, type, score, label, evidence) {
@@ -108,9 +110,14 @@ export function classifySiteForAudit(scanResults) {
     const pageSummaries = extracted.page_summaries || [];
     const schemaTypes = uniqueStrings((extracted.schema_entities || []).map((entity) => entity.type));
     const allText = String((extracted.text_chunks || []).join(' ')).toLowerCase();
-    const titles = uniqueStrings(extracted.titles || []).join(' ').toLowerCase();
+    const titles = uniqueStrings(extracted.titles || [])
+        .join(' ')
+        .toLowerCase();
     const pageTypeList = pageSummaries.map((page) => page.page_type).filter(Boolean);
-    const pageUrls = pageSummaries.map((page) => page.url || '').join(' ').toLowerCase();
+    const pageUrls = pageSummaries
+        .map((page) => page.url || '')
+        .join(' ')
+        .toLowerCase();
 
     const scores = {
         local_business: 0,
@@ -134,7 +141,13 @@ export function classifySiteForAudit(scanResults) {
 
     if (extracted.has_local_business_schema) {
         scores.local_business += 4;
-        pushReason(reasons, 'local_business', 4, 'LocalBusiness schema detected', 'Observed JSON-LD includes LocalBusiness.');
+        pushReason(
+            reasons,
+            'local_business',
+            4,
+            'LocalBusiness schema detected',
+            'Observed JSON-LD includes LocalBusiness.',
+        );
     }
 
     if ((localSignals.cities || []).length > 0 || (localSignals.regions || []).length > 0) {
@@ -144,13 +157,19 @@ export function classifySiteForAudit(scanResults) {
             'local_business',
             3,
             'Local geography mentioned',
-            `Observed local signals: ${[...(localSignals.cities || []), ...(localSignals.regions || [])].slice(0, 4).join(', ')}`
+            `Observed local signals: ${[...(localSignals.cities || []), ...(localSignals.regions || [])].slice(0, 4).join(', ')}`,
         );
     }
 
     if ((localSignals.address_lines || []).length > 0 || (localSignals.maps_links || []).length > 0) {
         scores.local_business += 2;
-        pushReason(reasons, 'local_business', 2, 'Physical location evidence', 'Address-like or map-link evidence was detected.');
+        pushReason(
+            reasons,
+            'local_business',
+            2,
+            'Physical location evidence',
+            'Address-like or map-link evidence was detected.',
+        );
     }
 
     if ((extracted.phones || []).length > 0 && (extracted.emails || []).length > 0) {
@@ -159,91 +178,200 @@ export function classifySiteForAudit(scanResults) {
     }
 
     // Strong local-business boost: service keywords + contact + real geographic evidence (not just generic business identity)
-    const hasServiceLanguage = (serviceSignals.keywords || []).some(k => ['service', 'services', 'solution', 'solutions', 'expertise', 'specialite'].includes(k));
+    const hasServiceLanguage = (serviceSignals.keywords || []).some((k) =>
+        ['service', 'services', 'solution', 'solutions', 'expertise', 'specialite'].includes(k),
+    );
     const hasStrongContact = (extracted.phones || []).length > 0 && (extracted.emails || []).length > 0;
-    const hasRealLocalGeo = (localSignals.cities || []).length > 0 || (localSignals.regions || []).length > 0 || (localSignals.address_lines || []).length > 0;
-    if (hasServiceLanguage && hasStrongContact && hasRealLocalGeo && !schemaTypes.some((type) => /softwareapplication/i.test(type))) {
+    const hasRealLocalGeo =
+        (localSignals.cities || []).length > 0 ||
+        (localSignals.regions || []).length > 0 ||
+        (localSignals.address_lines || []).length > 0;
+    if (
+        hasServiceLanguage &&
+        hasStrongContact &&
+        hasRealLocalGeo &&
+        !schemaTypes.some((type) => /softwareapplication/i.test(type))
+    ) {
         scores.local_business += 2;
-        pushReason(reasons, 'local_business', 2, 'Service-business with public contact and local footprint', 'Service language plus visible contact and local geography suggest a local/service business.');
+        pushReason(
+            reasons,
+            'local_business',
+            2,
+            'Service-business with public contact and local footprint',
+            'Service language plus visible contact and local geography suggest a local/service business.',
+        );
     }
 
     // Local terms boost from extraction
     if ((localSignals.local_terms || []).length >= 2) {
         scores.local_business += 2;
-        pushReason(reasons, 'local_business', 2, 'Local vocabulary detected',
-            `Local terms observed: ${(localSignals.local_terms || []).slice(0, 4).join(', ')}`);
+        pushReason(
+            reasons,
+            'local_business',
+            2,
+            'Local vocabulary detected',
+            `Local terms observed: ${(localSignals.local_terms || []).slice(0, 4).join(', ')}`,
+        );
     }
 
     const saasKeywordMatches = [
-        'logiciel', 'software', 'plateforme', 'platform', 'saas', 'demo', 'free trial', 'essai gratuit',
-        'signup', 'integrations', 'api', 'dashboard',
+        'logiciel',
+        'software',
+        'plateforme',
+        'platform',
+        'saas',
+        'demo',
+        'free trial',
+        'essai gratuit',
+        'signup',
+        'integrations',
+        'api',
+        'dashboard',
     ].filter((keyword) => allText.includes(keyword) || titles.includes(keyword) || pageUrls.includes(keyword));
 
     // These are ambiguous terms that appear on BOTH local and SaaS sites.
     // Only count them as SaaS signals if at least one strong SaaS-specific keyword is already present.
-    const ambiguousSaasMatches = [
-        'login', 'connexion', 'sign in', 'pricing', 'tarifs',
-    ].filter((keyword) => allText.includes(keyword) || titles.includes(keyword) || pageUrls.includes(keyword));
+    const ambiguousSaasMatches = ['login', 'connexion', 'sign in', 'pricing', 'tarifs'].filter(
+        (keyword) => allText.includes(keyword) || titles.includes(keyword) || pageUrls.includes(keyword),
+    );
 
     if (schemaTypes.some((type) => /softwareapplication/i.test(type))) {
         scores.saas_software += 4;
-        pushReason(reasons, 'saas_software', 4, 'Software schema detected', 'Observed JSON-LD includes SoftwareApplication.');
+        pushReason(
+            reasons,
+            'saas_software',
+            4,
+            'Software schema detected',
+            'Observed JSON-LD includes SoftwareApplication.',
+        );
     }
 
     // Only count ambiguous SaaS terms if there's at least 1 strong SaaS keyword
-    const effectiveSaasMatches = saasKeywordMatches.length > 0
-        ? [...saasKeywordMatches, ...ambiguousSaasMatches]
-        : ambiguousSaasMatches.length >= 3 ? ambiguousSaasMatches : [];
+    const effectiveSaasMatches =
+        saasKeywordMatches.length > 0
+            ? [...saasKeywordMatches, ...ambiguousSaasMatches]
+            : ambiguousSaasMatches.length >= 3
+              ? ambiguousSaasMatches
+              : [];
 
     if (effectiveSaasMatches.length >= 3) {
         scores.saas_software += 4;
-        pushReason(reasons, 'saas_software', 4, 'Software/product language', `Observed SaaS/product keywords: ${effectiveSaasMatches.slice(0, 5).join(', ')}`);
+        pushReason(
+            reasons,
+            'saas_software',
+            4,
+            'Software/product language',
+            `Observed SaaS/product keywords: ${effectiveSaasMatches.slice(0, 5).join(', ')}`,
+        );
     } else if (effectiveSaasMatches.length > 0) {
         scores.saas_software += 2;
-        pushReason(reasons, 'saas_software', 2, 'Some software/product language', `Observed keywords: ${effectiveSaasMatches.join(', ')}`);
+        pushReason(
+            reasons,
+            'saas_software',
+            2,
+            'Some software/product language',
+            `Observed keywords: ${effectiveSaasMatches.join(', ')}`,
+        );
     }
 
     if (pageTypeList.some((type) => ['pricing', 'features', 'product', 'docs'].includes(type))) {
         scores.saas_software += 2;
-        pushReason(reasons, 'saas_software', 2, 'Product pages detected', 'Pricing/features/docs/product style pages were observed.');
+        pushReason(
+            reasons,
+            'saas_software',
+            2,
+            'Product pages detected',
+            'Pricing/features/docs/product style pages were observed.',
+        );
     }
 
     const contentKeywordMatches = [
-        'blog', 'article', 'guide', 'ressource', 'ressources', 'news', 'actualite', 'insights', 'editorial', 'podcast'
+        'blog',
+        'article',
+        'guide',
+        'ressource',
+        'ressources',
+        'news',
+        'actualite',
+        'insights',
+        'editorial',
+        'podcast',
     ].filter((keyword) => allText.includes(keyword) || titles.includes(keyword) || pageUrls.includes(keyword));
 
     if (schemaTypes.some((type) => /(article|blogposting|newsarticle)/i.test(type))) {
         scores.content_led += 4;
-        pushReason(reasons, 'content_led', 4, 'Editorial schema detected', 'Observed JSON-LD includes Article/BlogPosting.');
+        pushReason(
+            reasons,
+            'content_led',
+            4,
+            'Editorial schema detected',
+            'Observed JSON-LD includes Article/BlogPosting.',
+        );
     }
 
     if (contentKeywordMatches.length >= 2) {
         scores.content_led += 3;
-        pushReason(reasons, 'content_led', 3, 'Editorial language', `Observed editorial keywords: ${contentKeywordMatches.slice(0, 4).join(', ')}`);
+        pushReason(
+            reasons,
+            'content_led',
+            3,
+            'Editorial language',
+            `Observed editorial keywords: ${contentKeywordMatches.slice(0, 4).join(', ')}`,
+        );
     }
 
     const longFormPages = pageSummaries.filter((page) => Number(page.word_count || 0) >= 700).length;
     if (longFormPages >= 2) {
         scores.content_led += 2;
-        pushReason(reasons, 'content_led', 2, 'Long-form content detected', `${longFormPages} pages contain substantial text.`);
+        pushReason(
+            reasons,
+            'content_led',
+            2,
+            'Long-form content detected',
+            `${longFormPages} pages contain substantial text.`,
+        );
     }
 
-    const agencyKeywordMatches = ['agence', 'agency', 'studio', 'consulting', 'cabinet', 'services numeriques', 'marketing'].filter(
-        (keyword) => allText.includes(keyword) || titles.includes(keyword)
-    );
+    const agencyKeywordMatches = [
+        'agence',
+        'agency',
+        'studio',
+        'consulting',
+        'cabinet',
+        'services numeriques',
+        'marketing',
+    ].filter((keyword) => allText.includes(keyword) || titles.includes(keyword));
 
     // Hybrid only when BOTH local and another type have genuinely strong evidence, and neither clearly dominates
     if (scores.local_business >= 6 && scores.saas_software >= 4) {
         scores.hybrid_business += 5;
-        pushReason(reasons, 'hybrid_business', 5, 'Strong mixed local and SaaS signals', 'Observed strong local-business signals alongside strong software/product signals.');
+        pushReason(
+            reasons,
+            'hybrid_business',
+            5,
+            'Strong mixed local and SaaS signals',
+            'Observed strong local-business signals alongside strong software/product signals.',
+        );
     } else if (scores.local_business >= 6 && agencyKeywordMatches.length > 0) {
         scores.hybrid_business += 5;
-        pushReason(reasons, 'hybrid_business', 5, 'Mixed local and agency signals', 'Observed strong local-business signals alongside agency signals.');
+        pushReason(
+            reasons,
+            'hybrid_business',
+            5,
+            'Mixed local and agency signals',
+            'Observed strong local-business signals alongside agency signals.',
+        );
     }
 
     if (scores.local_business === 0 && scores.saas_software === 0 && scores.content_led === 0) {
         scores.generic_business = 3;
-        pushReason(reasons, 'generic_business', 3, 'No strong specialist profile', 'The site looks like a generic business presence.');
+        pushReason(
+            reasons,
+            'generic_business',
+            3,
+            'No strong specialist profile',
+            'The site looks like a generic business presence.',
+        );
     } else {
         scores.generic_business = 1;
     }

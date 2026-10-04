@@ -8,9 +8,36 @@ import { z } from 'zod';
 
 export const COMMUNITY_SOURCES = ['reddit', 'web', 'github', 'x', 'youtube'];
 export const COMMUNITY_RUN_STATUSES = ['pending', 'running', 'completed', 'failed', 'partial'];
-export const COMMUNITY_MENTION_TYPES = ['complaint', 'question', 'theme', 'competitor', 'recommendation', 'opportunity', 'language'];
-export const COMMUNITY_CLUSTER_TYPES = ['complaint', 'question', 'theme', 'competitor_complaint', 'language', 'source_bucket'];
-export const COMMUNITY_OPPORTUNITY_TYPES = ['faq', 'content', 'differentiation', 'positioning', 'response', 'recurring_buyer_question', 'comparison_discussion', 'recurring_pain_point', 'response_opportunity', 'ai_mention_opportunity', 'content_opportunity'];
+export const COMMUNITY_MENTION_TYPES = [
+    'complaint',
+    'question',
+    'theme',
+    'competitor',
+    'recommendation',
+    'opportunity',
+    'language',
+];
+export const COMMUNITY_CLUSTER_TYPES = [
+    'complaint',
+    'question',
+    'theme',
+    'competitor_complaint',
+    'language',
+    'source_bucket',
+];
+export const COMMUNITY_OPPORTUNITY_TYPES = [
+    'faq',
+    'content',
+    'differentiation',
+    'positioning',
+    'response',
+    'recurring_buyer_question',
+    'comparison_discussion',
+    'recurring_pain_point',
+    'response_opportunity',
+    'ai_mention_opportunity',
+    'content_opportunity',
+];
 export const COMMUNITY_OPPORTUNITY_STATUSES = ['open', 'acted', 'dismissed', 'expired'];
 export const COMMUNITY_EVIDENCE_LEVELS = ['low', 'medium', 'strong'];
 export const COMMUNITY_PROVENANCE_LEVELS = ['observed', 'derived', 'inferred'];
@@ -27,7 +54,22 @@ export const SIGNAL_FAMILIES = {
         description: 'Prospects asking how to solve a problem or choose a provider.',
         operator_use: 'Respond directly, demonstrate expertise, capture lead.',
         mention_types: ['question'],
-        keywords: ['how', 'comment', 'which', 'quel', 'best', 'meilleur', 'recommend', 'recommand', 'suggest', 'conseill', 'looking for', 'cherche', 'need', 'besoin'],
+        keywords: [
+            'how',
+            'comment',
+            'which',
+            'quel',
+            'best',
+            'meilleur',
+            'recommend',
+            'recommand',
+            'suggest',
+            'conseill',
+            'looking for',
+            'cherche',
+            'need',
+            'besoin',
+        ],
     },
     comparison_intent: {
         id: 'comparison_intent',
@@ -35,15 +77,38 @@ export const SIGNAL_FAMILIES = {
         description: 'Users comparing tools, providers, or approaches.',
         operator_use: 'Position against competitors, create comparison content.',
         mention_types: ['competitor', 'question'],
-        keywords: ['vs', 'versus', 'compare', 'comparer', 'alternative', 'instead', 'plutot', 'difference', 'mieux', 'better'],
+        keywords: [
+            'vs',
+            'versus',
+            'compare',
+            'comparer',
+            'alternative',
+            'instead',
+            'plutot',
+            'difference',
+            'mieux',
+            'better',
+        ],
     },
     best_tool_intent: {
         id: 'best_tool_intent',
-        label: 'Recherche d\'outil',
+        label: "Recherche d'outil",
         description: 'Users searching for the best tool or solution in a category.',
         operator_use: 'Appear in recommendation threads, create "best of" content.',
         mention_types: ['question', 'recommendation'],
-        keywords: ['best', 'meilleur', 'top', 'tool', 'outil', 'software', 'logiciel', 'platform', 'plateforme', 'solution', 'app'],
+        keywords: [
+            'best',
+            'meilleur',
+            'top',
+            'tool',
+            'outil',
+            'software',
+            'logiciel',
+            'platform',
+            'plateforme',
+            'solution',
+            'app',
+        ],
     },
     pain_point: {
         id: 'pain_point',
@@ -51,7 +116,23 @@ export const SIGNAL_FAMILIES = {
         description: 'Users expressing frustration with existing solutions.',
         operator_use: 'Address unmet needs, build content around pain relief.',
         mention_types: ['complaint'],
-        keywords: ['frustrat', 'annoying', 'terrible', 'horrible', 'worst', 'pire', 'problem', 'probleme', 'issue', 'broken', 'casse', 'fail', 'echec', 'hate', 'deteste'],
+        keywords: [
+            'frustrat',
+            'annoying',
+            'terrible',
+            'horrible',
+            'worst',
+            'pire',
+            'problem',
+            'probleme',
+            'issue',
+            'broken',
+            'casse',
+            'fail',
+            'echec',
+            'hate',
+            'deteste',
+        ],
     },
     competitor_weakness: {
         id: 'competitor_weakness',
@@ -59,7 +140,20 @@ export const SIGNAL_FAMILIES = {
         description: 'Users complaining about competitors or their limitations.',
         operator_use: 'Differentiate on competitor weaknesses, create switching content.',
         mention_types: ['competitor', 'complaint'],
-        keywords: ['expensive', 'cher', 'slow', 'lent', 'bad support', 'support nul', 'missing', 'manque', 'limited', 'limite', 'buggy', 'crash'],
+        keywords: [
+            'expensive',
+            'cher',
+            'slow',
+            'lent',
+            'bad support',
+            'support nul',
+            'missing',
+            'manque',
+            'limited',
+            'limite',
+            'buggy',
+            'crash',
+        ],
     },
     response_opportunity: {
         id: 'response_opportunity',
@@ -67,7 +161,17 @@ export const SIGNAL_FAMILIES = {
         description: 'Active threads where a direct expert response would add value.',
         operator_use: 'Post a helpful reply, build authority and visibility.',
         mention_types: ['question', 'complaint'],
-        keywords: ['help', 'aide', 'anyone', 'quelqu', 'advice', 'conseil', 'experience', 'recommendation', 'recommandation'],
+        keywords: [
+            'help',
+            'aide',
+            'anyone',
+            'quelqu',
+            'advice',
+            'conseil',
+            'experience',
+            'recommendation',
+            'recommandation',
+        ],
     },
     ai_mention_opportunity: {
         id: 'ai_mention_opportunity',
@@ -75,7 +179,23 @@ export const SIGNAL_FAMILIES = {
         description: 'Discussions about AI tools, AI Overviews, or LLM-generated content where the brand could appear.',
         operator_use: 'Optimize for AI citation, create AI-referenceable content.',
         mention_types: ['theme', 'question'],
-        keywords: ['ai', 'ia', 'chatgpt', 'gpt', 'gemini', 'claude', 'llm', 'ai overview', 'ai overviews', 'generated', 'genere', 'citation', 'cite', 'artificial intelligence', 'intelligence artificielle'],
+        keywords: [
+            'ai',
+            'ia',
+            'chatgpt',
+            'gpt',
+            'gemini',
+            'claude',
+            'llm',
+            'ai overview',
+            'ai overviews',
+            'generated',
+            'genere',
+            'citation',
+            'cite',
+            'artificial intelligence',
+            'intelligence artificielle',
+        ],
     },
 };
 
@@ -92,26 +212,75 @@ export const MIN_KEYWORD_MATCHES_FOR_SIGNAL = 2;
 // Short keywords that MUST use word-boundary matching to avoid
 // false positives inside longer words (e.g. "ai" in "maintain").
 export const BOUNDARY_REQUIRED_KEYWORDS = new Set([
-    'ai', 'ia', 'vs', 'app', 'bad', 'bug', 'help', 'aide', 'need', 'best',
-    'top', 'cher', 'lent', 'cite', 'per', 'slow',
+    'ai',
+    'ia',
+    'vs',
+    'app',
+    'bad',
+    'bug',
+    'help',
+    'aide',
+    'need',
+    'best',
+    'top',
+    'cher',
+    'lent',
+    'cite',
+    'per',
+    'slow',
 ]);
 
 // Strong complaint terms — a single match is sufficient evidence
 export const STRONG_COMPLAINT_TERMS = [
-    'frustrat', 'terrible', 'horrible', 'worst', 'pire', 'hate', 'deteste',
-    'scam', 'arnaque', 'broken', 'casse', 'refund', 'cancel',
+    'frustrat',
+    'terrible',
+    'horrible',
+    'worst',
+    'pire',
+    'hate',
+    'deteste',
+    'scam',
+    'arnaque',
+    'broken',
+    'casse',
+    'refund',
+    'cancel',
 ];
 
 // Weak complaint terms — require ≥2 matches or co-occurrence with a strong term
 export const WEAK_COMPLAINT_TERMS = [
-    'slow', 'expensive', 'problem', 'issue', 'bad', 'delay', 'bug',
-    'support', 'spam', 'cher', 'lent', 'probleme', 'decu', 'mauvais', 'retard',
+    'slow',
+    'expensive',
+    'problem',
+    'issue',
+    'bad',
+    'delay',
+    'bug',
+    'support',
+    'spam',
+    'cher',
+    'lent',
+    'probleme',
+    'decu',
+    'mauvais',
+    'retard',
 ];
 
 // Negation prefixes — when found before a term, the term is not a true signal
 export const NEGATION_PATTERNS = [
-    'no ', 'not ', 'never ', 'without ', 'dont ', "don't ", "isn't ", 'isnt ',
-    'pas de ', 'pas un ', 'aucun ', 'sans ', 'jamais ',
+    'no ',
+    'not ',
+    'never ',
+    'without ',
+    'dont ',
+    "don't ",
+    "isn't ",
+    'isnt ',
+    'pas de ',
+    'pas un ',
+    'aucun ',
+    'sans ',
+    'jamais ',
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -162,18 +331,30 @@ export function evidenceLevel(count) {
 // Weights MUST sum to 1.0 for the 0-100 range to be meaningful.
 // If tuning individual weights, ensure the total remains 1.0.
 export const SCORING_WEIGHTS = {
-    business_relevance:      0.20, // Does this mention match the client's domain?
-    geographic_proximity:    0.10, // Is there a geographic match?
-    problem_intensity:       0.15, // How strong is the pain signal?
-    buying_intent:           0.15, // Is the user actively looking to buy/switch?
-    comparison_intent:       0.10, // Is this a comparison or "vs" discussion?
-    execution_potential:     0.10, // Can the operator realistically act on this?
-    ai_reusability:          0.05, // Can this feed AI content or citations?
-    spam_risk_penalty:       0.10, // Negative: low-quality or spammy signal
-    frequency:               0.05, // Raw mention count signal
+    business_relevance: 0.2, // Does this mention match the client's domain?
+    geographic_proximity: 0.1, // Is there a geographic match?
+    problem_intensity: 0.15, // How strong is the pain signal?
+    buying_intent: 0.15, // Is the user actively looking to buy/switch?
+    comparison_intent: 0.1, // Is this a comparison or "vs" discussion?
+    execution_potential: 0.1, // Can the operator realistically act on this?
+    ai_reusability: 0.05, // Can this feed AI content or citations?
+    spam_risk_penalty: 0.1, // Negative: low-quality or spammy signal
+    frequency: 0.05, // Raw mention count signal
 };
 
-const SPAM_INDICATORS = ['crypto', 'nft', 'onlyfans', 'casino', 'forex', 'earn money', 'gagner argent', 'free money', 'passive income', 'revenu passif', 'dropship'];
+const SPAM_INDICATORS = [
+    'crypto',
+    'nft',
+    'onlyfans',
+    'casino',
+    'forex',
+    'earn money',
+    'gagner argent',
+    'free money',
+    'passive income',
+    'revenu passif',
+    'dropship',
+];
 
 /**
  * Computes a composite score (0–100) for a cluster based on multiple dimensions.
@@ -201,26 +382,78 @@ export function computeCompositeScore(cluster, context = {}) {
     }
 
     // 2. Geographic proximity: does the label/snippet mention the city
-    const cityNorm = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cityNorm = city
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
     const geoProximity = cityNorm && combined.includes(cityNorm) ? 1 : 0;
 
     // 3. Problem intensity: presence of strong complaint/pain language
-    const painTerms = ['frustrat', 'terrible', 'horrible', 'worst', 'pire', 'broken', 'casse', 'fail', 'echec', 'hate', 'deteste', 'scam', 'arnaque'];
+    const painTerms = [
+        'frustrat',
+        'terrible',
+        'horrible',
+        'worst',
+        'pire',
+        'broken',
+        'casse',
+        'fail',
+        'echec',
+        'hate',
+        'deteste',
+        'scam',
+        'arnaque',
+    ];
     const painMatches = painTerms.filter((t) => combined.includes(t)).length;
     const problemIntensity = Math.min(painMatches / 2, 1);
 
     // 4. Buying intent: signals of active purchase consideration
-    const buyTerms = ['recommend', 'recommand', 'looking for', 'cherche', 'need', 'besoin', 'best', 'meilleur', 'budget', 'pricing', 'prix', 'tarif', 'devis', 'quote', 'hire', 'embaucher'];
+    const buyTerms = [
+        'recommend',
+        'recommand',
+        'looking for',
+        'cherche',
+        'need',
+        'besoin',
+        'best',
+        'meilleur',
+        'budget',
+        'pricing',
+        'prix',
+        'tarif',
+        'devis',
+        'quote',
+        'hire',
+        'embaucher',
+    ];
     const buyMatches = buyTerms.filter((t) => combined.includes(t)).length;
     const buyingIntent = Math.min(buyMatches / 2, 1);
 
     // 5. Comparison intent
-    const compTerms = ['vs', 'versus', 'alternative', 'compare', 'comparer', 'instead', 'plutot', 'difference', 'mieux que', 'better than'];
+    const compTerms = [
+        'vs',
+        'versus',
+        'alternative',
+        'compare',
+        'comparer',
+        'instead',
+        'plutot',
+        'difference',
+        'mieux que',
+        'better than',
+    ];
     const compMatches = compTerms.filter((t) => combined.includes(t)).length;
     const comparisonIntent = Math.min(compMatches / 1.5, 1);
 
     // 6. Execution potential: can operator realistically act? (questions/complaints = high, themes = medium)
-    const executionMap = { question: 0.9, complaint: 0.7, competitor_complaint: 0.8, theme: 0.4, language: 0.3, source_bucket: 0.1 };
+    const executionMap = {
+        question: 0.9,
+        complaint: 0.7,
+        competitor_complaint: 0.8,
+        theme: 0.4,
+        language: 0.3,
+        source_bucket: 0.1,
+    };
     const executionPotential = executionMap[cluster.cluster_type] || 0.3;
 
     // 7. AI reusability: mentions of AI, LLMs, or citation-related terms

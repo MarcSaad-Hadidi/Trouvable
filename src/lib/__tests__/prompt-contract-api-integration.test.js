@@ -62,17 +62,19 @@ describe('prompt contract API integration', () => {
         dbMock.createTrackedQuery.mockImplementation(async (payload) => ({ id: 'q1', ...payload }));
 
         const { POST } = await import('../../app/api/admin/queries/create/route.js');
-        const response = await POST(new Request('http://localhost/api/admin/queries/create', {
-            method: 'POST',
-            body: JSON.stringify({
-                clientId: '8f5fc5ac-d07a-4764-bcb2-550ea60f6f7d',
-                query_text: "Quels criteres et preuves demander avant de choisir Trouvable ?",
-                category: 'discovery',
-                locale: 'fr-CA',
-                prompt_mode: 'user_like',
-                is_active: true,
+        const response = await POST(
+            new Request('http://localhost/api/admin/queries/create', {
+                method: 'POST',
+                body: JSON.stringify({
+                    clientId: '8f5fc5ac-d07a-4764-bcb2-550ea60f6f7d',
+                    query_text: 'Quels criteres et preuves demander avant de choisir Trouvable ?',
+                    category: 'discovery',
+                    locale: 'fr-CA',
+                    prompt_mode: 'user_like',
+                    is_active: true,
+                }),
             }),
-        }));
+        );
 
         const json = await response.json();
         expect(response.status).toBe(200);
@@ -102,18 +104,24 @@ describe('prompt contract API integration', () => {
                 }),
             }),
         });
-        dbMock.updateTrackedQuery.mockImplementation(async (id, payload) => ({ id, ...payload, client_id: '8f5fc5ac-d07a-4764-bcb2-550ea60f6f7d' }));
+        dbMock.updateTrackedQuery.mockImplementation(async (id, payload) => ({
+            id,
+            ...payload,
+            client_id: '8f5fc5ac-d07a-4764-bcb2-550ea60f6f7d',
+        }));
 
         const { POST } = await import('../../app/api/admin/queries/update/route.js');
-        const response = await POST(new Request('http://localhost/api/admin/queries/update', {
-            method: 'POST',
-            body: JSON.stringify({
-                id: '11111111-1111-4111-8111-111111111111',
-                query_text: 'Liste 3 alternatives a Trouvable et justifie chaque option.',
-                prompt_mode: 'operator_probe',
-                is_active: true,
+        const response = await POST(
+            new Request('http://localhost/api/admin/queries/update', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: '11111111-1111-4111-8111-111111111111',
+                    query_text: 'Liste 3 alternatives a Trouvable et justifie chaque option.',
+                    prompt_mode: 'operator_probe',
+                    is_active: true,
+                }),
             }),
-        }));
+        );
 
         const json = await response.json();
         expect(response.status).toBe(200);
@@ -135,7 +143,10 @@ describe('prompt contract API integration', () => {
         });
         dbMock.updateTrackedQuery.mockResolvedValue(null);
         dbMock.getTrackedQueriesAll.mockResolvedValue([]);
-        dbMock.createTrackedQuery.mockImplementation(async (payload) => ({ id: `q-${payload.query_text}`, ...payload }));
+        dbMock.createTrackedQuery.mockImplementation(async (payload) => ({
+            id: `q-${payload.query_text}`,
+            ...payload,
+        }));
 
         const { activateClientOnboarding } = await import('../onboarding/client-onboarding.js');
         const result = await activateClientOnboarding({

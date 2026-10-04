@@ -14,7 +14,7 @@ export function computeDelta(latestValue, previousValue) {
 
 export function buildMetricTrendSummary({ snapshots = [], metricKey, days = 30 }) {
     const now = Date.now();
-    const windowStart = now - (days * 24 * 60 * 60 * 1000);
+    const windowStart = now - days * 24 * 60 * 60 * 1000;
 
     const series = (snapshots || [])
         .map((row) => ({
@@ -30,9 +30,10 @@ export function buildMetricTrendSummary({ snapshots = [], metricKey, days = 30 }
     });
 
     const latestPoint = seriesInWindow.at(-1) || series.at(-1) || null;
-    const previousPoint = (seriesInWindow.length >= 2 ? seriesInWindow.at(-2) : null)
-        || (series.length >= 2 ? series.at(-2) : null)
-        || null;
+    const previousPoint =
+        (seriesInWindow.length >= 2 ? seriesInWindow.at(-2) : null) ||
+        (series.length >= 2 ? series.at(-2) : null) ||
+        null;
 
     const delta = computeDelta(latestPoint?.value ?? null, previousPoint?.value ?? null);
 

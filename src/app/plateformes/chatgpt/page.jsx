@@ -8,4 +8,3 @@ export const metadata = buildSeoGrowthMetadata(page);
 export default function ChatgptPage() {
     return <SeoGrowthPage page={page} />;
 }
-

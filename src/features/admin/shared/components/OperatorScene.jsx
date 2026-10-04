@@ -52,7 +52,10 @@ export function OperatorNarrativeHeader({
             className={`relative overflow-hidden rounded-[22px] border ${a.border} bg-[linear-gradient(165deg,rgba(12,14,18,0.96)_0%,rgba(8,9,11,0.92)_100%)] px-5 py-6 sm:px-7 sm:py-7 shadow-[0_24px_56px_rgba(0,0,0,0.35)] ${className}`}
         >
             <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${a.wash}`} />
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-90" style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)` }} />
+            <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-90"
+                style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)` }}
+            />
 
             <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="min-w-0 max-w-3xl">

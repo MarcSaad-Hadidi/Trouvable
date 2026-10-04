@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import {
-    buildRobotsTxt,
-    CONTENT_SIGNAL_POLICY_LINES,
-    CONTENT_SIGNAL_VALUE,
-} from '../agent-discovery/config';
+import { buildRobotsTxt, CONTENT_SIGNAL_POLICY_LINES, CONTENT_SIGNAL_VALUE } from '../agent-discovery/config';
 
 describe('/robots.txt content signals contract', () => {
     it('declares content signals in the robots.txt body', () => {

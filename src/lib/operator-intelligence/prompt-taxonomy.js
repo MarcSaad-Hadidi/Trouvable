@@ -61,7 +61,8 @@ export const DISCOVERY_MODE_META = {
     controlled_context_answer: {
         key: 'controlled_context_answer',
         label: 'Contexte controle',
-        description: 'Le contexte business est volontairement injecte; utile pour QA/copy, pas pour visibilite naturelle.',
+        description:
+            'Le contexte business est volontairement injecte; utile pour QA/copy, pas pour visibilite naturelle.',
         visibility_eligible: false,
         bias_risk: 'context_injected',
         evidence_level: 'weak',
@@ -79,7 +80,8 @@ export const DISCOVERY_MODE_META = {
     brand_aware: {
         key: 'brand_aware',
         label: 'Marque explicite (legacy)',
-        description: 'Mode historique avec contexte entreprise injecte. Conserve pour compatibilite; preferer controlled_context_answer.',
+        description:
+            'Mode historique avec contexte entreprise injecte. Conserve pour compatibilite; preferer controlled_context_answer.',
         visibility_eligible: false,
         bias_risk: 'context_injected',
         evidence_level: 'weak',
@@ -94,7 +96,11 @@ const VALID_DISCOVERY_MODES = new Set(Object.keys(DISCOVERY_MODE_META));
  * (all existing prompts/runs are effectively brand_aware).
  */
 export function normalizeDiscoveryMode(value) {
-    const raw = String(value || '').trim().toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    const raw = String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/-/g, '_');
     if (VALID_DISCOVERY_MODES.has(raw)) return raw;
     return 'brand_aware';
 }
@@ -109,13 +115,16 @@ export function isVisibilityEligible(discoveryMode) {
 
 function includesClientName(queryText = '', clientName = '') {
     const queryLower = String(queryText || '').toLowerCase();
-    const nameLower = String(clientName || '').toLowerCase().trim();
+    const nameLower = String(clientName || '')
+        .toLowerCase()
+        .trim();
     return Boolean(nameLower && nameLower.length >= 2 && queryLower.includes(nameLower));
 }
 
 function hasSkepticalBrandIntent(queryText = '') {
-    return /(vent|bullshit|arnaque|scam|credible|credibil|cr[eé]dible|fiable|efficace|preuves?|vaut|worth|legitime|l[eé]gitime|promesse|garantie|avis|review)/i
-        .test(String(queryText || ''));
+    return /(vent|bullshit|arnaque|scam|credible|credibil|cr[eé]dible|fiable|efficace|preuves?|vaut|worth|legitime|l[eé]gitime|promesse|garantie|avis|review)/i.test(
+        String(queryText || ''),
+    );
 }
 
 /**
@@ -130,10 +139,12 @@ function hasSkepticalBrandIntent(queryText = '') {
 function inferDiscoveryModeLegacy({ category, intentFamily, queryText = '', clientName = '' }) {
     // Explicit brand or competitor categories are always brand_aware
     if (category === 'brand' || category === 'competitor_comparison') return 'brand_aware';
-    if (intentFamily === 'brand' || intentFamily === 'competitor' || intentFamily === 'competitor_comparison') return 'brand_aware';
+    if (intentFamily === 'brand' || intentFamily === 'competitor' || intentFamily === 'competitor_comparison')
+        return 'brand_aware';
 
     // Brand-adjacent intent families that involve the company context
-    if (intentFamily === 'buyer_guidance' || intentFamily === 'pricing' || intentFamily === 'implementation') return 'brand_aware';
+    if (intentFamily === 'buyer_guidance' || intentFamily === 'pricing' || intentFamily === 'implementation')
+        return 'brand_aware';
 
     // If the query text explicitly contains the client name, it's brand_aware
     if (clientName) {
@@ -161,7 +172,11 @@ export function inferDiscoveryMode({ category, intentFamily, queryText = '', cli
         return hasSkepticalBrandIntent(queryText) ? 'skeptical_brand_evaluation' : 'neutral_brand_check';
     }
 
-    if (category === 'competitor_comparison' || intentFamily === 'competitor' || intentFamily === 'competitor_comparison') {
+    if (
+        category === 'competitor_comparison' ||
+        intentFamily === 'competitor' ||
+        intentFamily === 'competitor_comparison'
+    ) {
         return 'competitor_discovery';
     }
 
@@ -203,14 +218,14 @@ export const MEASUREMENT_OUTCOMES = {
     competitor_dominated: {
         key: 'competitor_dominated',
         label: 'Dominance concurrentielle',
-        description: 'La cible n\'a pas ete mentionnee. Les concurrents dominent la reponse.',
+        description: "La cible n'a pas ete mentionnee. Les concurrents dominent la reponse.",
         counts_as_visibility: false,
     },
     /** Target was NOT mentioned — no strong answer from the model. */
     not_mentioned: {
         key: 'not_mentioned',
         label: 'Non mentionnee',
-        description: 'La cible n\'a pas ete mentionnee dans la reponse.',
+        description: "La cible n'a pas ete mentionnee dans la reponse.",
         counts_as_visibility: false,
     },
     /** The response was too weak / empty / unparseable to count as a measurement. */
@@ -244,7 +259,13 @@ export function countsAsVisibilityOutcome(outcome) {
  * @param {number} params.totalMentioned - total businesses mentioned
  * @returns {string} One of MEASUREMENT_OUTCOMES keys
  */
-export function classifyMeasurementOutcome({ discoveryMode, targetFound, runSignalTier, competitorCount = 0, totalMentioned = 0 }) {
+export function classifyMeasurementOutcome({
+    discoveryMode,
+    targetFound,
+    runSignalTier,
+    competitorCount = 0,
+    totalMentioned = 0,
+}) {
     // If the run produced junk, it's not a valid measurement
     if (runSignalTier === 'empty_signal') return 'low_quality';
 
@@ -299,11 +320,17 @@ function normalizeRaw(value) {
 }
 
 function inferFromQueryText(queryText = '') {
-    const text = String(queryText || '').trim().toLowerCase();
+    const text = String(queryText || '')
+        .trim()
+        .toLowerCase();
 
     if (!text) return 'discovery';
     if (/(versus|vs\.?|alternatives?|compare|compar|competit)/.test(text)) return 'competitor_comparison';
-    if (/(pres de|proche de|a |à |dans |montreal|montreal|quebec|quebec city|laval|longueuil|brossard|quartier|rive-sud|rive sud|ville)/.test(text)) {
+    if (
+        /(pres de|proche de|a |à |dans |montreal|montreal|quebec|quebec city|laval|longueuil|brossard|quartier|rive-sud|rive sud|ville)/.test(
+            text,
+        )
+    ) {
         return 'local_intent';
     }
     if (/(nom officiel|marque|avis sur|review of|site officiel|telephone|numero de|contact)/.test(text)) return 'brand';
@@ -327,7 +354,10 @@ export function normalizeTrackedQueryCategory(value, queryText = '') {
 export function prepareTrackedQueryWrite(input, existing = {}) {
     const queryText = input.query_text ?? existing.query_text ?? '';
     const locale = input.locale ?? existing.locale ?? 'fr-CA';
-    const category = normalizeTrackedQueryCategory(input.category ?? input.query_type ?? existing.category ?? existing.query_type, queryText);
+    const category = normalizeTrackedQueryCategory(
+        input.category ?? input.query_type ?? existing.category ?? existing.query_type,
+        queryText,
+    );
 
     return {
         ...input,
@@ -338,7 +368,10 @@ export function prepareTrackedQueryWrite(input, existing = {}) {
 }
 
 export function getTrackedQueryCategoryMeta(value, queryText = '') {
-    return TRACKED_QUERY_CATEGORY_META[normalizeTrackedQueryCategory(value, queryText)] || TRACKED_QUERY_CATEGORY_META.discovery;
+    return (
+        TRACKED_QUERY_CATEGORY_META[normalizeTrackedQueryCategory(value, queryText)] ||
+        TRACKED_QUERY_CATEGORY_META.discovery
+    );
 }
 
 export function getTrackedQueryCategoryOptions() {

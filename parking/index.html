@@ -1,86 +1,93 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex, nofollow, noarchive">
-    <meta name="description" content="Trouvable est temporairement en pause.">
-    <meta name="color-scheme" content="dark">
-    <title>Trouvable — Service en pause</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #080808;
-        color: #f7f7f7;
-      }
-      * { box-sizing: border-box; }
-      body {
-        min-height: 100vh;
-        margin: 0;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        background:
-          radial-gradient(circle at 20% 0%, rgba(91, 115, 255, 0.2), transparent 34rem),
-          #080808;
-      }
-      main {
-        width: min(100%, 680px);
-        padding: clamp(32px, 7vw, 64px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 24px;
-        background: rgba(15, 15, 15, 0.92);
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-      }
-      .eyebrow {
-        margin: 0 0 18px;
-        color: #8ea0ff;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-      }
-      h1 {
-        margin: 0;
-        max-width: 13ch;
-        font-size: clamp(2rem, 7vw, 4rem);
-        line-height: 1.02;
-        letter-spacing: -0.04em;
-      }
-      p {
-        margin: 24px 0 0;
-        max-width: 54ch;
-        color: #b8b8b8;
-        font-size: clamp(1rem, 2.5vw, 1.125rem);
-        line-height: 1.7;
-      }
-      .status {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 32px;
-        color: #d8d8d8;
-        font-size: 0.875rem;
-      }
-      .status::before {
-        width: 9px;
-        height: 9px;
-        border-radius: 999px;
-        background: #8ea0ff;
-        content: "";
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Trouvable</p>
-      <h1>Trouvable est temporairement en pause.</h1>
-      <p>
-        Le service d’analyse et le portail ne traitent actuellement aucune nouvelle opération.
-        Les données historiques et le code sont conservés pour permettre une reprise contrôlée.
-      </p>
-      <div class="status">Aucune action n’est requise.</div>
-    </main>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+        <meta name="description" content="Trouvable est temporairement en pause." />
+        <meta name="color-scheme" content="dark" />
+        <title>Trouvable — Service en pause</title>
+        <style>
+            :root {
+                color-scheme: dark;
+                font-family:
+                    Inter,
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    'Segoe UI',
+                    sans-serif;
+                background: #080808;
+                color: #f7f7f7;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                min-height: 100vh;
+                margin: 0;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background: radial-gradient(circle at 20% 0%, rgba(91, 115, 255, 0.2), transparent 34rem), #080808;
+            }
+            main {
+                width: min(100%, 680px);
+                padding: clamp(32px, 7vw, 64px);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 24px;
+                background: rgba(15, 15, 15, 0.92);
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            }
+            .eyebrow {
+                margin: 0 0 18px;
+                color: #8ea0ff;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+            }
+            h1 {
+                margin: 0;
+                max-width: 13ch;
+                font-size: clamp(2rem, 7vw, 4rem);
+                line-height: 1.02;
+                letter-spacing: -0.04em;
+            }
+            p {
+                margin: 24px 0 0;
+                max-width: 54ch;
+                color: #b8b8b8;
+                font-size: clamp(1rem, 2.5vw, 1.125rem);
+                line-height: 1.7;
+            }
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 32px;
+                color: #d8d8d8;
+                font-size: 0.875rem;
+            }
+            .status::before {
+                width: 9px;
+                height: 9px;
+                border-radius: 999px;
+                background: #8ea0ff;
+                content: '';
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <p class="eyebrow">Trouvable</p>
+            <h1>Trouvable est temporairement en pause.</h1>
+            <p>
+                Le service d’analyse et le portail ne traitent actuellement aucune nouvelle opération. Les données
+                historiques et le code sont conservés pour permettre une reprise contrôlée.
+            </p>
+            <div class="status">Aucune action n’est requise.</div>
+        </main>
+    </body>
 </html>

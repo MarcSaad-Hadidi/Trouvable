@@ -1,7 +1,22 @@
 import 'server-only';
 import crypto from 'crypto';
-import { evidenceLevel, SIGNAL_FAMILIES, computeCompositeScore, MIN_KEYWORD_MATCHES_FOR_SIGNAL, STRONG_COMPLAINT_TERMS, WEAK_COMPLAINT_TERMS, matchesKeyword, isNegated } from './contracts';
-import { normalizeText, tokenize, extractBigrams, scoreThemeRelevance, THEME_RELEVANCE_THRESHOLD } from './community-context';
+import {
+    evidenceLevel,
+    SIGNAL_FAMILIES,
+    computeCompositeScore,
+    MIN_KEYWORD_MATCHES_FOR_SIGNAL,
+    STRONG_COMPLAINT_TERMS,
+    WEAK_COMPLAINT_TERMS,
+    matchesKeyword,
+    isNegated,
+} from './contracts';
+import {
+    normalizeText,
+    tokenize,
+    extractBigrams,
+    scoreThemeRelevance,
+    THEME_RELEVANCE_THRESHOLD,
+} from './community-context';
 
 // ──────────────────────────────────────────────────────────────
 // Text analysis constants (from social.js — canonical copies)
@@ -39,7 +54,9 @@ export function toDocumentRows(rawPosts, clientId, collectionRunId, { sourceLabe
             source_metadata: {
                 subreddit: post.subreddit || null,
                 ups: post.ups || 0,
-                ...(post._search_score !== undefined && post._search_score !== null ? { search_score: post._search_score } : {}),
+                ...(post._search_score !== undefined && post._search_score !== null
+                    ? { search_score: post._search_score }
+                    : {}),
             },
             normalized_content: normalizeText(`${post.title} ${post.body}`),
             language: 'fr',
@@ -358,37 +375,41 @@ export function deriveOpportunitiesFromClusters(clusters, clientId, relevanceAnc
         const hasResponseOpp = families.includes('response_opportunity');
 
         // Always produce FAQ opportunity (backward compatible)
-        opportunities.push(buildOpportunity(q, {
-            opportunity_type: hasBuyerIntent ? 'recurring_buyer_question' : 'faq',
-            title: hasBuyerIntent ? `Question acheteur récurrente: ${q.label}` : `FAQ: ${q.label}`,
-            rationale: hasBuyerIntent
-                ? 'Question récurrente de prospects avec intention d\'achat ou de comparaison.'
-                : 'Inféré des questions communautaires récurrentes observées.',
-            metadata: buildOpportunityMetadata(
-                q,
-                hasBuyerIntent
-                    ? 'Ces questions viennent de prospects en phase de décision, et y répondre positionne votre expertise.'
-                    : 'Ces questions reviennent régulièrement, et une page FAQ dédiée capterait ce trafic.',
-                hasBuyerIntent
-                    ? 'Répondez directement dans le fil ou créez du contenu ciblé pour cette question.'
-                    : 'Créez une page FAQ ou un article de blog répondant précisément à cette question.',
-                hasBuyerIntent ? 'buyer_question' : null,
-            ),
-        }));
+        opportunities.push(
+            buildOpportunity(q, {
+                opportunity_type: hasBuyerIntent ? 'recurring_buyer_question' : 'faq',
+                title: hasBuyerIntent ? `Question acheteur récurrente: ${q.label}` : `FAQ: ${q.label}`,
+                rationale: hasBuyerIntent
+                    ? "Question récurrente de prospects avec intention d'achat ou de comparaison."
+                    : 'Inféré des questions communautaires récurrentes observées.',
+                metadata: buildOpportunityMetadata(
+                    q,
+                    hasBuyerIntent
+                        ? 'Ces questions viennent de prospects en phase de décision, et y répondre positionne votre expertise.'
+                        : 'Ces questions reviennent régulièrement, et une page FAQ dédiée capterait ce trafic.',
+                    hasBuyerIntent
+                        ? 'Répondez directement dans le fil ou créez du contenu ciblé pour cette question.'
+                        : 'Créez une page FAQ ou un article de blog répondant précisément à cette question.',
+                    hasBuyerIntent ? 'buyer_question' : null,
+                ),
+            }),
+        );
 
         // If response opportunity signal detected, also produce a response_opportunity
         if (hasResponseOpp) {
-            opportunities.push(buildOpportunity(q, {
-                opportunity_type: 'response_opportunity',
-                title: `Répondre au fil: ${q.label}`,
-                rationale: 'Fil actif où une réponse experte ajouterait de la valeur et de la visibilité.',
-                metadata: buildOpportunityMetadata(
-                    q,
-                    'Ce fil est actif et recherche une expertise, et y répondre construit votre autorité.',
-                    'Rédigez une réponse experte et utile dans le fil. Ne faites pas de promotion directe.',
-                    'response_opportunity',
-                ),
-            }));
+            opportunities.push(
+                buildOpportunity(q, {
+                    opportunity_type: 'response_opportunity',
+                    title: `Répondre au fil: ${q.label}`,
+                    rationale: 'Fil actif où une réponse experte ajouterait de la valeur et de la visibilité.',
+                    metadata: buildOpportunityMetadata(
+                        q,
+                        'Ce fil est actif et recherche une expertise, et y répondre construit votre autorité.',
+                        'Rédigez une réponse experte et utile dans le fil. Ne faites pas de promotion directe.',
+                        'response_opportunity',
+                    ),
+                }),
+            );
         }
     }
 
@@ -397,17 +418,19 @@ export function deriveOpportunitiesFromClusters(clusters, clientId, relevanceAnc
         .filter((c) => (c.metadata?.signal_families || []).includes('comparison_intent'))
         .slice(0, 4);
     for (const comp of comparisonClusters) {
-        opportunities.push(buildOpportunity(comp, {
-            opportunity_type: 'comparison_discussion',
-            title: `Discussion comparative: ${comp.label}`,
-            rationale: 'Utilisateurs comparant des solutions, opportunité de positionnement.',
-            metadata: buildOpportunityMetadata(
-                comp,
-                'Les utilisateurs comparent activement des solutions dans cette discussion. C\'est le moment idéal pour se positionner.',
-                'Créez du contenu de comparaison honnête ou répondez avec des faits différenciants.',
-                'comparison_intent',
-            ),
-        }));
+        opportunities.push(
+            buildOpportunity(comp, {
+                opportunity_type: 'comparison_discussion',
+                title: `Discussion comparative: ${comp.label}`,
+                rationale: 'Utilisateurs comparant des solutions, opportunité de positionnement.',
+                metadata: buildOpportunityMetadata(
+                    comp,
+                    "Les utilisateurs comparent activement des solutions dans cette discussion. C'est le moment idéal pour se positionner.",
+                    'Créez du contenu de comparaison honnête ou répondez avec des faits différenciants.',
+                    'comparison_intent',
+                ),
+            }),
+        );
     }
 
     // ── Content opportunities from relevant themes ──
@@ -418,73 +441,79 @@ export function deriveOpportunitiesFromClusters(clusters, clientId, relevanceAnc
     for (const theme of themes) {
         const hasAi = (theme.metadata?.signal_families || []).includes('ai_mention_opportunity');
         const oppType = hasAi ? 'ai_mention_opportunity' : 'content_opportunity';
-        opportunities.push(buildOpportunity(theme, {
-            opportunity_type: oppType,
-            title: hasAi ? `Opportunité citation IA: ${theme.label}` : `Angle contenu: ${theme.label}`,
-            rationale: hasAi
-                ? 'Discussion liée à l\'IA où votre marque pourrait être citée par les assistants IA.'
-                : 'Inféré des thèmes de discussion externe récurrents.',
-            metadata: buildOpportunityMetadata(
-                theme,
-                hasAi
-                    ? 'Les assistants IA citent du contenu bien structuré sur ce sujet, optimisez-le pour être référencé.'
-                    : 'Ce thème revient fréquemment dans les discussions, et du contenu ciblé capterait ce trafic.',
-                hasAi
-                    ? 'Créez du contenu structuré (FAQ, guide) optimisé pour la citation par les AI Overviews.'
-                    : 'Créez un article ou une page dédiée à ce sujet pour capter l\'intérêt communautaire.',
-                hasAi ? 'ai_mention_opportunity' : null,
-            ),
-        }));
+        opportunities.push(
+            buildOpportunity(theme, {
+                opportunity_type: oppType,
+                title: hasAi ? `Opportunité citation IA: ${theme.label}` : `Angle contenu: ${theme.label}`,
+                rationale: hasAi
+                    ? "Discussion liée à l'IA où votre marque pourrait être citée par les assistants IA."
+                    : 'Inféré des thèmes de discussion externe récurrents.',
+                metadata: buildOpportunityMetadata(
+                    theme,
+                    hasAi
+                        ? 'Les assistants IA citent du contenu bien structuré sur ce sujet, optimisez-le pour être référencé.'
+                        : 'Ce thème revient fréquemment dans les discussions, et du contenu ciblé capterait ce trafic.',
+                    hasAi
+                        ? 'Créez du contenu structuré (FAQ, guide) optimisé pour la citation par les AI Overviews.'
+                        : "Créez un article ou une page dédiée à ce sujet pour capter l'intérêt communautaire.",
+                    hasAi ? 'ai_mention_opportunity' : null,
+                ),
+            }),
+        );
     }
 
     // ── Recurring pain points from complaints ──
     const complaints = clusters.filter((c) => c.cluster_type === 'complaint').slice(0, 4);
     for (const complaint of complaints) {
         const hasPainPoint = (complaint.metadata?.signal_families || []).includes('pain_point');
-        opportunities.push(buildOpportunity(complaint, {
-            opportunity_type: hasPainPoint ? 'recurring_pain_point' : 'content',
-            title: hasPainPoint
-                ? `Point de douleur récurrent: ${complaint.label}`
-                : `Traiter la préoccupation: ${complaint.label}`,
-            rationale: hasPainPoint
-                ? 'Frustration récurrente détectée, et adresser ce point crée un avantage compétitif.'
-                : 'Inféré du langage de plainte récurrent observé dans les discussions.',
-            metadata: buildOpportunityMetadata(
-                complaint,
-                hasPainPoint
-                    ? 'Les utilisateurs expriment une frustration forte et répétée sur ce sujet, et y répondre vous différencie.'
-                    : 'Cette préoccupation revient dans les discussions, et du contenu rassurant réduirait les frictions.',
-                hasPainPoint
-                    ? 'Montrez comment votre solution résout ce problème spécifique. Utilisez des témoignages si possible.'
-                    : 'Créez du contenu adressant cette préoccupation et proposant votre approche.',
-                hasPainPoint ? 'pain_point' : null,
-            ),
-        }));
+        opportunities.push(
+            buildOpportunity(complaint, {
+                opportunity_type: hasPainPoint ? 'recurring_pain_point' : 'content',
+                title: hasPainPoint
+                    ? `Point de douleur récurrent: ${complaint.label}`
+                    : `Traiter la préoccupation: ${complaint.label}`,
+                rationale: hasPainPoint
+                    ? 'Frustration récurrente détectée, et adresser ce point crée un avantage compétitif.'
+                    : 'Inféré du langage de plainte récurrent observé dans les discussions.',
+                metadata: buildOpportunityMetadata(
+                    complaint,
+                    hasPainPoint
+                        ? 'Les utilisateurs expriment une frustration forte et répétée sur ce sujet, et y répondre vous différencie.'
+                        : 'Cette préoccupation revient dans les discussions, et du contenu rassurant réduirait les frictions.',
+                    hasPainPoint
+                        ? 'Montrez comment votre solution résout ce problème spécifique. Utilisez des témoignages si possible.'
+                        : 'Créez du contenu adressant cette préoccupation et proposant votre approche.',
+                    hasPainPoint ? 'pain_point' : null,
+                ),
+            }),
+        );
     }
 
     // ── Differentiation from competitor complaints ──
     const competitorComplaints = clusters.filter((c) => c.cluster_type === 'competitor_complaint').slice(0, 4);
     for (const cc of competitorComplaints) {
         const hasWeakness = (cc.metadata?.signal_families || []).includes('competitor_weakness');
-        opportunities.push(buildOpportunity(cc, {
-            opportunity_type: 'differentiation',
-            title: hasWeakness
-                ? `Faiblesse concurrentielle exploitable: ${cc.label}`
-                : `Angle de différenciation: résoudre "${cc.label}"`,
-            rationale: hasWeakness
-                ? 'Les utilisateurs se plaignent d\'un concurrent sur ce point, ce qui crée une opportunité de différenciation directe.'
-                : 'Inféré des patterns de plaintes où l\'opérateur peut mieux se différencier.',
-            metadata: buildOpportunityMetadata(
-                cc,
-                hasWeakness
-                    ? 'Les utilisateurs quittent un concurrent à cause de ce problème, positionnez-vous comme la meilleure alternative.'
-                    : 'Ce pattern de plainte récurrent est une opportunité de différenciation.',
-                hasWeakness
-                    ? 'Créez du contenu de comparaison ciblé et des pages de migration/switching.'
-                    : 'Mettez en avant votre avantage sur ce point dans vos pages clés.',
-                hasWeakness ? 'competitor_weakness' : null,
-            ),
-        }));
+        opportunities.push(
+            buildOpportunity(cc, {
+                opportunity_type: 'differentiation',
+                title: hasWeakness
+                    ? `Faiblesse concurrentielle exploitable: ${cc.label}`
+                    : `Angle de différenciation: résoudre "${cc.label}"`,
+                rationale: hasWeakness
+                    ? "Les utilisateurs se plaignent d'un concurrent sur ce point, ce qui crée une opportunité de différenciation directe."
+                    : "Inféré des patterns de plaintes où l'opérateur peut mieux se différencier.",
+                metadata: buildOpportunityMetadata(
+                    cc,
+                    hasWeakness
+                        ? 'Les utilisateurs quittent un concurrent à cause de ce problème, positionnez-vous comme la meilleure alternative.'
+                        : 'Ce pattern de plainte récurrent est une opportunité de différenciation.',
+                    hasWeakness
+                        ? 'Créez du contenu de comparaison ciblé et des pages de migration/switching.'
+                        : 'Mettez en avant votre avantage sur ce point dans vos pages clés.',
+                    hasWeakness ? 'competitor_weakness' : null,
+                ),
+            }),
+        );
     }
 
     return opportunities;

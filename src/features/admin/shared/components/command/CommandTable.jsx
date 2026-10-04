@@ -163,9 +163,7 @@ export function CommandTable({
                 </table>
             </div>
             {footer ? (
-                <div className={cn(COMMAND_PANEL, 'rounded-none border-x-0 border-b-0 px-4 py-3')}>
-                    {footer}
-                </div>
+                <div className={cn(COMMAND_PANEL, 'rounded-none border-x-0 border-b-0 px-4 py-3')}>{footer}</div>
             ) : null}
         </div>
     );
@@ -195,9 +193,7 @@ function CommandTableRow({ row, index, columns, rowPadding, toneMeta, interactiv
                 toneMeta && 'border-l-2',
             )}
             style={
-                toneMeta
-                    ? { borderLeftColor: toneMeta.ring, boxShadow: `inset 3px 0 0 ${toneMeta.ring}` }
-                    : undefined
+                toneMeta ? { borderLeftColor: toneMeta.ring, boxShadow: `inset 3px 0 0 ${toneMeta.ring}` } : undefined
             }
         >
             {columns.map((column) => {

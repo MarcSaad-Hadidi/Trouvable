@@ -17,7 +17,7 @@ const eslintConfig = [
             'no-console': ['warn', { allow: ['error', 'warn'] }],
             'no-unused-vars': ['warn', { args: 'after-used', ignoreRestSiblings: true }],
             // A null guard intentionally accepts both null and undefined.
-            'eqeqeq': ['warn', 'always', { null: 'ignore' }],
+            eqeqeq: ['warn', 'always', { null: 'ignore' }],
             'prefer-const': 'warn',
             'no-var': 'warn',
         },

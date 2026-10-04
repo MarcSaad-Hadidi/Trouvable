@@ -12,29 +12,41 @@ export const auditAnalysisSchema = z.object({
     geo_recommendability: z.enum(['strong', 'moderate', 'weak', 'unclear']).describe('Niveau de recommandabilite GEO'),
     geo_recommendability_rationale: z.string().describe("Justification de l'evaluation GEO"),
     llm_comprehension_score: z.number().int().min(0).max(15).describe('Score /15 de comprehension LLM'),
-    answerability_summary: z.string().optional().describe("Resume de la clarte reponse / answerability"),
-    opportunities: z.array(z.object({
-        title: z.string(),
-        description: z.string(),
-        priority: z.enum(['high', 'medium', 'low']),
-        category: opportunityCategorySchema,
-        source: opportunitySourceSchema,
-        evidence_summary: z.string().optional(),
-        recommended_fix: z.string().optional(),
-    })).describe('Opportunites identifiees'),
-    faq_suggestions: z.array(z.object({
-        question: z.string(),
-        suggested_answer: z.string(),
-        source: opportunitySourceSchema,
-        rationale: z.string().optional(),
-    })).describe('Suggestions de FAQ'),
-    merge_suggestions: z.array(z.object({
-        field_name: z.string(),
-        suggested_value: z.any(),
-        confidence: confidenceSchema,
-        rationale: z.string(),
-        source: opportunitySourceSchema,
-    })).describe('Suggestions de donnees a merger dans le profil'),
+    answerability_summary: z.string().optional().describe('Resume de la clarte reponse / answerability'),
+    opportunities: z
+        .array(
+            z.object({
+                title: z.string(),
+                description: z.string(),
+                priority: z.enum(['high', 'medium', 'low']),
+                category: opportunityCategorySchema,
+                source: opportunitySourceSchema,
+                evidence_summary: z.string().optional(),
+                recommended_fix: z.string().optional(),
+            }),
+        )
+        .describe('Opportunites identifiees'),
+    faq_suggestions: z
+        .array(
+            z.object({
+                question: z.string(),
+                suggested_answer: z.string(),
+                source: opportunitySourceSchema,
+                rationale: z.string().optional(),
+            }),
+        )
+        .describe('Suggestions de FAQ'),
+    merge_suggestions: z
+        .array(
+            z.object({
+                field_name: z.string(),
+                suggested_value: z.any(),
+                confidence: confidenceSchema,
+                rationale: z.string(),
+                source: opportunitySourceSchema,
+            }),
+        )
+        .describe('Suggestions de donnees a merger dans le profil'),
     detected_services: z.array(z.string()).optional(),
     detected_areas: z.array(z.string()).optional(),
     detected_business_name: z.string().nullable().optional(),
@@ -46,13 +58,15 @@ export const auditAnalysisSchema = z.object({
 export const geoQueryRunSchema = z.object({
     query: z.string(),
     response_text: z.string().describe('La reponse complete generee par le modele'),
-    mentioned_businesses: z.array(z.object({
-        name: z.string(),
-        position: z.number().int().min(1).describe('Position dans la reponse (1 = premier mentionne)'),
-        context: z.string().describe('Extrait du passage ou le business est mentionne'),
-        is_target: z.boolean().describe("True si c'est le business suivi"),
-        sentiment: z.enum(['positive', 'neutral', 'negative']).optional(),
-    })),
+    mentioned_businesses: z.array(
+        z.object({
+            name: z.string(),
+            position: z.number().int().min(1).describe('Position dans la reponse (1 = premier mentionne)'),
+            context: z.string().describe('Extrait du passage ou le business est mentionne'),
+            is_target: z.boolean().describe("True si c'est le business suivi"),
+            sentiment: z.enum(['positive', 'neutral', 'negative']).optional(),
+        }),
+    ),
     total_businesses_mentioned: z.number().int(),
     target_found: z.boolean(),
     target_position: z.number().int().nullable(),
@@ -64,11 +78,15 @@ export const geoQueryRunSchema = z.object({
     evidence_level: z.enum(['none', 'weak', 'source_provided', 'cited_url', 'verified_source']).optional(),
     claims: z.array(z.string()).optional(),
     unsupported_claims: z.array(z.string()).optional(),
-    citations: z.array(z.object({
-        url: z.string(),
-        claim: z.string().optional(),
-        evidence_span: z.string().optional(),
-    })).optional(),
+    citations: z
+        .array(
+            z.object({
+                url: z.string(),
+                claim: z.string().optional(),
+                evidence_span: z.string().optional(),
+            }),
+        )
+        .optional(),
     uncertainty_flags: z.array(z.string()).optional(),
     hallucination_risk: z.enum(['low', 'medium', 'high']).optional(),
 });
@@ -76,14 +94,15 @@ export const geoQueryRunSchema = z.object({
 /**
  * Schema pour la validation d'un payload de lancement d'audit.
  */
-export const auditRunPayloadSchema = z.object({
-    clientId: z.string().uuid().optional(),
-    websiteUrl: z.string().url().optional(),
-    clientName: z.string().min(1).optional(),
-}).refine(
-    (data) => data.clientId || (data.websiteUrl && data.clientName),
-    { message: 'clientId OU (websiteUrl + clientName) requis' }
-);
+export const auditRunPayloadSchema = z
+    .object({
+        clientId: z.string().uuid().optional(),
+        websiteUrl: z.string().url().optional(),
+        clientName: z.string().min(1).optional(),
+    })
+    .refine((data) => data.clientId || (data.websiteUrl && data.clientName), {
+        message: 'clientId OU (websiteUrl + clientName) requis',
+    });
 
 /**
  * Schema pour le payload de query run.

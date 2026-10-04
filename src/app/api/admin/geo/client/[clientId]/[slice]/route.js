@@ -15,8 +15,6 @@ function buildVisibilitySliceOptions(searchParams) {
     return options;
 }
 
-
-
 export async function GET(request, { params }) {
     const admin = await requireAdmin();
     if (!admin) {
@@ -42,4 +40,3 @@ export async function GET(request, { params }) {
         return noStoreJson({ error: 'Erreur chargement tranche' }, { status: 500 });
     }
 }
-

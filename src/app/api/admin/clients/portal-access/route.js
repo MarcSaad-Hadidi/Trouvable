@@ -3,7 +3,11 @@ import { z } from 'zod';
 import { clerkClient } from '@clerk/nextjs/server';
 
 import { requireAdmin } from '@/lib/auth';
-import { listClientPortalMembers, setClientPortalAccessStatus, upsertClientPortalAccess } from '@/features/portal/server/access';
+import {
+    listClientPortalMembers,
+    setClientPortalAccessStatus,
+    upsertClientPortalAccess,
+} from '@/features/portal/server/access';
 import { logAction } from '@/lib/db/actions';
 import { getClientById } from '@/lib/db/clients';
 import { sendPortalInvitationEmail } from '@/features/portal/server/email';
@@ -99,16 +103,25 @@ export async function POST(request) {
             });
 
             const members = await listClientPortalMembers(parsed.data.clientId);
-            return NextResponse.json({ success: true, access: row, members, invitation: emailResult, clerkAccountCreated });
+            return NextResponse.json({
+                success: true,
+                access: row,
+                members,
+                invitation: emailResult,
+                clerkAccountCreated,
+            });
         }
 
         if (parsed.data.action === 'resend_invitation') {
             const client = await getClientById(parsed.data.clientId).catch(() => null);
             const members = await listClientPortalMembers(parsed.data.clientId);
-            const primaryMember = members.find(m => m.status === 'active') || members[0];
-            
+            const primaryMember = members.find((m) => m.status === 'active') || members[0];
+
             if (!primaryMember) {
-                return NextResponse.json({ error: 'Aucun compte portail actif pour renvoyer l\'invitation.' }, { status: 400 });
+                return NextResponse.json(
+                    { error: "Aucun compte portail actif pour renvoyer l'invitation." },
+                    { status: 400 },
+                );
             }
 
             const emailResult = await sendPortalInvitationEmail({

@@ -48,7 +48,10 @@ export default function PortalPriorityBoard({ priorities = [] }) {
                                 {/* Left accent bar */}
                                 <div
                                     className="absolute bottom-4 left-0 top-4 w-[3px] rounded-full transition-opacity duration-300 group-hover:opacity-100"
-                                    style={{ background: `linear-gradient(180deg, ${accent}, ${accent}25)`, opacity: 0.5 }}
+                                    style={{
+                                        background: `linear-gradient(180deg, ${accent}, ${accent}25)`,
+                                        opacity: 0.5,
+                                    }}
                                 />
 
                                 <div className="flex w-10 shrink-0 items-start justify-center pt-0.5">
@@ -64,9 +67,7 @@ export default function PortalPriorityBoard({ priorities = [] }) {
                                     <div className="mb-1.5 text-[14px] font-bold tracking-[-0.01em] text-white/90">
                                         {priority.title}
                                     </div>
-                                    <p className="text-[13px] leading-[1.65] text-white/35">
-                                        {priority.description}
-                                    </p>
+                                    <p className="text-[13px] leading-[1.65] text-white/35">{priority.description}</p>
                                 </div>
                             </motion.div>
                         );

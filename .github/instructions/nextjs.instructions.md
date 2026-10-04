@@ -1,5 +1,5 @@
 ---
-applyTo: "src/app/**,src/features/**,src/components/**,src/proxy.js,next.config.*,src/lib/actions/**"
+applyTo: 'src/app/**,src/features/**,src/components/**,src/proxy.js,next.config.*,src/lib/actions/**'
 ---
 
 # Next.js App Router instructions

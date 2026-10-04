@@ -75,8 +75,8 @@ export async function compareModels({
                 prompt,
                 content: groundedContent,
                 timeoutMs: providerTimeoutMs,
-            })
-        )
+            }),
+        ),
     );
 
     const results = settled.map((entry, index) => {

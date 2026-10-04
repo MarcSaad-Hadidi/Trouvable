@@ -29,9 +29,13 @@ function formatNumber(value) {
 function getGroupKeyword(group) {
     const match = String(group?.title || '').match(/«\s*(.+?)\s*»/);
     if (match?.[1]) return match[1];
-    return String(group?.title || '')
-        .replace(/^Groupe\s+\d+\s+·\s+/i, '')
-        .trim() || group?.pages?.[0]?.label || 'Groupe';
+    return (
+        String(group?.title || '')
+            .replace(/^Groupe\s+\d+\s+·\s+/i, '')
+            .trim() ||
+        group?.pages?.[0]?.label ||
+        'Groupe'
+    );
 }
 
 function heatTone(group) {
@@ -49,13 +53,22 @@ function HeatmapCell({ severity }) {
         none: 'bg-white/[0.02]',
     };
 
-    return <div className={cn('h-8 w-full cursor-pointer rounded-sm transition-colors hover:ring-1 ring-white/20', colors[severity] || colors.none)} />;
+    return (
+        <div
+            className={cn(
+                'h-8 w-full cursor-pointer rounded-sm transition-colors hover:ring-1 ring-white/20',
+                colors[severity] || colors.none,
+            )}
+        />
+    );
 }
 
 function buildMetricCards(groups) {
     const criticalCount = groups.filter((group) => group.confidenceTone === 'high').length;
     const trafficAtRisk = groups.reduce((sum, group) => sum + Number(group?.measured?.sharedClicks || 0), 0);
-    const pageCount = new Set(groups.flatMap((group) => (group?.pages || []).map((page) => page?.url || page?.label).filter(Boolean))).size;
+    const pageCount = new Set(
+        groups.flatMap((group) => (group?.pages || []).map((page) => page?.url || page?.label).filter(Boolean)),
+    ).size;
     const actionableCount = groups.filter((group) => group?.winner?.page || group?.action?.label).length;
 
     return [
@@ -70,7 +83,8 @@ function buildMetricCards(groups) {
             id: 'traffic',
             label: 'Trafic à Risque',
             value: trafficAtRisk > 0 ? formatCompactNumber(trafficAtRisk) : 'n.d.',
-            detail: trafficAtRisk > 0 ? 'Clics mensuels observés sur requêtes partagées' : 'Aucune mesure GSC suffisante',
+            detail:
+                trafficAtRisk > 0 ? 'Clics mensuels observés sur requêtes partagées' : 'Aucune mesure GSC suffisante',
             tone: trafficAtRisk > 0 ? 'warning' : 'neutral',
         },
         {
@@ -84,7 +98,10 @@ function buildMetricCards(groups) {
             id: 'actionable',
             label: 'Arbitrages Prêts',
             value: actionableCount,
-            detail: actionableCount > 0 ? 'Groupes avec recommandation ou page gagnante' : 'Aucun arbitrage encore exploitable',
+            detail:
+                actionableCount > 0
+                    ? 'Groupes avec recommandation ou page gagnante'
+                    : 'Aucun arbitrage encore exploitable',
             tone: actionableCount > 0 ? 'ok' : 'neutral',
         },
     ];
@@ -114,7 +131,15 @@ function buildHeatmapSeverity(rowGroup, columnGroup, rowIndex, colIndex) {
 
 function ChevronRightIcon(props) {
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            {...props}
+        >
             <path d="m9 18 6-6-6-6" />
         </svg>
     );
@@ -127,7 +152,10 @@ export default function SeoCannibalizationPage() {
 
     const baseHref = clientId ? `/admin/clients/${clientId}` : '/admin/clients';
     const groups = useMemo(
-        () => [...(data?.groups || [])].sort((left, right) => (severityOrder[left.confidenceTone] ?? 9) - (severityOrder[right.confidenceTone] ?? 9)),
+        () =>
+            [...(data?.groups || [])].sort(
+                (left, right) => (severityOrder[left.confidenceTone] ?? 9) - (severityOrder[right.confidenceTone] ?? 9),
+            ),
         [data?.groups],
     );
     const selectedGroup = groups.find((group) => group.id === expandedClusterId) || groups[0] || null;
@@ -135,10 +163,20 @@ export default function SeoCannibalizationPage() {
 
     if (loading) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Graphe de Cannibalisation" subtitle="Chargement des recouvrements et arbitrages réels." />}>
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Graphe de Cannibalisation"
+                        subtitle="Chargement des recouvrements et arbitrages réels."
+                    />
+                }
+            >
                 <div className={cn(COMMAND_PANEL, 'p-8')}>
                     <div className="text-[15px] font-semibold text-white/90">Chargement de la cannibalisation SEO</div>
-                    <p className="mt-2 text-[13px] text-white/55">Le cockpit attend les groupes de recouvrement observés sur le dossier courant.</p>
+                    <p className="mt-2 text-[13px] text-white/55">
+                        Le cockpit attend les groupes de recouvrement observés sur le dossier courant.
+                    </p>
                 </div>
             </CommandPageShell>
         );
@@ -146,8 +184,24 @@ export default function SeoCannibalizationPage() {
 
     if (error) {
         return (
-            <CommandPageShell header={<CommandHeader eyebrow="SEO Ops" title="Graphe de Cannibalisation" subtitle="Détection des conflits de mots-clés où plusieurs pages de votre site se concurrencent dans les SERPs." />}>
-                <CommandEmptyState title="Cannibalisation SEO indisponible" description={error} action={<Link href={`${baseHref}/seo/content`} className={COMMAND_BUTTONS.primary}>Contenu SEO</Link>} />
+            <CommandPageShell
+                header={
+                    <CommandHeader
+                        eyebrow="SEO Ops"
+                        title="Graphe de Cannibalisation"
+                        subtitle="Détection des conflits de mots-clés où plusieurs pages de votre site se concurrencent dans les SERPs."
+                    />
+                }
+            >
+                <CommandEmptyState
+                    title="Cannibalisation SEO indisponible"
+                    description={error}
+                    action={
+                        <Link href={`${baseHref}/seo/content`} className={COMMAND_BUTTONS.primary}>
+                            Contenu SEO
+                        </Link>
+                    }
+                />
             </CommandPageShell>
         );
     }
@@ -159,14 +213,24 @@ export default function SeoCannibalizationPage() {
                     eyebrow="SEO Ops"
                     title="Graphe de Cannibalisation"
                     subtitle="Détection des conflits de mots-clés où plusieurs pages de votre site se concurrencent dans les SERPs."
-                    actions={<Link href={`${baseHref}/seo/actions`} className={COMMAND_BUTTONS.primary}>Lancer une détection</Link>}
+                    actions={
+                        <Link href={`${baseHref}/seo/actions`} className={COMMAND_BUTTONS.primary}>
+                            Lancer une détection
+                        </Link>
+                    }
                 />
             }
         >
-                <SourceStatusNotice status={data?.status} errors={data?.errors} />
+            <SourceStatusNotice status={data?.status} errors={data?.errors} />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {metricCards.map((card) => (
-                    <CommandMetricCard key={card.id} label={card.label} value={card.value} detail={card.detail} tone={card.tone} />
+                    <CommandMetricCard
+                        key={card.id}
+                        label={card.label}
+                        value={card.value}
+                        detail={card.detail}
+                        tone={card.tone}
+                    />
                 ))}
             </div>
 
@@ -177,7 +241,9 @@ export default function SeoCannibalizationPage() {
                     {groups.length > 0 ? (
                         <div className="space-y-3">
                             {groups.map((group) => {
-                                const isExpanded = expandedClusterId ? expandedClusterId === group.id : selectedGroup?.id === group.id;
+                                const isExpanded = expandedClusterId
+                                    ? expandedClusterId === group.id
+                                    : selectedGroup?.id === group.id;
                                 const trafficRisk = Number(group?.measured?.sharedClicks || 0);
 
                                 return (
@@ -194,18 +260,42 @@ export default function SeoCannibalizationPage() {
                                             className="flex cursor-pointer select-none items-center justify-between bg-white/[0.01] p-4"
                                         >
                                             <div className="flex min-w-0 items-center gap-4">
-                                                <div className={cn('h-2 w-2 rounded-full', group.confidenceTone === 'high' ? 'bg-rose-500' : group.confidenceTone === 'medium' ? 'bg-amber-400' : 'bg-white/20')} />
+                                                <div
+                                                    className={cn(
+                                                        'h-2 w-2 rounded-full',
+                                                        group.confidenceTone === 'high'
+                                                            ? 'bg-rose-500'
+                                                            : group.confidenceTone === 'medium'
+                                                              ? 'bg-amber-400'
+                                                              : 'bg-white/20',
+                                                    )}
+                                                />
                                                 <div className="min-w-0">
-                                                    <div className="truncate text-[13px] font-bold text-white/90">&quot;{getGroupKeyword(group)}&quot;</div>
-                                                    <div className="mt-0.5 text-[10px] text-white/40">{group.pages.length} URLs en compétition</div>
+                                                    <div className="truncate text-[13px] font-bold text-white/90">
+                                                        &quot;{getGroupKeyword(group)}&quot;
+                                                    </div>
+                                                    <div className="mt-0.5 text-[10px] text-white/40">
+                                                        {group.pages.length} URLs en compétition
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-6">
                                                 <div className="hidden text-right sm:block">
-                                                    <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/40">Trafic à risque</div>
-                                                    <div className="text-[12px] font-mono font-bold text-amber-400">{trafficRisk > 0 ? `${formatNumber(trafficRisk)} clics/mo` : 'n.d.'}</div>
+                                                    <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/40">
+                                                        Trafic à risque
+                                                    </div>
+                                                    <div className="text-[12px] font-mono font-bold text-amber-400">
+                                                        {trafficRisk > 0
+                                                            ? `${formatNumber(trafficRisk)} clics/mo`
+                                                            : 'n.d.'}
+                                                    </div>
                                                 </div>
-                                                <ChevronRightIcon className={cn('h-4 w-4 text-white/30 transition-transform duration-300', isExpanded && 'rotate-90')} />
+                                                <ChevronRightIcon
+                                                    className={cn(
+                                                        'h-4 w-4 text-white/30 transition-transform duration-300',
+                                                        isExpanded && 'rotate-90',
+                                                    )}
+                                                />
                                             </div>
                                         </div>
 
@@ -215,32 +305,84 @@ export default function SeoCannibalizationPage() {
                                                     <div className="space-y-2">
                                                         {group.pages.map((page, index) => {
                                                             const share = derivePageShare(page, group.pages);
-                                                            const isLeader = String(page?.url || page?.label || '') === String(group?.winner?.page?.url || group?.winner?.page?.label || '');
+                                                            const isLeader =
+                                                                String(page?.url || page?.label || '') ===
+                                                                String(
+                                                                    group?.winner?.page?.url ||
+                                                                        group?.winner?.page?.label ||
+                                                                        '',
+                                                                );
                                                             return (
-                                                                <div key={`${group.id}-${page.label}-${index}`} className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.02] p-3">
+                                                                <div
+                                                                    key={`${group.id}-${page.label}-${index}`}
+                                                                    className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.02] p-3"
+                                                                >
                                                                     <GripHorizontalIcon className="h-4 w-4 shrink-0 text-white/10" />
                                                                     <div className="min-w-0 flex-1">
                                                                         <div className="mb-1 flex items-center gap-2">
-                                                                            <span className="truncate font-mono text-[12px] text-white/80">{page.label || page.url || 'Page concernée'}</span>
-                                                                            {isLeader ? <span className="rounded bg-emerald-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-400">Leader</span> : null}
+                                                                            <span className="truncate font-mono text-[12px] text-white/80">
+                                                                                {page.label ||
+                                                                                    page.url ||
+                                                                                    'Page concernée'}
+                                                                            </span>
+                                                                            {isLeader ? (
+                                                                                <span className="rounded bg-emerald-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-400">
+                                                                                    Leader
+                                                                                </span>
+                                                                            ) : null}
                                                                         </div>
                                                                         <div className="flex flex-wrap items-center gap-3 text-[10px]">
-                                                                            <span className="text-white/40">Intention: <span className="text-white/70">{group.conflictTypeLabel || 'À confirmer'}</span></span>
-                                                                            <span className="text-white/40">Pos: <span className="font-bold text-white/70">#{page?.fallbackMetrics?.position ? Number(page.fallbackMetrics.position).toFixed(0) : 'n.d.'}</span></span>
-                                                                            <span className="text-white/40">Clics: <span className="tabular-nums text-white/70">{formatNumber(page?.fallbackMetrics?.clicks)}</span></span>
+                                                                            <span className="text-white/40">
+                                                                                Intention:{' '}
+                                                                                <span className="text-white/70">
+                                                                                    {group.conflictTypeLabel ||
+                                                                                        'À confirmer'}
+                                                                                </span>
+                                                                            </span>
+                                                                            <span className="text-white/40">
+                                                                                Pos:{' '}
+                                                                                <span className="font-bold text-white/70">
+                                                                                    #
+                                                                                    {page?.fallbackMetrics?.position
+                                                                                        ? Number(
+                                                                                              page.fallbackMetrics
+                                                                                                  .position,
+                                                                                          ).toFixed(0)
+                                                                                        : 'n.d.'}
+                                                                                </span>
+                                                                            </span>
+                                                                            <span className="text-white/40">
+                                                                                Clics:{' '}
+                                                                                <span className="tabular-nums text-white/70">
+                                                                                    {formatNumber(
+                                                                                        page?.fallbackMetrics?.clicks,
+                                                                                    )}
+                                                                                </span>
+                                                                            </span>
                                                                         </div>
                                                                     </div>
                                                                     <div className="w-24 shrink-0 px-2">
                                                                         <div className="mb-1 flex justify-between text-[9px]">
                                                                             <span className="text-white/40">Part</span>
-                                                                            <span className="font-bold text-white">{share === null ? 'n.d.' : `${share}%`}</span>
+                                                                            <span className="font-bold text-white">
+                                                                                {share === null ? 'n.d.' : `${share}%`}
+                                                                            </span>
                                                                         </div>
                                                                         <div className="h-1.5 overflow-hidden rounded-full bg-black/50">
-                                                                            <div className="h-full rounded-full bg-indigo-400" style={{ width: `${share || 0}%` }} />
+                                                                            <div
+                                                                                className="h-full rounded-full bg-indigo-400"
+                                                                                style={{ width: `${share || 0}%` }}
+                                                                            />
                                                                         </div>
                                                                     </div>
                                                                     {page.url ? (
-                                                                        <a href={page.url} target="_blank" rel="noreferrer" className="rounded p-1.5 text-white/40 transition-colors hover:bg-white/10 hover:text-white" title="Voir l'URL">
+                                                                        <a
+                                                                            href={page.url}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            className="rounded p-1.5 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+                                                                            title="Voir l'URL"
+                                                                        >
                                                                             <ExternalLinkIcon className="h-3.5 w-3.5" />
                                                                         </a>
                                                                     ) : null}
@@ -252,15 +394,32 @@ export default function SeoCannibalizationPage() {
                                                     <div className="mt-4 flex flex-col justify-between gap-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 sm:flex-row sm:items-center">
                                                         <div>
                                                             <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-indigo-300">
-                                                                <GitMergeIcon className="h-3.5 w-3.5" /> Recommandation opérateur
+                                                                <GitMergeIcon className="h-3.5 w-3.5" /> Recommandation
+                                                                opérateur
                                                             </div>
-                                                            <p className="max-w-lg text-[12px] leading-relaxed text-white/70">{group?.action?.why || group?.summary || 'Aucun arbitrage recommandé pour le moment.'}</p>
+                                                            <p className="max-w-lg text-[12px] leading-relaxed text-white/70">
+                                                                {group?.action?.why ||
+                                                                    group?.summary ||
+                                                                    'Aucun arbitrage recommandé pour le moment.'}
+                                                            </p>
                                                         </div>
                                                         <div className="flex shrink-0 gap-2">
-                                                            <button type="button" onClick={() => setExpandedClusterId(null)} className={cn(COMMAND_BUTTONS.secondary, 'border-white/10')}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setExpandedClusterId(null)}
+                                                                className={cn(
+                                                                    COMMAND_BUTTONS.secondary,
+                                                                    'border-white/10',
+                                                                )}
+                                                            >
                                                                 Ignorer
                                                             </button>
-                                                            <Link href={`${baseHref}/seo/actions`} className={COMMAND_BUTTONS.primary}>Générer Plan d&#39;action</Link>
+                                                            <Link
+                                                                href={`${baseHref}/seo/actions`}
+                                                                className={COMMAND_BUTTONS.primary}
+                                                            >
+                                                                Générer Plan d&#39;action
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -274,7 +433,10 @@ export default function SeoCannibalizationPage() {
                         <div className={cn(COMMAND_PANEL, 'p-6')}>
                             <CommandEmptyState
                                 title={data?.emptyState?.title || 'Aucun recouvrement net observé'}
-                                description={data?.emptyState?.description || 'Le dossier ne montre pas encore de conflit suffisamment fiable pour remplir les clusters de cette vue.'}
+                                description={
+                                    data?.emptyState?.description ||
+                                    'Le dossier ne montre pas encore de conflit suffisamment fiable pour remplir les clusters de cette vue.'
+                                }
                             />
                         </div>
                     )}
@@ -291,22 +453,42 @@ export default function SeoCannibalizationPage() {
                                 <div className="flex">
                                     <div className="mt-4 mr-2 flex w-24 flex-col gap-1">
                                         {groups.slice(0, 5).map((group) => (
-                                            <div key={group.id} className="flex h-8 items-center justify-end truncate text-[9px] font-mono text-white/40">{getGroupKeyword(group)}</div>
+                                            <div
+                                                key={group.id}
+                                                className="flex h-8 items-center justify-end truncate text-[9px] font-mono text-white/40"
+                                            >
+                                                {getGroupKeyword(group)}
+                                            </div>
                                         ))}
                                     </div>
 
                                     <div className="flex-1">
                                         <div className="mb-2 flex h-4 gap-1">
                                             {groups.slice(0, 5).map((group, index) => (
-                                                <div key={`${group.id}-${index}`} className="flex-1 text-center text-[9px] text-white/30">/url-{index + 1}</div>
+                                                <div
+                                                    key={`${group.id}-${index}`}
+                                                    className="flex-1 text-center text-[9px] text-white/30"
+                                                >
+                                                    /url-{index + 1}
+                                                </div>
                                             ))}
                                         </div>
                                         <div className="flex flex-col gap-1">
                                             {groups.slice(0, 5).map((rowGroup, rowIndex) => (
                                                 <div key={`${rowGroup.id}-${rowIndex}`} className="flex gap-1">
                                                     {groups.slice(0, 5).map((columnGroup, colIndex) => (
-                                                        <div key={`${rowGroup.id}-${columnGroup.id}`} className="flex-1">
-                                                            <HeatmapCell severity={buildHeatmapSeverity(rowGroup, columnGroup, rowIndex, colIndex)} />
+                                                        <div
+                                                            key={`${rowGroup.id}-${columnGroup.id}`}
+                                                            className="flex-1"
+                                                        >
+                                                            <HeatmapCell
+                                                                severity={buildHeatmapSeverity(
+                                                                    rowGroup,
+                                                                    columnGroup,
+                                                                    rowIndex,
+                                                                    colIndex,
+                                                                )}
+                                                            />
                                                         </div>
                                                     ))}
                                                 </div>
@@ -316,9 +498,15 @@ export default function SeoCannibalizationPage() {
                                 </div>
 
                                 <div className="mt-6 flex justify-center gap-3">
-                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40"><div className="h-2 w-2 rounded-sm bg-rose-500" /> Critique</span>
-                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40"><div className="h-2 w-2 rounded-sm bg-amber-500/50" /> Moyen</span>
-                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40"><div className="h-2 w-2 rounded-sm bg-white/5" /> Sain</span>
+                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40">
+                                        <div className="h-2 w-2 rounded-sm bg-rose-500" /> Critique
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40">
+                                        <div className="h-2 w-2 rounded-sm bg-amber-500/50" /> Moyen
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-[9px] text-white/40">
+                                        <div className="h-2 w-2 rounded-sm bg-white/5" /> Sain
+                                    </span>
                                 </div>
                             </>
                         ) : (
@@ -339,7 +527,15 @@ export default function SeoCannibalizationPage() {
                                     <svg width="100%" height="100%">
                                         <line x1="50%" y1="50%" x2="30%" y2="30%" stroke="white" strokeWidth="1" />
                                         <line x1="50%" y1="50%" x2="70%" y2="30%" stroke="white" strokeWidth="1" />
-                                        <line x1="50%" y1="50%" x2="50%" y2="72%" stroke="#f43f5e" strokeWidth="2" strokeDasharray="4" />
+                                        <line
+                                            x1="50%"
+                                            y1="50%"
+                                            x2="50%"
+                                            y2="72%"
+                                            stroke="#f43f5e"
+                                            strokeWidth="2"
+                                            strokeDasharray="4"
+                                        />
                                     </svg>
                                 </div>
 
@@ -348,7 +544,9 @@ export default function SeoCannibalizationPage() {
                                         <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full border border-indigo-400 bg-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
                                             <span className="text-xs font-bold text-indigo-200">KW</span>
                                         </div>
-                                        <span className="mt-2 rounded border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] text-white/80">{getGroupKeyword(selectedGroup)}</span>
+                                        <span className="mt-2 rounded border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] text-white/80">
+                                            {getGroupKeyword(selectedGroup)}
+                                        </span>
                                     </div>
 
                                     {(selectedGroup.pages || []).slice(0, 3).map((page, index) => {
@@ -357,13 +555,41 @@ export default function SeoCannibalizationPage() {
                                             'absolute right-[22%] top-[24%] flex flex-col items-center',
                                             'absolute bottom-[22%] left-1/2 flex -translate-x-1/2 flex-col items-center',
                                         ];
-                                        const isPrimary = String(page?.url || page?.label || '') === String(selectedGroup?.winner?.page?.url || selectedGroup?.winner?.page?.label || '');
+                                        const isPrimary =
+                                            String(page?.url || page?.label || '') ===
+                                            String(
+                                                selectedGroup?.winner?.page?.url ||
+                                                    selectedGroup?.winner?.page?.label ||
+                                                    '',
+                                            );
                                         return (
-                                            <div key={`${selectedGroup.id}-${page.label}-${index}`} className={positions[index]}>
-                                                <div className={cn('z-10 flex items-center justify-center rounded border', isPrimary ? 'h-10 w-10 border-rose-500 bg-rose-500/10' : 'h-8 w-8 border-white/20 bg-white/5')}>
-                                                    <span className={cn('text-[10px]', isPrimary ? 'font-bold text-rose-400' : 'text-white/60')}>URL</span>
+                                            <div
+                                                key={`${selectedGroup.id}-${page.label}-${index}`}
+                                                className={positions[index]}
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        'z-10 flex items-center justify-center rounded border',
+                                                        isPrimary
+                                                            ? 'h-10 w-10 border-rose-500 bg-rose-500/10'
+                                                            : 'h-8 w-8 border-white/20 bg-white/5',
+                                                    )}
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            'text-[10px]',
+                                                            isPrimary ? 'font-bold text-rose-400' : 'text-white/60',
+                                                        )}
+                                                    >
+                                                        URL
+                                                    </span>
                                                 </div>
-                                                <span className={cn('mt-1 text-[8px]', isPrimary ? 'font-bold text-rose-400/80' : 'text-white/40')}>
+                                                <span
+                                                    className={cn(
+                                                        'mt-1 text-[8px]',
+                                                        isPrimary ? 'font-bold text-rose-400/80' : 'text-white/40',
+                                                    )}
+                                                >
                                                     {String(page?.label || page?.url || 'page').slice(0, 26)}
                                                 </span>
                                             </div>
@@ -372,9 +598,16 @@ export default function SeoCannibalizationPage() {
                                 </div>
                             </div>
                         ) : (
-                            <CommandEmptyState title="Aucun cluster sélectionné" description="Sélectionnez un cluster pour visualiser ses relations." />
+                            <CommandEmptyState
+                                title="Aucun cluster sélectionné"
+                                description="Sélectionnez un cluster pour visualiser ses relations."
+                            />
                         )}
-                        <p className="mt-3 text-center text-[10px] text-white/40">{selectedGroup ? 'Lecture simplifiée à partir du groupe actuellement ouvert.' : 'Sélectionnez un cluster pour visualiser ses relations.'}</p>
+                        <p className="mt-3 text-center text-[10px] text-white/40">
+                            {selectedGroup
+                                ? 'Lecture simplifiée à partir du groupe actuellement ouvert.'
+                                : 'Sélectionnez un cluster pour visualiser ses relations.'}
+                        </p>
                     </div>
                 </div>
             </div>

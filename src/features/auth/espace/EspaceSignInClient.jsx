@@ -5,10 +5,7 @@ import useSignInRedirect from '@/features/auth/useSignInRedirect';
 import SignInProgress from '@/features/auth/SignInProgress';
 import { signInAppearance } from '@/features/auth/sign-in-appearance';
 
-const ClerkSignIn = dynamic(
-    () => import('@clerk/nextjs').then((mod) => mod.SignIn),
-    { ssr: false }
-);
+const ClerkSignIn = dynamic(() => import('@clerk/nextjs').then((mod) => mod.SignIn), { ssr: false });
 
 const REDIRECT = '/espace/apres-connexion';
 

@@ -35,7 +35,9 @@ const DIMENSION_TO_SURFACE = {
 };
 
 function normalizeSeverity(value) {
-    const normalized = String(value || '').trim().toLowerCase();
+    const normalized = String(value || '')
+        .trim()
+        .toLowerCase();
     if (normalized === 'critical') return 'critical';
     if (normalized === 'high') return 'high';
     if (normalized === 'low') return 'low';
@@ -105,7 +107,9 @@ function buildProvenanceEntries(issue = {}, truthClass = 'uncertain', confidence
 }
 
 function buildType(issue = {}) {
-    const base = slugifyTruthKey(`${issue.dimension || issue.category || 'audit'}_${issue.title || issue.description || 'issue'}`);
+    const base = slugifyTruthKey(
+        `${issue.dimension || issue.category || 'audit'}_${issue.title || issue.description || 'issue'}`,
+    );
     return base || 'audit_issue';
 }
 

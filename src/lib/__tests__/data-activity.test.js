@@ -10,8 +10,16 @@ const copies = [
     ['geo_queries_run', 'Cycle de prompts terminé', '0/0 prompts suivis exécutés'],
     ['geo_query_run_single', 'Exécution unitaire terminée', 'Prompt exécuté avec erreurs.'],
     ['geo_query_run_rerun', "Relance d'exécution", "Une exécution existante a été relancée depuis l'inspecteur."],
-    ['geo_query_reparse', 'Reparse effectué', 'Le pipeline extraction/citations/concurrents a été réappliqué sur une exécution stockée.'],
-    ['geo_queries_benchmark_run', 'Benchmark sandbox exécuté', 'Comparaison multi-variantes terminée en mode sandbox gratuit.'],
+    [
+        'geo_query_reparse',
+        'Reparse effectué',
+        'Le pipeline extraction/citations/concurrents a été réappliqué sur une exécution stockée.',
+    ],
+    [
+        'geo_queries_benchmark_run',
+        'Benchmark sandbox exécuté',
+        'Comparaison multi-variantes terminée en mode sandbox gratuit.',
+    ],
     ['tracked_query_created', 'Prompt suivi ajouté', 'Un nouveau prompt suivi a été ajouté.'],
     ['tracked_query_updated', 'Prompt suivi mis à jour', 'Le texte ou la classification du prompt a été mis à jour.'],
     ['tracked_query_toggled', 'Statut prompt modifié', 'Prompt mis en pause.'],
@@ -29,9 +37,15 @@ describe('safe activity projection', () => {
     it.each(copies)('preserves the copy and observed envelope for %s', async (type, title, description) => {
         io.actions.mockResolvedValue([{ id: 'a', action_type: type, created_at: '2026-10-01' }]);
         const data = await getRecentSafeActivity('client-a');
-        expect(data.items).toEqual([{ id: 'action-a', type, title, description, created_at: '2026-10-01', provenance: data.provenance }]);
+        expect(data.items).toEqual([
+            { id: 'action-a', type, title, description, created_at: '2026-10-01', provenance: data.provenance },
+        ]);
         expect(data.items[0].provenance.key).toBe('observed');
-        expect(io.actions).toHaveBeenCalledWith('client-a', copies.map(([key]) => key), 8);
+        expect(io.actions).toHaveBeenCalledWith(
+            'client-a',
+            copies.map(([key]) => key),
+            8,
+        );
     });
 
     it.each([

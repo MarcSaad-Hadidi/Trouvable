@@ -56,14 +56,16 @@ function AttentionBadge({ attention }) {
     };
     const m = meta[attention] || meta.stable;
     return (
-        <span className={`inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.06em] px-2 py-[3px] rounded-md border ${m.cls}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${m.dot} shrink-0 ${attention === 'critical' ? 'cmd-health-dot' : ''}`} />
+        <span
+            className={`inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.06em] px-2 py-[3px] rounded-md border ${m.cls}`}
+        >
+            <span
+                className={`w-1.5 h-1.5 rounded-full ${m.dot} shrink-0 ${attention === 'critical' ? 'cmd-health-dot' : ''}`}
+            />
             {m.label}
         </span>
     );
 }
-
-
 
 function clientsListLink({ q, page, archived }) {
     const p = new URLSearchParams();
@@ -80,7 +82,10 @@ export default async function AdminClientsPage({ searchParams }) {
     // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
     const rawQ = paramsData?.q || '';
-    const q = rawQ.slice(0, 60).replace(/[^a-zA-Z0-9 éèàùâêîôûç-]/g, '').trim();
+    const q = rawQ
+        .slice(0, 60)
+        .replace(/[^a-zA-Z0-9 éèàùâêîôûç-]/g, '')
+        .trim();
     const page = parseInt(paramsData?.page, 10) || 1;
     const showArchived = paramsData?.archived === '1';
 
@@ -88,7 +93,9 @@ export default async function AdminClientsPage({ searchParams }) {
 
     let query = supabase
         .from('client_geo_profiles')
-        .select('id, client_name, client_slug, is_published, lifecycle_status, updated_at, archived_at', { count: 'exact' });
+        .select('id, client_name, client_slug, is_published, lifecycle_status, updated_at, archived_at', {
+            count: 'exact',
+        });
 
     if (showArchived) {
         query = query.not('archived_at', 'is', null);
@@ -103,9 +110,7 @@ export default async function AdminClientsPage({ searchParams }) {
     const from = (page - 1) * ITEMS_PER_PAGE;
     const to = from + ITEMS_PER_PAGE - 1;
 
-    const { data: clients, count, error } = await query
-        .order('updated_at', { ascending: false })
-        .range(from, to);
+    const { data: clients, count, error } = await query.order('updated_at', { ascending: false }).range(from, to);
 
     if (error) {
         console.error('[AdminClientsPage] Supabase error:', error);
@@ -143,7 +148,7 @@ export default async function AdminClientsPage({ searchParams }) {
             eyebrow={showArchived ? 'Portefeuille · Archives' : 'Portefeuille'}
             title={showArchived ? 'Archives' : 'Portefeuille'}
             subtitle="Supervision globale des mandats. Priorisez l’attention par état moteur, alertes et file d’actions."
-            actions={(
+            actions={
                 <>
                     <SearchBar />
                     <Link
@@ -156,7 +161,7 @@ export default async function AdminClientsPage({ searchParams }) {
                         Nouveau mandat
                     </Link>
                 </>
-            )}
+            }
         />
     );
 
@@ -169,20 +174,27 @@ export default async function AdminClientsPage({ searchParams }) {
                         <div className={cn(COMMAND_PANEL, 'px-5 py-4')}>
                             {/* Segmented Health Bar */}
                             <div className="flex items-center gap-5 mb-3">
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 shrink-0">Santé portefeuille</div>
+                                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35 shrink-0">
+                                    Santé portefeuille
+                                </div>
                                 <div className="flex-1 flex h-[6px] overflow-hidden rounded-full bg-white/[0.03]">
                                     {[
                                         { key: 'critical', count: criticalCount, color: '#e06060' },
                                         { key: 'attention', count: attentionCount, color: '#d4a34a' },
                                         { key: 'stable', count: stableCount, color: '#4ade80' },
                                     ].map((seg) => {
-                                        const pct = ((seg.count / (count || rows.length || 1)) * 100);
+                                        const pct = (seg.count / (count || rows.length || 1)) * 100;
                                         if (pct === 0) return null;
                                         return (
                                             <div
                                                 key={seg.key}
                                                 className="h-full transition-all duration-700"
-                                                style={{ width: `${pct}%`, background: seg.color, opacity: 0.65, marginRight: 1 }}
+                                                style={{
+                                                    width: `${pct}%`,
+                                                    background: seg.color,
+                                                    opacity: 0.65,
+                                                    marginRight: 1,
+                                                }}
                                             />
                                         );
                                     })}
@@ -192,28 +204,38 @@ export default async function AdminClientsPage({ searchParams }) {
                             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] text-white/40">Total</span>
-                                    <span className="text-[14px] font-bold tabular-nums text-white/80">{count ?? rows.length}</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-white/80">
+                                        {count ?? rows.length}
+                                    </span>
                                 </div>
                                 <div className="h-3 w-px bg-white/[0.08]" />
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-[#e06060]" style={{ opacity: 0.7 }} />
                                     <span className="text-[11px] text-white/40">Critiques</span>
-                                    <span className="text-[14px] font-bold tabular-nums text-[#f0a8a8]">{criticalCount}</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#f0a8a8]">
+                                        {criticalCount}
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-[#d4a34a]" style={{ opacity: 0.7 }} />
                                     <span className="text-[11px] text-white/40">Attention</span>
-                                    <span className="text-[14px] font-bold tabular-nums text-[#ecd29b]">{attentionCount}</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#ecd29b]">
+                                        {attentionCount}
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-[#4ade80]" style={{ opacity: 0.7 }} />
                                     <span className="text-[11px] text-white/40">Stables</span>
-                                    <span className="text-[14px] font-bold tabular-nums text-[#a3f0bf]">{stableCount}</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-[#a3f0bf]">
+                                        {stableCount}
+                                    </span>
                                 </div>
                                 <div className="h-3 w-px bg-white/[0.08]" />
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] text-white/40">Actions en file</span>
-                                    <span className="text-[14px] font-bold tabular-nums text-white/70">{totalActions}</span>
+                                    <span className="text-[14px] font-bold tabular-nums text-white/70">
+                                        {totalActions}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -236,7 +258,10 @@ export default async function AdminClientsPage({ searchParams }) {
                                 <tbody className="divide-y divide-white/[0.04]">
                                     {error ? (
                                         <tr>
-                                            <td colSpan="7" className="px-6 py-16 text-center text-red-300/80 font-medium text-sm">
+                                            <td
+                                                colSpan="7"
+                                                className="px-6 py-16 text-center text-red-300/80 font-medium text-sm"
+                                            >
                                                 Une erreur est survenue lors du chargement du portefeuille.
                                             </td>
                                         </tr>
@@ -245,12 +270,26 @@ export default async function AdminClientsPage({ searchParams }) {
                                             <td colSpan="7" className="px-6 py-20 text-center">
                                                 <div className="flex flex-col items-center cmd-animate-in">
                                                     <div className="w-14 h-14 rounded-2xl border border-white/[0.06] bg-white/[0.02] flex items-center justify-center mb-4">
-                                                        <svg className="w-6 h-6 text-white/15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        <svg
+                                                            className="w-6 h-6 text-white/15"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                            strokeWidth="1.5"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                                            />
                                                         </svg>
                                                     </div>
-                                                    <p className="text-[14px] font-semibold text-white/55">Aucun mandat trouvé</p>
-                                                    <p className="text-white/25 mt-1 text-[12px]">Créez un nouveau mandat ou ajustez votre recherche.</p>
+                                                    <p className="text-[14px] font-semibold text-white/55">
+                                                        Aucun mandat trouvé
+                                                    </p>
+                                                    <p className="text-white/25 mt-1 text-[12px]">
+                                                        Créez un nouveau mandat ou ajustez votre recherche.
+                                                    </p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -259,89 +298,131 @@ export default async function AdminClientsPage({ searchParams }) {
                                             const s = client.operatorSignals;
                                             const isCritical = s?.attention === 'critical';
                                             return (
-                                            <tr
-                                                key={client.id}
-                                                className={`hover:bg-white/[0.025] transition-colors duration-200 align-top cmd-animate-in ${isCritical ? 'bg-red-500/[0.02]' : ''}`}
-                                                style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}
-                                            >
-                                                <td className="px-5 py-3.5">
-                                                    <Link href={`/admin/clients/${client.id}/dossier`} className="group block">
-                                                        <span className="font-semibold text-white/90 group-hover:text-[#a78bfa] transition-colors block truncate max-w-[200px] text-[13px]">
-                                                            {client.client_name}
-                                                        </span>
-                                                        <span className="font-mono text-[10px] text-white/20 truncate block max-w-[200px] mt-0.5">{client.client_slug}</span>
-                                                    </Link>
-                                                </td>
-                                                <td className="px-5 py-3.5 text-center">
-                                                    {s ? <AttentionBadge attention={s.attention} /> : <span className="text-white/15 text-[10px]">n.d.</span>}
-                                                </td>
-                                                <td className="px-5 py-3.5 text-center">
-                                                    <LifecycleBadge status={client.lifecycle_status} />
-                                                </td>
-                                                <td className="px-5 py-3.5 text-[11px] text-white/40 leading-snug">
-                                                    {s ? (
-                                                        <div className="space-y-1">
-                                                            <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                                                                <span>{s.activePrompts} prompts</span>
-                                                                <span className="text-white/12">·</span>
-                                                                <span>{s.openOpportunities} actions</span>
-                                                                <span className="text-white/12">·</span>
-                                                                <span>{s.completedRunsWindow} exécutions / 21 j</span>
-                                                            </div>
-                                                            {(s.failedRunsWindow > 0 || s.lowConfidenceRunsWindow > 0) && (
-                                                                <div className="text-amber-200/60 text-[10px]">
-                                                                    {s.failedRunsWindow > 0 && <span>{s.failedRunsWindow} échec(s) </span>}
-                                                                    {s.lowConfidenceRunsWindow > 0 && <span>{s.lowConfidenceRunsWindow} conf. basse</span>}
-                                                                </div>
-                                                            )}
-                                                            {s.latestAuditAt && (
-                                                                <div className="text-[10px] text-white/20">
-                                                                    Audit : {new Date(s.latestAuditAt).toLocaleDateString('fr-CA')}
-                                                                    {s.reasons?.includes('stale_audit') && (
-                                                                        <span className="text-amber-300/70 ml-1">(obsolète)</span>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            {/* Activity density bar */}
-                                                            {s.completedRunsWindow > 0 && (
-                                                                <div className="h-[2px] w-20 overflow-hidden rounded-full bg-white/[0.04] mt-1">
-                                                                    <div
-                                                                        className="h-full rounded-full"
-                                                                        style={{
-                                                                            width: `${Math.min(100, Math.round((s.completedRunsWindow / maxRunsWindow) * 100))}%`,
-                                                                            background: 'linear-gradient(90deg, #5b73ff88, #5b73ff22)',
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-white/20">Signaux indisponibles</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-5 py-3.5 text-center">
-                                                    {showArchived && (
-                                                        <span className="text-[9px] uppercase font-bold text-amber-400/80 block mb-1 tracking-wide">Archivé</span>
-                                                    )}
-                                                    <PublishToggle id={client.id} isPublished={client.is_published} lifecycleStatus={client.lifecycle_status} />
-                                                </td>
-                                                <td className="px-5 py-3.5 whitespace-nowrap text-[11px] text-white/30">
-                                                    {s?.latestRunAt ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <FreshnessIndicator dateStr={s.latestRunAt} now={now} />
-                                                            <span title="Dernière exécution">
-                                                                Exécution · {new Date(s.latestRunAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                <tr
+                                                    key={client.id}
+                                                    className={`hover:bg-white/[0.025] transition-colors duration-200 align-top cmd-animate-in ${isCritical ? 'bg-red-500/[0.02]' : ''}`}
+                                                    style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}
+                                                >
+                                                    <td className="px-5 py-3.5">
+                                                        <Link
+                                                            href={`/admin/clients/${client.id}/dossier`}
+                                                            className="group block"
+                                                        >
+                                                            <span className="font-semibold text-white/90 group-hover:text-[#a78bfa] transition-colors block truncate max-w-[200px] text-[13px]">
+                                                                {client.client_name}
                                                             </span>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-white/15">Aucune exécution</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-5 py-3.5 text-right">
-                                                    <ClientListActions client={client} showArchived={showArchived} />
-                                                </td>
-                                            </tr>
-                                        );})
+                                                            <span className="font-mono text-[10px] text-white/20 truncate block max-w-[200px] mt-0.5">
+                                                                {client.client_slug}
+                                                            </span>
+                                                        </Link>
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-center">
+                                                        {s ? (
+                                                            <AttentionBadge attention={s.attention} />
+                                                        ) : (
+                                                            <span className="text-white/15 text-[10px]">n.d.</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-center">
+                                                        <LifecycleBadge status={client.lifecycle_status} />
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-[11px] text-white/40 leading-snug">
+                                                        {s ? (
+                                                            <div className="space-y-1">
+                                                                <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                                                                    <span>{s.activePrompts} prompts</span>
+                                                                    <span className="text-white/12">·</span>
+                                                                    <span>{s.openOpportunities} actions</span>
+                                                                    <span className="text-white/12">·</span>
+                                                                    <span>
+                                                                        {s.completedRunsWindow} exécutions / 21 j
+                                                                    </span>
+                                                                </div>
+                                                                {(s.failedRunsWindow > 0 ||
+                                                                    s.lowConfidenceRunsWindow > 0) && (
+                                                                    <div className="text-amber-200/60 text-[10px]">
+                                                                        {s.failedRunsWindow > 0 && (
+                                                                            <span>{s.failedRunsWindow} échec(s) </span>
+                                                                        )}
+                                                                        {s.lowConfidenceRunsWindow > 0 && (
+                                                                            <span>
+                                                                                {s.lowConfidenceRunsWindow} conf. basse
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                {s.latestAuditAt && (
+                                                                    <div className="text-[10px] text-white/20">
+                                                                        Audit :{' '}
+                                                                        {new Date(s.latestAuditAt).toLocaleDateString(
+                                                                            'fr-CA',
+                                                                        )}
+                                                                        {s.reasons?.includes('stale_audit') && (
+                                                                            <span className="text-amber-300/70 ml-1">
+                                                                                (obsolète)
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                {/* Activity density bar */}
+                                                                {s.completedRunsWindow > 0 && (
+                                                                    <div className="h-[2px] w-20 overflow-hidden rounded-full bg-white/[0.04] mt-1">
+                                                                        <div
+                                                                            className="h-full rounded-full"
+                                                                            style={{
+                                                                                width: `${Math.min(100, Math.round((s.completedRunsWindow / maxRunsWindow) * 100))}%`,
+                                                                                background:
+                                                                                    'linear-gradient(90deg, #5b73ff88, #5b73ff22)',
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-white/20">Signaux indisponibles</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-center">
+                                                        {showArchived && (
+                                                            <span className="text-[9px] uppercase font-bold text-amber-400/80 block mb-1 tracking-wide">
+                                                                Archivé
+                                                            </span>
+                                                        )}
+                                                        <PublishToggle
+                                                            id={client.id}
+                                                            isPublished={client.is_published}
+                                                            lifecycleStatus={client.lifecycle_status}
+                                                        />
+                                                    </td>
+                                                    <td className="px-5 py-3.5 whitespace-nowrap text-[11px] text-white/30">
+                                                        {s?.latestRunAt ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <FreshnessIndicator dateStr={s.latestRunAt} now={now} />
+                                                                <span title="Dernière exécution">
+                                                                    Exécution ·{' '}
+                                                                    {new Date(s.latestRunAt).toLocaleDateString(
+                                                                        'fr-FR',
+                                                                        {
+                                                                            day: '2-digit',
+                                                                            month: 'short',
+                                                                            year: 'numeric',
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-white/15">Aucune exécution</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-3.5 text-right">
+                                                        <ClientListActions
+                                                            client={client}
+                                                            showArchived={showArchived}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
@@ -350,10 +431,11 @@ export default async function AdminClientsPage({ searchParams }) {
                         {totalPages > 1 && (
                             <div className="px-5 py-4 border-t border-white/[0.05] flex items-center justify-between">
                                 <span className="text-[11px] text-white/25">
-                                    <span className="font-semibold text-white/45 tabular-nums">{from + 1}–{Math.min(to + 1, count)}</span>
-                                    {' '}sur{' '}
-                                    <span className="font-semibold text-white/45 tabular-nums">{count}</span>
-                                    {' '}mandats
+                                    <span className="font-semibold text-white/45 tabular-nums">
+                                        {from + 1}–{Math.min(to + 1, count)}
+                                    </span>{' '}
+                                    sur <span className="font-semibold text-white/45 tabular-nums">{count}</span>{' '}
+                                    mandats
                                 </span>
 
                                 <div className="flex gap-2">
@@ -365,7 +447,10 @@ export default async function AdminClientsPage({ searchParams }) {
                                             Précédent
                                         </Link>
                                     ) : (
-                                        <button disabled className="px-3 py-1.5 bg-white/[0.015] border border-white/[0.03] text-white/15 rounded-lg text-[11px] cursor-not-allowed">
+                                        <button
+                                            disabled
+                                            className="px-3 py-1.5 bg-white/[0.015] border border-white/[0.03] text-white/15 rounded-lg text-[11px] cursor-not-allowed"
+                                        >
                                             Précédent
                                         </button>
                                     )}
@@ -378,7 +463,10 @@ export default async function AdminClientsPage({ searchParams }) {
                                             Suivant
                                         </Link>
                                     ) : (
-                                        <button disabled className="px-3 py-1.5 bg-white/[0.015] border border-white/[0.03] text-white/15 rounded-lg text-[11px] cursor-not-allowed">
+                                        <button
+                                            disabled
+                                            className="px-3 py-1.5 bg-white/[0.015] border border-white/[0.03] text-white/15 rounded-lg text-[11px] cursor-not-allowed"
+                                        >
                                             Suivant
                                         </button>
                                     )}

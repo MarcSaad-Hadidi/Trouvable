@@ -8,4 +8,3 @@ export const metadata = buildSeoGrowthMetadata(page);
 export default function VisibiliteGoogleReponsesIaPage() {
     return <SeoGrowthPage page={page} />;
 }
-

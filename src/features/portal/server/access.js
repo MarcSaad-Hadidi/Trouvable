@@ -65,7 +65,7 @@ export async function upsertClientPortalAccess({
             },
             {
                 onConflict: 'client_id,contact_email',
-            }
+            },
         )
         .select()
         .single();
@@ -168,9 +168,7 @@ export async function resolvePortalMembership({ backfill = true } = {}) {
         if (membershipRows.length > 0) {
             resolvedBy = 'verified_email';
 
-            const rowsToBackfill = membershipRows
-                .filter((row) => !row.clerk_user_id)
-                .map((row) => row.id);
+            const rowsToBackfill = membershipRows.filter((row) => !row.clerk_user_id).map((row) => row.id);
 
             if (backfill && rowsToBackfill.length > 0) {
                 const { error: updateError } = await supabase
@@ -181,11 +179,9 @@ export async function resolvePortalMembership({ backfill = true } = {}) {
                 if (updateError) {
                     console.error('[PortalAccess] clerk_user_id backfill failed:', updateError.message);
                 } else {
-                    membershipRows = membershipRows.map((row) => (
-                        rowsToBackfill.includes(row.id)
-                            ? { ...row, clerk_user_id: userId }
-                            : row
-                    ));
+                    membershipRows = membershipRows.map((row) =>
+                        rowsToBackfill.includes(row.id) ? { ...row, clerk_user_id: userId } : row,
+                    );
                 }
             }
         }
@@ -205,7 +201,9 @@ export async function resolvePortalMembership({ backfill = true } = {}) {
     const clientIds = [...new Set(membershipRows.map((row) => row.client_id).filter(Boolean))];
     const { data: clientRows, error: clientError } = await supabase
         .from('client_geo_profiles')
-        .select('id, client_name, client_slug, website_url, business_type, publication_status, is_published, lifecycle_status')
+        .select(
+            'id, client_name, client_slug, website_url, business_type, publication_status, is_published, lifecycle_status',
+        )
         .in('id', clientIds)
         .neq('lifecycle_status', 'archived');
 
@@ -239,7 +237,7 @@ export async function resolvePortalMembership({ backfill = true } = {}) {
                     is_published: client.is_published,
                 };
             })
-            .filter(Boolean)
+            .filter(Boolean),
     );
 
     return {

@@ -6,9 +6,7 @@ import { getAdminSupabase } from '@/lib/supabase-admin';
 import { finiteNumberOrNull } from '@/lib/numbers';
 
 function latestIso(values) {
-    return values
-        .filter(Boolean)
-        .sort((a, b) => String(b).localeCompare(String(a)))[0] || null;
+    return values.filter(Boolean).sort((a, b) => String(b).localeCompare(String(a)))[0] || null;
 }
 
 export async function getOperatorWorkspaceShell(clientId) {
@@ -45,10 +43,7 @@ export async function getOperatorWorkspaceShell(clientId) {
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle(),
-        supabase
-            .from('tracked_queries')
-            .select('*', { count: 'exact', head: true })
-            .eq('client_id', clientId),
+        supabase.from('tracked_queries').select('*', { count: 'exact', head: true }).eq('client_id', clientId),
         supabase
             .from('tracked_queries')
             .select('*', { count: 'exact', head: true })
@@ -87,13 +82,25 @@ export async function getOperatorWorkspaceShell(clientId) {
             .maybeSingle(),
     ]);
 
-    const results = { audit: latestAuditResult, trackedQueries: trackedQueryCountResult,
-        activeTrackedQueries: activeTrackedQueryCountResult, totalQueryRuns: completedRunsResult,
-        openOpportunities: openOpportunitiesResult, pendingMerge: pendingMergeResult,
-        lastRun: latestRunResult, lastAction: latestActionResult };
+    const results = {
+        audit: latestAuditResult,
+        trackedQueries: trackedQueryCountResult,
+        activeTrackedQueries: activeTrackedQueryCountResult,
+        totalQueryRuns: completedRunsResult,
+        openOpportunities: openOpportunitiesResult,
+        pendingMerge: pendingMergeResult,
+        lastRun: latestRunResult,
+        lastAction: latestActionResult,
+    };
     const dataSources = { client: 'available' };
     const errors = [];
-    const countSources = new Set(['trackedQueries', 'activeTrackedQueries', 'totalQueryRuns', 'openOpportunities', 'pendingMerge']);
+    const countSources = new Set([
+        'trackedQueries',
+        'activeTrackedQueries',
+        'totalQueryRuns',
+        'openOpportunities',
+        'pendingMerge',
+    ]);
     const values = {};
     for (const [source, result] of Object.entries(results)) {
         const loaded = result.status === 'fulfilled' ? result.value : null;
@@ -110,10 +117,11 @@ export async function getOperatorWorkspaceShell(clientId) {
     }
     const client = normalizeClientProfileShape(clientRow);
     const audit = values.audit;
-    const issueCount = dataSources.audit === 'unavailable' ? null : Array.isArray(audit?.issues) ? audit.issues.length : 0;
-    const refreshMarker = latestIso([
-        client.updated_at, audit?.created_at, values.lastRun?.created_at, values.lastAction?.created_at,
-    ]) || new Date(0).toISOString();
+    const issueCount =
+        dataSources.audit === 'unavailable' ? null : Array.isArray(audit?.issues) ? audit.issues.length : 0;
+    const refreshMarker =
+        latestIso([client.updated_at, audit?.created_at, values.lastRun?.created_at, values.lastAction?.created_at]) ||
+        new Date(0).toISOString();
     return {
         status: errors.length ? 'partial' : 'available',
         dataSources,

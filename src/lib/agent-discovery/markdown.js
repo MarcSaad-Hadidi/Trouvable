@@ -37,11 +37,7 @@ function selectContentRoot($) {
     return $('body');
 }
 
-export function renderMarkdownFromHtml({
-    html,
-    sourceUrl,
-    fallbackTitle = 'Trouvable',
-}) {
+export function renderMarkdownFromHtml({ html, sourceUrl, fallbackTitle = 'Trouvable' }) {
     if (typeof html !== 'string' || html.trim().length === 0) {
         const emptyMarkdown = `# ${fallbackTitle}\n\nNo markdown content could be generated.\n`;
         return {
@@ -53,20 +49,10 @@ export function renderMarkdownFromHtml({
     const $ = load(html);
     $('script,style,noscript,template,svg,iframe').remove();
 
-    const title = normalizeText($('title').first().text())
-        || normalizeText($('h1').first().text())
-        || fallbackTitle;
+    const title = normalizeText($('title').first().text()) || normalizeText($('h1').first().text()) || fallbackTitle;
     const description = normalizeText($('meta[name="description"]').attr('content') || '');
 
-    const lines = [
-        '---',
-        `title: ${title}`,
-        `source: ${sourceUrl}`,
-        '---',
-        '',
-        `# ${title}`,
-        '',
-    ];
+    const lines = ['---', `title: ${title}`, `source: ${sourceUrl}`, '---', '', `# ${title}`, ''];
 
     if (description) {
         lines.push(description, '');
@@ -89,7 +75,8 @@ export function renderMarkdownFromHtml({
 
     lines.push(`[HTML version](${sourceUrl})`);
 
-    const markdown = lines.join('\n')
+    const markdown = lines
+        .join('\n')
         .replace(/\n{3,}/g, '\n\n')
         .trimEnd()
         .concat('\n');

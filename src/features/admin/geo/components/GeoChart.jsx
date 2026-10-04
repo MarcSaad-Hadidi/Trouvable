@@ -69,18 +69,8 @@ export default function GeoChart({ series, options = {} }) {
         };
 
         const finiteVals = series.flatMap((s) => s.data.filter((v) => Number.isFinite(v)));
-        let mn =
-            minVal != null
-                ? minVal
-                : finiteVals.length > 0
-                  ? Math.max(0, Math.min(...finiteVals) - 5)
-                  : 0;
-        let mx =
-            maxVal != null
-                ? maxVal
-                : finiteVals.length > 0
-                  ? Math.min(100, Math.max(...finiteVals) + 5)
-                  : 100;
+        let mn = minVal != null ? minVal : finiteVals.length > 0 ? Math.max(0, Math.min(...finiteVals) - 5) : 0;
+        let mx = maxVal != null ? maxVal : finiteVals.length > 0 ? Math.min(100, Math.max(...finiteVals) + 5) : 100;
         if (mx <= mn) {
             mn = Math.max(0, mn - 1);
             mx = Math.min(100, mx + 1);
@@ -187,35 +177,38 @@ export default function GeoChart({ series, options = {} }) {
         };
     }, [draw]);
 
-    const handleMouseMove = useCallback((e) => {
-        if (!interactive || !layoutRef.current || !wrapRef.current) return;
-        const rect = wrapRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const { pad, iW, n, xs } = layoutRef.current;
-        const labels = customLabels || getDates(n);
+    const handleMouseMove = useCallback(
+        (e) => {
+            if (!interactive || !layoutRef.current || !wrapRef.current) return;
+            const rect = wrapRef.current.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const { pad, iW, n, xs } = layoutRef.current;
+            const labels = customLabels || getDates(n);
 
-        const step = n <= 1 ? iW : iW / (n - 1);
-        let index = Math.round((mouseX - pad.l) / step);
-        if (index < 0) index = 0;
-        if (index >= n) index = n - 1;
+            const step = n <= 1 ? iW : iW / (n - 1);
+            let index = Math.round((mouseX - pad.l) / step);
+            if (index < 0) index = 0;
+            if (index >= n) index = n - 1;
 
-        const exactX = xs(index);
+            const exactX = xs(index);
 
-        const rows = series.map((s) => ({
-            label: s.label || 'Val',
-            color: s.color,
-            value: Number.isFinite(s.data[index]) ? s.data[index] : null,
-        }));
+            const rows = series.map((s) => ({
+                label: s.label || 'Val',
+                color: s.color,
+                value: Number.isFinite(s.data[index]) ? s.data[index] : null,
+            }));
 
-        setTooltip({
-            x: exactX,
-            wrapWidth: wrapRef.current.offsetWidth || 400,
-            date: labels[index] || `#${index}`,
-            rows,
-            lineTop: pad.t,
-            lineHeight: layoutRef.current.iH,
-        });
-    }, [interactive, series, customLabels]);
+            setTooltip({
+                x: exactX,
+                wrapWidth: wrapRef.current.offsetWidth || 400,
+                date: labels[index] || `#${index}`,
+                rows,
+                lineTop: pad.t,
+                lineHeight: layoutRef.current.iH,
+            });
+        },
+        [interactive, series, customLabels],
+    );
 
     const handleMouseLeave = useCallback(() => {
         setTooltip(null);
@@ -253,14 +246,21 @@ export default function GeoChart({ series, options = {} }) {
                         }}
                     >
                         <div className="bg-[rgba(10,10,10,0.95)] backdrop-blur-lg border border-white/10 rounded-lg px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.7)] min-w-[120px]">
-                            <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.06em] mb-1.5">{tooltip.date}</div>
+                            <div className="text-[10px] text-white/25 font-bold uppercase tracking-[0.06em] mb-1.5">
+                                {tooltip.date}
+                            </div>
                             {tooltip.rows.map((r, i) => (
                                 <div key={i} className="flex justify-between items-center gap-4 mb-0.5 text-xs">
                                     <div className="flex items-center gap-1.5 text-white/55">
-                                        <span className="w-2 h-2 rounded-full inline-block" style={{ background: r.color, boxShadow: `0 0 6px ${r.color}` }} />
+                                        <span
+                                            className="w-2 h-2 rounded-full inline-block"
+                                            style={{ background: r.color, boxShadow: `0 0 6px ${r.color}` }}
+                                        />
                                         {r.label}
                                     </div>
-                                    <span className="font-bold text-white/90">{r.value != null ? `${r.value}${unit}` : 'n.d.'}</span>
+                                    <span className="font-bold text-white/90">
+                                        {r.value != null ? `${r.value}${unit}` : 'n.d.'}
+                                    </span>
                                 </div>
                             ))}
                         </div>

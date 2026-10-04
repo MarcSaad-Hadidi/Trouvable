@@ -9,7 +9,12 @@ function deriveOverallState(visibility) {
     const avg = seo != null && geo != null ? Math.round((seo + geo) / 2) : (seo ?? geo ?? null);
 
     if (avg == null)
-        return { label: "En cours d'évaluation", sub: 'Premiers résultats en préparation', accent: 'text-white/50', bar: 0 };
+        return {
+            label: "En cours d'évaluation",
+            sub: 'Premiers résultats en préparation',
+            accent: 'text-white/50',
+            bar: 0,
+        };
     if (avg >= 75)
         return { label: 'Excellent', sub: `Score consolidé ${avg}/100`, accent: 'text-emerald-400', bar: avg };
     if (avg >= 50)
@@ -19,7 +24,8 @@ function deriveOverallState(visibility) {
 
 function deriveWorkState(items) {
     const count = items.length;
-    if (count === 0) return { label: 'Aucune activité', sub: "Prochaine intervention en attente", accent: 'text-white/50', bar: 0 };
+    if (count === 0)
+        return { label: 'Aucune activité', sub: 'Prochaine intervention en attente', accent: 'text-white/50', bar: 0 };
 
     const latest = items[0];
     const dateStr = latest?.created_at
@@ -28,7 +34,7 @@ function deriveWorkState(items) {
 
     return {
         label: `${count} intervention${count > 1 ? 's' : ''}`,
-        sub: dateStr ? `Dernière · ${dateStr}` : (latest?.title || ''),
+        sub: dateStr ? `Dernière · ${dateStr}` : latest?.title || '',
         accent: 'text-white',
         bar: Math.min(count * 18, 100),
     };
@@ -46,23 +52,56 @@ function deriveTrendState(trendSummary) {
     const ratio = Math.round((up / withDelta.length) * 100);
 
     if (up > down)
-        return { label: 'Tendance positive', sub: `${up}/${withDelta.length} indicateur${up > 1 ? 's' : ''} en hausse`, accent: 'text-emerald-400', bar: ratio };
+        return {
+            label: 'Tendance positive',
+            sub: `${up}/${withDelta.length} indicateur${up > 1 ? 's' : ''} en hausse`,
+            accent: 'text-emerald-400',
+            bar: ratio,
+        };
     if (down > up)
-        return { label: "Points d'attention", sub: `${down}/${withDelta.length} en recul`, accent: 'text-amber-300', bar: ratio };
+        return {
+            label: "Points d'attention",
+            sub: `${down}/${withDelta.length} en recul`,
+            accent: 'text-amber-300',
+            bar: ratio,
+        };
     return { label: 'Stabilité', sub: 'Indicateurs stables sur 30 jours', accent: 'text-white/50', bar: 50 };
 }
 
 const TILES = [
-    { key: 'state', title: 'État du mandat', barColor: 'from-[#5b73ff]/40 to-[#5b73ff]/10', sparkKey: 'seo_score', sparkColor: '#5b73ff' },
-    { key: 'work', title: 'Activité récente', barColor: 'from-[#a78bfa]/40 to-[#a78bfa]/10', sparkKey: null, sparkColor: '#a78bfa' },
-    { key: 'trend', title: 'Évolution 30j', barColor: 'from-emerald-400/40 to-emerald-400/10', sparkKey: 'visibility_proxy_percent', sparkColor: '#34d399' },
+    {
+        key: 'state',
+        title: 'État du mandat',
+        barColor: 'from-[#5b73ff]/40 to-[#5b73ff]/10',
+        sparkKey: 'seo_score',
+        sparkColor: '#5b73ff',
+    },
+    {
+        key: 'work',
+        title: 'Activité récente',
+        barColor: 'from-[#a78bfa]/40 to-[#a78bfa]/10',
+        sparkKey: null,
+        sparkColor: '#a78bfa',
+    },
+    {
+        key: 'trend',
+        title: 'Évolution 30j',
+        barColor: 'from-emerald-400/40 to-emerald-400/10',
+        sparkKey: 'visibility_proxy_percent',
+        sparkColor: '#34d399',
+    },
 ];
 
 const ease = [0.16, 1, 0.3, 1];
 
 export default function PortalExecutiveStrip({ visibility, recentWorkItems, trendSummary, dataSources = {} }) {
     const sparklines = trendSummary?.sparklines || {};
-    const unavailable = { label: 'Indisponible', sub: 'La source de données ne répond pas.', accent: 'text-white/50', bar: 0 };
+    const unavailable = {
+        label: 'Indisponible',
+        sub: 'La source de données ne répond pas.',
+        accent: 'text-white/50',
+        bar: 0,
+    };
     const states = {
         state: dataSources.workspace === 'unavailable' ? unavailable : deriveOverallState(visibility),
         work: dataSources.actions === 'unavailable' ? unavailable : deriveWorkState(recentWorkItems),

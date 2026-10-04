@@ -2,7 +2,10 @@ const BLOCKED_NAVIGATION_SCHEMES = ['java' + 'script:', 'data:', 'vbscript:'];
 
 export function hasBlockedNavigationScheme(value) {
     if (typeof value !== 'string') return false;
-    const normalized = value.trim().replace(/[\u0000-\u001F\u007F\s]+/g, '').toLowerCase();
+    const normalized = value
+        .trim()
+        .replace(/[\u0000-\u001F\u007F\s]+/g, '')
+        .toLowerCase();
     return BLOCKED_NAVIGATION_SCHEMES.some((scheme) => normalized.startsWith(scheme));
 }
 

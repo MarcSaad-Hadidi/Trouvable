@@ -3,11 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-import {
-    extractLocalSignals,
-    extractSocialLinks,
-    extractTrustSignals,
-} from '../audit/extraction-helpers.js';
+import { extractLocalSignals, extractSocialLinks, extractTrustSignals } from '../audit/extraction-helpers.js';
 
 describe('audit extraction URL sanitization', () => {
     it('keeps social links for exact hosts and rejects domain substrings in attacker hosts', () => {

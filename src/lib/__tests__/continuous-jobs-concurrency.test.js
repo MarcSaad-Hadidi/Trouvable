@@ -100,8 +100,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('server-only', () => ({}));
 
-
-
 vi.mock('@/lib/db/clients', () => ({
     getClientById: mocks.getClientById,
     listActiveClientIds: mocks.listActiveClientIds,
@@ -208,14 +206,7 @@ import {
     upsertVisibilitySnapshotForClient,
 } from '@/lib/continuous/jobs';
 
-function makeRun({
-    id,
-    jobId,
-    clientId,
-    jobType,
-    attemptCount = 0,
-    maxAttempts = 3,
-}) {
+function makeRun({ id, jobId, clientId, jobType, attemptCount = 0, maxAttempts = 3 }) {
     return {
         id,
         job_id: jobId,
@@ -276,9 +267,7 @@ describe('continuous jobs concurrency guards', () => {
             cadence_minutes: 1440,
             retry_backoff_minutes: 20,
         }));
-        mocks.countRunningRunsForJobTypes
-            .mockResolvedValueOnce(0)
-            .mockResolvedValueOnce(1);
+        mocks.countRunningRunsForJobTypes.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
         setClaimMockFromRuns({
             [runA.id]: runA,
             [runB.id]: runB,
@@ -429,7 +418,7 @@ describe('continuous jobs concurrency guards', () => {
         expect(mocks.requeueStaleRun).toHaveBeenCalledTimes(1);
         expect(mocks.updateRecurringJob).toHaveBeenCalledWith(
             'job-stale-1',
-            expect.objectContaining({ status: 'pending' })
+            expect.objectContaining({ status: 'pending' }),
         );
     });
 
@@ -474,11 +463,22 @@ describe('continuous jobs concurrency guards', () => {
     });
 });
 
-
 describe('partial daily snapshot persistence', () => {
     it('persists unavailable metrics as null and records source metadata', async () => {
-        mocks.flattenSnapshotToLegacy.mockReturnValueOnce({ status: 'partial', sources: { mentions: 'unavailable' }, competitorMentions: null, seoScore: 0, trackedPromptStats: {} });
+        mocks.flattenSnapshotToLegacy.mockReturnValueOnce({
+            status: 'partial',
+            sources: { mentions: 'unavailable' },
+            competitorMentions: null,
+            seoScore: 0,
+            trackedPromptStats: {},
+        });
         await upsertVisibilitySnapshotForClient({ clientId: 'client-a', metadata: { reason: 'fixture' } });
-        expect(mocks.upsertVisibilityMetricSnapshot).toHaveBeenLastCalledWith(expect.objectContaining({ seo_score: 0, competitor_visibility_count: null, metadata: { reason: 'fixture', data_status: 'partial', data_sources: { mentions: 'unavailable' } } }));
+        expect(mocks.upsertVisibilityMetricSnapshot).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                seo_score: 0,
+                competitor_visibility_count: null,
+                metadata: { reason: 'fixture', data_status: 'partial', data_sources: { mentions: 'unavailable' } },
+            }),
+        );
     });
 });

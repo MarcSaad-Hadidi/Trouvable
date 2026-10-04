@@ -19,12 +19,7 @@ export default function PortalSignInPage() {
             footer="Connexion securisee (Clerk). Acces accorde par courriel invite, verifie sur ce compte."
         >
             <Suspense
-                fallback={
-                    <div
-                        className="w-full min-h-[280px] rounded-xl bg-white/[0.03] animate-pulse"
-                        aria-hidden
-                    />
-                }
+                fallback={<div className="w-full min-h-[280px] rounded-xl bg-white/[0.03] animate-pulse" aria-hidden />}
             >
                 <PortalSignInClient />
             </Suspense>

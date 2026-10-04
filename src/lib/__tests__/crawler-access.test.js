@@ -117,22 +117,32 @@ describe('validateLlmsTxt', () => {
 
 describe('scoreLlmsTxt', () => {
     it('returns 0 when not found', () => {
-        expect(scoreLlmsTxt({ found: false, hasFullVersion: false, validation: { valid: false, reason: 'absent' } })).toBe(0);
+        expect(
+            scoreLlmsTxt({ found: false, hasFullVersion: false, validation: { valid: false, reason: 'absent' } }),
+        ).toBe(0);
     });
 
     it('returns 30 for invalid format', () => {
-        expect(scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: false, reason: 'missing_h1' } })).toBe(30);
+        expect(
+            scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: false, reason: 'missing_h1' } }),
+        ).toBe(30);
     });
 
     it('returns 50 for minimal valid', () => {
-        expect(scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: true, reason: 'minimal' } })).toBe(50);
+        expect(
+            scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: true, reason: 'minimal' } }),
+        ).toBe(50);
     });
 
     it('returns 80 for complete without full version', () => {
-        expect(scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: true, reason: 'complete' } })).toBe(80);
+        expect(
+            scoreLlmsTxt({ found: true, hasFullVersion: false, validation: { valid: true, reason: 'complete' } }),
+        ).toBe(80);
     });
 
     it('returns 95 for complete with full version', () => {
-        expect(scoreLlmsTxt({ found: true, hasFullVersion: true, validation: { valid: true, reason: 'complete' } })).toBe(95);
+        expect(
+            scoreLlmsTxt({ found: true, hasFullVersion: true, validation: { valid: true, reason: 'complete' } }),
+        ).toBe(95);
     });
 });

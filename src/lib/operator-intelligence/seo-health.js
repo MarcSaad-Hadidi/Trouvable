@@ -64,7 +64,10 @@ function buildAuditHistory(audits) {
                 date: audit.created_at,
                 label: (() => {
                     try {
-                        return new Date(audit.created_at).toLocaleDateString('fr-CA', { month: '2-digit', day: '2-digit' });
+                        return new Date(audit.created_at).toLocaleDateString('fr-CA', {
+                            month: '2-digit',
+                            day: '2-digit',
+                        });
                     } catch {
                         return 'n.d.';
                     }
@@ -98,7 +101,10 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
             available: false,
             emptyState: {
                 title: 'Sante SEO indisponible',
-                description: dataSources.audit === 'unavailable' ? 'Données audit temporairement indisponibles.' : "Aucun audit exploitable n'est disponible pour ce mandat. Relancez un audit avant d'ouvrir la lecture technique.",
+                description:
+                    dataSources.audit === 'unavailable'
+                        ? 'Données audit temporairement indisponibles.'
+                        : "Aucun audit exploitable n'est disponible pour ce mandat. Relancez un audit avant d'ouvrir la lecture technique.",
             },
         };
     }
@@ -111,7 +117,8 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
             available: false,
             emptyState: {
                 title: 'Audit SEO en cours',
-                description: 'Le dernier audit est encore en cours de traitement. Rechargez la page dans un instant pour recuperer la lecture technique complete.',
+                description:
+                    'Le dernier audit est encore en cours de traitement. Rechargez la page dans un instant pour recuperer la lecture technique complete.',
             },
         };
     }
@@ -185,7 +192,10 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'technical_issues',
                 label: 'Points critiques',
                 value: normalizedIssues.length,
-                detail: normalizedIssues.length > 0 ? 'Problemes techniques prioritaires issus du dernier audit' : 'Aucun probleme technique majeur remonte',
+                detail:
+                    normalizedIssues.length > 0
+                        ? 'Problemes techniques prioritaires issus du dernier audit'
+                        : 'Aucun probleme technique majeur remonte',
                 reliability: 'calculated',
                 accent: normalizedIssues.length > 0 ? 'amber' : 'emerald',
             },
@@ -193,7 +203,10 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'promptable_issues',
                 label: 'Prompts prets',
                 value: promptableIssueCount,
-                detail: promptableIssueCount > 0 ? 'Problemes techniques pouvant produire un prompt de correction depuis la preuve audit' : 'Aucun probleme technique exploitable pour generer un prompt de correction',
+                detail:
+                    promptableIssueCount > 0
+                        ? 'Problemes techniques pouvant produire un prompt de correction depuis la preuve audit'
+                        : 'Aucun probleme technique exploitable pour generer un prompt de correction',
                 reliability: 'calculated',
                 accent: promptableIssueCount > 0 ? 'emerald' : 'slate',
             },
@@ -203,9 +216,10 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'indexation',
                 label: 'Indexation',
                 status: indicatorStatus(indexationIndicator, 'critical'),
-                detail: indexationIndicator?.status === 'detected'
-                    ? "Aucune instruction `noindex` n'a ete observee sur la page d'entree auditee."
-                    : "Un signal de blocage d'indexation a ete observe ou la preuve est insuffisante.",
+                detail:
+                    indexationIndicator?.status === 'detected'
+                        ? "Aucune instruction `noindex` n'a ete observee sur la page d'entree auditee."
+                        : "Un signal de blocage d'indexation a ete observe ou la preuve est insuffisante.",
                 evidence: indexationIndicator?.evidence || "Aucune preuve d'indexation exploitable dans cet audit.",
                 reliability: indexationIndicator ? 'calculated' : 'unavailable',
                 action: "Verifier les balises index/noindex et relancer l'audit apres correction.",
@@ -213,13 +227,20 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
             buildCheck({
                 id: 'robots',
                 label: 'Robots',
-                status: !robotsSignal ? 'unavailable' : robotsSignal.kind === 'strength' ? 'ok' : (robotsSignal.item?.priority === 'high' ? 'critical' : 'warning'),
+                status: !robotsSignal
+                    ? 'unavailable'
+                    : robotsSignal.kind === 'strength'
+                      ? 'ok'
+                      : robotsSignal.item?.priority === 'high'
+                        ? 'critical'
+                        : 'warning',
                 detail: !robotsSignal
                     ? "Aucune preuve robots exploitable n'a ete persistee dans le dernier audit."
                     : robotsSignal.kind === 'strength'
-                        ? 'Les crawlers critiques ne sont pas bloques dans la preuve observee.'
-                        : 'Un blocage robots / crawler ressort dans le dernier audit.',
-                evidence: robotsSignal?.item?.evidence_summary || robotsSignal?.item?.description || 'Preuve robots absente.',
+                      ? 'Les crawlers critiques ne sont pas bloques dans la preuve observee.'
+                      : 'Un blocage robots / crawler ressort dans le dernier audit.',
+                evidence:
+                    robotsSignal?.item?.evidence_summary || robotsSignal?.item?.description || 'Preuve robots absente.',
                 reliability: robotsSignal ? 'measured' : 'unavailable',
                 action: 'Corriger robots.txt ou les regles crawler avant un nouveau passage.',
             }),
@@ -227,9 +248,10 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'canonical',
                 label: 'Canonical',
                 status: indicatorStatus(canonicalIndicator, 'warning'),
-                detail: canonicalIndicator?.status === 'detected'
-                    ? 'Une balise canonique a ete observee sur la homepage auditee.'
-                    : "La clarte canonique reste insuffisante sur la page d'entree auditee.",
+                detail:
+                    canonicalIndicator?.status === 'detected'
+                        ? 'Une balise canonique a ete observee sur la homepage auditee.'
+                        : "La clarte canonique reste insuffisante sur la page d'entree auditee.",
                 evidence: canonicalIndicator?.evidence || 'Aucune preuve canonique exploitable.',
                 reliability: canonicalIndicator ? 'calculated' : 'unavailable',
                 action: 'Aligner la balise canonique sur la page canonique reelle.',
@@ -247,7 +269,7 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'sitemap',
                 label: 'Sitemap',
                 status: 'unavailable',
-                detail: "Le dernier audit ne conserve pas un signal sitemap exploitable cote admin, meme si le repo sait analyser `robots.txt`.",
+                detail: 'Le dernier audit ne conserve pas un signal sitemap exploitable cote admin, meme si le repo sait analyser `robots.txt`.',
                 evidence: 'Aucune preuve sitemap persistee avec le dernier audit client.',
                 reliability: 'unavailable',
                 action: 'Preparer une persistance sitemap dediee avant de promettre un suivi operateur fiable.',
@@ -256,10 +278,14 @@ export async function getSeoHealthSlice(clientId, { audit: providedAudit } = {})
                 id: 'schema',
                 label: 'Schema',
                 status: schemaTypes.length > 0 ? 'ok' : 'warning',
-                detail: schemaTypes.length > 0
-                    ? `${schemaTypes.length} type(s) de donnees structurees observe(s).`
-                    : "Aucune entite structuree exploitable n'a ete detectee dans l'echantillon audite.",
-                evidence: schemaTypes.length > 0 ? schemaTypes.slice(0, 4).join(' · ') : "Aucune entite Schema.org persistee dans l'audit.",
+                detail:
+                    schemaTypes.length > 0
+                        ? `${schemaTypes.length} type(s) de donnees structurees observe(s).`
+                        : "Aucune entite structuree exploitable n'a ete detectee dans l'echantillon audite.",
+                evidence:
+                    schemaTypes.length > 0
+                        ? schemaTypes.slice(0, 4).join(' · ')
+                        : "Aucune entite Schema.org persistee dans l'audit.",
                 reliability: schemaTypes.length > 0 ? 'measured' : 'unavailable',
                 action: 'Verifier la presence et la coherence du JSON-LD sur les pages strategiques.',
             }),

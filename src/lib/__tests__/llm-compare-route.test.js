@@ -23,10 +23,46 @@ describe('POST /api/admin/llm-compare', () => {
             contract_version: 'v1',
             input: { source_type: 'text', url: null, prompt: 'analyse', content_preview: 'preview' },
             results: [
-                { provider: 'gemini', model: 'g', ok: true, status: 'success', latency_ms: 10, usage: {}, content: 'ok', error: null },
-                { provider: 'groq', model: 'q', ok: true, status: 'success', latency_ms: 12, usage: {}, content: 'ok', error: null },
-                { provider: 'mistral', model: 'm', ok: true, status: 'success', latency_ms: 14, usage: {}, content: 'ok', error: null },
-                { provider: 'openrouter', model: 'o', ok: true, status: 'success', latency_ms: 16, usage: {}, content: 'ok', error: null },
+                {
+                    provider: 'gemini',
+                    model: 'g',
+                    ok: true,
+                    status: 'success',
+                    latency_ms: 10,
+                    usage: {},
+                    content: 'ok',
+                    error: null,
+                },
+                {
+                    provider: 'groq',
+                    model: 'q',
+                    ok: true,
+                    status: 'success',
+                    latency_ms: 12,
+                    usage: {},
+                    content: 'ok',
+                    error: null,
+                },
+                {
+                    provider: 'mistral',
+                    model: 'm',
+                    ok: true,
+                    status: 'success',
+                    latency_ms: 14,
+                    usage: {},
+                    content: 'ok',
+                    error: null,
+                },
+                {
+                    provider: 'openrouter',
+                    model: 'o',
+                    ok: true,
+                    status: 'success',
+                    latency_ms: 16,
+                    usage: {},
+                    content: 'ok',
+                    error: null,
+                },
             ],
         });
 
@@ -36,10 +72,12 @@ describe('POST /api/admin/llm-compare', () => {
         process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
 
         const { POST } = await import('@/app/api/admin/llm-compare/route');
-        const response = await POST(new Request('http://localhost/api/admin/llm-compare', {
-            method: 'POST',
-            body: JSON.stringify({ text: 'raw input', prompt: 'analyse' }),
-        }));
+        const response = await POST(
+            new Request('http://localhost/api/admin/llm-compare', {
+                method: 'POST',
+                body: JSON.stringify({ text: 'raw input', prompt: 'analyse' }),
+            }),
+        );
         const json = await response.json();
 
         expect(response.status).toBe(200);
@@ -56,10 +94,12 @@ describe('POST /api/admin/llm-compare', () => {
         compareModelsMock.mockRejectedValue(new LlmComparisonError('input_error', 'prompt manquant'));
 
         const { POST } = await import('@/app/api/admin/llm-compare/route');
-        const response = await POST(new Request('http://localhost/api/admin/llm-compare', {
-            method: 'POST',
-            body: JSON.stringify({ text: 'raw input', prompt: 'x' }),
-        }));
+        const response = await POST(
+            new Request('http://localhost/api/admin/llm-compare', {
+                method: 'POST',
+                body: JSON.stringify({ text: 'raw input', prompt: 'x' }),
+            }),
+        );
         const json = await response.json();
         expect(response.status).toBe(400);
         expect(json.error.class).toBe('input_error');

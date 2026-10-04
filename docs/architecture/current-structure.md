@@ -4,29 +4,29 @@ L’application est conservée en hibernation. `vercel.json` déploie uniquement
 
 ## Responsabilités
 
-| Chemin | Responsabilité |
-|---|---|
-| `src/app/` | Routes explicites, layouts, handlers API, boundaries et métadonnées Next. |
-| `src/features/public/` | Pages marketing, villes, expertises, profils et ressources SEO/GEO. |
-| `src/features/admin/` | Portefeuille, dossier, SEO, GEO, Agent et chrome opérateur. |
-| `src/features/portal/` | Portail client ; loaders et contrôle d’accès dans `server/`. |
-| `src/features/espace/` | Orientation après connexion. |
-| `src/features/auth/` | Écrans Clerk et résolution de la destination autorisée. |
-| `src/components/ui/` | Primitives UI. |
-| `src/components/shared/` | Affichage partagé, dont les widgets de métriques. |
-| `src/lib/db/` | Accès aux données par domaine. Aucun barrel global `db.js`. |
-| `src/lib/operator-intelligence/` | Agrégations et slices opérateur, au-dessus des accès ciblés. |
-| `src/lib/audit/`, `queries/`, `ai/` | Crawl, scoring, prompts, extraction et fournisseurs. |
-| `src/lib/agent-reach/` | Veille sociale : orchestration, contexte, collecte, signaux, enrichissement et persistance. |
-| `src/lib/design/tokens.ts` | Tokens visuels canoniques pour les surfaces qui les consomment. |
-| `src/lib/continuous/`, `connectors/`, `remediation/` | Jobs, intégrations et workflow de corrections. |
-| `src/proxy.js` | Frontière de requête Clerk et en-têtes applicatifs. |
-| `parking/` | `index.html`, `404.html`, `robots.txt` déployés pendant l’hibernation. |
-| `public/` | Assets de l’application, conservés à la racine. |
-| `supabase/` | Migrations ordonnées et anciens scripts SQL conservés. |
-| `scripts/` | Validateurs et opérations nommées explicitement. |
-| `.github/` | CI, agents, prompts, skills et instructions Copilot. |
-| `.cursor/` | Réglages de l’outil et installation des worktrees. |
+| Chemin                                               | Responsabilité                                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `src/app/`                                           | Routes explicites, layouts, handlers API, boundaries et métadonnées Next.                   |
+| `src/features/public/`                               | Pages marketing, villes, expertises, profils et ressources SEO/GEO.                         |
+| `src/features/admin/`                                | Portefeuille, dossier, SEO, GEO, Agent et chrome opérateur.                                 |
+| `src/features/portal/`                               | Portail client ; loaders et contrôle d’accès dans `server/`.                                |
+| `src/features/espace/`                               | Orientation après connexion.                                                                |
+| `src/features/auth/`                                 | Écrans Clerk et résolution de la destination autorisée.                                     |
+| `src/components/ui/`                                 | Primitives UI.                                                                              |
+| `src/components/shared/`                             | Affichage partagé, dont les widgets de métriques.                                           |
+| `src/lib/db/`                                        | Accès aux données par domaine. Aucun barrel global `db.js`.                                 |
+| `src/lib/operator-intelligence/`                     | Agrégations et slices opérateur, au-dessus des accès ciblés.                                |
+| `src/lib/audit/`, `queries/`, `ai/`                  | Crawl, scoring, prompts, extraction et fournisseurs.                                        |
+| `src/lib/agent-reach/`                               | Veille sociale : orchestration, contexte, collecte, signaux, enrichissement et persistance. |
+| `src/lib/design/tokens.ts`                           | Tokens visuels canoniques pour les surfaces qui les consomment.                             |
+| `src/lib/continuous/`, `connectors/`, `remediation/` | Jobs, intégrations et workflow de corrections.                                              |
+| `src/proxy.js`                                       | Frontière de requête Clerk et en-têtes applicatifs.                                         |
+| `parking/`                                           | `index.html`, `404.html`, `robots.txt` déployés pendant l’hibernation.                      |
+| `public/`                                            | Assets de l’application, conservés à la racine.                                             |
+| `supabase/`                                          | Migrations ordonnées et anciens scripts SQL conservés.                                      |
+| `scripts/`                                           | Validateurs et opérations nommées explicitement.                                            |
+| `.github/`                                           | CI, agents, prompts, skills et instructions Copilot.                                        |
+| `.cursor/`                                           | Réglages de l’outil et installation des worktrees.                                          |
 
 ## Frontières
 

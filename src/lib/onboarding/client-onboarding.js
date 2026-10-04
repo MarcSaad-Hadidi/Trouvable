@@ -2,10 +2,18 @@ import 'server-only';
 
 import { normalizePortalContactEmail, syncClientProfileCompatibilityFields } from '@/lib/client-profile';
 import { LIFECYCLE_DEFAULTS } from '@/lib/lifecycle';
-import { getClientBySlug as dbGetClientBySlug, createClient as dbCreateClient, updateClient as dbUpdateClient, getClientById as dbGetClientById } from '@/lib/db/clients';
+import {
+    getClientBySlug as dbGetClientBySlug,
+    createClient as dbCreateClient,
+    updateClient as dbUpdateClient,
+    getClientById as dbGetClientById,
+} from '@/lib/db/clients';
 import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { logAction as dbLogAction } from '@/lib/db/actions';
-import { getTrackedQueriesAll as dbGetTrackedQueriesAll, createTrackedQuery as dbCreateTrackedQuery } from '@/lib/db/tracked-queries';
+import {
+    getTrackedQueriesAll as dbGetTrackedQueriesAll,
+    createTrackedQuery as dbCreateTrackedQuery,
+} from '@/lib/db/tracked-queries';
 import { upsertClientPortalAccess } from '@/features/portal/server/access';
 import { serializePromptContractForDb } from '@/lib/queries/prompt-contract-persistence';
 
@@ -67,11 +75,7 @@ function deriveBusinessType(canonicalDetection) {
 }
 
 function getSiteClassification(audit) {
-    return (
-        audit?.geo_breakdown?.site_classification
-        || audit?.seo_breakdown?.site_classification
-        || null
-    );
+    return audit?.geo_breakdown?.site_classification || audit?.seo_breakdown?.site_classification || null;
 }
 
 function confidenceBand(value) {
@@ -147,14 +151,9 @@ function buildProfileSuggestion({
     summaryText,
     extracted,
 }) {
-    const detectedCity = stringArray([
-        extracted?.local_signals?.cities?.[0],
-        input.primary_region,
-    ])[0] || '';
+    const detectedCity = stringArray([extracted?.local_signals?.cities?.[0], input.primary_region])[0] || '';
 
-    const detectedRegion = stringArray([
-        extracted?.local_signals?.regions?.[0],
-    ])[0] || '';
+    const detectedRegion = stringArray([extracted?.local_signals?.regions?.[0]])[0] || '';
 
     const detectedBusinessType = deriveBusinessType(canonicalDetection);
     const primaryEmail = emails[0] || normalizePortalContactEmail(input.primary_contact_email) || '';
@@ -167,7 +166,9 @@ function buildProfileSuggestion({
         detectedCity,
         detectedRegion,
     ]).slice(0, 12);
-    const description = String(summaryText || '').trim().slice(0, 260);
+    const description = String(summaryText || '')
+        .trim()
+        .slice(0, 260);
     const faqs = normalizeFaqPairs(extracted?.faq_pairs || []);
 
     return {
@@ -210,7 +211,7 @@ function buildSuggestionSignals({
 }) {
     const categoryFact = canonicalDetection?.facts?.canonical_category;
     const modelFact = canonicalDetection?.facts?.business_model;
-    
+
     return {
         identity: {
             value: businessNames[0] || input.business_name,
@@ -287,15 +288,18 @@ export async function startClientOnboarding(rawInput, options = {}) {
         lifecycle_status: LIFECYCLE_DEFAULTS.onboarding,
     });
 
-    await dbUpdateClient(client.id, syncClientProfileCompatibilityFields({
-        publication_status: 'draft',
-        is_published: false,
-        target_region: input.primary_region,
-        address: input.primary_region ? { city: input.primary_region } : {},
-        contact_info: input.primary_contact_email
-            ? { public_email: input.primary_contact_email, email: input.primary_contact_email }
-            : {},
-    }));
+    await dbUpdateClient(
+        client.id,
+        syncClientProfileCompatibilityFields({
+            publication_status: 'draft',
+            is_published: false,
+            target_region: input.primary_region,
+            address: input.primary_region ? { city: input.primary_region } : {},
+            contact_info: input.primary_contact_email
+                ? { public_email: input.primary_contact_email, email: input.primary_contact_email }
+                : {},
+        }),
+    );
 
     let auditResult = null;
     try {
@@ -308,17 +312,14 @@ export async function startClientOnboarding(rawInput, options = {}) {
     const extracted = latestAudit?.extracted_data || {};
     const classification = getSiteClassification(latestAudit);
     const businessNames = stringArray(extracted.business_names || []);
-    const emails = uniqueStrings([
-        input.primary_contact_email,
-        ...stringArray(extracted.emails || []),
-    ]).slice(0, 6);
+    const emails = uniqueStrings([input.primary_contact_email, ...stringArray(extracted.emails || [])]).slice(0, 6);
     const phones = stringArray(extracted.phones || []).slice(0, 4);
     const socialLinks = stringArray(extracted.social_links || []).slice(0, 10);
     const summaryText =
-        latestAudit?.geo_breakdown?.ai_analysis?.business_summary
-        || latestAudit?.seo_breakdown?.ai_analysis?.business_summary
-        || stringArray(extracted.descriptions || [])[0]
-        || '';
+        latestAudit?.geo_breakdown?.ai_analysis?.business_summary ||
+        latestAudit?.seo_breakdown?.ai_analysis?.business_summary ||
+        stringArray(extracted.descriptions || [])[0] ||
+        '';
     const canonicalDetection = buildCanonicalBusinessDetection({
         clientName: businessNames[0] || input.business_name,
         rawBusinessType: input.category,
@@ -346,7 +347,9 @@ export async function startClientOnboarding(rawInput, options = {}) {
 
     const promptContextClient = {
         client_name: profileSuggestion.client_name || input.business_name,
-        business_type: normalizeBusinessTypeForPromptContext(profileSuggestion.business_type) || normalizeBusinessTypeForPromptContext(input.category),
+        business_type:
+            normalizeBusinessTypeForPromptContext(profileSuggestion.business_type) ||
+            normalizeBusinessTypeForPromptContext(input.category),
         address: profileSuggestion.address || { city: input.primary_region },
         target_region: profileSuggestion.target_region || input.primary_region,
         business_details: profileSuggestion.business_details || {},
@@ -366,11 +369,14 @@ export async function startClientOnboarding(rawInput, options = {}) {
         existingPrompts: [],
     });
 
-    await dbUpdateClient(client.id, syncClientProfileCompatibilityFields({
-        ...profileSuggestion,
-        publication_status: 'draft',
-        is_published: false,
-    }));
+    await dbUpdateClient(
+        client.id,
+        syncClientProfileCompatibilityFields({
+            ...profileSuggestion,
+            publication_status: 'draft',
+            is_published: false,
+        }),
+    );
 
     const missingItems = buildMissingItems({
         emails,
@@ -388,19 +394,19 @@ export async function startClientOnboarding(rawInput, options = {}) {
 
     const portalDraft = input.primary_contact_email
         ? {
-            enabled: true,
-            contact_email: input.primary_contact_email,
-            portal_role: 'viewer',
-            member_type: 'client_contact',
-            source: 'operator_input',
-        }
+              enabled: true,
+              contact_email: input.primary_contact_email,
+              portal_role: 'viewer',
+              member_type: 'client_contact',
+              source: 'operator_input',
+          }
         : {
-            enabled: false,
-            contact_email: '',
-            portal_role: 'viewer',
-            member_type: 'client_contact',
-            source: 'missing_email',
-        };
+              enabled: false,
+              contact_email: '',
+              portal_role: 'viewer',
+              member_type: 'client_contact',
+              source: 'missing_email',
+          };
 
     await dbLogAction({
         client_id: client.id,
@@ -427,12 +433,12 @@ export async function startClientOnboarding(rawInput, options = {}) {
         },
         classification: classification
             ? {
-                type: classification.type || null,
-                label: classification.label || null,
-                confidence: classification.confidence ?? null,
-                confidence_band: confidenceBand(classification.confidence),
-                reasons: Array.isArray(classification.reasons) ? classification.reasons.slice(0, 6) : [],
-            }
+                  type: classification.type || null,
+                  label: classification.label || null,
+                  confidence: classification.confidence ?? null,
+                  confidence_band: confidenceBand(classification.confidence),
+                  reasons: Array.isArray(classification.reasons) ? classification.reasons.slice(0, 6) : [],
+              }
             : null,
         detected: {
             business_names: businessNames,
@@ -462,8 +468,8 @@ export async function startClientOnboarding(rawInput, options = {}) {
                 is_valid: prompt.quality_status !== 'weak',
                 reasons: Array.isArray(prompt.quality_reasons) ? prompt.quality_reasons : [],
             },
-            is_valid: prompt.validation?.is_valid ?? (prompt.quality_status !== 'weak'),
-            is_selected: prompt.is_selected_default ?? (prompt.quality_status === 'strong'),
+            is_valid: prompt.validation?.is_valid ?? prompt.quality_status !== 'weak',
+            is_selected: prompt.is_selected_default ?? prompt.quality_status === 'strong',
         })),
         portalDraft,
         missingItems,
@@ -490,7 +496,9 @@ function normalizePromptSuggestions(values = []) {
             validation_status: String(value?.validation?.status || value?.validation_status || '').trim() || null,
             validation_reasons: Array.isArray(value?.validation?.reasons)
                 ? value.validation.reasons
-                : (Array.isArray(value?.validation_reasons) ? value.validation_reasons : []),
+                : Array.isArray(value?.validation_reasons)
+                  ? value.validation_reasons
+                  : [],
             offer_anchor: value?.offer_anchor || null,
             user_visible_offering: value?.user_visible_offering || null,
             target_audience: value?.target_audience || null,
@@ -514,16 +522,15 @@ export async function activateClientOnboarding(rawInput, options = {}) {
     const desiredBusinessType = String(profile.business_type || client.business_type || '').trim();
     const desiredTargetRegion = String(profile.target_region || client.target_region || '').trim();
     const desiredAddress = profile.address && typeof profile.address === 'object' ? profile.address : {};
-    const desiredContactInfo = profile.contact_info && typeof profile.contact_info === 'object' ? profile.contact_info : {};
+    const desiredContactInfo =
+        profile.contact_info && typeof profile.contact_info === 'object' ? profile.contact_info : {};
     const desiredSocialProfiles = uniqueStrings(profile.social_profiles || []);
-    const desiredBusinessDetails = profile.business_details && typeof profile.business_details === 'object' ? profile.business_details : {};
+    const desiredBusinessDetails =
+        profile.business_details && typeof profile.business_details === 'object' ? profile.business_details : {};
     const desiredFaqs = normalizeFaqPairs(profile.geo_faqs || []);
 
     const contactEmail = normalizePortalContactEmail(
-        desiredContactInfo.public_email
-        || desiredContactInfo.email
-        || rawInput?.portalDraft?.contact_email
-        || ''
+        desiredContactInfo.public_email || desiredContactInfo.email || rawInput?.portalDraft?.contact_email || '',
     );
 
     const updatePayload = syncClientProfileCompatibilityFields({
@@ -542,11 +549,18 @@ export async function activateClientOnboarding(rawInput, options = {}) {
             phone: String(desiredContactInfo.phone || '').trim(),
         },
         social_profiles: desiredSocialProfiles,
-        seo_description: String(profile.seo_description || '').trim().slice(0, 200) || null,
+        seo_description:
+            String(profile.seo_description || '')
+                .trim()
+                .slice(0, 200) || null,
         business_details: {
             ...desiredBusinessDetails,
-            short_desc: String(desiredBusinessDetails.short_desc || desiredBusinessDetails.short_description || '').trim(),
-            short_description: String(desiredBusinessDetails.short_description || desiredBusinessDetails.short_desc || '').trim(),
+            short_desc: String(
+                desiredBusinessDetails.short_desc || desiredBusinessDetails.short_description || '',
+            ).trim(),
+            short_description: String(
+                desiredBusinessDetails.short_description || desiredBusinessDetails.short_desc || '',
+            ).trim(),
         },
         geo_faqs: desiredFaqs,
         publication_status: 'draft',
@@ -557,7 +571,13 @@ export async function activateClientOnboarding(rawInput, options = {}) {
 
     const existingPrompts = await dbGetTrackedQueriesAll(client.id).catch(() => []);
     const existingPromptKeys = new Set(
-        (existingPrompts || []).map((prompt) => String(prompt.query_text || '').trim().toLowerCase()).filter(Boolean)
+        (existingPrompts || [])
+            .map((prompt) =>
+                String(prompt.query_text || '')
+                    .trim()
+                    .toLowerCase(),
+            )
+            .filter(Boolean),
     );
 
     const normalizedPrompts = normalizePromptSuggestions(rawInput?.promptSuggestions || []);
@@ -668,12 +688,12 @@ export async function activateClientOnboarding(rawInput, options = {}) {
         createdPrompts: promptRows.length,
         portalDraft: portalDraftRecord
             ? {
-                id: portalDraftRecord.id,
-                contact_email: portalDraftRecord.contact_email,
-                status: portalDraftRecord.status,
-                portal_role: portalDraftRecord.portal_role,
-                member_type: portalDraftRecord.member_type,
-            }
+                  id: portalDraftRecord.id,
+                  contact_email: portalDraftRecord.contact_email,
+                  status: portalDraftRecord.status,
+                  portal_role: portalDraftRecord.portal_role,
+                  member_type: portalDraftRecord.member_type,
+              }
             : null,
     };
 }

@@ -32,12 +32,13 @@ The following is guidance for separately authorized future implementation, not a
 ### 2. Checkout flow verification
 
 ```
-User clicks upgrade → Create Checkout Session (server) → Redirect to Stripe → 
-Payment → Webhook: checkout.session.completed → Update entitlements → 
+User clicks upgrade → Create Checkout Session (server) → Redirect to Stripe →
+Payment → Webhook: checkout.session.completed → Update entitlements →
 Redirect to success page
 ```
 
 After an authorized implementation exists, verify each step:
+
 - [ ] Checkout session created with correct price ID
 - [ ] Success/cancel URLs are valid routes
 - [ ] Webhook handler processes `checkout.session.completed`
@@ -57,9 +58,7 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Verify webhook signature
-const event = stripe.webhooks.constructEvent(
-  body, sig, process.env.STRIPE_WEBHOOK_SECRET
-);
+const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 ```
 
 ### 4. Entitlement checks
@@ -74,19 +73,19 @@ const event = stripe.webhooks.constructEvent(
 // Implement the verified server-side entitlement contract first.
 const subscription = await getActiveSubscription(userId);
 if (!subscription || subscription.plan !== 'premium') {
-  return { error: 'Upgrade required', status: 403 };
+    return { error: 'Upgrade required', status: 403 };
 }
 ```
 
 ### 5. Common issues
 
-| Issue | Diagnosis | Fix |
-|---|---|---|
-| Webhook not firing | Check Stripe Dashboard webhook logs | Verify endpoint URL and events |
-| Entitlements not updating | Check webhook handler + Supabase update | Verify DB write after webhook |
-| Checkout redirect fails | Check success_url / cancel_url | Ensure URLs are absolute |
-| Double charges | Missing idempotency key | Add idempotency handling |
-| Plan mismatch | Price ID mismatch | Verify env variable matches Stripe |
+| Issue                     | Diagnosis                               | Fix                                |
+| ------------------------- | --------------------------------------- | ---------------------------------- |
+| Webhook not firing        | Check Stripe Dashboard webhook logs     | Verify endpoint URL and events     |
+| Entitlements not updating | Check webhook handler + Supabase update | Verify DB write after webhook      |
+| Checkout redirect fails   | Check success_url / cancel_url          | Ensure URLs are absolute           |
+| Double charges            | Missing idempotency key                 | Add idempotency handling           |
+| Plan mismatch             | Price ID mismatch                       | Verify env variable matches Stripe |
 
 ### 6. Testing (only for separately authorized future implementation)
 

@@ -36,9 +36,10 @@ function getApiKey() {
 }
 
 function getModel(purpose = 'audit') {
-    const raw = purpose === 'query'
-        ? process.env.MISTRAL_MODEL_QUERY || process.env.MISTRAL_MODEL_COMPARE || DEFAULT_MODEL
-        : process.env.MISTRAL_MODEL_AUDIT || process.env.MISTRAL_MODEL_COMPARE || DEFAULT_MODEL;
+    const raw =
+        purpose === 'query'
+            ? process.env.MISTRAL_MODEL_QUERY || process.env.MISTRAL_MODEL_COMPARE || DEFAULT_MODEL
+            : process.env.MISTRAL_MODEL_AUDIT || process.env.MISTRAL_MODEL_COMPARE || DEFAULT_MODEL;
     return normalizeModel(raw);
 }
 
@@ -64,12 +65,17 @@ export async function callMistral({
     let lastError = null;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const response = await scheduleMistralRequest(() => withTimeout(client.chat.complete({
-                model,
-                temperature,
-                maxTokens,
-                messages,
-            }), DEFAULT_TIMEOUT));
+            const response = await scheduleMistralRequest(() =>
+                withTimeout(
+                    client.chat.complete({
+                        model,
+                        temperature,
+                        maxTokens,
+                        messages,
+                    }),
+                    DEFAULT_TIMEOUT,
+                ),
+            );
 
             const usage = response?.usage || {};
             return {
@@ -85,7 +91,10 @@ export async function callMistral({
             const message = String(error?.message || '');
             // invalid_model errors will never succeed on retry — fail immediately
             if (message.includes('invalid_model') || message.includes('Invalid model')) break;
-            const shouldRetry = message.includes('429') || message.toLowerCase().includes('rate') || message.toLowerCase().includes('timeout');
+            const shouldRetry =
+                message.includes('429') ||
+                message.toLowerCase().includes('rate') ||
+                message.toLowerCase().includes('timeout');
             if (attempt < MAX_RETRIES && shouldRetry) {
                 const wait = Math.min(2000 * 2 ** attempt, 8000);
                 console.warn(`[AI/Mistral] Erreur: ${message}. Retry ${attempt + 1}/${MAX_RETRIES} dans ${wait}ms...`);

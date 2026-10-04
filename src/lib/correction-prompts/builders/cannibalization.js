@@ -31,8 +31,9 @@ function findCannibalizationGroup(audit, groupId) {
     for (const candidate of candidates) {
         const list = toArray(candidate);
         if (list.length === 0) continue;
-        const match = list.find((group) => compactString(group?.id) === normalizedId)
-            || list.find((group) => compactString(group?.group_id) === normalizedId);
+        const match =
+            list.find((group) => compactString(group?.id) === normalizedId) ||
+            list.find((group) => compactString(group?.group_id) === normalizedId);
         if (match) return match;
     }
 
@@ -66,9 +67,7 @@ export function buildCannibalizationCorrectionPromptContext({ client, audit, ref
     }
 
     const pages = toArray(group.pages);
-    const primaryPage = pages.find((page) => compactString(page?.role)?.toLowerCase() === 'winner')
-        || pages[0]
-        || null;
+    const primaryPage = pages.find((page) => compactString(page?.role)?.toLowerCase() === 'winner') || pages[0] || null;
     const title = compactString(group.title) || compactString(group.label) || 'Groupe de cannibalisation';
     const action = compactString(group.action_label) || compactString(group.recommended_action) || null;
     const rationale = compactString(group.summary) || compactString(group.why) || null;
@@ -84,8 +83,7 @@ export function buildCannibalizationCorrectionPromptContext({ client, audit, ref
     const pseudoIssue = {
         id: `cannib:${compactString(ref.groupId)}`,
         title: `Cannibalisation — ${title}`,
-        description: rationale
-            || 'Plusieurs pages se positionnent sur un même intent et se cannibalisent.',
+        description: rationale || 'Plusieurs pages se positionnent sur un même intent et se cannibalisent.',
         priority: 'high',
         category: 'cannibalization',
         dimension: 'technical_seo',
@@ -95,10 +93,11 @@ export function buildCannibalizationCorrectionPromptContext({ client, audit, ref
         recommendedFix: action
             ? `Appliquer la décision opérateur: ${action}. Décrire ensuite l'implémentation (redirection 301 / consolidation / repositionnement / différenciation) sans modifier l'intent des pages gardées.`
             : 'Décider fusion, repositionnement ou différenciation. Justifier la décision sur l’intent de recherche et les signaux observés avant toute réécriture.',
-        sourceUrl: compactString(primaryPage?.url)
-            || compactString(primaryPage?.page_url)
-            || compactString(audit?.resolved_url)
-            || compactString(audit?.source_url),
+        sourceUrl:
+            compactString(primaryPage?.url) ||
+            compactString(primaryPage?.page_url) ||
+            compactString(audit?.resolved_url) ||
+            compactString(audit?.source_url),
         affectedScope: pages.length > 1 ? 'multi_page' : 'single_page',
     };
 

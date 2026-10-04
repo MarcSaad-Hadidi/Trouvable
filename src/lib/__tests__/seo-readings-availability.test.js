@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const io = vi.hoisted(() => ({ audit: vi.fn(), history: vi.fn(), opportunities: vi.fn(), connectors: vi.fn(), gsc: vi.fn(), client: vi.fn(), visibility: vi.fn() }));
+const io = vi.hoisted(() => ({
+    audit: vi.fn(),
+    history: vi.fn(),
+    opportunities: vi.fn(),
+    connectors: vi.fn(),
+    gsc: vi.fn(),
+    client: vi.fn(),
+    visibility: vi.fn(),
+}));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db/audits', () => ({ getLatestAudit: io.audit, getRecentAudits: io.history }));
 vi.mock('@/lib/db/opportunities', () => ({ getLatestOpportunities: io.opportunities }));
@@ -14,11 +22,24 @@ import { getSeoHealthSlice } from '../operator-intelligence/seo-health';
 import { getSeoOnPageSlice } from '../operator-intelligence/seo-on-page';
 import { getSeoOpportunitiesSlice } from '../operator-intelligence/seo-opportunities';
 
-const page = { url: 'https://example.test/service', page_type: 'services', title: 'Court', h1: 'Service', word_count: 100 };
-const audit = { id: 'audit-a', created_at: '2026-10-02', scan_status: 'success', seo_score: 0, extracted_data: { page_summaries: [page] }, issues: [] };
+const page = {
+    url: 'https://example.test/service',
+    page_type: 'services',
+    title: 'Court',
+    h1: 'Service',
+    word_count: 100,
+};
+const audit = {
+    id: 'audit-a',
+    created_at: '2026-10-02',
+    scan_status: 'success',
+    seo_score: 0,
+    extracted_data: { page_summaries: [page] },
+    issues: [],
+};
 const rows = [{ date: '2026-10-02', page: page.url, query: 'réparation', clicks: 0, impressions: 80, position: 8 }];
 const loaders = [getSeoContentSlice, getSeoCannibalizationSlice];
-const card = (data, id) => data.summaryCards.find(value => value.id === id);
+const card = (data, id) => data.summaryCards.find((value) => value.id === id);
 function expectSafeFailure(data, source) {
     expect(data.status).not.toBe('available');
     expect(data.dataSources[source]).toBe('unavailable');
@@ -32,27 +53,40 @@ beforeEach(() => {
     io.audit.mockReset().mockResolvedValue(audit);
     io.history.mockReset().mockResolvedValue([audit]);
     io.opportunities.mockReset().mockResolvedValue({ active: [] });
-    io.connectors.mockReset().mockResolvedValue([{ provider: 'gsc', status: 'connected', last_synced_at: '2026-10-03' }]);
+    io.connectors
+        .mockReset()
+        .mockResolvedValue([{ provider: 'gsc', status: 'connected', last_synced_at: '2026-10-03' }]);
     io.gsc.mockReset().mockResolvedValue(rows);
     io.client.mockReset().mockResolvedValue({ clientName: 'Atelier', websiteUrl: 'https://example.test' });
-    io.visibility.mockReset().mockResolvedValue({ status: 'available', dataSources: { gscQueries: 'available' }, errors: [], freshness: { gsc: { status: 'ok', reliability: 'measured', lastObservedDate: '2026-10-02' } } });
+    io.visibility
+        .mockReset()
+        .mockResolvedValue({
+            status: 'available',
+            dataSources: { gscQueries: 'available' },
+            errors: [],
+            freshness: { gsc: { status: 'ok', reliability: 'measured', lastObservedDate: '2026-10-02' } },
+        });
 });
 afterEach(() => vi.useRealTimers());
 
 describe('SEO readings retain independent source availability', () => {
-    it.each(loaders)('keeps audit evidence and no false measured zero when GSC fails in %s', async load => {
+    it.each(loaders)('keeps audit evidence and no false measured zero when GSC fails in %s', async (load) => {
         io.gsc.mockRejectedValue(new Error('private failure GSC'));
         const data = await load('client-a');
         expectSafeFailure(data, 'gscRows');
         expect(data.auditMeta.createdAt).toBe(audit.created_at);
-        expect(data.freshness.gsc).toMatchObject({ status: 'unavailable', reliability: 'unavailable', lastSyncedAt: '2026-10-03' });
-        expect(data.actionHooks.some(hook => hook.id === 'connect-gsc')).toBe(false);
+        expect(data.freshness.gsc).toMatchObject({
+            status: 'unavailable',
+            reliability: 'unavailable',
+            lastSyncedAt: '2026-10-03',
+        });
+        expect(data.actionHooks.some((hook) => hook.id === 'connect-gsc')).toBe(false);
         if (load === getSeoContentSlice) {
             expect(data.contentDecay.status).toBe('unavailable');
             expect(data.refreshOpportunities.items.length).toBeGreaterThan(0);
         } else expect(card(data, 'measured_count').value).toBeNull();
     });
-    it.each(loaders)('keeps a connector query failure distinct from a missing connection in %s', async load => {
+    it.each(loaders)('keeps a connector query failure distinct from a missing connection in %s', async (load) => {
         io.connectors.mockRejectedValue(new Error('private failure connector'));
         const data = await load('client-a');
         expectSafeFailure(data, 'connectors');
@@ -60,7 +94,7 @@ describe('SEO readings retain independent source availability', () => {
         expect(data.freshness.gsc.lastObservedDate).toBe('2026-10-02');
         expect(data.freshness.gsc.detail).not.toContain('non connectée');
     });
-    it.each(loaders)('keeps a genuinely disconnected empty GSC source free from incidents in %s', async load => {
+    it.each(loaders)('keeps a genuinely disconnected empty GSC source free from incidents in %s', async (load) => {
         io.connectors.mockResolvedValue([]);
         io.gsc.mockResolvedValue([]);
         const data = await load('client-a');
@@ -69,7 +103,7 @@ describe('SEO readings retain independent source availability', () => {
         expect(data.errors).toEqual([]);
         expect(data.freshness.gsc.connectorStatus).toBe('not_connected');
     });
-    it.each(loaders)('distinguishes an unread action queue from a successful empty queue in %s', async load => {
+    it.each(loaders)('distinguishes an unread action queue from a successful empty queue in %s', async (load) => {
         io.opportunities.mockRejectedValue(new Error('private failure queue'));
         const failed = await load('client-a');
         expectSafeFailure(failed, 'opportunities');
@@ -92,7 +126,11 @@ describe('SEO readings retain independent source availability', () => {
         const data = await getSeoCannibalizationSlice('client-a');
         expectSafeFailure(data, 'client');
         expect(data.clientName).toBeNull();
-        expect(data.groups[0].measured).toMatchObject({ sharedClicks: 0, sharedQueryCount: 1, nonBrandSharedQueryCount: null });
+        expect(data.groups[0].measured).toMatchObject({
+            sharedClicks: 0,
+            sharedQueryCount: 1,
+            nonBrandSharedQueryCount: null,
+        });
         expect(data.groups[0].measured.querySamples[0].isBrandLike).toBeNull();
         expect(data.groups[0].action.label).not.toBe('Repositionner');
     });
@@ -143,7 +181,7 @@ describe('SEO readings retain independent source availability', () => {
         expect(data.metadata.items.length).toBeGreaterThan(0);
         expect(data.positionBand).toMatchObject({ status: 'unavailable', availability: 'unavailable', items: [] });
         expect(card(data, 'pages_4_20').value).toBeNull();
-        expect(data.actionHooks.some(hook => hook.id === 'connect-gsc')).toBe(false);
+        expect(data.actionHooks.some((hook) => hook.id === 'connect-gsc')).toBe(false);
         expect(data.dataSources['content.gscRows']).toBe('unavailable');
     });
     it('aggregates partial nested reads without discarding direct GSC opportunities', async () => {
@@ -151,21 +189,29 @@ describe('SEO readings retain independent source availability', () => {
         const data = await getSeoOpportunitiesSlice('client-a');
         expectSafeFailure(data, 'audit');
         expect(data.dataSources['onPage.audit']).toBe('unavailable');
-        expect(data.errors.some(error => error.source === 'onPage.audit')).toBe(true);
-        expect(data.positionBand.items[0].metrics.find(metric => metric.label === 'Clics').value).toBe(0);
+        expect(data.errors.some((error) => error.source === 'onPage.audit')).toBe(true);
+        expect(data.positionBand.items[0].metrics.find((metric) => metric.label === 'Clics').value).toBe(0);
         expect(data.metadata).toMatchObject({ status: 'unavailable', availability: 'unavailable' });
         expect(data.quickWins.availability).toBe('partial');
     });
     it('propagates a partial visibility response even when that nested call fulfilled', async () => {
-        io.visibility.mockResolvedValue({ status: 'partial', dataSources: { ga4Traffic: 'unavailable', gscQueries: 'available' }, errors: [{ source: 'ga4Traffic', message: 'Données temporairement indisponibles.' }], freshness: { gsc: { reliability: 'measured' } } });
+        io.visibility.mockResolvedValue({
+            status: 'partial',
+            dataSources: { ga4Traffic: 'unavailable', gscQueries: 'available' },
+            errors: [{ source: 'ga4Traffic', message: 'Données temporairement indisponibles.' }],
+            freshness: { gsc: { reliability: 'measured' } },
+        });
         const data = await getSeoOpportunitiesSlice('client-a');
         expect(data.status).toBe('partial');
         expect(data.dataSources.visibility).toBe('partial');
         expect(data.dataSources['visibility.ga4Traffic']).toBe('unavailable');
-        expect(data.errors).toContainEqual({ source: 'visibility.ga4Traffic', message: 'Données temporairement indisponibles.' });
+        expect(data.errors).toContainEqual({
+            source: 'visibility.ga4Traffic',
+            message: 'Données temporairement indisponibles.',
+        });
         expect(data.positionBand.items.length).toBeGreaterThan(0);
     });
-    it.each(loaders)('keeps a successful unobserved GSC read free from errors in %s', async load => {
+    it.each(loaders)('keeps a successful unobserved GSC read free from errors in %s', async (load) => {
         io.gsc.mockResolvedValue([]);
         const data = await load('client-a');
         expect(data.status).toBe('available');
@@ -178,14 +224,19 @@ describe('SEO readings retain independent source availability', () => {
         io.visibility.mockRejectedValue(new Error('private failure visibility'));
         const data = await getSeoOpportunitiesSlice('client-a');
         expectSafeFailure(data, 'visibility');
-        expect(data.positionBand.items[0].metrics.find(metric => metric.label === 'Clics').value).toBe(0);
+        expect(data.positionBand.items[0].metrics.find((metric) => metric.label === 'Clics').value).toBe(0);
         expect(data.positionBand.availability).toBe('available');
         expect(data.metadata.items.length).toBeGreaterThan(0);
     });
     it('keeps known disconnected GSC distinct from an incident in opportunities', async () => {
         io.connectors.mockResolvedValue([]);
         io.gsc.mockResolvedValue([]);
-        io.visibility.mockResolvedValue({ status: 'available', dataSources: { gscQueries: 'not_connected' }, errors: [], connectors: { gsc: { status: 'not_connected' } } });
+        io.visibility.mockResolvedValue({
+            status: 'available',
+            dataSources: { gscQueries: 'not_connected' },
+            errors: [],
+            connectors: { gsc: { status: 'not_connected' } },
+        });
         const data = await getSeoOpportunitiesSlice('client-a');
         expect(data.status).toBe('available');
         expect(data.errors).toEqual([]);
@@ -195,12 +246,20 @@ describe('SEO readings retain independent source availability', () => {
     });
     it('keeps observed zero and persisted and live dates distinct in opportunities', async () => {
         io.gsc.mockResolvedValue([{ ...rows[0], impressions: 0, clicks: 0 }]);
-        io.visibility.mockResolvedValue({ status: 'available', dataSources: { gscQueries: 'available' }, errors: [], freshness: { gsc: { reliability: 'measured', lastObservedDate: '2026-09-30' } } });
+        io.visibility.mockResolvedValue({
+            status: 'available',
+            dataSources: { gscQueries: 'available' },
+            errors: [],
+            freshness: { gsc: { reliability: 'measured', lastObservedDate: '2026-09-30' } },
+        });
         const data = await getSeoOpportunitiesSlice('client-a');
         expect(data.status).toBe('available');
         expect(data.positionBand.availability).toBe('available');
         expect(card(data, 'pages_4_20').value).toBe(0);
-        expect(data.freshness.gsc).toMatchObject({ lastObservedDate: '2026-10-02', lastLiveObservedDate: '2026-09-30' });
+        expect(data.freshness.gsc).toMatchObject({
+            lastObservedDate: '2026-10-02',
+            lastLiveObservedDate: '2026-09-30',
+        });
     });
     it('starts nested reads immediately when an audit was already provided', async () => {
         const pending = getSeoOpportunitiesSlice('client-a', { audit });
@@ -211,7 +270,8 @@ describe('SEO readings retain independent source availability', () => {
         expect(data.auditMeta.createdAt).toBe(audit.created_at);
     });
     it('returns sanitized errors and no false success if all sources fail', async () => {
-        for (const reader of [io.audit, io.opportunities, io.connectors, io.gsc, io.client]) reader.mockRejectedValue(new Error('private failure unavailable'));
+        for (const reader of [io.audit, io.opportunities, io.connectors, io.gsc, io.client])
+            reader.mockRejectedValue(new Error('private failure unavailable'));
         const data = await getSeoCannibalizationSlice('client-a');
         expect(data.status).toBe('unavailable');
         expect(data.errors).toHaveLength(5);
@@ -219,17 +279,31 @@ describe('SEO readings retain independent source availability', () => {
         expect(data.emptyState.description).toContain('temporairement');
     });
     it('retains calculated page overlap without fabricated measured counts after GSC failure', async () => {
-        io.audit.mockResolvedValue({ ...audit, extracted_data: { page_summaries: [page, { ...page, url: 'https://example.test/other' }] } });
+        io.audit.mockResolvedValue({
+            ...audit,
+            extracted_data: { page_summaries: [page, { ...page, url: 'https://example.test/other' }] },
+        });
         io.gsc.mockRejectedValue(new Error('private failure GSC'));
         const data = await getSeoCannibalizationSlice('client-a');
         expectSafeFailure(data, 'gscRows');
         expect(data.groups[0].calculated.reliability).toBe('calculated');
-        expect(data.groups[0].measured).toMatchObject({ reliability: 'unavailable', sharedClicks: null, sharedImpressions: null, sharedQueryCount: null });
+        expect(data.groups[0].measured).toMatchObject({
+            reliability: 'unavailable',
+            sharedClicks: null,
+            sharedImpressions: null,
+            sharedQueryCount: null,
+        });
     });
     it('starts the direct content reads synchronously even after a sync loader failure', async () => {
-        io.audit.mockImplementation(() => { throw new Error('private failure sync'); });
+        io.audit.mockImplementation(() => {
+            throw new Error('private failure sync');
+        });
         const pending = getSeoContentSlice('client-scope');
-        const initialCalls = [io.opportunities.mock.calls.length, io.connectors.mock.calls.length, io.gsc.mock.calls.length];
+        const initialCalls = [
+            io.opportunities.mock.calls.length,
+            io.connectors.mock.calls.length,
+            io.gsc.mock.calls.length,
+        ];
         const data = await pending;
         expect(initialCalls).toEqual([1, 1, 1]);
         expect(io.gsc).toHaveBeenCalledWith('client-scope', { days: 56, limit: 1200 });

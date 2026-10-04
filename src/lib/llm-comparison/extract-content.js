@@ -36,7 +36,10 @@ async function fetchWithTimeout(url, timeoutMs = DEFAULT_FETCH_TIMEOUT_MS) {
         if (error?.name === 'AbortError') {
             throw new LlmComparisonError('timeout', `Extraction URL timeout apres ${timeoutMs}ms`);
         }
-        throw new LlmComparisonError('extraction_error', `Erreur réseau lors de l'extraction : ${error?.message || 'Erreur inconnue (redirection infinie, etc.)'}`);
+        throw new LlmComparisonError(
+            'extraction_error',
+            `Erreur réseau lors de l'extraction : ${error?.message || 'Erreur inconnue (redirection infinie, etc.)'}`,
+        );
     } finally {
         clearTimeout(timer);
     }
@@ -109,7 +112,9 @@ export async function extractInputContent({
             const body = await response.text();
             extracted = contentType.includes('html') ? await extractTextFromHtml(body) : normalizeText(body);
         } else {
-            console.warn(`[extractInputContent] Fetch failed (${fetchErrorMsg}), falling back to Playwright for ${parsedUrl.toString()}`);
+            console.warn(
+                `[extractInputContent] Fetch failed (${fetchErrorMsg}), falling back to Playwright for ${parsedUrl.toString()}`,
+            );
             const { createPlaywrightRenderer } = await import('../audit/playwright-renderer.js');
             const renderer = await createPlaywrightRenderer();
             try {
@@ -118,10 +123,16 @@ export async function extractInputContent({
                     if (result.ok && result.html) {
                         extracted = await extractTextFromHtml(result.html);
                     } else {
-                        throw new LlmComparisonError('extraction_error', `Impossible de récupérer l'URL (Playwright: ${result.error}).`);
+                        throw new LlmComparisonError(
+                            'extraction_error',
+                            `Impossible de récupérer l'URL (Playwright: ${result.error}).`,
+                        );
                     }
                 } else {
-                    throw new LlmComparisonError('extraction_error', `Impossible de récupérer l'URL (fetch error: ${fetchErrorMsg}) et Playwright désactivé.`);
+                    throw new LlmComparisonError(
+                        'extraction_error',
+                        `Impossible de récupérer l'URL (fetch error: ${fetchErrorMsg}) et Playwright désactivé.`,
+                    );
                 }
             } finally {
                 await renderer.close().catch(() => {});

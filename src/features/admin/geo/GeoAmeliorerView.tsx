@@ -11,7 +11,7 @@ import {
     ShieldAlertIcon,
     UserIcon,
     PlusIcon,
-    ArrowRightIcon
+    ArrowRightIcon,
 } from 'lucide-react';
 
 import { CommandHeader, CommandPageShell } from '@/features/admin/shared/components/command';
@@ -25,7 +25,9 @@ function formatShortDate(value) {
     if (!value) return null;
     try {
         return new Date(value).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' });
-    } catch { return null; }
+    } catch {
+        return null;
+    }
 }
 
 function priorityChip(priority) {
@@ -41,9 +43,14 @@ const EASE = [0.16, 1, 0.3, 1];
 function OpportunityCard({ card, columnId, pendingId, onUpdateStatus, index }) {
     const priority = card.priority || card.review_item?.priority || 'info';
     const title = card.title || card.review_item?.title || 'Action';
-    const description = card.description || card.rationale || card.review_item?.description || card.review_item?.evidence_summary || 'Aucun détail supplémentaire.';
+    const description =
+        card.description ||
+        card.rationale ||
+        card.review_item?.description ||
+        card.review_item?.evidence_summary ||
+        'Aucun détail supplémentaire.';
     const category = card.category || card.review_item?.category || 'GEO';
-    
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -52,11 +59,16 @@ function OpportunityCard({ card, columnId, pendingId, onUpdateStatus, index }) {
             className={cn(
                 COMMAND_SURFACE,
                 'group flex flex-col p-4 transition-all hover:bg-white/[0.04] relative overflow-hidden',
-                columnId === 'done' && 'opacity-60 grayscale-[0.5] hover:opacity-90 hover:grayscale-0'
+                columnId === 'done' && 'opacity-60 grayscale-[0.5] hover:opacity-90 hover:grayscale-0',
             )}
         >
             <div className="flex items-start justify-between mb-3">
-                <span className={cn('rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest border', priorityChip(priority))}>
+                <span
+                    className={cn(
+                        'rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest border',
+                        priorityChip(priority),
+                    )}
+                >
                     {priority}
                 </span>
                 <span className="text-[9px] font-bold text-white/10 uppercase tracking-widest">{category}</span>
@@ -82,7 +94,9 @@ function OpportunityCard({ card, columnId, pendingId, onUpdateStatus, index }) {
                         </div>
                     )}
                     {card.created_at && (
-                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{formatShortDate(card.created_at)}</span>
+                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+                            {formatShortDate(card.created_at)}
+                        </span>
                     )}
                 </div>
 
@@ -117,12 +131,39 @@ export default function GeoOpportunitiesPage() {
     const [pendingId, setPendingId] = useState(null);
     const geoBase = clientId ? `/admin/clients/${clientId}/geo` : '/admin/clients';
 
-    const columns = useMemo(() => ([
-        { id: 'todo', title: 'À Faire', icon: CircleDashedIcon, color: 'text-[#7c6aef]', items: data?.byStatus?.open || [] },
-        { id: 'doing', title: 'En cours', icon: ClockIcon, color: 'text-amber-400', items: data?.byStatus?.in_progress || [] },
-        { id: 'blocked', title: 'Bloqué', icon: ShieldAlertIcon, color: 'text-rose-400', items: data?.byStatus?.dismissed || [] },
-        { id: 'done', title: 'Terminé', icon: CheckCircle2Icon, color: 'text-emerald-400', items: data?.byStatus?.done || [] },
-    ]), [data]);
+    const columns = useMemo(
+        () => [
+            {
+                id: 'todo',
+                title: 'À Faire',
+                icon: CircleDashedIcon,
+                color: 'text-[#7c6aef]',
+                items: data?.byStatus?.open || [],
+            },
+            {
+                id: 'doing',
+                title: 'En cours',
+                icon: ClockIcon,
+                color: 'text-amber-400',
+                items: data?.byStatus?.in_progress || [],
+            },
+            {
+                id: 'blocked',
+                title: 'Bloqué',
+                icon: ShieldAlertIcon,
+                color: 'text-rose-400',
+                items: data?.byStatus?.dismissed || [],
+            },
+            {
+                id: 'done',
+                title: 'Terminé',
+                icon: CheckCircle2Icon,
+                color: 'text-emerald-400',
+                items: data?.byStatus?.done || [],
+            },
+        ],
+        [data],
+    );
 
     async function updateStatus(id, status) {
         if (!clientId || !id || pendingId) return;
@@ -134,7 +175,9 @@ export default function GeoOpportunitiesPage() {
                 body: JSON.stringify({ status }),
             });
             invalidateWorkspace();
-        } finally { setPendingId(null); }
+        } finally {
+            setPendingId(null);
+        }
     }
 
     const header = (
@@ -142,26 +185,41 @@ export default function GeoOpportunitiesPage() {
             eyebrow="IA / GEO"
             title="Feuille de Route Action"
             subtitle="Pilotage des optimisations et correctifs issus des analyses GEO. Kanban opérationnel."
-            actions={(
+            actions={
                 <Link href={`${geoBase}/runs`} className={COMMAND_BUTTONS.primary}>
                     <PlusIcon className="h-4 w-4" /> Nouvelle Analyse
                 </Link>
-            )}
+            }
         />
     );
 
-    if (loading) return <CommandPageShell header={header}><div className="p-8 animate-pulse text-white/50">Synchronisation de la file d&#39;action...</div></CommandPageShell>;
-    if (error) return <CommandPageShell header={header}><CommandEmptyState title="Indisponible" description={error} /></CommandPageShell>;
+    if (loading)
+        return (
+            <CommandPageShell header={header}>
+                <div className="p-8 animate-pulse text-white/50">Synchronisation de la file d&#39;action...</div>
+            </CommandPageShell>
+        );
+    if (error)
+        return (
+            <CommandPageShell header={header}>
+                <CommandEmptyState title="Indisponible" description={error} />
+            </CommandPageShell>
+        );
 
     return (
         <CommandPageShell header={header}>
             <div className="mt-2 flex h-[calc(100vh-280px)] min-h-[600px] gap-4 overflow-x-auto pb-6 geo-scrollbar">
                 {columns.map((column) => (
-                    <div key={column.id} className="flex w-[320px] shrink-0 flex-col rounded-[24px] border border-white/[0.04] bg-[#06070a] overflow-hidden">
+                    <div
+                        key={column.id}
+                        className="flex w-[320px] shrink-0 flex-col rounded-[24px] border border-white/[0.04] bg-[#06070a] overflow-hidden"
+                    >
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05] bg-white/[0.01]">
                             <div className="flex items-center gap-2.5">
                                 <column.icon className={cn('h-4 w-4', column.color)} />
-                                <h3 className={cn('text-[12px] font-bold uppercase tracking-[0.14em]', column.color)}>{column.title}</h3>
+                                <h3 className={cn('text-[12px] font-bold uppercase tracking-[0.14em]', column.color)}>
+                                    {column.title}
+                                </h3>
                             </div>
                             <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white/30 border border-white/10">
                                 {column.items.length}
@@ -170,7 +228,7 @@ export default function GeoOpportunitiesPage() {
 
                         <div className="flex-1 space-y-3 overflow-y-auto p-4 geo-scrollbar">
                             {column.items.map((card, index) => (
-                                <OpportunityCard 
+                                <OpportunityCard
                                     key={card.id || index}
                                     card={card}
                                     columnId={column.id}

@@ -56,7 +56,8 @@ export function checkStatusFr(check) {
     if (check?.passed === false) {
         const sev = String(check.severity || '').toLowerCase();
         if (sev === 'critical' || sev === 'high') return { key: 'problem', label: 'Problème', tone: 'bad' };
-        if (sev === 'medium' || sev === 'warn' || sev === 'warning') return { key: 'watch', label: 'À surveiller', tone: 'warn' };
+        if (sev === 'medium' || sev === 'warn' || sev === 'warning')
+            return { key: 'watch', label: 'À surveiller', tone: 'warn' };
         return { key: 'watch', label: 'À corriger', tone: 'warn' };
     }
     return { key: 'unknown', label: 'Indéterminé', tone: 'neutral' };
@@ -68,10 +69,14 @@ export function checkStatusFr(check) {
  */
 export function pageStatusFr(pageStatus) {
     switch (pageStatus) {
-        case 'problem': return { key: 'problem', label: 'Problème', tone: 'bad' };
-        case 'watch': return { key: 'watch', label: 'À surveiller', tone: 'warn' };
-        case 'ok': return { key: 'ok', label: 'OK', tone: 'good' };
-        default: return { key: 'unknown', label: 'Indéterminé', tone: 'neutral' };
+        case 'problem':
+            return { key: 'problem', label: 'Problème', tone: 'bad' };
+        case 'watch':
+            return { key: 'watch', label: 'À surveiller', tone: 'warn' };
+        case 'ok':
+            return { key: 'ok', label: 'OK', tone: 'good' };
+        default:
+            return { key: 'unknown', label: 'Indéterminé', tone: 'neutral' };
     }
 }
 

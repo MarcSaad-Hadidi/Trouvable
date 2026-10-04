@@ -26,11 +26,12 @@ import { Pill } from './audit-helpers';
  */
 
 function SlotBadge({ slot }) {
-    const meta = slot === 'blocking'
-        ? { label: 'Bloquant', tone: 'bg-red-500/15 text-red-300 border-red-400/30' }
-        : slot === 'important'
-        ? { label: 'Important', tone: 'bg-amber-500/15 text-amber-200 border-amber-400/30' }
-        : { label: 'À surveiller', tone: 'bg-white/[0.08] text-white/60 border-white/15' };
+    const meta =
+        slot === 'blocking'
+            ? { label: 'Bloquant', tone: 'bg-red-500/15 text-red-300 border-red-400/30' }
+            : slot === 'important'
+              ? { label: 'Important', tone: 'bg-amber-500/15 text-amber-200 border-amber-400/30' }
+              : { label: 'À surveiller', tone: 'bg-white/[0.08] text-white/60 border-white/15' };
     return <Pill label={meta.label} tone={meta.tone} />;
 }
 
@@ -51,20 +52,20 @@ function ProblemCard({ problem, clientId }) {
     const cardClass = isBlocking
         ? 'bg-gradient-to-r from-red-500/[0.08] to-transparent border-l-[3px] border-l-red-400/70 border-t border-r border-b border-t-white/[0.06] border-r-white/[0.06] border-b-white/[0.06]'
         : isImportant
-        ? 'bg-gradient-to-r from-amber-500/[0.05] to-transparent border-l-[3px] border-l-amber-400/50 border-t border-r border-b border-t-white/[0.06] border-r-white/[0.06] border-b-white/[0.06]'
-        : 'border bg-white/[0.025] border-white/[0.06]';
+          ? 'bg-gradient-to-r from-amber-500/[0.05] to-transparent border-l-[3px] border-l-amber-400/50 border-t border-r border-b border-t-white/[0.06] border-r-white/[0.06] border-b-white/[0.06]'
+          : 'border bg-white/[0.025] border-white/[0.06]';
 
     const problemRef = clientId
         ? {
-            source: 'audit_priority_problem',
-            clientId,
-            issueId: problem.source === 'issue' ? problem.id : null,
-            checkId: problem.source === 'layer1' ? (problem.checkId || problem.id?.replace(/^layer1:/, '')) : null,
-            pageUrl: problem.pageUrl || problem.sourceUrl || null,
-            dimension: problem.dimension || null,
-            category: problem.category || null,
-            label: problem.title,
-        }
+              source: 'audit_priority_problem',
+              clientId,
+              issueId: problem.source === 'issue' ? problem.id : null,
+              checkId: problem.source === 'layer1' ? problem.checkId || problem.id?.replace(/^layer1:/, '') : null,
+              pageUrl: problem.pageUrl || problem.sourceUrl || null,
+              dimension: problem.dimension || null,
+              category: problem.category || null,
+              label: problem.title,
+          }
         : null;
 
     return (
@@ -106,21 +107,23 @@ function ProblemCard({ problem, clientId }) {
 }
 
 function HeadlineBadge({ totals }) {
-    const toneClass = totals.blocking > 0
-        ? 'bg-red-500/15 text-red-300 border-red-400/30'
-        : totals.important > 0
-        ? 'bg-amber-500/15 text-amber-200 border-amber-400/30'
-        : totals.watch > 0
-        ? 'bg-white/[0.08] text-white/70 border-white/15'
-        : 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20';
+    const toneClass =
+        totals.blocking > 0
+            ? 'bg-red-500/15 text-red-300 border-red-400/30'
+            : totals.important > 0
+              ? 'bg-amber-500/15 text-amber-200 border-amber-400/30'
+              : totals.watch > 0
+                ? 'bg-white/[0.08] text-white/70 border-white/15'
+                : 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20';
 
-    const label = totals.blocking > 0
-        ? `${totals.blocking} bloquant${totals.blocking > 1 ? 's' : ''}`
-        : totals.important > 0
-        ? `${totals.important} important${totals.important > 1 ? 's' : ''}`
-        : totals.watch > 0
-        ? `${totals.watch} à surveiller`
-        : 'tout est bon';
+    const label =
+        totals.blocking > 0
+            ? `${totals.blocking} bloquant${totals.blocking > 1 ? 's' : ''}`
+            : totals.important > 0
+              ? `${totals.important} important${totals.important > 1 ? 's' : ''}`
+              : totals.watch > 0
+                ? `${totals.watch} à surveiller`
+                : 'tout est bon';
 
     return <Pill label={label} tone={toneClass} />;
 }
@@ -147,7 +150,8 @@ export default function AuditPriorityProblems({ audit, maxVisible = 6, clientId 
 
             {visible.length === 0 ? (
                 <p className="mt-3 text-xs text-white/50">
-                    Aucun problème — ni bloquant, ni important, ni à surveiller — n&apos;a été détecté sur ce dernier audit.
+                    Aucun problème — ni bloquant, ni important, ni à surveiller — n&apos;a été détecté sur ce dernier
+                    audit.
                 </p>
             ) : (
                 <div className="mt-4 space-y-2">
@@ -159,7 +163,8 @@ export default function AuditPriorityProblems({ audit, maxVisible = 6, clientId 
 
             {remaining > 0 && (
                 <p className="mt-3 text-[11px] text-white/35">
-                    + {remaining} problème{remaining > 1 ? 's' : ''} supplémentaire{remaining > 1 ? 's' : ''} non affiché{remaining > 1 ? 's' : ''} ici.
+                    + {remaining} problème{remaining > 1 ? 's' : ''} supplémentaire{remaining > 1 ? 's' : ''} non
+                    affiché{remaining > 1 ? 's' : ''} ici.
                 </p>
             )}
 
@@ -168,12 +173,16 @@ export default function AuditPriorityProblems({ audit, maxVisible = 6, clientId 
                     <span className="text-white/60">Répartition :</span>
                     <span className="inline-flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                        <span>{totals.blocking} bloquant{totals.blocking > 1 ? 's' : ''}</span>
+                        <span>
+                            {totals.blocking} bloquant{totals.blocking > 1 ? 's' : ''}
+                        </span>
                     </span>
                     <span className="text-white/15">·</span>
                     <span className="inline-flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                        <span>{totals.important} important{totals.important > 1 ? 's' : ''}</span>
+                        <span>
+                            {totals.important} important{totals.important > 1 ? 's' : ''}
+                        </span>
                     </span>
                     <span className="text-white/15">·</span>
                     <span className="inline-flex items-center gap-1">

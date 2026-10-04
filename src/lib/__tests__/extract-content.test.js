@@ -19,12 +19,16 @@ describe('extractInputContent', () => {
     });
 
     it('extracts readable content from URL HTML', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            status: 200,
-            headers: { get: () => 'text/html; charset=utf-8' },
-            text: async () => '<html><head><title>Page test</title></head><body><script>x</script><main>Contenu utile</main></body></html>',
-        }));
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                headers: { get: () => 'text/html; charset=utf-8' },
+                text: async () =>
+                    '<html><head><title>Page test</title></head><body><script>x</script><main>Contenu utile</main></body></html>',
+            }),
+        );
 
         const { extractInputContent } = await import('@/lib/llm-comparison/extract-content');
         const result = await extractInputContent({ url: 'https://example.com', sourceType: 'url' });

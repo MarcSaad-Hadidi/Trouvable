@@ -6,7 +6,6 @@ import { SITE_LAST_MODIFIED_ISO, SITE_URL } from '@/lib/site-config';
 export const revalidate = 3600; // Revalider le sitemap toutes les heures (3600 secondes)
 
 export default async function sitemap() {
-
     const staticPaths = [
         '',
         '/offres',
@@ -27,7 +26,7 @@ export default async function sitemap() {
     }));
 
     // Build static programmatic SEO routes (Villes & Expertises)
-    VILLES.forEach(ville => {
+    VILLES.forEach((ville) => {
         routes.push({
             url: `${SITE_URL}/villes/${ville.slug}`,
             lastModified: new Date(SITE_LAST_MODIFIED_ISO),
@@ -36,7 +35,7 @@ export default async function sitemap() {
         });
     });
 
-    EXPERTISES.forEach(expertise => {
+    EXPERTISES.forEach((expertise) => {
         routes.push({
             url: `${SITE_URL}/expertises/${expertise.slug}`,
             lastModified: new Date(SITE_LAST_MODIFIED_ISO),
@@ -45,7 +44,7 @@ export default async function sitemap() {
         });
     });
 
-    SEO_GROWTH_PAGES.forEach(page => {
+    SEO_GROWTH_PAGES.forEach((page) => {
         routes.push({
             url: `${SITE_URL}${page.path}`,
             lastModified: new Date(SITE_LAST_MODIFIED_ISO),
@@ -80,4 +79,3 @@ export default async function sitemap() {
 
     return routes;
 }
-

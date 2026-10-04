@@ -2,23 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-    LabEmptyState,
-    LabPill,
-    LabSectionHeader,
-} from './LabPrimitives';
-import {
-    buildCompareSnapshotFromAudit,
-    formatDate,
-    formatMs,
-    scoreToneClass,
-} from './audit-lab-model';
-import {
-    dimensionLabelFr,
-    humanizeCategoryKey,
-    severityFr,
-    severityTone,
-} from './audit-lab-copy';
+import { LabEmptyState, LabPill, LabSectionHeader } from './LabPrimitives';
+import { buildCompareSnapshotFromAudit, formatDate, formatMs, scoreToneClass } from './audit-lab-model';
+import { dimensionLabelFr, humanizeCategoryKey, severityFr, severityTone } from './audit-lab-copy';
 
 /**
  * Bloc "Comparaison des audits".
@@ -88,12 +74,12 @@ function deltaLabel(delta, { suffix = ' pts' } = {}) {
 function ScoreCell({ label, value, highlight = false, suffix = '/100' }) {
     const tone = scoreToneClass(value);
     return (
-        <div className={`rounded-xl border px-3 py-2.5 ${highlight ? 'border-violet-400/25 bg-violet-500/[0.05]' : 'border-white/[0.08] bg-white/[0.02]'}`}>
+        <div
+            className={`rounded-xl border px-3 py-2.5 ${highlight ? 'border-violet-400/25 bg-violet-500/[0.05]' : 'border-white/[0.08] bg-white/[0.02]'}`}
+        >
             <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">{label}</div>
             <div className="mt-1 flex items-baseline gap-1">
-                <span className={`text-lg font-extrabold tabular-nums ${tone}`}>
-                    {value == null ? '—' : value}
-                </span>
+                <span className={`text-lg font-extrabold tabular-nums ${tone}`}>{value == null ? '—' : value}</span>
                 {value != null && <span className="text-[10px] text-white/30">{suffix}</span>}
             </div>
         </div>
@@ -115,12 +101,12 @@ function SideHeader({ side, label, snapshot }) {
                     {label || displayUrl}
                 </div>
                 {subtitle && subtitle !== label && (
-                    <div className="truncate text-[10px] text-white/40" title={subtitle}>{subtitle}</div>
+                    <div className="truncate text-[10px] text-white/40" title={subtitle}>
+                        {subtitle}
+                    </div>
                 )}
             </div>
-            {snapshot.classification?.label && (
-                <LabPill label={snapshot.classification.label} tone="info" />
-            )}
+            {snapshot.classification?.label && <LabPill label={snapshot.classification.label} tone="info" />}
         </div>
     );
 }
@@ -135,9 +121,13 @@ function SummaryRow({ label, a, b, invert = false, suffix = '/100', deltaSuffix 
     const borderClass = emphasize ? 'border-violet-400/25 bg-violet-500/[0.04]' : 'border-white/[0.06] bg-white/[0.01]';
 
     return (
-        <div className={`grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg border px-3 py-2 ${borderClass}`}>
+        <div
+            className={`grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg border px-3 py-2 ${borderClass}`}
+        >
             <div className="min-w-0">
-                <div className={`text-[12px] font-semibold ${emphasize ? 'text-white/95' : 'text-white/80'}`}>{label}</div>
+                <div className={`text-[12px] font-semibold ${emphasize ? 'text-white/95' : 'text-white/80'}`}>
+                    {label}
+                </div>
             </div>
             <div className={`text-right font-semibold tabular-nums ${scoreToneClass(a)}`}>
                 {a == null ? '—' : a}
@@ -148,10 +138,7 @@ function SummaryRow({ label, a, b, invert = false, suffix = '/100', deltaSuffix 
                 {b != null && <span className="ml-0.5 text-[9px] text-white/25">{suffix}</span>}
             </div>
             <div className="min-w-[72px] text-right">
-                <LabPill
-                    label={deltaLabel(delta, { suffix: deltaSuffix })}
-                    tone={tone}
-                />
+                <LabPill label={deltaLabel(delta, { suffix: deltaSuffix })} tone={tone} />
             </div>
         </div>
     );
@@ -166,9 +153,7 @@ function SummaryTable({ rows, headerA, headerB }) {
                 <div className="text-right">{headerB}</div>
                 <div className="min-w-[72px] text-right">Écart</div>
             </div>
-            <div className="space-y-1 p-2">
-                {rows}
-            </div>
+            <div className="space-y-1 p-2">{rows}</div>
         </div>
     );
 }
@@ -194,7 +179,10 @@ function ListColumn({ label, items, tone, empty }) {
                             className="flex items-start gap-1.5 rounded-md border border-white/[0.04] bg-white/[0.01] px-2.5 py-1.5"
                         >
                             {item.severity && tone === 'bad' && (
-                                <LabPill label={severityFr(item.severity) || 'Info'} tone={severityTone(item.severity)} />
+                                <LabPill
+                                    label={severityFr(item.severity) || 'Info'}
+                                    tone={severityTone(item.severity)}
+                                />
                             )}
                             <span className="text-[11px] leading-snug text-white/75">
                                 {item.title || humanizeCategoryKey(item.id || item.category || 'point')}
@@ -218,12 +206,16 @@ function HeadlineDelta({ label, a, b, invert = false }) {
     return (
         <div className="flex flex-col items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">{label}</span>
-            <span className={`font-['Plus_Jakarta_Sans',sans-serif] text-[26px] font-extrabold leading-none tabular-nums ${textClass}`}>
+            <span
+                className={`font-['Plus_Jakarta_Sans',sans-serif] text-[26px] font-extrabold leading-none tabular-nums ${textClass}`}
+            >
                 {deltaLabel(delta, { suffix: '' })}
                 {delta != null && delta !== 0 && <span className="ml-0.5 text-[12px] text-white/35">pts</span>}
             </span>
             <span className="text-[9.5px] text-white/35">
-                {a == null ? '—' : a}<span className="text-white/20"> / </span>{b == null ? '—' : b}
+                {a == null ? '—' : a}
+                <span className="text-white/20"> / </span>
+                {b == null ? '—' : b}
             </span>
         </div>
     );
@@ -237,8 +229,18 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
             { key: 'final', label: 'Score Trouvable final', a: a.finalScore, b: b.finalScore, emphasize: true },
             { key: 'seo', label: 'Score SEO', a: a.seoScore, b: b.seoScore },
             { key: 'geo', label: 'Score GEO / local', a: a.geoScore, b: b.geoScore },
-            { key: 'layer1', label: 'Score brut du scan', a: siteA?.layer1?.overall ?? null, b: siteB?.layer1?.overall ?? null },
-            { key: 'layer2', label: 'Indicateur expert', a: siteA?.layer2?.summary_score ?? null, b: siteB?.layer2?.summary_score ?? null },
+            {
+                key: 'layer1',
+                label: 'Score brut du scan',
+                a: siteA?.layer1?.overall ?? null,
+                b: siteB?.layer1?.overall ?? null,
+            },
+            {
+                key: 'layer2',
+                label: 'Indicateur expert',
+                a: siteA?.layer2?.summary_score ?? null,
+                b: siteB?.layer2?.summary_score ?? null,
+            },
         ];
     }, [siteA, siteB]);
 
@@ -257,12 +259,8 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
         }));
     }, [siteA, siteB]);
 
-    const coverageA = siteA?.pagesScanned
-        ? `${siteA.pagesSuccessful}/${siteA.pagesScanned}`
-        : null;
-    const coverageB = siteB?.pagesScanned
-        ? `${siteB.pagesSuccessful}/${siteB.pagesScanned}`
-        : null;
+    const coverageA = siteA?.pagesScanned ? `${siteA.pagesSuccessful}/${siteA.pagesScanned}` : null;
+    const coverageB = siteB?.pagesScanned ? `${siteB.pagesSuccessful}/${siteB.pagesScanned}` : null;
 
     return (
         <div className="space-y-4">
@@ -288,13 +286,7 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
                 headerA="Côté A"
                 headerB="Côté B"
                 rows={summaryRows.map((row) => (
-                    <SummaryRow
-                        key={row.key}
-                        label={row.label}
-                        a={row.a}
-                        b={row.b}
-                        emphasize={row.emphasize}
-                    />
+                    <SummaryRow key={row.key} label={row.label} a={row.a} b={row.b} emphasize={row.emphasize} />
                 ))}
             />
 
@@ -303,7 +295,9 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
                 <ScoreCell label="Pages explorées — A" value={coverageA ?? '—'} suffix="" />
                 <ScoreCell label="Pages explorées — B" value={coverageB ?? '—'} suffix="" />
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Écart de couverture</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                        Écart de couverture
+                    </div>
                     <div className="mt-1 text-[14px] font-semibold tabular-nums text-white/80">
                         {siteA?.pagesSuccessful != null && siteB?.pagesSuccessful != null
                             ? deltaLabel(siteA.pagesSuccessful - siteB.pagesSuccessful, { suffix: ' pages' })
@@ -326,17 +320,41 @@ function ComparisonPanel({ siteA, siteB, labelA, labelB }) {
             {/* Issues / strengths columns */}
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="rounded-xl border border-violet-400/15 bg-violet-500/[0.02] p-3">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-violet-300/80">Côté A — points clés</div>
+                    <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-violet-300/80">
+                        Côté A — points clés
+                    </div>
                     <div className="grid grid-cols-1 gap-2">
-                        <ListColumn label="Problèmes majeurs" items={siteA?.issues || []} tone="bad" empty="Aucun problème majeur remonté." />
-                        <ListColumn label="Points forts" items={siteA?.strengths || []} tone="good" empty="Aucun point fort remonté." />
+                        <ListColumn
+                            label="Problèmes majeurs"
+                            items={siteA?.issues || []}
+                            tone="bad"
+                            empty="Aucun problème majeur remonté."
+                        />
+                        <ListColumn
+                            label="Points forts"
+                            items={siteA?.strengths || []}
+                            tone="good"
+                            empty="Aucun point fort remonté."
+                        />
                     </div>
                 </div>
                 <div className="rounded-xl border border-white/[0.08] bg-white/[0.015] p-3">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-white/60">Côté B — points clés</div>
+                    <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-white/60">
+                        Côté B — points clés
+                    </div>
                     <div className="grid grid-cols-1 gap-2">
-                        <ListColumn label="Problèmes majeurs" items={siteB?.issues || []} tone="bad" empty="Aucun problème majeur remonté." />
-                        <ListColumn label="Points forts" items={siteB?.strengths || []} tone="good" empty="Aucun point fort remonté." />
+                        <ListColumn
+                            label="Problèmes majeurs"
+                            items={siteB?.issues || []}
+                            tone="bad"
+                            empty="Aucun problème majeur remonté."
+                        />
+                        <ListColumn
+                            label="Points forts"
+                            items={siteB?.strengths || []}
+                            tone="good"
+                            empty="Aucun point fort remonté."
+                        />
                     </div>
                 </div>
             </div>
@@ -386,7 +404,10 @@ function HistoryMode({ clientId, currentAudit }) {
         return () => controller.abort();
     }, [clientId, currentAudit?.id]);
 
-    const snapshotA = useMemo(() => buildCompareSnapshotFromAudit(currentAudit, { label: 'Audit actuel' }), [currentAudit]);
+    const snapshotA = useMemo(
+        () => buildCompareSnapshotFromAudit(currentAudit, { label: 'Audit actuel' }),
+        [currentAudit],
+    );
     const selectedAudit = useMemo(() => {
         if (!history?.audits || !selectedId) return null;
         return history.audits.find((audit) => audit.id === selectedId) || null;
@@ -405,7 +426,12 @@ function HistoryMode({ clientId, currentAudit }) {
             pagesSuccessful: selectedAudit.pagesSuccessful || 0,
             classification: selectedAudit.classification,
             scores: {
-                finalScore: selectedAudit.hybridScore ?? selectedAudit.deterministicScore ?? selectedAudit.geoScore ?? selectedAudit.seoScore ?? null,
+                finalScore:
+                    selectedAudit.hybridScore ??
+                    selectedAudit.deterministicScore ??
+                    selectedAudit.geoScore ??
+                    selectedAudit.seoScore ??
+                    null,
                 seoScore: selectedAudit.seoScore,
                 geoScore: selectedAudit.geoScore,
                 deterministicScore: selectedAudit.deterministicScore,
@@ -434,9 +460,12 @@ function HistoryMode({ clientId, currentAudit }) {
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40">Audit à comparer</div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/40">
+                            Audit à comparer
+                        </div>
                         <p className="mt-0.5 text-[11px] text-white/55">
-                            Comparer l&#39;audit actuel ({formatDate(currentAudit.created_at)}) à l&#39;un des précédents.
+                            Comparer l&#39;audit actuel ({formatDate(currentAudit.created_at)}) à l&#39;un des
+                            précédents.
                         </p>
                     </div>
                     {loading && <span className="text-[11px] text-white/45">Chargement de l&#39;historique…</span>}
@@ -469,7 +498,9 @@ function HistoryMode({ clientId, currentAudit }) {
                                 >
                                     <span>{formatDate(audit.createdAt)}</span>
                                     <span className="text-white/30">·</span>
-                                    <span className={`tabular-nums ${scoreToneClass(audit.hybridScore ?? audit.deterministicScore ?? null)}`}>
+                                    <span
+                                        className={`tabular-nums ${scoreToneClass(audit.hybridScore ?? audit.deterministicScore ?? null)}`}
+                                    >
                                         {audit.hybridScore ?? audit.deterministicScore ?? '—'}
                                     </span>
                                 </button>
@@ -480,17 +511,14 @@ function HistoryMode({ clientId, currentAudit }) {
             </div>
 
             {snapshotA && snapshotB ? (
-                <ComparisonPanel
-                    siteA={snapshotA}
-                    siteB={snapshotB}
-                    labelA="Audit actuel"
-                    labelB={snapshotB.label}
-                />
-            ) : !loading && (
-                <LabEmptyState
-                    title="Sélectionnez un audit précédent"
-                    description="Choisissez un audit dans la liste ci-dessus pour afficher la comparaison."
-                />
+                <ComparisonPanel siteA={snapshotA} siteB={snapshotB} labelA="Audit actuel" labelB={snapshotB.label} />
+            ) : (
+                !loading && (
+                    <LabEmptyState
+                        title="Sélectionnez un audit précédent"
+                        description="Choisissez un audit dans la liste ci-dessus pour afficher la comparaison."
+                    />
+                )
             )}
         </div>
     );
@@ -533,7 +561,10 @@ function BenchmarkMode({ currentAudit }) {
         }
     }, [currentAudit, url, running]);
 
-    const snapshotA = useMemo(() => buildCompareSnapshotFromAudit(currentAudit, { label: 'Audit actuel' }), [currentAudit]);
+    const snapshotA = useMemo(
+        () => buildCompareSnapshotFromAudit(currentAudit, { label: 'Audit actuel' }),
+        [currentAudit],
+    );
     const snapshotB = result?.siteB || null;
 
     if (!currentAudit) {
@@ -562,8 +593,9 @@ function BenchmarkMode({ currentAudit }) {
                             disabled={running}
                         />
                         <p className="mt-1 text-[10.5px] text-white/40">
-                            L&#39;audit actuel du mandat sert de référence (« Côté A »). Le site externe est exploré en dry-run, sans persistance.
-                            L&#39;analyse IA narrative est désactivée pour rester reproductible.
+                            L&#39;audit actuel du mandat sert de référence (« Côté A »). Le site externe est exploré en
+                            dry-run, sans persistance. L&#39;analyse IA narrative est désactivée pour rester
+                            reproductible.
                         </p>
                     </div>
                     <div className="flex items-end">
@@ -654,7 +686,9 @@ function DryRunMode({ defaultUrlA }) {
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-3">
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_auto]">
                     <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Site A (référence)</div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                            Site A (référence)
+                        </div>
                         <input
                             type="url"
                             value={urlA}
@@ -665,7 +699,9 @@ function DryRunMode({ defaultUrlA }) {
                         />
                     </div>
                     <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">Site B (comparaison)</div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/40">
+                            Site B (comparaison)
+                        </div>
                         <input
                             type="url"
                             value={urlB}
@@ -687,7 +723,8 @@ function DryRunMode({ defaultUrlA }) {
                     </div>
                 </div>
                 <p className="mt-2 text-[10.5px] text-white/40">
-                    Les deux sites sont explorés en parallèle (~60–120 s). Rien n&#39;est enregistré : cette comparaison ne remplace pas un audit client officiel.
+                    Les deux sites sont explorés en parallèle (~60–120 s). Rien n&#39;est enregistré : cette comparaison
+                    ne remplace pas un audit client officiel.
                 </p>
                 {error && (
                     <p className="mt-2 rounded-md border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] text-red-300">
@@ -726,7 +763,13 @@ export default function AuditLabComparison({ clientId, currentAudit, defaultUrl,
     const [mode, setMode] = useState('history');
 
     return (
-        <section className={omitSectionHeader ? 'space-y-4' : 'rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.04] via-white/[0.01] to-transparent p-5'}>
+        <section
+            className={
+                omitSectionHeader
+                    ? 'space-y-4'
+                    : 'rounded-2xl border border-white/[0.10] bg-gradient-to-br from-white/[0.04] via-white/[0.01] to-transparent p-5'
+            }
+        >
             {!omitSectionHeader && (
                 <LabSectionHeader
                     eyebrow="Comparaison d'audits"

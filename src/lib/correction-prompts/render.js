@@ -20,12 +20,7 @@ const SECTION_LABELS = [
     ['formatDuLivrableFinal', 'Format du livrable final'],
 ];
 
-const STRING_SECTION_KEYS = new Set([
-    'mission',
-    'contexte',
-    'problemeDetecte',
-    'impactAttendu',
-]);
+const STRING_SECTION_KEYS = new Set(['mission', 'contexte', 'problemeDetecte', 'impactAttendu']);
 
 function normalizeLine(value) {
     return String(value || '').trim();
@@ -179,12 +174,10 @@ function buildConstraints(context, strict) {
     const base = normalizeList(context?.constraints?.absolute);
     const extras = strict
         ? [
-            'N utiliser en premiere passe que les chemins verifies fournis par le contexte.',
-            'Si aucune surface verifiee ne confirme le probleme, l ecrire clairement avant d elargir la recherche.',
-        ]
-        : [
-            'Commencer par les chemins verifies et la route observee avant toute exploration plus large.',
-        ];
+              'N utiliser en premiere passe que les chemins verifies fournis par le contexte.',
+              'Si aucune surface verifiee ne confirme le probleme, l ecrire clairement avant d elargir la recherche.',
+          ]
+        : ['Commencer par les chemins verifies et la route observee avant toute exploration plus large.'];
 
     return normalizeList([...base, ...extras]);
 }
@@ -199,28 +192,38 @@ function buildMustDo(context, strict) {
     if (verifiedPaths.length > 0) {
         items.push(`Inspecter d abord les chemins verifies suivants: ${verifiedPaths.join(', ')}.`);
     } else {
-        items.push("Identifier dans le repo la surface la plus probable avant toute modification, puis confirmer qu'elle produit bien le signal observe.");
+        items.push(
+            "Identifier dans le repo la surface la plus probable avant toute modification, puis confirmer qu'elle produit bien le signal observe.",
+        );
     }
 
-    items.push(sourceUrl
-        ? `Confirmer dans le code quel fichier ou helper produit reellement le signal observe sur ${sourceUrl}.`
-        : 'Confirmer dans le code quel fichier ou helper produit reellement le signal observe.');
+    items.push(
+        sourceUrl
+            ? `Confirmer dans le code quel fichier ou helper produit reellement le signal observe sur ${sourceUrl}.`
+            : 'Confirmer dans le code quel fichier ou helper produit reellement le signal observe.',
+    );
 
     if (categoryInstruction) {
         items.push(categoryInstruction);
     }
 
     if (recommendedFix && !recommendedFix.toLowerCase().includes('indisponible')) {
-        items.push(`Appliquer un correctif minimal coherent avec la piste deja suggeree par la source: ${recommendedFix}`);
+        items.push(
+            `Appliquer un correctif minimal coherent avec la piste deja suggeree par la source: ${recommendedFix}`,
+        );
     } else {
-        items.push('Appliquer un correctif minimal directement relie a la preuve audit ou expliquer honnetement pourquoi le probleme ne se reproduit pas dans le code actuel.');
+        items.push(
+            'Appliquer un correctif minimal directement relie a la preuve audit ou expliquer honnetement pourquoi le probleme ne se reproduit pas dans le code actuel.',
+        );
     }
 
     items.push('Verifier le rendu ou la route observee apres correction et noter le resultat dans le livrable.');
 
     if (strict) {
-        items.push("Si une seule surface source suffit, limiter la modification a cette surface.");
-        items.push("Si la preuve d'audit contredit le repo, arreter l'escalade et formuler le constat honnetement au lieu d'inventer une cause.");
+        items.push('Si une seule surface source suffit, limiter la modification a cette surface.');
+        items.push(
+            "Si la preuve d'audit contredit le repo, arreter l'escalade et formuler le constat honnetement au lieu d'inventer une cause.",
+        );
     }
 
     return normalizeList(items);
@@ -245,7 +248,9 @@ function buildMustNotDo(context, strict) {
 function buildValidation(context, strict) {
     const items = normalizeList(context?.validationTargets);
 
-    items.push('Confirmer que la preuve initiale est corrigee ou expliquer clairement pourquoi elle ne se reproduit pas.');
+    items.push(
+        'Confirmer que la preuve initiale est corrigee ou expliquer clairement pourquoi elle ne se reproduit pas.',
+    );
 
     if (strict) {
         items.push('Verifier que les fichiers effectivement modifies sont les seuls necessaires a la correction.');
@@ -289,9 +294,10 @@ function buildDeterministicVariant(context, variantName) {
             : `La surface pilote SEO Health classe ce signal comme ${truthLabel} avec une confiance ${confidence}. Repere repo: ${repoFactsSentence}`,
         problemeDetecte: `${description}${sourceUrl ? ` Surface observee: ${sourceUrl}.` : ''}`,
         preuveDisponible: buildEvidenceList(context),
-        impactAttendu: recommendedFix && !recommendedFix.toLowerCase().includes('indisponible')
-            ? `Obtenir un correctif minimal qui traite la preuve observee et aligne le rendu ou la route concernee. Piste issue de la source: ${recommendedFix}`
-            : 'Obtenir un correctif minimal qui traite la preuve observee ou, si le probleme ne se reproduit pas dans le code actuel, le documenter honnetement sans inventer de cause.',
+        impactAttendu:
+            recommendedFix && !recommendedFix.toLowerCase().includes('indisponible')
+                ? `Obtenir un correctif minimal qui traite la preuve observee et aligne le rendu ou la route concernee. Piste issue de la source: ${recommendedFix}`
+                : 'Obtenir un correctif minimal qui traite la preuve observee ou, si le probleme ne se reproduit pas dans le code actuel, le documenter honnetement sans inventer de cause.',
         fichiersOuSurfacesAInspecter: normalizeList(context?.inspectionTargets),
         contraintesAbsolues: buildConstraints(context, strict),
         ceQueLiaDoitFaire: buildMustDo(context, strict),
@@ -376,23 +382,20 @@ function mergeWithContext(context, variantName, rawVariant) {
             sanitizeGeneratedList(rawVariant?.validationAttendue, { verifiedPaths, allowExternalUrls: false }),
         ),
         formatDuLivrableFinal: fallback.formatDuLivrableFinal,
-        donneesManquantes: mergeUnique(
-            fallback.donneesManquantes,
-            normalizeListLike(rawVariant?.donneesManquantes),
-        ),
+        donneesManquantes: mergeUnique(fallback.donneesManquantes, normalizeListLike(rawVariant?.donneesManquantes)),
     };
 }
 
 export function finalizeCorrectionPromptPayload(payload, context = null) {
     const finalized = context
         ? {
-            standard: mergeWithContext(context, 'standard', payload?.standard),
-            strict: mergeWithContext(context, 'strict', payload?.strict),
-        }
+              standard: mergeWithContext(context, 'standard', payload?.standard),
+              strict: mergeWithContext(context, 'strict', payload?.strict),
+          }
         : {
-            standard: coerceLooseVariant(payload?.standard),
-            strict: coerceLooseVariant(payload?.strict),
-        };
+              standard: coerceLooseVariant(payload?.standard),
+              strict: coerceLooseVariant(payload?.strict),
+          };
 
     assertCorrectionPromptPayload(finalized);
 

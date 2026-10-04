@@ -13,17 +13,25 @@ import { registerTask } from './registry.js';
 
 const briefingSchema = z.object({
     headline: z.string().describe('One-line reading of the community intelligence state'),
-    key_findings: z.array(z.object({
-        finding: z.string(),
-        evidence: z.string(),
-        importance: z.enum(['high', 'medium', 'low']),
-    })).default([]),
+    key_findings: z
+        .array(
+            z.object({
+                finding: z.string(),
+                evidence: z.string(),
+                importance: z.enum(['high', 'medium', 'low']),
+            }),
+        )
+        .default([]),
     pain_points: z.array(z.string()).default([]),
     buying_signals: z.array(z.string()).default([]),
-    recommended_actions: z.array(z.object({
-        action: z.string(),
-        reason: z.string(),
-    })).default([]),
+    recommended_actions: z
+        .array(
+            z.object({
+                action: z.string(),
+                reason: z.string(),
+            }),
+        )
+        .default([]),
     seed_assessment: z.string().optional().describe('Brief assessment of seed quality and coverage'),
     run_explanation: z.string().optional().describe('Clear explanation of why the run was weak/empty if applicable'),
 });
@@ -46,31 +54,46 @@ function buildMessages(input) {
         querySeeds,
     } = input;
 
-    const seedSummary = (querySeeds || []).length > 0
-        ? `Seeds utilisés : ${querySeeds.join(', ')}`
-        : 'Aucun seed configuré.';
+    const seedSummary =
+        (querySeeds || []).length > 0 ? `Seeds utilisés : ${querySeeds.join(', ')}` : 'Aucun seed configuré.';
 
-    const seedDiagSummary = (seedDiagnostics || []).map((sd, i) =>
-        `  ${i + 1}. "${sd.seed}" → ${sd.status === 'ok' ? `${sd.results} résultat(s)` : `erreur: ${sd.detail || 'inconnue'}`}`
-    ).join('\n') || '  Aucun diagnostic de seed disponible.';
+    const seedDiagSummary =
+        (seedDiagnostics || [])
+            .map(
+                (sd, i) =>
+                    `  ${i + 1}. "${sd.seed}" → ${sd.status === 'ok' ? `${sd.results} résultat(s)` : `erreur: ${sd.detail || 'inconnue'}`}`,
+            )
+            .join('\n') || '  Aucun diagnostic de seed disponible.';
 
-    const clusterSummary = (clusters || []).length > 0
-        ? clusters.slice(0, 20).map((c, i) =>
-            `  ${i + 1}. [${c.cluster_type}] "${c.label}" — ${c.mention_count} mentions (preuve: ${c.evidence_level || 'low'})`
-        ).join('\n')
-        : '  Aucun cluster détecté.';
+    const clusterSummary =
+        (clusters || []).length > 0
+            ? clusters
+                  .slice(0, 20)
+                  .map(
+                      (c, i) =>
+                          `  ${i + 1}. [${c.cluster_type}] "${c.label}" — ${c.mention_count} mentions (preuve: ${c.evidence_level || 'low'})`,
+                  )
+                  .join('\n')
+            : '  Aucun cluster détecté.';
 
-    const oppSummary = (opportunities || []).length > 0
-        ? opportunities.slice(0, 10).map((o, i) =>
-            `  ${i + 1}. [${o.opportunity_type}] "${o.title}" — preuve: ${o.evidence_level || 'low'}, ${o.mention_count || 0} mentions`
-        ).join('\n')
-        : '  Aucune opportunité dérivée.';
+    const oppSummary =
+        (opportunities || []).length > 0
+            ? opportunities
+                  .slice(0, 10)
+                  .map(
+                      (o, i) =>
+                          `  ${i + 1}. [${o.opportunity_type}] "${o.title}" — preuve: ${o.evidence_level || 'low'}, ${o.mention_count || 0} mentions`,
+                  )
+                  .join('\n')
+            : '  Aucune opportunité dérivée.';
 
     const isWeak = (documentsCollected || 0) === 0 || (clusters || []).length === 0;
 
     // Detect source access failure from seed diagnostics
     const errorSeeds = (seedDiagnostics || []).filter((sd) => sd.status === 'error');
-    const accessBlockedSeeds = errorSeeds.filter((sd) => sd.http_status === 403 || sd.failure_class === 'source_access_failure');
+    const accessBlockedSeeds = errorSeeds.filter(
+        (sd) => sd.http_status === 403 || sd.failure_class === 'source_access_failure',
+    );
     const isAccessBlocked = accessBlockedSeeds.length > 0 && accessBlockedSeeds.length >= errorSeeds.length * 0.5;
     const isAllBlocked = errorSeeds.length === (seedDiagnostics || []).length && errorSeeds.length > 0;
 
@@ -78,7 +101,7 @@ function buildMessages(input) {
         {
             role: 'system',
             content: [
-                'Tu es un analyste d\'intelligence communautaire pour un opérateur de visibilité locale.',
+                "Tu es un analyste d'intelligence communautaire pour un opérateur de visibilité locale.",
                 'Tu rédiges un briefing opérateur concis et factuel à partir des données de collecte communautaire.',
                 '',
                 'Règles strictes :',
@@ -87,8 +110,8 @@ function buildMessages(input) {
                 '- headline : une phrase de synthèse de la situation actuelle.',
                 '- key_findings : les 3-5 constats les plus importants, chacun avec une preuve concrète.',
                 '- pain_points : les irritants récurrents détectés (vide si aucun).',
-                '- buying_signals : les signaux d\'achat ou d\'évaluation détectés (vide si aucun).',
-                '- recommended_actions : 2-4 actions concrètes que l\'opérateur peut prendre.',
+                "- buying_signals : les signaux d'achat ou d'évaluation détectés (vide si aucun).",
+                "- recommended_actions : 2-4 actions concrètes que l'opérateur peut prendre.",
                 '- seed_assessment : évaluation brève de la qualité et couverture des seeds.',
                 '- run_explanation : si la collecte est faible/vide, explication claire et rassurante.',
                 '- Écris en français.',
@@ -116,19 +139,19 @@ function buildMessages(input) {
                 oppSummary,
                 '',
                 isWeak
-                    ? (isAccessBlocked || isAllBlocked)
+                    ? isAccessBlocked || isAllBlocked
                         ? [
-                            'IMPORTANT : La collecte a échoué à cause d\'un blocage d\'accès technique (HTTP 403).',
-                            `${accessBlockedSeeds.length} seed(s) sur ${(seedDiagnostics || []).length} ont été bloqués.`,
-                            'Cela signifie que la source a rejeté les requêtes — ce n\'est PAS une absence de signal marché.',
-                            'Dans ton briefing :',
-                            '- headline doit clairement indiquer un échec d\'accès technique, pas un manque de signaux.',
-                            '- run_explanation doit expliquer que la collecte a été bloquée par la source.',
-                            '- recommended_actions doit être orienté remédiation technique (pas d\'ajustement de seeds ou de contenu).',
-                            '- NE PAS conclure qu\'il n\'y a pas d\'opportunités ou de signaux marché.',
-                        ].join('\n')
+                              "IMPORTANT : La collecte a échoué à cause d'un blocage d'accès technique (HTTP 403).",
+                              `${accessBlockedSeeds.length} seed(s) sur ${(seedDiagnostics || []).length} ont été bloqués.`,
+                              "Cela signifie que la source a rejeté les requêtes — ce n'est PAS une absence de signal marché.",
+                              'Dans ton briefing :',
+                              "- headline doit clairement indiquer un échec d'accès technique, pas un manque de signaux.",
+                              '- run_explanation doit expliquer que la collecte a été bloquée par la source.',
+                              "- recommended_actions doit être orienté remédiation technique (pas d'ajustement de seeds ou de contenu).",
+                              "- NE PAS conclure qu'il n'y a pas d'opportunités ou de signaux marché.",
+                          ].join('\n')
                         : 'NOTE : la collecte semble faible ou vide. Explique clairement pourquoi dans run_explanation et propose des actions correctives dans recommended_actions.'
-                    : 'Synthétise les signaux les plus importants pour l\'opérateur.',
+                    : "Synthétise les signaux les plus importants pour l'opérateur.",
                 '',
                 'Génère le briefing en JSON : { "briefing": { "headline": "...", "key_findings": [...], "pain_points": [...], "buying_signals": [...], "recommended_actions": [...], "seed_assessment": "...", "run_explanation": "..." } }',
             ].join('\n'),

@@ -23,10 +23,10 @@ function categoryToDimension(category) {
 function statusToPriority(status, weight) {
     const normalized = String(status || '').toLowerCase();
     if (normalized === 'fail') {
-        return (weight && weight >= 2) ? 'critical' : 'high';
+        return weight && weight >= 2 ? 'critical' : 'high';
     }
     if (normalized === 'warn') {
-        return (weight && weight >= 2) ? 'high' : 'medium';
+        return weight && weight >= 2 ? 'high' : 'medium';
     }
     return 'low';
 }
@@ -88,8 +88,9 @@ export function buildLayer1CorrectionPromptContext({ client, audit, ref }) {
     const category = compactString(check?.category) || 'technical';
     const status = compactString(check?.status) || 'fail';
     const weight = Number.isFinite(check?.weight) ? check.weight : 1;
-    const evidence = compactString(check?.evidence)
-        || `Check ${check?.check_id} a renvoyé le statut ${status} avec un poids ${weight}.`;
+    const evidence =
+        compactString(check?.evidence) ||
+        `Check ${check?.check_id} a renvoyé le statut ${status} avec un poids ${weight}.`;
     const title = `Layer 1 · ${check?.check_id || 'check'} (${status}) sur ${pageUrl || 'le scan global'}`;
     const dimension = categoryToDimension(category);
     const priority = statusToPriority(status, weight);
@@ -105,7 +106,8 @@ export function buildLayer1CorrectionPromptContext({ client, audit, ref }) {
         truth_class: 'observed',
         confidence: 'high',
         evidence,
-        recommendedFix: 'Corriger la cause technique à l\'origine du statut fail/warn de ce check Layer 1 après inspection du code concerné.',
+        recommendedFix:
+            "Corriger la cause technique à l'origine du statut fail/warn de ce check Layer 1 après inspection du code concerné.",
         sourceUrl: pageUrl,
         affectedScope: pageUrl ? 'page' : 'sitewide',
     };
