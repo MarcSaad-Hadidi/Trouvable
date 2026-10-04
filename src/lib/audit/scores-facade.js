@@ -1,20 +1,9 @@
 /**
- * scores-facade — lecture canonique des scores d'audit.
- *
- * Contexte :
- *   - Les audits exposent à la fois des champs legacy (`seo_score`, `geo_score`,
- *     `seo_breakdown`, `geo_breakdown`) et la nouvelle structure layered
- *     (`extracted_data.layered_v1.dimension_scores`, `layer1`, `layer2`).
- *   - Les surfaces consommatrices mélangent les deux, créant des incohérences
- *     subtiles (ex. un badge "Santé SEO" basé sur `seo_score` pendant que la
- *     surface Lab affiche `dimension_scores.technical_seo`).
- *
- * Cette façade fournit des accesseurs uniques + métadonnées sur la provenance
- * (measured | calculated | ai | unavailable) alignés sur les libellés produit
- * (Mesurée / Calculée / Analyse IA / Indisponible).
- *
- * Règle d'or : aucune surface ne doit lire directement `audit.seo_score` ;
- * passer par `readSeoScore(audit)` pour bénéficier des fallbacks + provenance.
+ * Lecture des scores et dimensions d'audit avec leur source effective.
+ * Les dimensions finales layered et les formats historiques restent lisibles.
+ * Ces accesseurs servent les consommateurs de la façade ; d'autres surfaces
+ * lisent encore les colonnes legacy directement. Les scores hybrides et les
+ * diagnostics des sous-systèmes restent des concepts distincts.
  */
 
 import { finiteNumberOrNull } from '../numbers.js';
@@ -27,12 +16,12 @@ function clampScore(value) {
     return Math.round(numeric);
 }
 
-function firstNumber(...candidates) {
-    for (const candidate of candidates) {
-        const parsed = clampScore(candidate);
-        if (parsed !== null) return parsed;
+function firstScore(...candidates) {
+    for (const [candidate, source] of candidates) {
+        const value = clampScore(candidate);
+        if (value !== null) return { value, source };
     }
-    return null;
+    return { value: null, source: 'none' };
 }
 
 function getLayeredRoot(audit) {
@@ -45,14 +34,11 @@ function getLayeredRoot(audit) {
 
 function getDimensionScores(audit) {
     const layered = getLayeredRoot(audit);
-    if (layered?.dimension_scores && typeof layered.dimension_scores === 'object') {
-        return layered.dimension_scores;
-    }
-    const extracted = audit?.extracted_data;
-    if (extracted?.dimension_scores && typeof extracted.dimension_scores === 'object') {
-        return extracted.dimension_scores;
-    }
-    return null;
+    return [
+        { scores: layered?.final_trouvable_score?.dimension_scores, source: 'layered.final_trouvable_score.dimension_scores' },
+        { scores: layered?.dimension_scores, source: 'layered.dimension_scores' },
+        { scores: audit?.extracted_data?.dimension_scores, source: 'extracted.dimension_scores' },
+    ].filter(({ scores }) => scores && typeof scores === 'object');
 }
 
 function dimensionValue(dimensionScores, key) {
@@ -65,17 +51,22 @@ function dimensionValue(dimensionScores, key) {
     return clampScore(raw);
 }
 
-function provenanceLabel(kind) {
-    switch (kind) {
-        case 'measured':
-            return 'Mesurée';
-        case 'calculated':
-            return 'Calculée';
-        case 'ai':
-            return 'Analyse IA';
-        default:
-            return 'Indisponible';
+function getDimensionReading(audit, key) {
+    for (const { scores, source } of getDimensionScores(audit)) {
+        const value = dimensionValue(scores, key);
+        if (value !== null) return { value, source: source + '.' + key };
     }
+    return { value: null, source: 'none' };
+}
+
+/** @returns {ScoreReading} */
+function scoreReading({ value, source }) {
+    return {
+        value,
+        provenance: value === null ? 'unavailable' : 'calculated',
+        provenanceLabel: value === null ? 'Indisponible' : 'Calculée',
+        source,
+    };
 }
 
 /**
@@ -88,100 +79,43 @@ function provenanceLabel(kind) {
 
 /** @returns {ScoreReading} */
 export function readSeoScore(audit) {
-    const dimensionScores = getDimensionScores(audit);
-    const layeredValue = dimensionValue(dimensionScores, 'technical_seo');
-    if (layeredValue !== null) {
-        return {
-            value: layeredValue,
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'layered.dimension_scores.technical_seo',
-        };
-    }
-
-    const legacy = firstNumber(audit?.seo_score, audit?.breakdown?.technical_seo?.score);
-    if (legacy !== null) {
-        return {
-            value: legacy,
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'legacy.seo_score',
-        };
-    }
-
-    return {
-        value: null,
-        provenance: 'unavailable',
-        provenanceLabel: provenanceLabel('unavailable'),
-        source: 'none',
-    };
+    const layered = getDimensionReading(audit, 'technical_seo');
+    return scoreReading(firstScore(
+        [layered.value, layered.source],
+        [audit?.seo_score, 'legacy.seo_score'],
+        [audit?.breakdown?.technical_seo?.score, 'legacy.breakdown.technical_seo'],
+    ));
 }
 
 /** @returns {ScoreReading} */
 export function readGeoScore(audit) {
-    const dimensionScores = getDimensionScores(audit);
-    const layeredValue = dimensionValue(dimensionScores, 'local_readiness')
-        ?? dimensionValue(dimensionScores, 'ai_answerability');
-    if (layeredValue !== null) {
-        return {
-            value: layeredValue,
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'layered.dimension_scores.local_readiness',
-        };
-    }
-
-    const legacy = firstNumber(audit?.geo_score, audit?.breakdown?.local_readiness?.score);
-    if (legacy !== null) {
-        return {
-            value: legacy,
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'legacy.geo_score',
-        };
-    }
-
-    return {
-        value: null,
-        provenance: 'unavailable',
-        provenanceLabel: provenanceLabel('unavailable'),
-        source: 'none',
-    };
+    const local = getDimensionReading(audit, 'local_readiness');
+    const layered = local.value !== null ? local : getDimensionReading(audit, 'ai_answerability');
+    return scoreReading(firstScore(
+        [layered.value, layered.source],
+        [audit?.geo_score, 'legacy.geo_score'],
+        [audit?.breakdown?.local_readiness?.score, 'legacy.breakdown.local_readiness'],
+    ));
 }
 
 /** @returns {ScoreReading} */
 export function readOverallScore(audit) {
-    const overall = firstNumber(
-        audit?.deterministic_score,
-        audit?.overall_score,
-        audit?.breakdown?.overall?.score,
+    // Preserve historical overall priority before deterministic persisted alternatives.
+    const reading = firstScore(
+        [audit?.deterministic_score, 'deterministic_score'],
+        [audit?.overall_score, 'overall_score'],
+        [audit?.breakdown?.overall?.score, 'legacy.breakdown.overall.score'],
+        [getLayeredRoot(audit)?.final_trouvable_score?.deterministic_score, 'layered.final_trouvable_score.deterministic_score'],
+        [audit?.seo_breakdown?.overall?.deterministic_score, 'legacy.seo_breakdown.overall.deterministic_score'],
+        [audit?.geo_breakdown?.overall?.deterministic_score, 'legacy.geo_breakdown.overall.deterministic_score'],
     );
-    if (overall !== null) {
-        return {
-            value: overall,
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'deterministic_score',
-        };
-    }
+    if (reading.value !== null) return scoreReading(reading);
 
     const seo = readSeoScore(audit);
     const geo = readGeoScore(audit);
-    if (seo.value !== null && geo.value !== null) {
-        return {
-            value: Math.round((seo.value + geo.value) / 2),
-            provenance: 'calculated',
-            provenanceLabel: provenanceLabel('calculated'),
-            source: 'derived.seo+geo/2',
-        };
-    }
-
-    return {
-        value: null,
-        provenance: 'unavailable',
-        provenanceLabel: provenanceLabel('unavailable'),
-        source: 'none',
-    };
+    return scoreReading(seo.value !== null && geo.value !== null
+        ? { value: Math.round((seo.value + geo.value) / 2), source: 'derived.seo+geo/2' }
+        : reading);
 }
 
 /**
@@ -190,50 +124,14 @@ export function readOverallScore(audit) {
  * @returns {Record<string, ScoreReading>}
  */
 export function readDimensions(audit) {
-    const keys = [
-        'technical_seo',
-        'local_readiness',
-        'ai_answerability',
-        'trust_signals',
-        'identity_completeness',
-    ];
-    const dimensionScores = getDimensionScores(audit);
+    const keys = ['technical_seo', 'local_readiness', 'ai_answerability', 'trust_signals', 'identity_completeness'];
     const result = {};
     for (const key of keys) {
-        const value = dimensionValue(dimensionScores, key);
-        if (value !== null) {
-            result[key] = {
-                value,
-                provenance: 'calculated',
-                provenanceLabel: provenanceLabel('calculated'),
-                source: `layered.dimension_scores.${key}`,
-            };
-        } else {
-            const legacyValue = firstNumber(audit?.breakdown?.[key]?.score);
-            result[key] = legacyValue !== null
-                ? {
-                    value: legacyValue,
-                    provenance: 'calculated',
-                    provenanceLabel: provenanceLabel('calculated'),
-                    source: `legacy.breakdown.${key}`,
-                }
-                : {
-                    value: null,
-                    provenance: 'unavailable',
-                    provenanceLabel: provenanceLabel('unavailable'),
-                    source: 'none',
-                };
-        }
+        const layered = getDimensionReading(audit, key);
+        result[key] = scoreReading(firstScore(
+            [layered.value, layered.source],
+            [audit?.breakdown?.[key]?.score, 'legacy.breakdown.' + key],
+        ));
     }
     return result;
-}
-
-export function hasLayeredAudit(audit) {
-    return getLayeredRoot(audit) !== null;
-}
-
-export function getAuditReliability(audit) {
-    if (hasLayeredAudit(audit)) return 'calculated';
-    if (readSeoScore(audit).value !== null || readGeoScore(audit).value !== null) return 'calculated';
-    return 'unavailable';
 }
