@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const geoCompareViewMock = vi.fn(() => null);
 const redirectMock = vi.fn();
@@ -20,8 +21,10 @@ describe('geo compare route wiring', () => {
     it('keeps global route in free mode', async () => {
         const { default: GeoComparePage } = await import('@/app/admin/(workspace)/geo-compare/page');
         const element = GeoComparePage();
-        expect(element.type).toBe(geoCompareViewMock);
-        expect(element.props).toEqual({});
+        renderToStaticMarkup(element);
+        expect(geoCompareViewMock).toHaveBeenCalledTimes(1);
+        expect(geoCompareViewMock.mock.calls[0][0]).toEqual({});
+        expect(useGeoClientMock).not.toHaveBeenCalled();
     });
 
     it('wires client route with linked client context', async () => {
@@ -33,8 +36,9 @@ describe('geo compare route wiring', () => {
         const { default: ClientGeoComparePage } =
             await import('@/app/admin/(workspace)/clients/[clientId]/geo/compare/page');
         const element = ClientGeoComparePage();
-        expect(element.type).toBe(geoCompareViewMock);
-        expect(element.props).toEqual({
+        renderToStaticMarkup(element);
+        expect(geoCompareViewMock).toHaveBeenCalledTimes(1);
+        expect(geoCompareViewMock.mock.calls[0][0]).toEqual({
             linkedClientId: 'client-123',
             linkedClientName: 'Trouvable Test',
         });
