@@ -65,7 +65,7 @@ Adapter ces deux chemins absolus au poste ; le dossier de preuves doit rester ho
 
 Le mode `production` utilise `next start`, sans bypass ni clés simulées. Le mode `fixture` utilise des données Supabase synthétiques en lecture seule, le garde d’accès de développement localhost existant et une UI Clerk anonyme simulée. Les requêtes externes et les mutations sont bloquées ; `--allow-fonts` autorise uniquement Google Fonts HTTPS pour la compilation de développement. Ces fixtures ne valident pas une session Clerk, un membership ou la RLS distante.
 
-Les codes de sortie distinguent succès (0), régression ou préparation manquante (1), et couverture bloquée par configuration absente (2). Les captures, traces, console et relevés Network/Performance restent dans le dossier de preuves ; lire les blocages et avertissements au lieu d’assimiler toutes les captures à une validation.
+Les codes de sortie distinguent succès (0), régression ou préparation manquante (1), et couverture bloquée par configuration absente (2). Les captures, la console et les relevés Network/Performance restent dans le dossier de preuves ; lire les blocages et avertissements au lieu d’assimiler toutes les captures à une validation.
 
 ## Git et review
 
