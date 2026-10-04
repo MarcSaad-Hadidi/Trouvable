@@ -45,6 +45,11 @@ export default function GeoModelesView() {
 
     const variantsCatalog = data?.benchmark?.variantsCatalog || EMPTY_ROWS;
 
+    const observationsUnavailable =
+        ['runs', 'recentRuns', 'benchmarks'].some((source) => data?.dataSources?.[source] === 'unavailable') ||
+        data?.modelPerformance === null ||
+        data?.benchmark?.sessions === null;
+
     const allModels = useMemo(() => {
         if (!data) return [];
         const observed = data?.modelPerformance || [];
@@ -99,10 +104,7 @@ export default function GeoModelesView() {
             const obs = observedMap.get(key);
             const bench = benchmarkVariantMap.get(variant.id);
             const aggregateCount = (field) =>
-                observedRunsUnavailable ||
-                dataSources.benchmarks === 'unavailable' ||
-                obs?.[field] === null ||
-                bench?.[field] === null
+                observationsUnavailable || obs?.[field] === null || bench?.[field] === null
                     ? null
                     : (obs?.[field] ?? 0) + (bench?.[field] ?? 0);
             const totalRuns = aggregateCount('runs');
@@ -154,9 +156,11 @@ export default function GeoModelesView() {
             if (a.hasData !== b.hasData) return a.hasData ? -1 : 1;
             return b.runs - a.runs;
         });
-    }, [data]);
+    }, [data, observationsUnavailable]);
 
-    const mostTestedModel = allModels.find((row) => row.hasData && Number.isFinite(row.runs) && row.runs > 0);
+    const mostTestedModel = observationsUnavailable
+        ? null
+        : allModels.find((row) => row.hasData && Number.isFinite(row.runs) && row.runs > 0);
 
     const hasTargetRate = Number.isFinite(mostTestedModel?.targetRatePercent);
 
@@ -262,7 +266,7 @@ export default function GeoModelesView() {
                 />
                 <CommandMetricCard
                     label="Audités"
-                    value={allModels.filter((m) => m.hasData).length}
+                    value={observationsUnavailable ? 'n.d.' : allModels.filter((m) => m.hasData).length}
                     detail="Sur catalogue"
                     tone="neutral"
                 />
@@ -312,7 +316,7 @@ export default function GeoModelesView() {
                                                 : 'border-white/5 text-white/20',
                                         )}
                                     >
-                                        {row.hasData ? 'Active' : 'Untested'}
+                                        {row.hasData ? 'Active' : observationsUnavailable ? 'Indisponible' : 'Untested'}
                                     </div>
                                 </div>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 mb-1">
@@ -325,7 +329,9 @@ export default function GeoModelesView() {
                                 {row.hasData ? (
                                     <div className="mt-auto grid grid-cols-3 gap-4 pt-6 border-t border-white/5">
                                         <div>
-                                            <div className="text-[9px] font-bold uppercase text-white/20">ROI</div>
+                                            <div className="text-[9px] font-bold uppercase text-white/20">
+                                                Détection
+                                            </div>
                                             <div className="text-[16px] font-bold text-emerald-400">
                                                 {(row.targetRatePercent ?? null) === null
                                                     ? 'n.d.'
@@ -347,7 +353,9 @@ export default function GeoModelesView() {
                                     </div>
                                 ) : (
                                     <div className="mt-auto pt-6 border-t border-white/5 text-[10px] text-white/10 uppercase tracking-widest font-bold">
-                                        Aucune donnée disponible
+                                        {observationsUnavailable
+                                            ? 'Données temporairement indisponibles'
+                                            : 'Aucune donnée disponible'}
                                     </div>
                                 )}
                             </div>

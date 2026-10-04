@@ -35,7 +35,7 @@ describe('model laboratory availability', () => {
         const text = renderModels(0, []);
         expect(text).toContain('Sources0');
         expect(text).toContain('Sessions0');
-        expect(text).toContain('ROI0%');
+        expect(text).toContain('Détection0%');
         expect(text).toContain('Taux de détection0%');
         expect(text).toContain('Plus testéFixture');
     });
@@ -76,7 +76,7 @@ describe('model laboratory availability', () => {
         };
         const text = renderToStaticMarkup(<GeoModelesView />).replace(/<[^>]*>/g, '');
         expect(text.split('Runsn.d.').length - 1).toBe(2);
-        expect(text.split('ROIn.d.').length - 1).toBe(2);
+        expect(text.split('Détectionn.d.').length - 1).toBe(2);
         expect(text.split('Sourcesn.d.').length - 1).toBe(2);
         expect(text).toContain('Taux de détectionn.d.');
         expect(text).toContain('Plus testén.d.');
@@ -100,7 +100,7 @@ describe('model laboratory availability', () => {
         };
         const text = renderToStaticMarkup(<GeoModelesView />).replace(/<[^>]*>/g, '');
         expect(text).toContain('Runs0');
-        expect(text).toContain('ROIn.d.');
+        expect(text).toContain('Détectionn.d.');
         expect(text).toContain('Sources0');
         expect(text).toContain('Taux de détectionn.d.');
         expect(text).toContain('Plus testén.d.');
@@ -121,12 +121,13 @@ describe('model laboratory observed summary and page scroll', () => {
                 label: 'Tavily (Web orchestre)',
             },
         ],
+        sessions = [],
     ) {
         fixture.data = {
             status: Object.values(dataSources).includes('unavailable') ? 'partial' : 'available',
             dataSources,
             modelPerformance: rows,
-            benchmark: { variantsCatalog, sessions: [] },
+            benchmark: { variantsCatalog, sessions },
         };
         return renderToStaticMarkup(<GeoModelesView />);
     }
@@ -141,7 +142,7 @@ describe('model laboratory observed summary and page scroll', () => {
     }
 
     it('keeps catalogue variants untested without manufacturing a zero rate or leader', () => {
-        const text = visibleText(renderFixture());
+        const text = visibleText(renderFixture([], { runs: 'empty', recentRuns: 'empty', benchmarks: 'empty' }));
         expectNoSummaryObservation(text);
         expect(text).toContain('Untested');
         expect(text).toContain('Aucune donnée disponible');
@@ -160,7 +161,7 @@ describe('model laboratory observed summary and page scroll', () => {
                 ),
             );
             expectNoSummaryObservation(text);
-            expect(text).toContain('ROIn.d.');
+            expect(text).toContain('Détectionn.d.');
             expect(text).toContain('Runsn.d.');
         },
     );
@@ -174,7 +175,7 @@ describe('model laboratory observed summary and page scroll', () => {
         );
         expect(text).toContain('Plus testémost-testedExécutions observées');
         expect(text).toContain('Taux de détection20%Modèle le plus testé');
-        expect(text).toContain('ROI100%');
+        expect(text).toContain('Détection100%');
         expect(text).not.toContain('Recommandé');
         expect(text).not.toContain('Meilleur modèle');
         expect(text).not.toContain('Top Rate');
@@ -187,7 +188,7 @@ describe('model laboratory observed summary and page scroll', () => {
             ]),
         );
         expectNoSummaryObservation(text);
-        expect(text).toContain('ROIn.d.');
+        expect(text).toContain('Détectionn.d.');
         expect(text).toContain('Runs0');
         expect(text).toContain('Sources0');
         expect(text).toContain('Sessions0');
@@ -199,7 +200,7 @@ describe('model laboratory observed summary and page scroll', () => {
         );
         expect(text).toContain('Taux de détectionn.d.');
         expect(text).toContain('Plus testéunknown-targetExécutions observées');
-        expect(text).toContain('ROIn.d.');
+        expect(text).toContain('Détectionn.d.');
         expect(text).toContain('Runs2');
     });
 
@@ -212,9 +213,50 @@ describe('model laboratory observed summary and page scroll', () => {
         );
         expect(text).toContain('Plus testémost-tested-unknownExécutions observées');
         expect(text).toContain('Taux de détectionn.d.Modèle le plus testé');
-        expect(text).toContain('ROIn.d.Runs100');
-        expect(text).toContain('ROI100%Runs2');
+        expect(text).toContain('Détectionn.d.Runs100');
+        expect(text).toContain('Détection100%Runs2');
         expect(text).not.toContain('Plus testéknown-rate');
+    });
+    it.each(['runs', 'recentRuns', 'benchmarks'])(
+        'treats compatible empty observations as unknown after the %s source failed',
+        (source) => {
+            const text = visibleText(renderFixture([], { [source]: 'unavailable' }));
+            expectNoSummaryObservation(text);
+            expect(text).toContain('Auditésn.d.');
+            expect(text).toContain('Indisponible');
+            expect(text).not.toContain('Untested');
+            expect(text).not.toContain('Aucune donnée disponible');
+        },
+    );
+
+    it.each(['modelPerformance', 'sessions'])('keeps an explicitly null %s inventory unavailable', (field) => {
+        const text = visibleText(
+            renderFixture(field === 'modelPerformance' ? null : [], {}, undefined, field === 'sessions' ? null : []),
+        );
+        expectNoSummaryObservation(text);
+        expect(text).toContain('Auditésn.d.');
+        expect(text).toContain('Indisponible');
+        expect(text).not.toContain('Untested');
+        expect(text).not.toContain('Aucune donnée disponible');
+    });
+
+    it('keeps independent outside-catalogue measurements without claiming a global ranking when benchmarks fail', () => {
+        const text = visibleText(
+            renderFixture(
+                [
+                    { provider: 'catalogue', model: 'catalogue-two-runs', runs: 2, targetFound: 1, sources: 0 },
+                    { provider: 'outside', model: 'outside-one-run', runs: 1, targetFound: 0, sources: 0 },
+                ],
+                { benchmarks: 'unavailable' },
+                [{ id: 'catalogue-variant', provider: 'catalogue', model: 'catalogue-two-runs', label: 'Catalogue' }],
+            ),
+        );
+        expectNoSummaryObservation(text);
+        expect(text).toContain('Auditésn.d.');
+        expect(text).toContain('Sessionsn.d.');
+        expect(text).toContain('Détectionn.d.Runsn.d.Sourcesn.d.');
+        expect(text).toContain('Détection0%Runs1Sources0');
+        expect(text).not.toContain('Plus testéoutside-one-run');
     });
     it('lets the shell own vertical scrolling rather than creating bounded page panes', () => {
         const markup = renderFixture();
