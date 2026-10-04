@@ -50,6 +50,7 @@ Key docs: [architecture](docs/architecture/current-structure.md) · [decisions](
 
 - Respect existing architecture and file organization.
 - Prefer small, focused changes over broad refactors.
+- An explicitly requested refactor may regroup or rename internal responsibilities when the benefit is demonstrated and contracts are preserved.
 - Reuse existing utilities, hooks, services, and patterns before adding new abstractions.
 - Do not rename files, folders, exports, or public interfaces unless necessary.
 - Understand before changing: inspect relevant files, identify the real execution path, explain the likely cause, propose a minimal plan, then implement.
@@ -81,6 +82,7 @@ If data is missing, say it is missing.
 ## Git workflow
 
 - Branch from the latest `origin/main`: `feat/short-description`, `fix/short-description`, or `refactor/short-description`
+- Continue an existing PR on its dedicated branch and preserve its commits; do not restart an ongoing consolidation from `main`.
 - Commit messages: `type(scope): description` — types: feat, fix, refactor, docs, test, chore, perf, style
 - Keep commits small and atomic — one logical change per commit
 - No force-pushes to `main`
@@ -102,7 +104,7 @@ If data is missing, say it is missing.
 - Reference via `process.env.VARIABLE_NAME`
 - Clerk: `NEXT_PUBLIC_CLERK_*` (client), `CLERK_*` (server)
 - Supabase: `NEXT_PUBLIC_SUPABASE_*` (anon), `SUPABASE_SERVICE_ROLE_KEY` (service)
-- Stripe: `STRIPE_SECRET_KEY` (server), `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (client)
+- Billing is not an active product integration; never add or connect payment secrets to validate a refactor.
 - AI: `MISTRAL_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY` (all server-only)
 
 ## Admin shell scroll model (do not break)

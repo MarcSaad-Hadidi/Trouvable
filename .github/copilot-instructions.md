@@ -12,21 +12,21 @@ Testing: Vitest · AI: Mistral, Groq, Gemini · Email: Resend · Bot protection:
 
 ## MCP tool routing
 
-Use the correct MCP server for the relevant domain. Do not guess when a tool can answer.
+Use an available MCP server when it is relevant to the task. The names below describe intended capabilities, not guaranteed tools in every environment. Inspect local code and installed documentation first when they answer the question; report unavailable capabilities instead of inventing results.
 
 | Domain | MCP server | When to use |
 |---|---|---|
-| App Router, rendering, metadata, middleware, caching, revalidation | `Next DevTools MCP` | **First** for any Next.js work |
+| App Router, rendering, metadata, proxy, caching, revalidation | `Next DevTools MCP` | When available; read the installed Next guides first |
 | Browser DOM, console, network, layout | `Chrome DevTools MCP` | Runtime inspection, visual debugging |
 | E2E flows, interaction verification | `Playwright MCP` | Flow testing, regression checks |
-| Schema, RLS, policies, queries, auth | `Supabase MCP` | **Read mode first**, then mutations |
+| Schema, RLS, policies, queries, auth | `Supabase MCP` | Remote access only in a separately authorized operational task; use migrations and local mocks during hibernation |
 | Production exceptions, stack traces | `Sentry MCP` | Incident triage, regression detection |
 | Framework/library API correctness | `Context7` | Before assuming any API behavior |
 | Web search, external fact verification | `Tavily MCP` | Only for genuine external validation |
 | Git history, PRs, issues, file contents | `GitHub MCP` | Code tracing, history, coordination |
 | API contracts, endpoint testing | `Postman MCP` | When API contract artifacts matter |
 
-**Rule:** Initialize the relevant MCP server before guessing. Use read/query mode before write mode.
+**Rule:** Use relevant tools only when available and authorized. Hibernation forbids production IO and service revival for local validation. Remote mutations, deployment, billing and messages need explicit authorization; tool availability is not permission.
 
 ## Specialist agents
 
@@ -46,7 +46,7 @@ Route work to the right specialist — see `.github/agents/` for the full roster
 ## Core principles
 
 1. **Understand before changing** — inspect relevant files, trace the real execution path, explain the likely cause, propose a minimal plan, then implement.
-2. **Smallest correct change** — prefer focused fixes over broad refactors.
+2. **Smallest correct change** — prefer focused fixes; an explicitly requested structural refactor may regroup responsibilities when its benefit and preserved behavior are demonstrated.
 3. **Truthfulness** — never fabricate metrics, SEO results, analytics, citations, benchmark outcomes, customer data, or structured data facts. If data is missing, say it is missing.
 4. **Safety-first** — be conservative around auth, RLS, schema, caching, metadata, middleware, billing, and public-facing content.
 5. **Reuse** — use existing utilities, hooks, services, and patterns before adding new abstractions.
@@ -66,8 +66,8 @@ Route work to the right specialist — see `.github/agents/` for the full roster
 
 ## Git workflow
 
-- Branch from `main` for features: `feat/short-description`
-- Branch from `main` for fixes: `fix/short-description`
+- Start new work from the latest `origin/main`: `feat/...`, `fix/...` or `refactor/...`.
+- Continue an existing PR on its dedicated branch, preserving its commits and user changes.
 - Commit messages: `type(scope): description` — types: feat, fix, refactor, docs, test, chore, perf, style
 - Keep commits small and atomic — one logical change per commit
 - No force-pushes to `main`

@@ -15,16 +15,16 @@ Read the relevant `node_modules/next/dist/docs/` guide before writing framework 
 
 ## Data fetching
 
-- Fetch data in server components or route handlers — not in client components via useEffect.
+- Keep privileged data access in server components, route handlers or server actions. Client fetching is valid for interactive navigation and existing operator slices; preserve authorization, loading/error states and protection against stale responses when the client changes.
 - Use server actions (`src/lib/actions/`) for mutations from client components.
-- For dynamic data: fetch in `page.jsx` or `layout.jsx` and pass as props.
+- For initial server data, fetch in `page.jsx` or `layout.jsx` and pass safe props. Preserve intentional lazy loading and client-context refreshes.
 - For static data with revalidation: use `export const revalidate = <seconds>`.
 
 ## Route structure
 
 ```
 src/app/
-├── layout.jsx          # Root layout (Clerk provider, globals)
+├── layout.jsx          # Root metadata, globals and public providers
 ├── page.jsx            # Homepage
 ├── admin/              # Operator workspace (Clerk email-gated)
 ├── portal/             # Client read-only portal (membership-scoped)
@@ -41,8 +41,8 @@ src/app/
 
 ## Metadata
 
-- Every page MUST export `metadata` or `generateMetadata()`.
-- Use `generateMetadata()` for dynamic pages (villes, expertises, etudes-de-cas).
+- Metadata may be inherited from layouts or supplied by framework file conventions. Add page exports when the route needs distinct metadata; do not duplicate valid inherited definitions.
+- Use `generateMetadata()` when metadata depends on dynamic data (for example villes or expertises); retain server boundaries and truthful canonical URLs.
 - Metadata must be truthful — no fabricated page titles, descriptions, or structured data.
 - JSON-LD structured data: use `<script type="application/ld+json">` in page components.
 - Check `src/lib/seo/` for shared metadata utilities.
@@ -60,8 +60,8 @@ src/app/
 - Static pages: default Next.js caching behavior.
 - Dynamic pages with ISR: use `revalidate` export.
 - On-demand revalidation: use `revalidatePath()` or `revalidateTag()` in server actions.
-- Never cache pages that depend on user authentication state.
-- API routes with auth: always `export const dynamic = 'force-dynamic'`.
+- Never share personalized responses between users. Preserve the installed Next runtime behavior of authentication APIs and existing cache/revalidation contracts.
+- For authenticated handlers, verify request-time execution and response caching against the installed guides; use explicit dynamic configuration where needed, without adding unrelated exports mechanically.
 
 ## Server actions
 
@@ -79,9 +79,9 @@ src/app/
 
 ## Performance
 
-- Use `next/image` for all images — never raw `<img>` tags.
+- Prefer `next/image` for application images when its optimization fits the source and layout. `ImageResponse` uses its own supported rendering elements, including `<img>`; preserve deliberate raw images when their runtime/source requires them, with dimensions and alt text as appropriate.
 - Use `next/link` for internal navigation — never raw `<a>` tags for internal routes.
-- Lazy-load heavy components: `dynamic(() => import(...), { ssr: false })`.
+- Lazy-load heavy components where appropriate. Use `ssr: false` only inside client components when the component requires browser-only rendering; preserve server rendering for public content and metadata.
 - Minimize client-side JavaScript — prefer server rendering.
 
 ## Vercel deployment
