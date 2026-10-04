@@ -34,6 +34,6 @@ Les contraintes défensives et index sur sessions, variantes, statuts de parsing
 
 ## Validation et portail
 
-`npm test` découvre JS/JSX/TS/TSX. Fixtures et tests d’extraction, prompt contract, parsing et provenance sous `src/lib/__tests__/` servent aux contrôles locaux. Les anciens scripts `check:extraction` et `check:eval` et le répertoire `tests/output` ne sont pas des commandes actuelles de `package.json`.
+`npm test` découvre JS/JSX/TS/TSX. Les tests d'[extraction](../src/lib/__tests__/extraction-v2.test.js), de [contrat prompt](../src/lib/__tests__/prompt-contract-unification.test.js) et de [review des runs](../src/lib/__tests__/run-review-contract.test.js) vérifient les contrats avec des fixtures locales. [CONTRIBUTING.md](../CONTRIBUTING.md) décrit les commandes actuelles et leur périmètre.
 
 La politique daily-first demeure dans `src/lib/continuous/mode.js` ; les Crons sont désactivés. Le portail garde des résumés business-safe en lecture seule ; sorties brutes, warnings internes et détails benchmark restent opérateur.

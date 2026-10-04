@@ -17,15 +17,7 @@ Ces commandes utilisent uniquement les modules intégrés de Node.js 24. Elles n
 
 ## Validation de l’application dormante
 
-Le workflow existant **Hibernation Gate** conserve son job automatique léger sur les pushes et PR vers `main`. Seul `workflow_dispatch` permet le job distinct `application-validation` :
-
-```bash
-npm ci --ignore-scripts --no-audit --no-fund
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
+Le workflow existant **Hibernation Gate** conserve son job automatique léger sur les pushes et PR vers `main`. Seul `workflow_dispatch` permet le job distinct `application-validation`, qui installe le lockfile sans scripts de lifecycle puis exécute lint, types, tests et build. La [vérification locale complète](../../CONTRIBUTING.md#commandes-de-vérification) utilise `npm run verify` pour exécuter aussi formatage, contrôles du dépôt et garde-fous en série.
 
 Le job utilise Node.js 24, des permissions `contents: read`, une concurrence bornée et une limite de 20 minutes. Il ne reçoit aucun secret de service et ne déploie rien. Aucun appel fournisseur ou envoi réel n’est nécessaire aux tests. `typecheck` génère les types de routes avec le même bundler webpack que le build, puis exécute TypeScript.
 
@@ -46,7 +38,7 @@ Une reprise nécessite une nouvelle branche depuis le dernier `origin/main`, un 
 1. Vérifier la sauvegarde des données et des secrets dans un coffre chiffré. Si Supabase est pausé, le restaurer et attendre son état sain avant toute promotion applicative.
 2. Conserver le code consolidé actuel dans `src/`. Le commit historique `eea4736186c0e86324b3b61fdfc45abe9e2e77e5` documente l’état antérieur à l’hibernation ; le recopier intégralement ferait perdre les corrections ultérieures.
 3. Préparer sélectivement la configuration Vercel Next.js et les variables nécessaires. La suppression des verrous Git/build et des garanties du parking doit apparaître explicitement dans cette PR de reprise.
-4. Exécuter la validation applicative ci-dessus, puis vérifier les routes publiques, auth, portail, admin et APIs en environnement de test contrôlé : accès anonyme/interdit, isolation client, console, réseau, hydratation, clavier et responsive.
+4. Exécuter la vérification complète documentée dans CONTRIBUTING, puis vérifier les routes publiques, auth, portail, admin et APIs en environnement de test contrôlé : accès anonyme/interdit, isolation client, console, réseau, hydratation, clavier et responsive.
 5. Après validation et autorisation distincte, créer un Preview et inspecter ses logs avant toute promotion production.
 6. Réactiver les tâches planifiées, workflows et connecteurs uniquement selon les besoins vérifiés, un à un avec observation des effets. Ne pas restaurer automatiquement toutes les anciennes planifications.
 

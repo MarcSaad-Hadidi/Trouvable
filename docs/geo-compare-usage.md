@@ -1,107 +1,44 @@
-# GEO Compare (outil interne)
+# GEO Compare — calibration interne
 
-Application dormante : les appels fournisseurs, grounding web et extractions URL ne doivent pas être déclenchés pendant cette consolidation.
+GEO Compare compare les réponses de plusieurs fournisseurs pour inspecter citations, URLs, concurrents, mention cible et qualité du signal. Il reste distinct des runs GEO suivis et de leur historique. L'application est dormante : extraction URL, grounding web et appels fournisseurs exigent un environnement explicitement autorisé, selon la [procédure d'hibernation](operations/trouvable-hibernation.md).
 
-## Où se trouve le module
+## Parcours opérateur
 
-- Admin: `/admin/geo-compare`
-- Workspace client canonique: `/admin/clients/[id]/geo/compare` ; ancien `/geo-compare` conservé comme alias.
-- Navigation: section `Outils GEO` dans la sidebar admin.
+Le module est accessible à `/admin/geo-compare` et, dans le contexte client, à `/admin/clients/[clientId]/geo/compare`. L'ancien chemin client `/geo-compare` reste un alias. La [vue](../src/features/admin/geo/GeoCompareView.tsx) permet de sélectionner un prompt suivi ou d'utiliser un prompt libre ; privilégier le contexte client et la source URL, puis examiner les signaux par fournisseur avant de garder, réécrire ou rejeter le prompt. Le texte brut reste un mode expert.
 
-## À quoi sert le module
+Un échec fournisseur n'est pas une absence de marché ; un succès partiel doit rester visible. Une comparaison interne ne prouve pas la parité avec l'expérience native d'une plateforme IA.
 
-- Comparer Gemini, Groq et Mistral sur une même requête GEO.
-- Diagnostiquer la qualité des réponses pour calibration prompts:
-  - citations / URLs
-  - concurrents
-  - mention marque cible
-  - exploitabilité du signal
+## API et exécution
 
-## Différence avec le moteur GEO standard
-
-- `GEO Compare` = outil de calibration interne ponctuelle.
-- Moteur GEO standard = runs persistés et pipeline opérateur client.
-- Le module n altère pas `run-tracked-queries` ni les runs standards.
-
-## Workflow dans un environnement explicitement autorisé
-
-1. En mode client, sélectionner un prompt suivi actif (ou passer en prompt libre).
-2. Utiliser l URL du site/page comme source principale.
-3. N utiliser le texte brut qu en mode expert.
-4. Vérifier signal par provider (citations, concurrents, marque).
-5. Lire la synthèse comparative et les hints calibration.
-6. Décider:
-   - garder le prompt
-   - le réécrire
-   - le classer benchmark-only
-   - le rejeter
-
-## Bonnes pratiques opérateur
-
-- Privilégier le mode client-linked pour calibration réelle.
-- Éviter les prompts trop vagues (faible signal multi-provider).
-- Surveiller les succès partiels et ne pas surinterpréter un provider en erreur.
-
-
-## API de comparaison
-
-Route server-side: `POST /api/admin/llm-compare`
-
-## Payload
+La [route autorisée côté serveur](../src/app/api/admin/llm-compare/route.js) expose `POST /api/admin/llm-compare`. Exemple de payload, avec une URL illustrative :
 
 ```json
 {
   "source_type": "url",
   "url": "https://example.com/article",
-  "prompt": "Resume les points cles et les risques SEO",
+  "prompt": "Résume les points clés et les risques SEO",
   "provider_timeout_ms": 30000,
   "max_content_chars": 16000,
   "enable_google_grounding": true
 }
 ```
 
-Ou en texte brut:
+Pour du contenu fourni directement, utiliser `source_type: "text"` et `text` au lieu de `url`. La route valide les entrées. Le [comparateur](../src/lib/llm-comparison/compare-models.js) extrait le contenu, ajoute un contexte web commun quand disponible, puis exécute les fournisseurs en `Promise.allSettled` avec timeout par fournisseur. La [liste canonique](../src/lib/llm-comparison/response-contract.js) comprend Gemini, Groq, Mistral et OpenRouter ; une clé manquante produit une erreur fournisseur, sans attester de connexion active. Mistral conserve sa queue mémoire dédiée, avec intervalle d'une seconde, sans imposer cette cadence aux autres fournisseurs.
 
-```json
-{
-  "source_type": "text",
-  "text": "Contenu brut a comparer...",
-  "prompt": "Synthese comparative en 5 points"
-}
-```
+La réponse `v1` contient `input` (source, URL, prompt, aperçu), `grounding` (activation, fournisseur utilisé, nombre de résultats, erreur) et `results[]` (fournisseur, modèle, succès/statut, latence, usage, contenu ou erreur structurée). Les erreurs sont nettoyées de secrets par le contrat de réponse.
 
-## Variables d environnement
+## Configuration dans un environnement autorisé
 
-- `GOOGLE_API_KEY` (fallback accepte `GEMINI_API_KEY`)
-- `GROQ_API_KEY`
-- `MISTRAL_API_KEY`
-- `OPENROUTER_API_KEY` (optionnel, provider alternatif global)
-- `GOOGLE_SEARCH_API_KEY` (optionnel, pour Google Programmable Search)
-- `GOOGLE_SEARCH_ENGINE_ID` (optionnel, pour Google Programmable Search)
-- `TAVILY_API_KEY` (fallback web grounding si Google Search non configuré)
-- `GOOGLE_MODEL_COMPARE` (fallback `GEMINI_MODEL_COMPARE`)
-- `GROQ_MODEL_COMPARE`
-- `MISTRAL_MODEL_COMPARE`
-- `OPENROUTER_MODEL_QUERY`
-- `OPENROUTER_MODEL_AUDIT`
-- `OPENROUTER_MODEL_BENCHMARK`
+| Usage | Variables consommées |
+|---|---|
+| Gemini | `GOOGLE_API_KEY` ou `GEMINI_API_KEY` ; `GOOGLE_MODEL_COMPARE` ou `GEMINI_MODEL_COMPARE`. |
+| Groq | `GROQ_API_KEY`, `GROQ_MODEL_COMPARE`. |
+| Mistral | `MISTRAL_API_KEY`, `MISTRAL_MODEL_COMPARE`. |
+| OpenRouter | `OPENROUTER_API_KEY` ; `OPENROUTER_MODEL_COMPARE` ou `OPENROUTER_MODEL_QUERY`. |
+| Grounding partagé | `GOOGLE_SEARCH_API_KEY` et `GOOGLE_SEARCH_ENGINE_ID`, avec repli `TAVILY_API_KEY`. |
 
-## Contrat de reponse
+Les modèles par défaut et priorités de configuration sont choisis par la couche d'adaptation appelée depuis le [comparateur](../src/lib/llm-comparison/compare-models.js). Aucun secret ne doit figurer dans les payloads, captures ou sorties JSON.
 
-- `contract_version` (actuellement `v1`)
-- `input.source_type`, `input.url`, `input.prompt`, `input.content_preview`
-- `grounding.enabled`, `grounding.used_provider`, `grounding.results_count`, `grounding.error`
-- `results[]` avec:
-  - `provider`, `model`
-  - `ok`, `status`
-  - `latency_ms`
-  - `usage`
-  - `content`
-  - `error` (`{ class, message }` en cas d echec)
+## Validation locale
 
-## Notes d integration
-
-- Execution providers en `Promise.allSettled` pour supporter les erreurs partielles.
-- Grounding web commun injecte avant execution pour donner le meme contexte web aux 3 providers.
-- Mistral est cadence via une queue memoire (`1 req/s`) sans impacter Gemini/Groq.
-- Aucun secret API n est expose dans la sortie JSON.
+Les [tests du comparateur](../src/lib/__tests__/llm-comparison.test.js) couvrent succès partiels et timeouts ; les [tests de route](../src/lib/__tests__/llm-compare-route.test.js) vérifient le contrat et l'absence de secrets. Les [insights](../src/lib/__tests__/geo-compare-insights.test.js) et le [formulaire](../src/lib/__tests__/geo-compare-form.test.js) ont leurs propres fixtures. Ces tests ne contactent pas les services réels.

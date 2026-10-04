@@ -1,80 +1,72 @@
 # Trouvable
 
-Trouvable est un outil interne pour accompagner des entreprises locales dans leur visibilité sur Google et dans les réponses des modèles conversationnels. Il rassemble audits de sites, observations de réponses IA, preuves et actions opérateur, avec une restitution client en lecture seule.
+Trouvable aide un opérateur à comprendre et améliorer la visibilité d'entreprises locales sur Google et dans les réponses des modèles conversationnels. L'application réunit audits de sites, prompts suivis, preuves et actions, puis restitue une synthèse client en lecture seule.
 
-## État actuel : hibernation
+**En hibernation : la production sert uniquement le [parking statique](parking/).** L'application Next.js et ses services sont dormants ; les déploiements Git et Crons restent désactivés. La [procédure d'exploitation](docs/operations/trouvable-hibernation.md) encadre toute reprise.
 
-La production sert un **parking HTML statique**. L’application Next.js et ses services sont dormants : aucun Cron Vercel, aucune fonction applicative et aucun déploiement Git automatique. Le code et les migrations sont conservés pour une reprise contrôlée. Les validations locales ne réactivent pas l’exploitation.
+## Le produit conservé
 
-Le contrat figure dans la [procédure d’hibernation](docs/operations/trouvable-hibernation.md) et les [verrous d’infrastructure](docs/operations/trouvable-hibernation-infrastructure.md).
-
-## Surfaces implémentées
-
-| Surface | Rôle dans l’application dormante |
+| Surface | Parcours implémentés |
 |---|---|
-| Site public | Mandats, villes et expertises, ressources SEO/GEO, profils publiés, métadonnées et sitemap. |
-| `/admin` | Portefeuille, onboarding, dossier client, laboratoire d’audit et espaces SEO, GEO et Agent. |
-| `/portal` | Synthèses et tendances client, limitées aux memberships résolus côté serveur. |
-| `/espace` | Connexion et orientation vers l’espace autorisé. |
-| APIs et moteurs | Crawl borné, scoring déterministe, analyse IA, prompts suivis, comparaisons, remédiation et jobs persistés. |
+| Site public | Offres, villes et expertises, ressources SEO/GEO, profils publiés et découverte machine. |
+| `/admin` | Portefeuille, onboarding, dossier client, laboratoire d'audit et espaces SEO, GEO et Agent. |
+| `/portal` | Synthèses et tendances en lecture seule, limitées aux memberships résolus côté serveur. |
+| `/espace` | Connexion et orientation vers l'espace autorisé. |
 
-Le dépôt contient les parcours OAuth Google et les adaptateurs GA4/GSC, ainsi que les fournisseurs IA Mistral, Groq et Gemini. **Implémentation ne signifie pas connexion distante vérifiée** : le fonctionnement authentifié dépend des services, droits et secrets de l’environnement. Aucune connexion distante ni résultat client n’est attesté par ce README.
+Les audits combinent crawl borné, scoring déterministe et analyse IA avec replis. Les prompts suivis conservent réponses, parsing et provenance ; les comparaisons ponctuelles servent à la calibration. Google OAuth/GA4/GSC, Mistral, Groq et Gemini possèdent des adaptateurs dans le dépôt. Leur présence ne prouve aucune connexion distante active ni résultat client. Les métriques décrivent les observations stockées : absence, erreur et vrai zéro restent distincts.
 
-Les métriques GEO décrivent les réponses effectivement suivies et stockées. Une absence de score reste indisponible ; une absence de preuve ne devient pas une mesure de marché.
+## Architecture
 
-## Démarrage et contrôles locaux
+Next.js 16.3 App Router, React 19, Tailwind 3, Clerk 7, Supabase et Vitest. npm et [package-lock.json](package-lock.json) fixent les dépendances.
 
-Le dépôt utilise **npm** et `package-lock.json`. Le lockfile installe Next.js 16.3.3, React 19, Tailwind 3 et Clerk 7. Utiliser une version de Node compatible avec le paquet Next installé ; Node 24 a servi aux contrôles locaux de la consolidation.
+```text
+src/app/         Routes, layouts, handlers et métadonnées Next.js
+src/features/    Surfaces public, admin, portal, espace et auth
+src/components/  Primitives UI et composants partagés
+src/lib/         Accès aux données, moteurs et contrats métier
+src/proxy.js     Frontière de requête Clerk et en-têtes applicatifs
+parking/         Production statique pendant l'hibernation
+supabase/        Migrations ordonnées et références SQL conservées
+scripts/         Vérification locale et opérations explicites
+```
 
-Pour vérifier uniquement le parking, aucune installation n’est nécessaire :
+Les modules [db](src/lib/db/) portent les accès par domaine ; les [slices opérateur](src/lib/operator-intelligence/) et [loaders portail](src/features/portal/server/) composent leurs lectures. Les accès de service restent serveur et soumis à l'autorisation. La [structure](docs/architecture/current-structure.md) et la [carte des routes](docs/architecture/routing-map.md) détaillent ces frontières.
+
+## Démarrer et vérifier localement
+
+Utiliser Node.js **24.19.0** ([.node-version](.node-version)) et npm **11.6.2** avec le lockfile :
+
+```bash
+npm ci --ignore-scripts --no-audit --no-fund
+npm run dev
+```
+
+La commande `npm run verify` exécute en série formatage, lint strict, types, tests, build et garde-fous du dépôt. Ces contrôles ne demandent pas de secrets de production. Les écrans authentifiés nécessitent un environnement de test autorisé ; [CONTRIBUTING.md](CONTRIBUTING.md#commandes-de-vérification) décrit les commandes, leur périmètre et les limites.
+
+Le parking se vérifie sans installation npm :
 
 ```bash
 node scripts/validate-hibernation.mjs
 node --test scripts/__tests__/hibernation.test.mjs
 ```
 
-Pour les contrôles applicatifs locaux :
+## Mécanismes à lire dans le code
 
-```bash
-npm ci --ignore-scripts --no-audit --no-fund
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
+| Mécanisme | Implémentation | Tests locaux |
+|---|---|---|
+| Audit et crawl borné | [Route autorisée](src/app/api/admin/audits/run/route.js), [lancement et finalisation](src/lib/audit/run-audit.js), [scanner](src/lib/audit/scanner.js) | [Frontière de crawl](src/lib/__tests__/site-audit-crawler-frontier.test.js) ; les tests de crawl ne valident pas les écritures d'une base réelle. |
+| Score absent, zéro et provenance | [Lecture des scores](src/lib/audit/scores-facade.js), [snapshot métier](src/lib/operator-intelligence/snapshot.js) | [Formats historiques](src/lib/__tests__/score-readings.test.js), [sources partielles ou en erreur](src/lib/__tests__/workspace-snapshot.test.js). |
+| Veille sociale par étapes | [Orchestrateur](src/lib/agent-reach/pipeline.js) : contexte, collecte, enrichissement, signaux et persistance | [Cycle de collecte et finalisation](src/lib/__tests__/engine-community-pipeline.test.js), [replis et limites de collecte](src/lib/__tests__/engine-community-collection.test.js). |
+| Autorisation portail | [Membership serveur](src/features/portal/server/access.js), [page client](src/features/portal/PortalClientPage.jsx) | [Accès anonyme, identité vérifiée et isolation client](src/lib/__tests__/portal-access.test.js). |
+| Chargement d'une vue métier | [Vue GEO](src/features/admin/geo/GeoOverviewView.tsx), [sélection des slices](src/lib/operator-intelligence/geo-slice-loaders.js) | [Chargement à la demande](src/lib/__tests__/geo-slice-loaders.test.js), [réponses tardives et contexte client](src/features/admin/shared/layout/__tests__/client-workspace-freshness.test.jsx). |
+| Hibernation | [Validateur du contrat statique](scripts/validate-hibernation.mjs), [configuration Vercel](vercel.json) | [Configurations permises et interdites](scripts/__tests__/hibernation.test.mjs). |
 
-Le build peut être réalisé sans secrets de service. Cela ne valide pas les parcours Clerk/Supabase, les appels fournisseurs ou les permissions d’une base réelle. `npm run dev` lance l’application dormante localement ; les écrans authentifiés nécessitent un environnement de test contrôlé. Lire [CONTRIBUTING.md](CONTRIBUTING.md) avant de configurer des services. Ne pas utiliser de secrets de production ni lancer les jobs pour vérifier un changement structurel.
+Ces tests utilisent des fixtures et IO simulées. Ils ne prouvent pas les sessions Clerk réelles, les politiques d'une base distante ou le fonctionnement des fournisseurs. Le Hibernation Gate automatique protège le parking ; la validation applicative de la CI est manuelle et ne déploie rien.
 
-## Navigation dans le code
+## Approfondir
 
-```text
-src/
-  app/          Routes, layouts, handlers et métadonnées Next.js
-  features/     Surfaces public, admin, portal, espace et auth
-  components/   Primitives UI et composants partagés
-  lib/          Accès aux données, moteurs et contrats métier
-  proxy.js      Frontière de requête et authentification Clerk
-parking/        Seuls fichiers déployés pendant l’hibernation
-public/         Assets de l’application dormante
-supabase/       Historique SQL et scripts de reconstruction conservés
-scripts/        Validateurs et outillage explicite
-docs/           Architecture, contrats et exploitation
-```
-
-Les modules de `src/lib/db/` portent les accès par domaine ; les agrégations opérateur s’appuient sur ces modules ciblés. Le portail possède ses loaders dans `src/features/portal/server/`. La [structure](docs/architecture/current-structure.md), la [carte des routes](docs/architecture/routing-map.md) et les [décisions techniques](docs/architecture/refactor-decisions.md) détaillent ces frontières.
-
-## Choix techniques
-
-- **Preuve et provenance** : observations, calculs dérivés et inférences gardent leurs sémantiques. Les états de review et de remédiation sont distincts.
-- **Accès serveur** : Clerk authentifie ; les contrôles opérateur et memberships portail autorisent. Le client Supabase de service reste côté serveur.
-- **Audits résilients** : crawl borné et protégé, extraction, scoring déterministe et analyse IA séparés ; les formats historiques restent lisibles.
-- **Exécutions traçables** : prompts, réponses brutes, parsing et historique sont persistés. Les jobs conservent déduplication, verrouillage et finalisation, même dormants.
-- **UI opérateur** : sections métier distinctes et chargement par slices ; `.geo-content` possède le scroll principal.
-
-## Validation : portée des contrôles
-
-Le **Hibernation Gate** automatique protège le parking et la configuration de déploiement. La validation applicative est un job **manuel** du même workflow, sans secrets de production ni déploiement. Un Gate vert n’atteste donc pas le comportement authentifié de l’application.
-
-ESLint couvre JS/JSX/TS/TSX ; Vitest découvre les tests JS/JSX/TS/TSX. `typecheck` génère les types Next puis vérifie le programme TypeScript configuré ; le JavaScript n’est pas intégralement typé. Le build complète les contrôles de compilation et de routes. Les scripts `assets:check` et `lfs:check` sont absents : aucun succès ne leur est attribué.
-
-Les changements d’auth, de portail ou de données demandent en plus une vérification ciblée dans un environnement de test autorisé. Aucun appel payant, email réel, migration distante ou reprise de service n’est nécessaire pour ces contrôles.
+- [Décisions techniques et invariants](docs/architecture/refactor-decisions.md)
+- [Prompts canoniques](docs/prompt-contract-unification.md) et [capture/qualité des runs](docs/phase-3-1-quality-engine.md)
+- [Jobs continus et concurrence](docs/continuous-visibility-engine-data-model.md)
+- [Preuve, review et remédiation](docs/truth-remediation-normalization-boundary.md)
+- [Compatibilité SQL et reconstruction](docs/db-reconciliation-audit.md)

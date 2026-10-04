@@ -17,6 +17,8 @@ L’application est conservée en hibernation. `vercel.json` déploie uniquement
 | `src/lib/db/` | Accès aux données par domaine. Aucun barrel global `db.js`. |
 | `src/lib/operator-intelligence/` | Agrégations et slices opérateur, au-dessus des accès ciblés. |
 | `src/lib/audit/`, `queries/`, `ai/` | Crawl, scoring, prompts, extraction et fournisseurs. |
+| `src/lib/agent-reach/` | Veille sociale : orchestration, contexte, collecte, signaux, enrichissement et persistance. |
+| `src/lib/design/tokens.ts` | Tokens visuels canoniques pour les surfaces qui les consomment. |
 | `src/lib/continuous/`, `connectors/`, `remediation/` | Jobs, intégrations et workflow de corrections. |
 | `src/proxy.js` | Frontière de requête Clerk et en-têtes applicatifs. |
 | `parking/` | `index.html`, `404.html`, `robots.txt` déployés pendant l’hibernation. |
@@ -46,7 +48,7 @@ Clerk authentifie. `src/lib/auth.js` contrôle les opérateurs par allowlist ser
 
 ## Conventions préservées
 
-Next 16 accepte `src/app` et exige `src/proxy.js` lorsque les sources sont sous `src`. `public`, les configurations et `.env.*` restent à la racine. Les alias TypeScript/Vitest et le scan Tailwind suivent `src`, sans deuxième arborescence active à la racine.
+Next 16 accepte `src/app` ; le proxy du projet se place dans `src/proxy.js`, au même niveau que les routes. `public`, les configurations et `.env.*` restent à la racine. Les alias TypeScript/Vitest et le scan Tailwind suivent `src`, sans deuxième arborescence active à la racine.
 
 Les routes restent explicites ; les alias historiques conservent leurs redirections. Auth et espace ont des responsabilités distinctes : le regroupement des sources ne change ni les URLs ni les autorisations.
 

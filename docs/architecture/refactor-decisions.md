@@ -46,7 +46,7 @@ Les comparaisons ponctuelles sont séparées des runs GEO standard et des varian
 
 ## 6. Interface opérateur
 
-Les tokens dans `src/lib/design/tokens.js` et les composants actuels constituent la référence du rendu. Les anciens brouillons ne définissent pas une liste de fonctionnalités à créer.
+Les [tokens visuels](../../src/lib/design/tokens.ts) et les composants actuels constituent la référence du rendu. Les anciens brouillons ne définissent pas une liste de fonctionnalités à créer.
 
 - L’admin est un espace opérateur ; le portail client garde une restitution simplifiée.
 - La navigation expose portefeuille et contexte client, avec des univers SEO, GEO et Agent distincts. La préparation locale reste dans SEO. Les sources/citations et la veille sociale gardent leurs questions métier.

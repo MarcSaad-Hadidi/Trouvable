@@ -1,57 +1,65 @@
 # Contribuer à Trouvable
 
-La production est en hibernation statique. Toute contribution conserve le parking, les données, les protections d’accès et les fonctionnalités dormantes. Une reprise des services nécessite une autorisation explicite et la [procédure d’exploitation](docs/operations/trouvable-hibernation.md).
+La production reste en hibernation statique. Toute contribution conserve le parking, les données, les autorisations et les fonctionnalités dormantes. Une reprise des services exige une autorisation explicite et la [procédure d'exploitation](docs/operations/trouvable-hibernation.md).
 
 ## Environnement local
 
-Utiliser npm avec le lockfile conservé :
+Utiliser Node.js **24.19.0**, indiqué dans [.node-version](.node-version), et npm **11.6.2**, indiqué dans `packageManager`. [package.json](package.json) exprime également la plage de compatibilité des outils ; [package-lock.json](package-lock.json) fixe les dépendances.
 
 ```bash
 npm ci --ignore-scripts --no-audit --no-fund
-node scripts/validate-hibernation.mjs
-node --test scripts/__tests__/hibernation.test.mjs
+npm run dev
 ```
 
-Aucun script d’installation applicatif n’est nécessaire. Ne pas copier de secrets de production pour effectuer lint, types, tests ou build.
+Aucun script d'installation applicatif n'est nécessaire. Lint, types, tests et build ne demandent pas de secrets de production. Le build sans secrets ne valide pas les parcours authentifiés : ils nécessitent Clerk et Supabase dans un environnement de test autorisé. Les tests locaux utilisent des fixtures et IO simulées.
 
-`npm run dev` démarre Next localement. Le build sans secrets peut réussir, mais les parcours authentifiés demandent Clerk et Supabase configurés dans un environnement de test autorisé. Les tests unitaires utilisent des mocks : ils ne prouvent ni le catalogue SQL distant ni les permissions d’un service réel.
-
-Les variables de développement restent dans `.env.local` à la racine, jamais dans Git. Lire les consommateurs avant de configurer une variable : `src/lib/supabase-admin.js` utilise `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` côté serveur ; Clerk distingue `NEXT_PUBLIC_CLERK_*` et `CLERK_*`. IA, Google et email servent aux vérifications explicites, pas aux contrôles structurels. Ne pas appeler un fournisseur, synchroniser un connecteur ou envoyer un email pour valider un refactor.
+Les variables de développement restent dans `.env.local`, jamais dans Git. Lire les consommateurs avant de configurer une variable : [supabase-admin](src/lib/supabase-admin.js) utilise `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` côté serveur ; Clerk distingue `NEXT_PUBLIC_CLERK_*` et `CLERK_*`. Ne pas appeler un fournisseur, synchroniser un connecteur ou envoyer un email pour valider un refactor.
 
 ## Organisation et contrats
 
 Lire [AGENTS.md](AGENTS.md), la [structure](docs/architecture/current-structure.md) et les [décisions](docs/architecture/refactor-decisions.md). `src/app` décrit le routage ; `src/features` porte les surfaces produit ; `src/lib` porte les moteurs et accès métier. Préserver les frontières serveur/client, les URLs publiques et historiques, le scope client et le scroll administrateur.
 
-Les migrations ordonnées dans `supabase/migrations/` restent l’historique SQL. Les anciens scripts `supabase/schema.sql` et `setup_*.sql` sont conservés comme références de reconstruction ; leur équivalence avec une base reconstruite n’est pas prouvée ici. Ne pas les appliquer en production ni les retirer sans preuve sur une base locale jetable. La [réconciliation historique](docs/db-reconciliation-audit.md) expose les dérives à vérifier.
+Les migrations ordonnées dans `supabase/migrations/` restent l'historique SQL. Les anciens `schema.sql` et `setup_*.sql` sont conservés comme références de reconstruction. Ne pas les appliquer en production ni les retirer sans preuve sur une base locale jetable ; la [note SQL](docs/db-reconciliation-audit.md) explique compatibilités et limites.
 
-## Validation proportionnée
+## Commandes de vérification
 
-Pour la documentation : vérifier liens, chemins, commandes et `git diff --check`. Pour un changement métier : reproduire le défaut et ajouter un test de comportement pertinent. Pour l’UI : vérifier les états chargement/vide/erreur/données, le clavier, le mobile et le scroll des routes concernées.
-
-Avant une PR applicative prête à relire :
+Avant de considérer une PR applicative prête, lancer la [vérification complète](scripts/verify.mjs) :
 
 ```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
-node scripts/validate-hibernation.mjs
-node --test scripts/__tests__/hibernation.test.mjs
-git diff --check
+npm run verify
 ```
 
-Le job applicatif de `.github/workflows/ci.yml` se lance manuellement ; le Hibernation Gate reste automatique et léger. Ne pas présenter le Gate comme une validation applicative. `assets:check` et `lfs:check` n’existent pas dans `package.json`.
+Elle s'arrête au premier échec et exécute **en série** : formatage, lint, types, tests applicatifs, tests de garde-fous, build, validateur d'hibernation, contrôle du dépôt puis `git diff --check`. Ne pas lancer simultanément `typecheck` et `build` : ils écrivent les mêmes types Next.
 
-Documenter les commandes, résultats et limites dans la PR, sans ajouter une collection de rapports au dépôt. Une compilation sans secrets ne remplace pas les vérifications d’autorisation anonyme/interdite/client A/client B. Ne pas créer de bypass d’auth pour obtenir une capture.
+| Commande | Périmètre |
+|---|---|
+| `npm run format:check` | Prettier selon `.prettierrc.json` et `.prettierignore`. `npm run format` écrit le formatage ; séparer ce diff des changements de comportement. |
+| `npm run lint` | ESLint sur JS/JSX/TS/TSX, seuil de zéro avertissement. `lint:fix` applique les corrections automatiques. |
+| `npm run typecheck` | Types de routes Next générés avec webpack, puis programme TypeScript configuré ; ne type pas intégralement le JavaScript. |
+| `npm test` | Tests Vitest JS/JSX/TS/TSX, fixtures et mocks locaux. Exemple ciblé : `npm test -- src/lib/__tests__/portal-access.test.js`. |
+| `npm run test:hibernation` | Tests Node des protections et outils dans `scripts/__tests__/`. |
+| `npm run build` | Compilation et routes de l'application dormante avec webpack ; aucun déploiement. |
+| `npm run check:hibernation` | Contrat fermé du parking, configuration Vercel et workflows dormants. |
+| `npm run check:repository` | Imports/réexports/mocks et imports dynamiques littéraux, casse, cycles de production, liens Markdown locaux et ancres, références JSX littérales d'assets et motifs d'artefacts générés suivis. |
+
+Le [contrôle du dépôt](scripts/check-repository.mjs) compte les imports calculés sans résoudre toutes leurs destinations. Il ne certifie pas les assets référencés dynamiquement, tout le CSS ou tous les chemins runtime ; ses liens HTTP externes ne sont pas vérifiés. `assets:check` et `lfs:check` sont absents : les vérifications d'assets littéraux ne constituent pas un contrôle Git LFS.
+
+Le parking se vérifie aussi sans installation npm, avec `node scripts/validate-hibernation.mjs` et `node --test scripts/__tests__/hibernation.test.mjs`. Le Hibernation Gate automatique reste léger ; le job applicatif manuel de [.github/workflows/ci.yml](.github/workflows/ci.yml) exécute lint, types, tests et build sans secrets de production ni déploiement. Un Gate vert n'atteste pas le comportement applicatif.
+
+## Vérifications ciblées et limites
+
+Pour la documentation, vérifier liens, ancres, chemins, commandes et `git diff --check`. Pour un changement métier, reproduire le défaut et ajouter un test de comportement pertinent. Pour l'UI, vérifier chargement/vide/erreur/données, clavier, mobile et scroll sur les routes concernées. Les fixtures de navigateur et les accès anonymes d'un build de production constituent des preuves distinctes ; un rendu avec bypass local ne valide pas une session réelle.
+
+Les tests d'autorisation doivent distinguer anonyme/interdit/client A/client B. Les IO simulées ne valident ni les politiques d'une base distante, ni les sessions Clerk, ni les connecteurs ou réponses IA réels. Documenter commandes, résultats et limites dans la PR, sans collection de rapports permanents. Ne pas créer de bypass d'auth pour obtenir une capture.
 
 ## Git et review
 
-Créer une branche propre depuis le dernier `origin/main` : `feat/...`, `fix/...` ou `refactor/...` selon le chantier. Préserver le travail existant ; utiliser un worktree isolé si nécessaire. Pas de reset destructif, force-push sur main, merge automatique ou déploiement implicite.
+Pour un nouveau chantier, partir du dernier `origin/main` avec `feat/...`, `fix/...` ou `refactor/...`. Pour continuer une PR, conserver sa branche dédiée et ses commits. Préserver le travail utilisateur ; utiliser un worktree isolé si nécessaire. Pas de reset destructif, force-push sur main, merge automatique ou déploiement implicite.
 
-Les commits suivent `type(scope): description`, avec un changement logique par commit. Relire le diff complet contre la base de PR, y compris les suppressions et déplacements. Identifier leurs consommateurs possibles (imports dynamiques, conventions Next, scripts, workflows, CSS, assets et opérations documentées) avant de retirer un fichier. Conserver tout élément dont l’usage reste incertain.
+Les commits suivent `type(scope): description`, avec un changement logique par commit. Relire le diff complet contre la base de PR, y compris suppressions et déplacements. Identifier les consommateurs possibles — imports dynamiques, conventions Next, mocks, scripts, workflows, CSS, assets et opérations documentées — avant de retirer un fichier. Conserver tout élément dont l'usage reste incertain.
 
-La PR décrit le problème, le comportement obtenu, les validations et les risques. Garder la PR en draft si un contrôle indispensable est bloqué ou en échec. Un retour arrière se prépare par revert ciblé dans une nouvelle branche ; aucune restauration destructive de données n’est requise pour une consolidation de code.
+La PR décrit problème, comportement obtenu, validations et risques. Garder la PR en draft si un contrôle indispensable est bloqué ou échoue. Un retour arrière utilise des reverts ciblés dans une nouvelle branche, sans restauration destructive des données.
 
 ## Export manuel des alertes Code Scanning
 
-`scripts/export-codeql-alerts.ps1` est un outil manuel de lecture des alertes ouvertes de ce dépôt sur GitHub. Il nécessite un token GitHub avec les droits de lecture Code Scanning, fourni par `GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_OAUTH_TOKEN` ou les variables correspondantes du `.env.local` de la racine. Il ne lance pas CodeQL et ne modifie pas les alertes. Exécuter depuis un dossier de travail hors du dépôt pour y produire `codeql-alerts.md` et `codeql-alerts.csv`. Ne pas committer ces exports ni les secrets. Cet outil est conservé ; aucune extraction distante n’est nécessaire à la consolidation.
+[scripts/export-codeql-alerts.ps1](scripts/export-codeql-alerts.ps1) lit les alertes ouvertes GitHub avec un token ayant les droits Code Scanning, fourni par `GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_OAUTH_TOKEN` ou les variables correspondantes du `.env.local` racine. Il ne lance pas CodeQL et ne modifie pas les alertes. Exécuter depuis un dossier hors du dépôt pour y produire `codeql-alerts.md` et `codeql-alerts.csv` ; ne committer ni ces exports ni les secrets.

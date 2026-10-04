@@ -2,7 +2,7 @@
 
 Les migrations ordonnées dans [supabase/migrations](../supabase/migrations/) décrivent l'évolution du schéma. Les anciens `schema.sql` et `setup_*.sql` restent des références de reconstruction. Leur remplacement n'est pas démontré par un build ou des mocks : il faut reconstruire une base locale jetable et comparer son catalogue, ses contraintes, fonctions, triggers, index et politiques RLS avant de les retirer.
 
-Cette note conserve les raisons de la réconciliation du 20 mars 2026. Le [diagnostic complet à cette date](https://github.com/MarcSaad-Hadidi/Trouvable/blob/6c06ad4c11ac795ccf0fb485933721867c98a320/docs/db-reconciliation-audit.md) reste consultable dans Git ; ses chemins et propositions sont historiques. Aucun état actuel du catalogue distant n'est attesté. L'application et les services restent en hibernation ; aucune migration ou écriture distante n'est autorisée pour valider une consolidation.
+Cette note conserve les raisons de la réconciliation du 20 mars 2026. Le [diagnostic historique complet](https://github.com/MarcSaad-Hadidi/Trouvable/blob/6c06ad4c11ac795ccf0fb485933721867c98a320/docs/db-reconciliation-audit.md) reste consultable dans Git ; ses chemins et propositions sont historiques. Aucun état actuel du catalogue distant n'est attesté. L'application et les services restent en hibernation ; aucune migration ou écriture distante n'est autorisée pour valider une consolidation.
 
 ## Pourquoi les migrations additives ne suffisent pas
 

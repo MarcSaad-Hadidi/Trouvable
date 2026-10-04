@@ -11,11 +11,14 @@ Testing: Vitest · AI: Mistral, Groq, Gemini · Email: Resend · Bot protection:
 npm run dev        # local dev server
 npm run build      # production build
 npm run typecheck  # Next route types + configured TypeScript program
-npm run lint       # ESLint (JS/JSX/TS/TSX)
+npm run lint       # ESLint (JS/JSX/TS/TSX), zero warnings
 npm run lint:fix   # ESLint autofix
 npm test           # vitest run
 npm run test:watch # vitest watch
+npm run verify    # serial format/lint/types/tests/build/hibernation/repository checks
 ```
+
+Use Node.js 24.19.0 (`.node-version`) and npm 11.6.2 (`packageManager`). See [CONTRIBUTING.md](CONTRIBUTING.md#commandes-de-vérification) for each check's scope and limits. Do not run typecheck and build concurrently: both write Next route types.
 
 ## Architecture
 
@@ -86,7 +89,7 @@ If data is missing, say it is missing.
 - Commit messages: `type(scope): description` — types: feat, fix, refactor, docs, test, chore, perf, style
 - Keep commits small and atomic — one logical change per commit
 - No force-pushes to `main`
-- Run `npm run lint` and `npm test` before considering a PR ready
+- Run `npm run verify` before considering an application PR ready; use targeted checks during implementation and report any blocked validation.
 
 ## Error handling patterns
 
