@@ -38,7 +38,9 @@ Le [contrat de vérité/remédiation](../truth-remediation-normalization-boundar
 
 Le crawl reste borné, protégé contre les destinations dangereuses et soumis aux limites/timeouts. Le rendu Playwright est conditionnel et conserve un fallback ; un refactor ne retire ni finalisation d’audit ni protections de concurrence.
 
-Le [moteur continu](../continuous-visibility-engine-data-model.md) conserve déduplication, claim, overlap prevention, retry et récupération des runs bloqués. Ses routes existent dans l’application dormante ; aucune cadence Vercel n’est active.
+Le [moteur continu](../continuous-visibility-engine-data-model.md) conserve déduplication, claim, overlap prevention, retry et récupération des runs bloqués. `continuous/jobs.js` porte dispatch et exécution ; `recurring-jobs.js` porte définitions, contrôles et santé ; `trends.js` lit les tendances ; `snapshots.js` capture les observations. Les lectures ne passent plus par les moteurs. La santé initialise toujours les définitions manquantes, et les tendances initialisent toujours les connecteurs : ces effets historiques sont explicites. Ses routes existent dans l’application dormante ; aucune cadence Vercel n’est active.
+
+`operator-intelligence/overview-data.js` acquiert les cinq sources et leurs diagnostics pour les projections GEO et Agent. La visibilité Agent construit sa réponse depuis ces données communes, sans construire d’abord le DTO overview. Les branches indépendantes restent lues pour conserver disponibilité et provenance ; aucune économie de requêtes n’est déduite de ce changement. L’adaptation readiness conserve son cadrage métier, et le portail conserve ses autorisations et son filtrage propres.
 
 Le [contrat prompt](../prompt-contract-unification.md) maintient une seule qualification contextualisée, avec modes `user_like/operator_probe`, statuts `strong/review/weak` et persistence normalisée. Les anciens JSON restent lisibles. Les captures de runs et la [qualité inspectable](../phase-3-1-quality-engine.md) gardent parsing, preuves et limites des benchmarks.
 

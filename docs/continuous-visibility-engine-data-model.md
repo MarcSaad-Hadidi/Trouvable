@@ -11,7 +11,7 @@ Moteur implémenté dans l’application dormante. Aucun Cron Vercel actif ; ces
 
 Dans un environnement explicitement réactivé, dispatch sélectionne les jobs dus, insère les runs avec clé de déduplication, puis claim les runs disponibles. La finalisation met à jour état et prochaine cadence ; le succès permet un snapshot, l’échec applique retry/backoff dans son budget. La route snapshot peut capturer indépendamment les clients éligibles.
 
-Sources : `src/lib/continuous/jobs.js`, `src/lib/continuous/metrics-core.js`, `src/app/api/cron/continuous/dispatch/route.js` et `src/app/api/cron/continuous/snapshot/route.js`.
+Sources : `src/lib/continuous/jobs.js` pour dispatch et worker, `src/lib/continuous/recurring-jobs.js` pour définitions/contrôles/santé, `src/lib/continuous/snapshots.js` pour les captures, et les routes Cron dispatch/snapshot. La route snapshot initialise les jobs avant la capture ; la capture seule ne les initialise pas.
 
 - `dedupe_key` unique pour la queue.
 - Index partiel des runs `running` par client/type, avec contrôle avant claim.
@@ -22,6 +22,6 @@ La cadence est une politique applicative, pas un schedule actif. La [procédure 
 
 ## Lecture et vérité
 
-Les tendances sont calculées serveur depuis les snapshots : latest, previous, delta et fenêtres. L’admin conserve les détails ; le portail reçoit une synthèse sûre et scoped. Absence, erreur et vrai zéro restent distincts ; une observation partielle n’est pas une métrique complète.
+Les tendances sont calculées serveur dans `src/lib/continuous/trends.js` depuis les snapshots et `metrics-core.js` : latest, previous, delta et fenêtres. Elles ne chargent pas le worker ni ses moteurs. L’historique conserve son ordre ascendant et sa limite de 120 points ; la santé garde les 40 derniers runs et son initialisation préalable des définitions. La lecture des tendances initialise aussi les lignes de connecteurs manquantes. Les SDK de synchronisation sont chargés lors de leur exécution, pas pour lire les observations stockées. L’admin conserve les détails ; le portail reçoit une synthèse sûre et scoped. Absence, erreur et vrai zéro restent distincts ; une observation partielle n’est pas une métrique complète.
 
 `CONNECTOR_SAMPLE_MODE=1` expose `hasRealData: false` avec tableaux vides, sans résultats client fictifs. Une connexion configurée ne prouve ni consentement valide ni synchronisation réussie.
