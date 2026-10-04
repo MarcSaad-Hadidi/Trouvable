@@ -2,7 +2,7 @@
 import { EXPERTISES, VILLES } from "@/lib/data/geo-architecture";
 import { resolveExpertiseComposition } from "@/lib/data/composition";
 import { SITE_URL } from "@/lib/site-config";
-import { fitMetaDescription, withPublicAuthor } from "@/lib/seo/metadata";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
 import ExpertisePageClient from "@/features/public/expertise/ExpertisePageClient";
 
 export function generateStaticParams() {
@@ -15,15 +15,13 @@ export async function generateMetadata({ params }) {
     if (!expertise) return {};
 
     const title = `${expertise.name} | Visibilité IA | Trouvable`;
-    const description = fitMetaDescription(expertise.description);
+    const description = expertise.description;
 
-    return withPublicAuthor({
+    return buildPublicMetadata({
         title,
         description,
-        alternates: { canonical: `${SITE_URL}/expertises/${expertise.slug}` },
+        canonical: `${SITE_URL}/expertises/${expertise.slug}`,
         openGraph: {
-            title,
-            description,
             url: `${SITE_URL}/expertises/${expertise.slug}`,
             siteName: "Trouvable",
             type: "website",
@@ -38,8 +36,6 @@ export async function generateMetadata({ params }) {
         },
         twitter: {
             card: "summary_large_image",
-            title,
-            description,
             images: [`${SITE_URL}/twitter-image`],
         },
         robots: { index: true, follow: true },
