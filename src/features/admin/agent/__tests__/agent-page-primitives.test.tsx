@@ -120,7 +120,10 @@ describe('Agent table presentation', () => {
         expect(tableRows(html)).toEqual([['&lt;literal&gt;', '0', '', '']]);
     });
 
-    it.each([undefined, []])('infers at most five primitive columns from the first row for columns=%s', (columns) => {
+    it.each([
+        { label: 'undefined', columns: undefined },
+        { label: 'empty', columns: [] },
+    ])('infers at most five primitive columns from the first row for columns=$label', ({ columns }) => {
         const html = renderToStaticMarkup(
             <GenericTablePanel
                 title="Inferred"
