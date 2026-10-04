@@ -103,7 +103,7 @@ If data is missing, say it is missing.
 - `.env.local` for local development, Vercel environment variables for production
 - Reference via `process.env.VARIABLE_NAME`
 - Clerk: `NEXT_PUBLIC_CLERK_*` (client), `CLERK_*` (server)
-- Supabase: `NEXT_PUBLIC_SUPABASE_*` (anon), `SUPABASE_SERVICE_ROLE_KEY` (service)
+- Supabase: `NEXT_PUBLIC_SUPABASE_*` (anon), `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (server service client)
 - Billing is not an active product integration; never add or connect payment secrets to validate a refactor.
 - AI: `MISTRAL_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY` (all server-only)
 

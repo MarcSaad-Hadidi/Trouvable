@@ -67,7 +67,7 @@ src/app/
 
 - Define in `src/lib/actions/` — not inline in components.
 - Always validate inputs server-side (use `src/lib/admin-schemas.js` patterns).
-- Return structured responses: `{ success: true, data }` or `{ success: false, error }`.
+- Preserve each action's structured response contract (for example `{ error }` or `{ success, data, error }`); display safe validation and execution feedback in the consuming UI.
 - Handle Supabase errors explicitly — never let them bubble unhandled.
 
 ## Error handling

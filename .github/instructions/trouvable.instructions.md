@@ -19,7 +19,7 @@ applyTo: "src/app/**,src/features/**,src/components/**,src/lib/**,src/proxy.js,s
 ## Supabase safety
 
 For any schema, policy, auth, or query change — follow the workflow in `supabase.instructions.md`.
-When touching Supabase from `src/lib/` code: inspect current schema, explain RLS impact, propose SQL explicitly.
+When touching Supabase from `src/lib/` code: inspect affected migrations and query/auth contracts, explain RLS impact, and propose SQL explicitly only if schema, policies or stored data must change. During hibernation, validate with local fixtures or a disposable local database; no remote mutation or service revival is authorized.
 
 ## SEO/GEO truthfulness
 

@@ -80,4 +80,4 @@ Route work to the right specialist — see `.github/agents/` for the full roster
 - Reference secrets via `process.env.VARIABLE_NAME`
 - Clerk keys: `NEXT_PUBLIC_CLERK_*` (client) and `CLERK_*` (server)
 - Supabase keys: `NEXT_PUBLIC_SUPABASE_*` (anon) and `SUPABASE_SERVICE_ROLE_KEY` (service)
-- Stripe keys: `STRIPE_SECRET_KEY` (server) and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (client)
+- Billing is not an active product integration; never connect payment secrets to validate a refactor.
