@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { getSourceStatus, loadIndependentSources } from './source-availability';
+
 import { createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, weightedPosition, getObservedAgeDays, resolveConnectorStatus } from './seo-gsc';
 
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
@@ -516,10 +518,11 @@ function applySegmentFilter(queries, segment, brandTokens) {
    the read-side here and the write-side sync in `gsc-sync.js`. */
 const resolveGscProperty = resolveGscPropertyShared;
 
-function buildGscUnavailableReason({ gscStatus, siteUrl, refreshToken, fetchError, hasServerCredentials = false }) {
+function buildGscUnavailableReason({ gscStatus, siteUrl, refreshToken, fetchError, hasServerCredentials = false, clientUnavailable = false }) {
+    if (gscStatus?.status === 'unavailable' || clientUnavailable) return 'Données de configuration Search Console temporairement indisponibles.';
     if (gscStatus?.status === 'disabled') return 'Le connecteur Search Console est désactivé pour ce mandat.';
     if (gscStatus?.status === 'sample_mode') return 'Le connecteur Search Console est en mode échantillon, sans données brutes exploitables.';
-    if (fetchError) return fetchError.message;
+    if (fetchError) return 'Données Search Console temporairement indisponibles.';
     if (!siteUrl) return 'Aucune propriété GSC exploitable n’est configurée pour ce mandat.';
     if (!refreshToken && !hasServerCredentials) {
         return 'Le refresh token Google manque pour interroger la Search Console en direct.';
@@ -540,50 +543,20 @@ function buildRawSample(rows, limit = 20) {
 }
 
 async function fetchLiveGscData({ siteUrl, refreshToken, window, filters }) {
-    const [queryResponse, pageResponse, deviceResponse] = await Promise.all([
-        queryGscSearchAnalyticsRaw({
-            siteUrl,
-            startDate: window.startDate,
-            endDate: window.endDate,
-            dimensions: ['date', 'query'],
-            searchType: filters.searchType,
-            country: filters.country,
-            device: filters.device,
-            rowLimit: GSC_ROW_LIMIT,
-            maxRows: GSC_MAX_ROWS,
-            googleRefreshToken: refreshToken,
-        }),
-        queryGscSearchAnalyticsRaw({
-            siteUrl,
-            startDate: window.startDate,
-            endDate: window.endDate,
-            dimensions: ['date', 'page'],
-            searchType: filters.searchType,
-            country: filters.country,
-            device: filters.device,
-            rowLimit: GSC_ROW_LIMIT,
-            maxRows: GSC_MAX_ROWS,
-            googleRefreshToken: refreshToken,
-        }),
-        queryGscSearchAnalyticsRaw({
-            siteUrl,
-            startDate: window.currentStartDate,
-            endDate: window.endDate,
-            dimensions: ['device'],
-            searchType: filters.searchType,
-            country: filters.country,
-            device: filters.device,
-            rowLimit: GSC_ROW_LIMIT,
-            maxRows: GSC_MAX_ROWS,
-            googleRefreshToken: refreshToken,
-        }),
-    ]);
-
-    return {
-        query: queryResponse,
-        page: pageResponse,
-        device: deviceResponse,
+    const request = (dimensions, startDate) => async () => {
+        const response = await queryGscSearchAnalyticsRaw({
+            siteUrl, startDate, endDate: window.endDate, dimensions,
+            searchType: filters.searchType, country: filters.country, device: filters.device,
+            rowLimit: GSC_ROW_LIMIT, maxRows: GSC_MAX_ROWS, googleRefreshToken: refreshToken,
+        });
+        if (!Array.isArray(response?.rows)) throw new Error('Invalid GSC response');
+        return response;
     };
+    return loadIndependentSources({
+        query: request(['date', 'query'], window.startDate),
+        page: request(['date', 'page'], window.startDate),
+        device: request(['device'], window.currentStartDate),
+    });
 }
 
 export async function getVisibilitySlice(clientId, options = {}) {
@@ -598,15 +571,22 @@ export async function getVisibilitySlice(clientId, options = {}) {
     const window = resolveWindow(range);
     const ga4Days = Math.max(56, window.currentDays * 2);
 
-    const [clientProfile, connectorRows, trafficRows, ga4TopPages] = await Promise.all([
-        getClientSearchIdentity(clientId).catch(() => ({ clientName: '', websiteUrl: '' })),
-        getClientConnectorRows(clientId).catch(() => []),
-        getTrafficDailyRows(clientId, { days: ga4Days }).catch(() => []),
-        getTopPagesRows(clientId, { limit: 20 }).catch(() => []),
-    ]);
+    const { values, dataSources, errors } = await loadIndependentSources({
+        client: () => getClientSearchIdentity(clientId),
+        connectors: () => getClientConnectorRows(clientId),
+        ga4Traffic: () => getTrafficDailyRows(clientId, { days: ga4Days }),
+        ga4TopPages: () => getTopPagesRows(clientId, { limit: 20 }),
+    });
+    const clientProfile = values.client || { clientName: '', websiteUrl: '' };
+    const connectorRows = values.connectors || [];
+    const trafficRows = values.ga4Traffic || [];
+    const ga4TopPages = values.ga4TopPages || [];
+    const connector = provider => dataSources.connectors === 'unavailable'
+        ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
+        : resolveConnectorStatus(connectorRows, provider);
 
-    const ga4Status = resolveConnectorStatus(connectorRows, 'ga4');
-    const gscStatus = resolveConnectorStatus(connectorRows, 'gsc');
+    const ga4Status = connector('ga4');
+    const gscStatus = connector('gsc');
     const gscConnectorRow = (connectorRows || []).find((row) => row.provider === 'gsc') || null;
     const gscRefreshToken = gscConnectorRow?.config?.google_refresh_token || null;
     const hasServerGscCredentials = hasGscServiceAccountCredentials();
@@ -624,28 +604,46 @@ export async function getVisibilitySlice(clientId, options = {}) {
     if (
         gscProperty
         && (gscRefreshToken || hasServerGscCredentials)
+        && gscStatus.status !== 'unavailable'
         && gscStatus.status !== 'not_connected'
         && gscStatus.status !== 'disabled'
         && gscStatus.status !== 'sample_mode'
     ) {
         try {
-            gscRaw = await fetchLiveGscData({
+            const loaded = await fetchLiveGscData({
                 siteUrl: gscProperty,
                 refreshToken: gscRefreshToken,
                 window,
                 filters,
             });
+            for (const [key, source] of [['query', 'gscQueries'], ['page', 'gscPages'], ['device', 'gscDevices']]) {
+                const response = loaded.values[key];
+                dataSources[source] = loaded.dataSources[key] === 'unavailable' ? 'unavailable'
+                    : response.meta?.complete === false ? 'partial' : response.rows.length ? 'available' : 'empty';
+            }
+            errors.push(...loaded.errors.map(error => ({ ...error, source: { query: 'gscQueries', page: 'gscPages', device: 'gscDevices' }[error.source] })));
+            gscRaw = Object.values(loaded.values).some(Boolean) ? loaded.values : null;
+            gscFetchError = loaded.errors.length ? new Error('GSC unavailable') : null;
         } catch (error) {
             gscFetchError = error;
+            for (const source of ['gscQueries', 'gscPages', 'gscDevices']) dataSources[source] = 'unavailable';
+            errors.push({ source: 'gsc', message: 'Données temporairement indisponibles.' });
         }
     }
 
+    for (const source of ['gscQueries', 'gscPages', 'gscDevices']) {
+        // No request is an unavailable capability, not a successful empty query.
+        dataSources[source] ??= dataSources.connectors === 'unavailable' || dataSources.client === 'unavailable'
+            ? 'unavailable' : gscStatus.status === 'not_connected' ? 'not_connected' : 'not_observed';
+    }
+    const availability = { status: getSourceStatus(dataSources), dataSources, errors };
     const gscUnavailableReason = buildGscUnavailableReason({
         gscStatus,
         siteUrl: gscProperty,
         refreshToken: gscRefreshToken,
         fetchError: gscFetchError,
         hasServerCredentials: hasServerGscCredentials,
+        clientUnavailable: dataSources.client === 'unavailable',
     });
 
     const queryRowsAll = gscRaw?.query?.rows || [];
@@ -655,19 +653,24 @@ export async function getVisibilitySlice(clientId, options = {}) {
     const currentGscQueryRows = filterRowsBetween(queryRowsAll, window.currentStartDate, window.endDate);
     const previousGscQueryRows = filterRowsBetween(queryRowsAll, window.previousStartDate, window.previousEndDate);
     const currentGscPageRows = filterRowsBetween(pageRowsAll, window.currentStartDate, window.endDate);
+    const freshness = {
+        ga4: buildFreshness('GA4', ga4Status, currentTrafficRows),
+        gsc: buildFreshness('Search Console', gscStatus, currentGscQueryRows, { unavailableDetail: gscUnavailableReason }),
+    };
+    for (const [provider, source] of [['ga4', 'ga4Traffic'], ['gsc', 'gscQueries']]) {
+        if (dataSources[source] === 'unavailable') {
+            freshness[provider] = { ...freshness[provider], status: 'unavailable', reliability: 'unavailable', detail: 'Données temporairement indisponibles.' };
+        }
+    }
 
     const bothDisconnected =
         ga4Status.status === 'not_connected' && gscStatus.status === 'not_connected';
 
-    if (bothDisconnected && currentTrafficRows.length === 0 && currentGscQueryRows.length === 0) {
+    if (bothDisconnected && errors.length === 0 && currentTrafficRows.length === 0 && currentGscQueryRows.length === 0) {
         return {
-            connectors: { ga4: ga4Status, gsc: gscStatus },
-            freshness: {
-                ga4: buildFreshness('GA4', ga4Status, currentTrafficRows),
-                gsc: buildFreshness('Search Console', gscStatus, currentGscQueryRows, {
-                    unavailableDetail: gscUnavailableReason,
-                }),
-            },
+            ...availability,
+        connectors: { ga4: ga4Status, gsc: gscStatus },
+            freshness,
             summary: null,
             comparison: null,
             trends: { gsc: [], ga4: [] },
@@ -723,8 +726,13 @@ export async function getVisibilitySlice(clientId, options = {}) {
         ? ((sessionsTotal - previousSessionsTotal) / previousSessionsTotal) * 100
         : null;
 
+    const hasTraffic = currentTrafficRows.length > 0;
+    const hasQueries = currentGscQueryRows.length > 0;
+    const queryCount = gscRaw?.query ? aggregatedQueries.length : null;
+    const pageCount = gscRaw?.page ? aggregatedPages.length : null;
+    const trafficDayCount = dataSources.ga4Traffic === 'unavailable' ? null : currentTrafficRows.length;
     const deviceSplit = gscRaw
-        ? buildDeviceSplit(deviceRows, gscUnavailableReason)
+        ? buildDeviceSplit(deviceRows, dataSources.gscDevices === 'unavailable' ? gscUnavailableReason : null)
         : buildUnavailableDeviceSplit(gscUnavailableReason);
 
     if (debugRawMode !== 'off' && gscRaw) {
@@ -740,9 +748,9 @@ export async function getVisibilitySlice(clientId, options = {}) {
                 previousEndDate: window.previousEndDate,
             },
             filters: { ...filters, segment },
-            queryMeta: gscRaw.query.meta,
-            pageMeta: gscRaw.page.meta,
-            deviceMeta: gscRaw.device.meta,
+            queryMeta: gscRaw.query?.meta,
+            pageMeta: gscRaw.page?.meta,
+            deviceMeta: gscRaw.device?.meta,
             querySample: buildRawSample(queryRowsAll, 30),
             pageSample: buildRawSample(pageRowsAll, 30),
             deviceSample: buildRawSample(deviceRows, 30),
@@ -774,71 +782,68 @@ export async function getVisibilitySlice(clientId, options = {}) {
             segment,
         },
         dimensions: gscRaw ? {
-            query: gscRaw.query.meta.dimensions,
-            page: gscRaw.page.meta.dimensions,
-            device: gscRaw.device.meta.dimensions,
+            query: gscRaw.query?.meta?.dimensions ?? null,
+            page: gscRaw.page?.meta?.dimensions ?? null,
+            device: gscRaw.device?.meta?.dimensions ?? null,
         } : null,
         rowCounts: gscRaw ? {
-            queryRowsTotal: queryRowsAll.length,
-            queryRowsCurrent: currentGscQueryRows.length,
-            queryRowsPrevious: previousGscQueryRows.length,
-            pageRowsCurrent: currentGscPageRows.length,
-            deviceRows: deviceRows.length,
+            queryRowsTotal: gscRaw.query ? queryRowsAll.length : null,
+            queryRowsCurrent: gscRaw.query ? currentGscQueryRows.length : null,
+            queryRowsPrevious: gscRaw.query ? previousGscQueryRows.length : null,
+            pageRowsCurrent: gscRaw.page ? currentGscPageRows.length : null,
+            deviceRows: gscRaw.device ? deviceRows.length : null,
         } : null,
         complete: gscRaw ? {
-            query: gscRaw.query.meta.complete,
-            page: gscRaw.page.meta.complete,
-            device: gscRaw.device.meta.complete,
+            query: gscRaw.query?.meta?.complete ?? null,
+            page: gscRaw.page?.meta?.complete ?? null,
+            device: gscRaw.device?.meta?.complete ?? null,
         } : null,
     };
 
     return {
+        ...availability,
         connectors: { ga4: ga4Status, gsc: gscStatus },
-        freshness: {
-            ga4: buildFreshness('GA4', ga4Status, currentTrafficRows),
-            gsc: buildFreshness('Search Console', gscStatus, currentGscQueryRows, {
-                unavailableDetail: gscUnavailableReason,
-            }),
-        },
+        freshness,
         gscSource,
         kpis: {
-            totalClicks: clickTotal || 0,
-            totalImpressions: impressionTotal || 0,
-            gscQueryCount: aggregatedQueries.length,
-            gscPageCount: aggregatedPages.length,
-            sessions: sessionsTotal || 0,
-            users: usersTotal || 0,
-            daysWithTraffic: currentTrafficRows.length,
+            totalClicks: hasQueries ? clickTotal : null,
+            totalImpressions: hasQueries ? impressionTotal : null,
+            gscQueryCount: queryCount,
+            gscPageCount: pageCount,
+            sessions: hasTraffic ? sessionsTotal : null,
+            users: hasTraffic ? usersTotal : null,
+            daysWithTraffic: trafficDayCount,
         },
         summary: {
-            clicks: clickTotal || null,
-            impressions: impressionTotal || null,
+            clicks: hasQueries ? clickTotal : null,
+            impressions: hasQueries ? impressionTotal : null,
             ctr: impressionTotal > 0 ? clickTotal / impressionTotal : null,
             position: weightedPosition(impressionTotal, weightedPositionSum, fallbackPositionSum, fallbackPositionCount),
-            queryCount: aggregatedQueries.length,
-            pageCount: aggregatedPages.length,
-            organicSessions: sessionsTotal || null,
-            organicUsers: usersTotal || null,
+            queryCount,
+            pageCount,
+            organicSessions: hasTraffic ? sessionsTotal : null,
+            organicUsers: hasTraffic ? usersTotal : null,
         },
-        comparison: buildComparison(currentGscQueryRows, previousGscQueryRows),
+        comparison: gscRaw?.query && (currentGscQueryRows.length || previousGscQueryRows.length)
+            ? buildComparison(currentGscQueryRows, previousGscQueryRows) : null,
         trends: {
             gsc: aggregateDailySearchRows(currentGscQueryRows),
             ga4: currentTrafficRows,
         },
-        trackedKeywordCount: enrichedQueries.length,
+        trackedKeywordCount: gscRaw?.query ? enrichedQueries.length : null,
         topPages: aggregatedPages.slice(0, 12),
         landingPages: ga4TopPages.slice(0, 12),
         ga4LandingPages: ga4TopPages.slice(0, 12),
         deviceSplit,
         ga4Support: {
-            sessions: sessionsTotal || null,
-            users: usersTotal || null,
+            sessions: hasTraffic ? sessionsTotal : null,
+            users: hasTraffic ? usersTotal : null,
             sessionsDeltaPercent: ga4SessionsDeltaPercent,
-            reliability: currentTrafficRows.length > 0 ? 'measured' : 'unavailable',
+            reliability: hasTraffic ? 'measured' : 'unavailable',
         },
         brandSplit: buildBrandSplit(clientProfile.clientName, aggregatedQueries),
         topQueries: enrichedQueries.slice(0, 40),
-        intentBreakdown: buildIntentBreakdown(enrichedQueries),
+        intentBreakdown: gscRaw?.query ? buildIntentBreakdown(enrichedQueries) : [],
         movers: buildMovers(enrichedQueries),
         debug: debugRawMode !== 'off' && gscRaw
             ? {

@@ -311,13 +311,14 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
     const isUnavailable = status === 'not_connected';
 
     if (provider === 'ga4') {
-        const hasData = Boolean(snapshot?.hasRealData && visibility?.kpis);
+        const hasData = Boolean(snapshot?.hasRealData && finiteNumberOrNull(visibility?.kpis?.sessions) !== null);
         return [
             buildMetric({
                 id: 'sessions_28d',
                 label: 'Sessions 28j',
                 value: hasData ? visibility.kpis.sessions : 'n.d.',
-                detail: hasData ? `${visibility.kpis.daysWithTraffic} jour(s) alimentés` : 'Aucune donnée GA4 synchronisée',
+                detail: hasData ? `${visibility.kpis.daysWithTraffic ?? 'n.d.'} jour(s) alimentés`
+                    : visibility?.dataSources?.ga4Traffic === 'unavailable' ? 'Données GA4 temporairement indisponibles' : 'Aucune donnée GA4 synchronisée',
                 reliability: hasData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
                 accent: 'blue',
             }),
@@ -333,13 +334,14 @@ function getConnectorMetricRows(provider, visibility, social, snapshot, status) 
     }
 
     if (provider === 'gsc') {
-        const hasData = Boolean(snapshot?.hasRealData && visibility?.kpis);
+        const hasData = Boolean(snapshot?.hasRealData && finiteNumberOrNull(visibility?.kpis?.totalClicks) !== null);
         return [
             buildMetric({
                 id: 'clicks_28d',
                 label: 'Clics 28j',
                 value: hasData ? visibility.kpis.totalClicks : 'n.d.',
-                detail: hasData ? `${visibility.kpis.totalImpressions} impressions cumulées` : 'Aucune requête Search Console synchronisée',
+                detail: hasData ? `${visibility.kpis.totalImpressions ?? 'n.d.'} impressions cumulées`
+                    : visibility?.dataSources?.gscQueries === 'unavailable' ? 'Données Search Console temporairement indisponibles' : 'Aucune requête Search Console synchronisée',
                 reliability: hasData ? 'measured' : (isUnavailable ? 'unavailable' : 'unavailable'),
                 accent: 'emerald',
             }),
@@ -603,7 +605,7 @@ async function getSharedDossierContract(clientId) {
                 label: 'Visibilité Google',
                 value: workspace.seoScore ?? 'n.d.',
                 detail: visibility?.kpis
-                    ? `${visibility.kpis.totalClicks} clic(s) GSC · ${visibility.kpis.sessions} session(s) GA4`
+                    ? `${visibility.kpis.totalClicks ?? 'n.d.'} clic(s) GSC · ${visibility.kpis.sessions ?? 'n.d.'} session(s) GA4`
                     : (workspace.latestAuditAt ? `Dernier audit ${timeSince(workspace.latestAuditAt)}` : 'Aucun audit finalisé'),
                 reliability: workspace.seoScore !== null && workspace.seoScore !== undefined ? 'measured' : 'unavailable',
                 href: `${baseHref}/seo/health`,
