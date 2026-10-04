@@ -231,13 +231,11 @@ function domSnapshot() {
             container: rect(element),
             svg: element.querySelector('svg') ? rect(element.querySelector('svg')) : null,
         })),
-        navigation: performance
-            .getEntriesByType('navigation')
-            .map((entry) => ({
-                duration: entry.duration,
-                domContentLoaded: entry.domContentLoadedEventEnd,
-                transferSize: entry.transferSize,
-            })),
+        navigation: performance.getEntriesByType('navigation').map((entry) => ({
+            duration: entry.duration,
+            domContentLoaded: entry.domContentLoadedEventEnd,
+            transferSize: entry.transferSize,
+        })),
     };
 }
 async function checkScroll(page) {

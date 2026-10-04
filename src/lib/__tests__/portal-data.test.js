@@ -72,15 +72,13 @@ describe('portal partial data', () => {
             counts: {},
         });
         Object.assign(snapshot, { status: 'available', sources: {}, errors: [] });
-        mocks.snapshot
-            .mockReset()
-            .mockResolvedValue({
-                snapshot,
-                latestAudit: null,
-                trackedQueries: [],
-                lastRunMap: new Map(),
-                modelPerformance: [],
-            });
+        mocks.snapshot.mockReset().mockResolvedValue({
+            snapshot,
+            latestAudit: null,
+            trackedQueries: [],
+            lastRunMap: new Map(),
+            modelPerformance: [],
+        });
     });
     it('preserves successful empty and true zero without client/provider calls', async () => {
         const data = await getPortalDashboardData('client-a');

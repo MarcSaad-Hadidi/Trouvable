@@ -29,16 +29,14 @@ beforeEach(() => {
     vi.setSystemTime(new Date('2026-10-03T12:00:00Z'));
     io.traffic.mockReset().mockResolvedValue([{ date: '2026-10-03', sessions: 0, users: 0 }]);
     io.topPages.mockReset().mockResolvedValue([]);
-    io.connectors
-        .mockReset()
-        .mockResolvedValue([
-            {
-                provider: 'gsc',
-                status: 'connected',
-                last_synced_at: '2026-10-03',
-                config: { google_refresh_token: 'fixture-token' },
-            },
-        ]);
+    io.connectors.mockReset().mockResolvedValue([
+        {
+            provider: 'gsc',
+            status: 'connected',
+            last_synced_at: '2026-10-03',
+            config: { google_refresh_token: 'fixture-token' },
+        },
+    ]);
     io.storedGsc
         .mockReset()
         .mockResolvedValue([{ date: '2026-10-01', query: 'réparation', clicks: 0, impressions: 0 }]);

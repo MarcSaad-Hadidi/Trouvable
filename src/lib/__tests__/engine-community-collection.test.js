@@ -129,12 +129,10 @@ describe('community collector bounded network effects', () => {
         fetch.mockResolvedValue({ ok: true, json: async () => ({ data: { children: [] } }) });
         expect((await collect()).collectionOutcome.failureClass).toBe('seed_quality_failure');
         expect(web.collect).not.toHaveBeenCalled();
-        fetch
-            .mockResolvedValueOnce({ ok: false, status: 403 })
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ data: { children: [{ data: { id: 'one', title: 'found' } }] } }),
-            });
+        fetch.mockResolvedValueOnce({ ok: false, status: 403 }).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ data: { children: [{ data: { id: 'one', title: 'found' } }] } }),
+        });
         const partial = await collect(['first', 'second']);
         expect(partial.collectionOutcome).toMatchObject({ failureClass: null, summary: { ok: 1, error: 1 } });
         expect(web.collect).not.toHaveBeenCalled();

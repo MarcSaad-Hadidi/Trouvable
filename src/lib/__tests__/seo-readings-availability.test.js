@@ -58,14 +58,12 @@ beforeEach(() => {
         .mockResolvedValue([{ provider: 'gsc', status: 'connected', last_synced_at: '2026-10-03' }]);
     io.gsc.mockReset().mockResolvedValue(rows);
     io.client.mockReset().mockResolvedValue({ clientName: 'Atelier', websiteUrl: 'https://example.test' });
-    io.visibility
-        .mockReset()
-        .mockResolvedValue({
-            status: 'available',
-            dataSources: { gscQueries: 'available' },
-            errors: [],
-            freshness: { gsc: { status: 'ok', reliability: 'measured', lastObservedDate: '2026-10-02' } },
-        });
+    io.visibility.mockReset().mockResolvedValue({
+        status: 'available',
+        dataSources: { gscQueries: 'available' },
+        errors: [],
+        freshness: { gsc: { status: 'ok', reliability: 'measured', lastObservedDate: '2026-10-02' } },
+    });
 });
 afterEach(() => vi.useRealTimers());
 
