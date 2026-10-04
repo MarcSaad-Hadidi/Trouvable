@@ -103,7 +103,7 @@ const mutations = [
     ['application job enabled on pull requests', directory => rewrite(directory, ciFile, raw => raw.replace("github.event_name == 'workflow_dispatch'", "github.event_name != 'schedule'"))],
     ['application job secret', directory => rewrite(directory, ciFile, raw => raw.replace('    env:', '    env:\n      SUPABASE_SERVICE_ROLE_KEY: ' + '$' + '{{ secrets.PRODUCTION_KEY }}'))],
     ['unbounded application timeout', directory => rewrite(directory, ciFile, raw => raw.replace('timeout-minutes: 20', 'timeout-minutes: 120'))],
-    ['equivalent unapproved command', directory => rewrite(directory, ciFile, raw => raw.replace('run: npm run build', 'run: npm exec next build'))],
+    ['equivalent unapproved command', directory => rewrite(directory, ciFile, raw => raw.replace('run: npm run verify', 'run: npm exec next build'))],
     ['application install in automatic gate', directory => rewrite(directory, ciFile, raw => raw.replace('run: node scripts/validate-hibernation.mjs', 'run: npm ci'))],
     ['extra automatic job', directory => rewrite(directory, ciFile, raw => raw + '\n  unapproved:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n')],
     ['new workflow outside allowlist', directory => writeFileSync(path.join(directory, '.github/workflows/extra.yml'), 'on: push\njobs: {}\n')],
@@ -111,6 +111,21 @@ const mutations = [
     ['indirect application script', directory => rewrite(directory, 'package.json', raw => {
         const config = JSON.parse(raw);
         config.scripts.build = 'next build --webpack && node scripts/deploy.js';
+        return JSON.stringify(config);
+    })],
+    ['lint warning threshold removed', directory => rewrite(directory, 'package.json', raw => {
+        const config = JSON.parse(raw);
+        config.scripts.lint = 'eslint .';
+        return JSON.stringify(config);
+    })],
+    ['verification lifecycle hook', directory => rewrite(directory, 'package.json', raw => {
+        const config = JSON.parse(raw);
+        config.scripts.preverify = 'node scripts/production.js';
+        return JSON.stringify(config);
+    })],
+    ['repository check invokes deployment', directory => rewrite(directory, 'package.json', raw => {
+        const config = JSON.parse(raw);
+        config.scripts['check:repository'] = 'node scripts/deploy.js';
         return JSON.stringify(config);
     })],
     ['application lifecycle hook', directory => rewrite(directory, 'package.json', raw => {

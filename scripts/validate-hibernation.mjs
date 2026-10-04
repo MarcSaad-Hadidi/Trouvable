@@ -123,14 +123,8 @@ const CI_CONTRACT = [
   "          node-version: \"24\"",
   "      - name: Install locked dependencies without lifecycle scripts",
   "        run: npm ci --ignore-scripts --no-audit --no-fund",
-  "      - name: Lint application",
-  "        run: npm run lint",
-  "      - name: Check application types",
-  "        run: npm run typecheck",
-  "      - name: Test application",
-  "        run: npm test",
-  "      - name: Build dormant application without service secrets",
-  "        run: npm run build",
+  "      - name: Verify dormant application without service secrets",
+  "        run: npm run verify",
   ""
 ].join('\n');
 
@@ -140,7 +134,18 @@ function assertCiWorkflow(yaml, packageRaw) {
   if (!packageRaw) return;
   try {
     const scripts = JSON.parse(packageRaw).scripts || {};
-    const approved = { lint: 'eslint .', typecheck: 'next typegen --webpack && tsc --noEmit', test: 'vitest run', build: 'next build --webpack' };
+    const approved = {
+      'format:check': 'prettier . --check',
+      lint: 'eslint . --max-warnings 0',
+      typecheck: 'next typegen --webpack && tsc --noEmit',
+      test: 'vitest run',
+      'test:tooling': 'node --test scripts/__tests__/repository.test.mjs scripts/__tests__/verify.test.mjs',
+      'test:hibernation': 'node --test scripts/__tests__/hibernation.test.mjs',
+      build: 'next build --webpack',
+      'check:hibernation': 'node scripts/validate-hibernation.mjs',
+      'check:repository': 'node scripts/check-repository.mjs',
+      verify: 'node scripts/verify.mjs',
+    };
     for (const [name, command] of Object.entries(approved)) {
       if (scripts[name] !== command || scripts['pre' + name] || scripts['post' + name]) fail('package.json: manual validation script ' + name + ' must remain local and free of lifecycle hooks');
     }

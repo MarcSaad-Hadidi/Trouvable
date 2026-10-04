@@ -4,7 +4,7 @@ Ce document explique les frontières et invariants de l'application dormante. Le
 
 ## 1. Application dormante et parking
 
-`src/` conserve l’application ; `parking/` porte la production statique. Le Hibernation Gate automatique protège ce contrat. Le job applicatif manuel de la même CI installe le lockfile et lance lint, types, tests et build sans secrets de production ni déploiement. La CSP applicative autorise les besoins de Next/Clerk ; la CSP du parking interdit les scripts. Elles n’ont pas à être égales.
+`src/` conserve l’application ; `parking/` porte la production statique. Le Hibernation Gate automatique protège ce contrat. Le job applicatif manuel de la même CI installe le lockfile et lance la vérification complète en série sans secrets de production ni déploiement. La CSP applicative autorise les besoins de Next/Clerk ; la CSP du parking interdit les scripts. Elles n’ont pas à être égales.
 
 Une reprise de services, un Cron exceptionnel, une migration ou un appel fournisseur reste une opération distincte régie par les [documents d’exploitation](../operations/trouvable-hibernation.md).
 
