@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { getAdminSupabase } from '@/lib/supabase-admin';
+import { finiteNumberOrNull } from '@/lib/numbers';
 
 // ──────────────────────────────────────────────────────────────
 // Collection runs
@@ -239,10 +240,13 @@ export async function getCommunityStats(clientId) {
         supabase.from('community_mentions').select('id', { count: 'exact', head: true }).eq('client_id', clientId),
     ]);
 
-    return {
-        documents: docsResult.count || 0,
-        clusters: clustersResult.count || 0,
-        opportunities: opportunitiesResult.count || 0,
-        mentions: mentionsResult.count || 0,
-    };
+    const results = [docsResult, clustersResult, opportunitiesResult, mentionsResult];
+    for (const result of results) {
+        if (result.error) throw new Error(`[Community] getCommunityStats: ${result.error.message}`);
+    }
+    const [documents, clusters, opportunities, mentions] = results.map((result) => {
+        const count = finiteNumberOrNull(result.count);
+        return Number.isInteger(count) && count >= 0 ? count : null;
+    });
+    return { documents, clusters, opportunities, mentions };
 }
