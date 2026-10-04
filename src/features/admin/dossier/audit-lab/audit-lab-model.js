@@ -53,7 +53,7 @@ export function getFinalStableScores(audit) {
     };
 }
 
-export function getDimensions(audit) {
+function getDimensions(audit) {
     const geoDims = toArray(audit?.geo_breakdown?.dimensions);
     if (geoDims.length > 0) return geoDims;
     return toArray(audit?.seo_breakdown?.dimensions);
@@ -79,10 +79,6 @@ const DIMENSION_BUCKETS = {
     ai_answerability: 'geo',
     trust_signals: 'geo',
 };
-
-export function getDimensionBucket(dimensionKey) {
-    return DIMENSION_BUCKETS[String(dimensionKey || '').toLowerCase()] || null;
-}
 
 const DIMENSION_FR = {
     technical_seo: {
@@ -112,7 +108,7 @@ const DIMENSION_FR = {
     },
 };
 
-export function dimensionFrMeta(key) {
+function dimensionFrMeta(key) {
     const lower = String(key || '').toLowerCase();
     return DIMENSION_FR[lower] || null;
 }
@@ -203,7 +199,7 @@ export function getSeoGeoBucketsViewModel(audit) {
     };
 }
 
-export function getClassification(audit) {
+function getClassification(audit) {
     return (
         audit?.geo_breakdown?.site_classification ||
         audit?.seo_breakdown?.site_classification ||
@@ -827,7 +823,7 @@ const LAYER2_MODULE_TO_BUCKET = {
     negative_signals: 'seo',
 };
 
-export function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dimensions) {
+function getSeoGeoBucketSynthesis(audit, bucketName, explicitIssues, dimensions) {
     const synthesized = [];
 
     const applicableDims = dimensions

@@ -127,7 +127,7 @@ function buildSparklinePoints(values) {
     });
 }
 
-export function SeoSparkline({ points, valueKey, color = 'emerald' }) {
+function SeoSparkline({ points, valueKey, color = 'emerald' }) {
     const values = (points || []).map((point) => Number(point?.[valueKey])).filter((value) => Number.isFinite(value));
 
     if (values.length < 2) return null;

@@ -159,19 +159,6 @@ export function humanizeCategoryKey(key) {
     return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-const PRIORITY_LABELS = {
-    high: 'Haute',
-    medium: 'Moyenne',
-    low: 'Faible',
-    critical: 'Critique',
-};
-
-export function priorityFr(value) {
-    if (!value) return null;
-    const key = String(value).toLowerCase();
-    return PRIORITY_LABELS[key] || String(value);
-}
-
 const CRAWL_STRATEGY_LABELS = {
     sitemap_first: 'Sitemap en priorité',
     sitemap: 'Via sitemap',
