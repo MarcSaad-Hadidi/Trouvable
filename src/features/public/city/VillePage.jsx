@@ -1,9 +1,9 @@
-﻿import { notFound } from "next/navigation";
-import { VILLES, EXPERTISES } from "@/lib/data/geo-architecture";
-import { resolveVilleComposition } from "@/lib/data/composition";
-import { SITE_URL } from "@/lib/site-config";
-import { buildPublicMetadata } from "@/lib/seo/metadata";
-import VillePageClient from "@/features/public/city/VillePageClient";
+﻿import { notFound } from 'next/navigation';
+import { VILLES, EXPERTISES } from '@/lib/data/geo-architecture';
+import { resolveVilleComposition } from '@/lib/data/composition';
+import { SITE_URL } from '@/lib/site-config';
+import { buildPublicMetadata } from '@/lib/seo/metadata';
+import VillePageClient from '@/features/public/city/VillePageClient';
 
 export function generateStaticParams() {
     return VILLES.map((v) => ({ villeSlug: v.slug }));
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }) {
         canonical: `${SITE_URL}/villes/${ville.slug}`,
         openGraph: {
             url: `${SITE_URL}/villes/${ville.slug}`,
-            siteName: "Trouvable",
-            type: "website",
+            siteName: 'Trouvable',
+            type: 'website',
             images: [
                 {
                     url: `${SITE_URL}/opengraph-image`,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
             ],
         },
         twitter: {
-            card: "summary_large_image",
+            card: 'summary_large_image',
             images: [`${SITE_URL}/twitter-image`],
         },
         robots: { index: true, follow: true },
@@ -49,16 +49,7 @@ export default async function VillePage({ params }) {
     if (!ville) notFound();
 
     const composition = resolveVilleComposition(ville);
-    const linkedExpertises = ville.linkedExpertises
-        .map((s) => EXPERTISES.find((e) => e.slug === s))
-        .filter(Boolean);
+    const linkedExpertises = ville.linkedExpertises.map((s) => EXPERTISES.find((e) => e.slug === s)).filter(Boolean);
 
-    return (
-        <VillePageClient
-            ville={ville}
-            composition={composition}
-            linkedExpertises={linkedExpertises}
-        />
-    );
+    return <VillePageClient ville={ville} composition={composition} linkedExpertises={linkedExpertises} />;
 }
-

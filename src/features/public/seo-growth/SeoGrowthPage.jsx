@@ -34,16 +34,16 @@ const PAGE_COMPONENTS = {
     'audit-visibilite-ia': AuditVisibiliteIaPage,
     'visibilite-google-reponses-ia': VisibiliteGoogleReponsesIaPage,
     'seo-ia-referencement-generatif': SeoIaReferencementGeneratifPage,
-    'chatgpt': ChatgptPage,
-    'perplexity': PerplexityPage,
+    chatgpt: ChatgptPage,
+    perplexity: PerplexityPage,
     'ai-overviews': AiOverviewsPage,
     'geo-vs-seo': GeoVsSeoPage,
     'agence-geo-quebec': AgenceGeoQuebecPage,
     'accompagnement-geo': AccompagnementGeoPage,
     'strategie-visibilite-ia': StrategieVisibiliteIaPage,
-    'gemini': GeminiPage,
-    'copilot': CopilotPage,
-    'claude': ClaudePage,
+    gemini: GeminiPage,
+    copilot: CopilotPage,
+    claude: ClaudePage,
     'mesurer-visibilite-ia': MesurerVisibiliteIaPage,
     'structurer-site-moteurs-ia': StructurerSiteMoteursIaPage,
 };
@@ -72,11 +72,7 @@ export default function SeoGrowthPage({ page }) {
                 itemList={itemList}
                 howTo={howTo || undefined}
             />
-            {UniquePageComponent ? (
-                <UniquePageComponent page={page} trustBrief={null} />
-            ) : (
-                <FallbackPage page={page} />
-            )}
+            {UniquePageComponent ? <UniquePageComponent page={page} trustBrief={null} /> : <FallbackPage page={page} />}
 
             <SeoGrowthTrustBrief page={page} />
 
@@ -93,7 +89,9 @@ function SeoGrowthTrustBrief({ page }) {
         <section className="border-b border-white/[0.06] bg-[#080808] px-6 py-7 sm:px-10">
             <div className="mx-auto grid max-w-[1120px] gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
                 <div>
-                    <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">À retenir</div>
+                    <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8fff]">
+                        À retenir
+                    </div>
                     <ul className="grid gap-3 text-[13.5px] leading-[1.65] text-white/68 md:grid-cols-3">
                         {takeaways.map((item) => (
                             <li key={item} className="border-l border-white/10 pl-4">

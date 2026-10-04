@@ -1,7 +1,19 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Mic, Camera, X, Grid, Sparkles, MoreVertical, Volume2, ChevronDown, ArrowRight, BookOpen } from 'lucide-react';
+import {
+    Search,
+    Mic,
+    Camera,
+    X,
+    Grid,
+    Sparkles,
+    MoreVertical,
+    Volume2,
+    ChevronDown,
+    ArrowRight,
+    BookOpen,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TypewriterText, AiThinking, FaqSection, LinksSection, PlatformEditorialLead } from './shared-primitives';
@@ -22,7 +34,6 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                 <PlatformEditorialLead page={page} />
                 {/* Google Native App Window */}
                 <div className="max-w-[1400px] mx-auto rounded-2xl border border-white/10 bg-[#202124] shadow-2xl overflow-hidden relative flex flex-col min-h-[800px]">
-
                     {/* Header */}
                     <header className="flex items-center px-4 sm:px-8 py-5 gap-4 sm:gap-8 border-b border-[#3c4043]/50">
                         <div className="text-white text-2xl font-semibold tracking-tighter shrink-0 flex items-center">
@@ -59,7 +70,15 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                 <Grid className="w-5 h-5 text-[#e8eaed]" />
                             </div>
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center cursor-pointer overflow-hidden border border-white/10">
-                                <Image src="/logos/trouvable_logo_blanc1.png" alt="Trouvable" className="w-full h-full object-contain p-1" width={32} height={32} unoptimized loading="eager" />
+                                <Image
+                                    src="/logos/trouvable_logo_blanc1.png"
+                                    alt="Trouvable"
+                                    className="w-full h-full object-contain p-1"
+                                    width={32}
+                                    height={32}
+                                    unoptimized
+                                    loading="eager"
+                                />
                             </div>
                         </div>
                     </header>
@@ -69,22 +88,36 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                         <div className="flex items-center gap-2 cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] font-medium text-[#8ab4f8]">
                             <Sparkles className="w-4 h-4 fill-current" /> Mode IA
                         </div>
-                        <div className="text-white border-b-[3px] border-[#8ab4f8] pb-[11px] cursor-pointer whitespace-nowrap font-medium">Tout</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px]">Images</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden sm:block">Shopping</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden md:block">Vidéos</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden lg:block">Vidéos courtes</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden lg:block">Actualités</div>
-                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px]">Plus</div>
-                        <div className="sm:ml-auto cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden sm:block">Outils</div>
+                        <div className="text-white border-b-[3px] border-[#8ab4f8] pb-[11px] cursor-pointer whitespace-nowrap font-medium">
+                            Tout
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px]">
+                            Images
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden sm:block">
+                            Shopping
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden md:block">
+                            Vidéos
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden lg:block">
+                            Vidéos courtes
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden lg:block">
+                            Actualités
+                        </div>
+                        <div className="cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px]">
+                            Plus
+                        </div>
+                        <div className="sm:ml-auto cursor-pointer hover:text-white transition whitespace-nowrap pb-[11px] hidden sm:block">
+                            Outils
+                        </div>
                     </nav>
 
                     {/* Main Content Area */}
                     <div className="flex-1 overflow-y-auto px-4 sm:px-[132px] py-8 flex flex-col lg:flex-row gap-8 lg:gap-16 clean-scroll">
-
                         {/* Left Column - SGE (AI Overview) */}
                         <div className="flex-1 max-w-[652px]">
-
                             {/* AI Overview Box */}
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
@@ -112,13 +145,19 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                                 <AiThinking />
                                             </div>
                                         ) : (
-                                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.5 }}
+                                            >
                                                 {/* Entity Header */}
                                                 <div className="flex items-center gap-4 mb-4">
                                                     <div className="w-[42px] h-[42px] rounded-full bg-[#303134] flex items-center justify-center cursor-pointer hover:bg-[#3c4043] shadow-sm transition border border-white/5 shrink-0">
                                                         <Volume2 className="w-[22px] h-[22px] text-[#8ab4f8]" />
                                                     </div>
-                                                    <h2 className="text-[28px] text-white font-normal tracking-tight">{page.eyebrow}</h2>
+                                                    <h2 className="text-[28px] text-white font-normal tracking-tight">
+                                                        {page.eyebrow}
+                                                    </h2>
                                                 </div>
 
                                                 {/* Text Content */}
@@ -127,7 +166,11 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                                         <TypewriterText text={page.definition} speed={5} />
                                                     </p>
                                                     <p className="text-[15px] leading-[1.6] text-[#e8eaed]">
-                                                        <TypewriterText text={page.summary} speed={5} delay={page.definition?.length * 5 + 300} />
+                                                        <TypewriterText
+                                                            text={page.summary}
+                                                            speed={5}
+                                                            delay={page.definition?.length * 5 + 300}
+                                                        />
                                                     </p>
                                                 </div>
 
@@ -138,7 +181,9 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                                         animate={{ opacity: 1, y: 0 }}
                                                         transition={{ delay: 2.0 }}
                                                     >
-                                                        <h3 className="text-[16px] text-white mb-3 font-medium">Failles identifiées</h3>
+                                                        <h3 className="text-[16px] text-white mb-3 font-medium">
+                                                            Failles identifiées
+                                                        </h3>
                                                         <ul className="space-y-2">
                                                             {page.problems?.map((p, i) => (
                                                                 <motion.li
@@ -160,7 +205,9 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                                         animate={{ opacity: 1, y: 0 }}
                                                         transition={{ delay: 3.0 }}
                                                     >
-                                                        <h3 className="text-[16px] text-white mb-3 font-medium">Stratégie de correction</h3>
+                                                        <h3 className="text-[16px] text-white mb-3 font-medium">
+                                                            Stratégie de correction
+                                                        </h3>
                                                         <ul className="space-y-2">
                                                             {page.corrections?.map((p, i) => (
                                                                 <motion.li
@@ -182,7 +229,9 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                                         animate={{ opacity: 1, y: 0 }}
                                                         transition={{ delay: 4.0 }}
                                                     >
-                                                        <h3 className="text-[16px] text-white mb-3 font-medium">Livrables</h3>
+                                                        <h3 className="text-[16px] text-white mb-3 font-medium">
+                                                            Livrables
+                                                        </h3>
                                                         <ul className="space-y-2">
                                                             {page.deliverables?.map((p, i) => (
                                                                 <motion.li
@@ -216,23 +265,26 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                             <div className="space-y-8 pl-1">
                                 {[
                                     {
-                                        title: "Agence SEO & GEO à Montréal | Trouvable",
-                                        url: "https://trouvable.ca/villes/montreal",
-                                        breadcrumb: "trouvable.ca › villes › montreal",
-                                        description: "Découvrez notre expertise en référencement naturel (SEO) et IA (GEO) pour positionner votre entreprise en tête des résultats de recherche à Montréal."
+                                        title: 'Agence SEO & GEO à Montréal | Trouvable',
+                                        url: 'https://trouvable.ca/villes/montreal',
+                                        breadcrumb: 'trouvable.ca › villes › montreal',
+                                        description:
+                                            'Découvrez notre expertise en référencement naturel (SEO) et IA (GEO) pour positionner votre entreprise en tête des résultats de recherche à Montréal.',
                                     },
                                     {
-                                        title: "Audit de Visibilité IA - Mesurez votre impact",
-                                        url: "https://trouvable.ca/services/audit-visibilite-ia",
-                                        breadcrumb: "trouvable.ca › services › audit-visibilite-ia",
-                                        description: "Testez comment votre marque apparaît dans ChatGPT, Gemini et Claude. Obtenez un rapport personnalisé sur votre présence dans les moteurs génératifs."
+                                        title: 'Audit de Visibilité IA - Mesurez votre impact',
+                                        url: 'https://trouvable.ca/services/audit-visibilite-ia',
+                                        breadcrumb: 'trouvable.ca › services › audit-visibilite-ia',
+                                        description:
+                                            'Testez comment votre marque apparaît dans ChatGPT, Gemini et Claude. Obtenez un rapport personnalisé sur votre présence dans les moteurs génératifs.',
                                     },
                                     {
-                                        title: "Notre Méthodologie : Devenir le choix évident",
-                                        url: "https://trouvable.ca/methodologie",
-                                        breadcrumb: "trouvable.ca › methodologie",
-                                        description: "Comprenez notre approche unique combinant architecture de contenu, entités nommées et autorité thématique pour dominer la SGE et le SEO traditionnel."
-                                    }
+                                        title: 'Notre Méthodologie : Devenir le choix évident',
+                                        url: 'https://trouvable.ca/methodologie',
+                                        breadcrumb: 'trouvable.ca › methodologie',
+                                        description:
+                                            'Comprenez notre approche unique combinant architecture de contenu, entités nommées et autorité thématique pour dominer la SGE et le SEO traditionnel.',
+                                    },
                                 ].map((res, i) => (
                                     <motion.div
                                         key={i}
@@ -243,21 +295,40 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                         className="group"
                                     >
                                         <div className="flex items-center gap-3 mb-2">
-                                            <Link href={res.url.replace('https://trouvable.ca', '')} className="flex items-center gap-3 group/header">
+                                            <Link
+                                                href={res.url.replace('https://trouvable.ca', '')}
+                                                className="flex items-center gap-3 group/header"
+                                            >
                                                 <div className="w-[28px] h-[28px] rounded-full bg-[#303134] border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    <Image src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-5 h-5 object-contain" width={20} height={20} unoptimized loading="eager" />
+                                                    <Image
+                                                        src="/logos/trouvable_logo_blanc1.png"
+                                                        alt="T"
+                                                        className="w-5 h-5 object-contain"
+                                                        width={20}
+                                                        height={20}
+                                                        unoptimized
+                                                        loading="eager"
+                                                    />
                                                 </div>
                                                 <div>
-                                                    <div className="text-[14px] text-[#e8eaed] leading-tight group-hover/header:text-white transition">Trouvable</div>
-                                                    <div className="text-[12px] text-[#9aa0a6] leading-tight truncate max-w-[300px]">{res.breadcrumb}</div>
+                                                    <div className="text-[14px] text-[#e8eaed] leading-tight group-hover/header:text-white transition">
+                                                        Trouvable
+                                                    </div>
+                                                    <div className="text-[12px] text-[#9aa0a6] leading-tight truncate max-w-[300px]">
+                                                        {res.breadcrumb}
+                                                    </div>
                                                 </div>
                                             </Link>
                                             <MoreVertical className="w-4 h-4 text-[#9aa0a6] ml-auto opacity-0 group-hover:opacity-100 transition" />
                                         </div>
                                         <Link href={res.url.replace('https://trouvable.ca', '')}>
-                                            <h3 className="text-[20px] text-[#8ab4f8] cursor-pointer group-hover:underline mb-2 leading-snug">{res.title}</h3>
+                                            <h3 className="text-[20px] text-[#8ab4f8] cursor-pointer group-hover:underline mb-2 leading-snug">
+                                                {res.title}
+                                            </h3>
                                         </Link>
-                                        <p className="text-[14px] text-[#bdc1c6] line-clamp-2 leading-[1.6]">{res.description}</p>
+                                        <p className="text-[14px] text-[#bdc1c6] line-clamp-2 leading-[1.6]">
+                                            {res.description}
+                                        </p>
                                     </motion.div>
                                 ))}
                             </div>
@@ -276,11 +347,14 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                         className="rounded-2xl border border-[#3c4043]/50 bg-[#202124] hover:bg-[#303134]/50 transition cursor-pointer p-4 group block"
                                     >
                                         <div className="flex items-start justify-between mb-2">
-                                            <h4 className="text-[16px] text-[#8ab4f8] group-hover:underline leading-tight">{link.label}</h4>
+                                            <h4 className="text-[16px] text-[#8ab4f8] group-hover:underline leading-tight">
+                                                {link.label}
+                                            </h4>
                                         </div>
                                         <p className="text-[12px] text-[#9aa0a6] mb-3 truncate">{link.href}</p>
                                         <div className="text-[14px] text-[#bdc1c6] leading-relaxed line-clamp-2">
-                                            {link.description || "Découvrez comment optimiser votre stratégie de référencement pour améliorer votre visibilité."}
+                                            {link.description ||
+                                                'Découvrez comment optimiser votre stratégie de référencement pour améliorer votre visibilité.'}
                                         </div>
                                         <div className="mt-4 flex items-center gap-2">
                                             <div className="w-6 h-6 rounded-full bg-[#1e1e1e] flex items-center justify-center">
@@ -302,22 +376,36 @@ export default function AiOverviewsPage({ page, trustBrief }) {
                                     <div className="text-[12px] font-bold text-white mb-3">Sponsorisé</div>
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center overflow-hidden">
-                                            <Image src="/logos/trouvable_logo_blanc1.png" alt="T" className="w-full h-full object-cover invert" width={28} height={28} unoptimized loading="eager" />
+                                            <Image
+                                                src="/logos/trouvable_logo_blanc1.png"
+                                                alt="T"
+                                                className="w-full h-full object-cover invert"
+                                                width={28}
+                                                height={28}
+                                                unoptimized
+                                                loading="eager"
+                                            />
                                         </div>
                                         <div>
                                             <div className="text-[14px] text-[#e8eaed]">Trouvable</div>
-                                            <div className="text-[12px] text-[#9aa0a6]">https://trouvable.ca/contact</div>
+                                            <div className="text-[12px] text-[#9aa0a6]">
+                                                https://trouvable.ca/contact
+                                            </div>
                                         </div>
                                     </div>
-                                    <h4 className="text-[18px] text-[#8ab4f8] group-hover:underline mb-2 leading-tight">Augmentez votre visibilité IA</h4>
-                                    <p className="text-[14px] text-[#bdc1c6] mb-4 leading-relaxed">Passez d&#39;introuvable à leader de votre marché avec notre méthodologie GEO avancée.</p>
+                                    <h4 className="text-[18px] text-[#8ab4f8] group-hover:underline mb-2 leading-tight">
+                                        Augmentez votre visibilité IA
+                                    </h4>
+                                    <p className="text-[14px] text-[#bdc1c6] mb-4 leading-relaxed">
+                                        Passez d&#39;introuvable à leader de votre marché avec notre méthodologie GEO
+                                        avancée.
+                                    </p>
                                     <div className="inline-flex items-center gap-2 text-[#8ab4f8] text-[14px] font-medium">
                                         Commencer maintenant <ArrowRight className="w-4 h-4" />
                                     </div>
                                 </Link>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -325,12 +413,14 @@ export default function AiOverviewsPage({ page, trustBrief }) {
 
                 {/* Regular bottom content */}
                 <div className="mt-20 max-w-[1400px] mx-auto">
-                    <section className="px-6 py-20 sm:px-10"><FaqSection faqs={page.faqs} accent="indigo" heading="Questions fréquentes" /></section>
-                    <section className="border-t border-white/5 px-6 py-20 sm:px-10"><LinksSection links={page.internalLinks} accent="indigo" heading="Univers connecté" /></section>
+                    <section className="px-6 py-20 sm:px-10">
+                        <FaqSection faqs={page.faqs} accent="indigo" heading="Questions fréquentes" />
+                    </section>
+                    <section className="border-t border-white/5 px-6 py-20 sm:px-10">
+                        <LinksSection links={page.internalLinks} accent="indigo" heading="Univers connecté" />
+                    </section>
                 </div>
             </main>
-
-
         </div>
     );
 }

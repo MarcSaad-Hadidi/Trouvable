@@ -22,7 +22,8 @@ export async function generateMetadata({ params }) {
     let seoTitle = profile.seo_title || profile.client_name;
     if (!profile.seo_title) {
         if (profile.business_type && profile.business_type !== 'LocalBusiness' && profile.address?.city) {
-            seoTitle = profile.client_name + ' - ' + profile.business_type + ' à ' + profile.address.city + ' | Trouvable';
+            seoTitle =
+                profile.client_name + ' - ' + profile.business_type + ' à ' + profile.address.city + ' | Trouvable';
         } else if (profile.address?.city) {
             seoTitle = profile.client_name + ' - ' + profile.address.city + ' | Trouvable';
         } else {
@@ -30,7 +31,9 @@ export async function generateMetadata({ params }) {
         }
     }
 
-    const description = fitMetaDescription(profile.seo_description || ('Profil local de ' + profile.client_name + ' sur Trouvable.'));
+    const description = fitMetaDescription(
+        profile.seo_description || 'Profil local de ' + profile.client_name + ' sur Trouvable.',
+    );
 
     return withPublicAuthor({
         title: seoTitle,
@@ -44,7 +47,7 @@ export async function generateMetadata({ params }) {
             siteName: 'Trouvable',
             locale: 'fr_CA',
             type: 'website',
-        }
+        },
     });
 }
 
@@ -64,7 +67,10 @@ export default async function ClientPage({ params }) {
                 <GeoSeoInjector clientProfile={profile} />
 
                 <nav className="max-w-3xl mx-auto mb-8" aria-label="Fil d'Ariane">
-                    <Link href="/" className="text-[#7b8fff] hover:text-white font-medium text-sm flex items-center gap-2 transition-colors">
+                    <Link
+                        href="/"
+                        className="text-[#7b8fff] hover:text-white font-medium text-sm flex items-center gap-2 transition-colors"
+                    >
                         ← Retour à Trouvable
                     </Link>
                 </nav>
@@ -82,14 +88,18 @@ export default async function ClientPage({ params }) {
                                 {profile.seo_description}
                             </p>
                         )}
-                        <div className="mt-4 text-xs uppercase tracking-[0.08em] text-white/35">
-                            Par Trouvable
-                        </div>
+                        <div className="mt-4 text-xs uppercase tracking-[0.08em] text-white/35">Par Trouvable</div>
                     </header>
 
                     <div className="mb-12 grid md:grid-cols-2 gap-8">
-                        <section aria-labelledby="client-info-heading" className="bg-white/[0.03] rounded-xl p-6 border border-white/[0.07]">
-                            <h2 id="client-info-heading" className="text-xs font-bold text-white/30 uppercase tracking-widest mb-6 border-b border-white/[0.07] pb-2">
+                        <section
+                            aria-labelledby="client-info-heading"
+                            className="bg-white/[0.03] rounded-xl p-6 border border-white/[0.07]"
+                        >
+                            <h2
+                                id="client-info-heading"
+                                className="text-xs font-bold text-white/30 uppercase tracking-widest mb-6 border-b border-white/[0.07] pb-2"
+                            >
                                 Aperçu de l’entreprise
                             </h2>
                             <ul className="space-y-4 text-[#a0a0a0] text-sm">
@@ -100,9 +110,13 @@ export default async function ClientPage({ params }) {
 
                                 {profile.address && Object.keys(profile.address).length > 0 && (
                                     <li className="flex flex-col">
-                                        <span className="text-white/30 font-medium text-xs uppercase mb-1">Service Local</span>
+                                        <span className="text-white/30 font-medium text-xs uppercase mb-1">
+                                            Service Local
+                                        </span>
                                         <address className="not-italic text-white">
-                                            {profile.address.street && <span className="block">{profile.address.street}</span>}
+                                            {profile.address.street && (
+                                                <span className="block">{profile.address.street}</span>
+                                            )}
                                             {profile.address.city && <span>{profile.address.city}</span>}
                                             {profile.address.postalCode && <span> ({profile.address.postalCode})</span>}
                                             {profile.address.region && <span>, {profile.address.region}</span>}
@@ -112,7 +126,12 @@ export default async function ClientPage({ params }) {
 
                                 {profile.website_url && (
                                     <li className="flex flex-col pt-2 block">
-                                        <a href={profile.website_url} className="inline-flex items-center text-[#7b8fff] hover:text-white font-bold transition-colors" target="_blank" rel="noopener noreferrer">
+                                        <a
+                                            href={profile.website_url}
+                                            className="inline-flex items-center text-[#7b8fff] hover:text-white font-bold transition-colors"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
                                             Visiter le site officiel →
                                         </a>
                                     </li>
@@ -120,28 +139,66 @@ export default async function ClientPage({ params }) {
                             </ul>
                         </section>
 
-                        <section aria-labelledby="trouvable-tech-heading" className="rounded-xl p-6 border border-[#5b73ff]/20 bg-[#5b73ff]/[0.02] shadow-[0_10px_30px_rgba(91,115,255,0.03)] relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-[80px] font-bold leading-none">AEO</div>
-                            <h2 id="trouvable-tech-heading" className="text-xs font-bold text-[#5b73ff]/80 uppercase tracking-widest mb-6 border-b border-[#5b73ff]/20 pb-2 relative z-10">
+                        <section
+                            aria-labelledby="trouvable-tech-heading"
+                            className="rounded-xl p-6 border border-[#5b73ff]/20 bg-[#5b73ff]/[0.02] shadow-[0_10px_30px_rgba(91,115,255,0.03)] relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-[80px] font-bold leading-none">
+                                AEO
+                            </div>
+                            <h2
+                                id="trouvable-tech-heading"
+                                className="text-xs font-bold text-[#5b73ff]/80 uppercase tracking-widest mb-6 border-b border-[#5b73ff]/20 pb-2 relative z-10"
+                            >
                                 Intégration par Trouvable
                             </h2>
                             <ul className="space-y-5 text-sm relative z-10">
                                 <li className="flex gap-3 items-start">
                                     <div className="mt-0.5 rounded-full bg-emerald-500/20 p-0.5">
-                                        <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <svg
+                                            className="w-3 h-3 text-emerald-400"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth="3"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M5 13l4 4L19 7"
+                                            ></path>
+                                        </svg>
                                     </div>
                                     <div>
                                         <div className="font-semibold text-white/90">Ingénierie de la donnée</div>
-                                        <div className="text-[13px] text-[#888] mt-1 leading-relaxed">Profil injecté avec un balisage Schema.org LocalBusiness conforme aux exigences de Google.</div>
+                                        <div className="text-[13px] text-[#888] mt-1 leading-relaxed">
+                                            Profil injecté avec un balisage Schema.org LocalBusiness conforme aux
+                                            exigences de Google.
+                                        </div>
                                     </div>
                                 </li>
                                 <li className="flex gap-3 items-start">
                                     <div className="mt-0.5 rounded-full bg-emerald-500/20 p-0.5">
-                                        <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <svg
+                                            className="w-3 h-3 text-emerald-400"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth="3"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M5 13l4 4L19 7"
+                                            ></path>
+                                        </svg>
                                     </div>
                                     <div>
                                         <div className="font-semibold text-white/90">Alignement IA (GEO)</div>
-                                        <div className="text-[13px] text-[#888] mt-1 leading-relaxed">Les signaux sémantiques de la marque sont structurés pour optimiser la reconnaissance par ChatGPT et Gemini.</div>
+                                        <div className="text-[13px] text-[#888] mt-1 leading-relaxed">
+                                            Les signaux sémantiques de la marque sont structurés pour optimiser la
+                                            reconnaissance par ChatGPT et Gemini.
+                                        </div>
                                     </div>
                                 </li>
                             </ul>
@@ -165,7 +222,9 @@ export default async function ClientPage({ params }) {
                     )}
 
                     <footer className="mt-16 pt-8 border-t border-white/10 text-center">
-                        <p className="text-[#a0a0a0] mb-4">Vous repérez une information manquante ou vous souhaitez revendiquer ce profil ?</p>
+                        <p className="text-[#a0a0a0] mb-4">
+                            Vous repérez une information manquante ou vous souhaitez revendiquer ce profil ?
+                        </p>
                         <ContactButton className="inline-block px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-[#d6d6d6] transition-colors">
                             Contacter l&#39;équipe Trouvable
                         </ContactButton>
@@ -176,4 +235,3 @@ export default async function ClientPage({ params }) {
         </>
     );
 }
-

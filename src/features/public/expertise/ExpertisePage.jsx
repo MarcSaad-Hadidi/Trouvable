@@ -1,9 +1,9 @@
-﻿import { notFound } from "next/navigation";
-import { EXPERTISES, VILLES } from "@/lib/data/geo-architecture";
-import { resolveExpertiseComposition } from "@/lib/data/composition";
-import { SITE_URL } from "@/lib/site-config";
-import { buildPublicMetadata } from "@/lib/seo/metadata";
-import ExpertisePageClient from "@/features/public/expertise/ExpertisePageClient";
+﻿import { notFound } from 'next/navigation';
+import { EXPERTISES, VILLES } from '@/lib/data/geo-architecture';
+import { resolveExpertiseComposition } from '@/lib/data/composition';
+import { SITE_URL } from '@/lib/site-config';
+import { buildPublicMetadata } from '@/lib/seo/metadata';
+import ExpertisePageClient from '@/features/public/expertise/ExpertisePageClient';
 
 export function generateStaticParams() {
     return EXPERTISES.map((e) => ({ expertiseSlug: e.slug }));
@@ -23,8 +23,8 @@ export async function generateMetadata({ params }) {
         canonical: `${SITE_URL}/expertises/${expertise.slug}`,
         openGraph: {
             url: `${SITE_URL}/expertises/${expertise.slug}`,
-            siteName: "Trouvable",
-            type: "website",
+            siteName: 'Trouvable',
+            type: 'website',
             images: [
                 {
                     url: `${SITE_URL}/opengraph-image`,
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }) {
             ],
         },
         twitter: {
-            card: "summary_large_image",
+            card: 'summary_large_image',
             images: [`${SITE_URL}/twitter-image`],
         },
         robots: { index: true, follow: true },
@@ -48,16 +48,7 @@ export default async function ExpertisePage({ params }) {
     if (!expertise) notFound();
 
     const composition = resolveExpertiseComposition(expertise);
-    const linkedVilles = expertise.linkedVilles
-        .map((s) => VILLES.find((v) => v.slug === s))
-        .filter(Boolean);
+    const linkedVilles = expertise.linkedVilles.map((s) => VILLES.find((v) => v.slug === s)).filter(Boolean);
 
-    return (
-        <ExpertisePageClient
-            expertise={expertise}
-            composition={composition}
-            linkedVilles={linkedVilles}
-        />
-    );
+    return <ExpertisePageClient expertise={expertise} composition={composition} linkedVilles={linkedVilles} />;
 }
-

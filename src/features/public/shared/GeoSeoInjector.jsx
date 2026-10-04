@@ -49,9 +49,7 @@ function normalizeText(value) {
 
 function compactValue(value) {
     if (Array.isArray(value)) {
-        const items = value
-            .map((entry) => compactValue(entry))
-            .filter((entry) => entry !== undefined);
+        const items = value.map((entry) => compactValue(entry)).filter((entry) => entry !== undefined);
         return items.length > 0 ? items : undefined;
     }
 
@@ -155,24 +153,18 @@ function buildOrganizationSchema(baseUrl, address, dateModified) {
         inLanguage: SITE_PRIMARY_LANGUAGE,
         telephone: SITE_PHONE_TEL,
         sameAs: SITE_SAME_AS,
-        about: [
-            'visibilité organique locale',
-            'optimisation pour moteurs génératifs',
-            'données structurées',
+        about: ['visibilité organique locale', 'optimisation pour moteurs génératifs', 'données structurées'],
+        mentions: [`${baseUrl}/offres`, `${baseUrl}/methodologie`, `${baseUrl}/etudes-de-cas`],
+        contactPoint: [
+            {
+                '@type': 'ContactPoint',
+                contactType: 'customer support',
+                telephone: SITE_PHONE_TEL,
+                areaServed: ['CA-QC'],
+                availableLanguage: ['fr-CA'],
+                url: `${baseUrl}/contact`,
+            },
         ],
-        mentions: [
-            `${baseUrl}/offres`,
-            `${baseUrl}/methodologie`,
-            `${baseUrl}/etudes-de-cas`,
-        ],
-        contactPoint: [{
-            '@type': 'ContactPoint',
-            contactType: 'customer support',
-            telephone: SITE_PHONE_TEL,
-            areaServed: ['CA-QC'],
-            availableLanguage: ['fr-CA'],
-            url: `${baseUrl}/contact`,
-        }],
         areaServed: [
             { '@type': 'City', name: 'Montréal' },
             { '@type': 'City', name: 'Laval' },
@@ -195,31 +187,20 @@ function buildProfessionalServiceSchema(baseUrl, dateModified) {
         description: 'Mandats de cartographie, implantation et pilotage continu pour la visibilité Google et IA.',
         inLanguage: SITE_PRIMARY_LANGUAGE,
         provider: { '@id': `${baseUrl}#organization` },
-        areaServed: [
-            { '@type': 'AdministrativeArea', name: 'Québec' },
-        ],
-        serviceType: [
-            'Cartographie stratégique',
-            'Mandat d’implantation',
-            'Pilotage continu',
-        ],
+        areaServed: [{ '@type': 'AdministrativeArea', name: 'Québec' }],
+        serviceType: ['Cartographie stratégique', 'Mandat d’implantation', 'Pilotage continu'],
         sameAs: SITE_SAME_AS,
-        contactPoint: [{
-            '@type': 'ContactPoint',
-            contactType: 'customer support',
-            telephone: SITE_PHONE_TEL,
-            availableLanguage: ['fr-CA'],
-            url: `${baseUrl}/contact`,
-        }],
-        about: [
-            'référencement local',
-            'cohérence des données publiques',
-            'réponses IA conversationnelles',
+        contactPoint: [
+            {
+                '@type': 'ContactPoint',
+                contactType: 'customer support',
+                telephone: SITE_PHONE_TEL,
+                availableLanguage: ['fr-CA'],
+                url: `${baseUrl}/contact`,
+            },
         ],
-        mentions: [
-            `${baseUrl}/offres`,
-            `${baseUrl}/notre-mesure`,
-        ],
+        about: ['référencement local', 'cohérence des données publiques', 'réponses IA conversationnelles'],
+        mentions: [`${baseUrl}/offres`, `${baseUrl}/notre-mesure`],
         mainEntityOfPage: baseUrl,
         dateModified: dateModified || SITE_LAST_MODIFIED_ISO,
     });
@@ -234,22 +215,14 @@ function buildWebsiteSchema(baseUrl, searchPath, dateModified) {
         description: SITE_AI_DESCRIPTION,
         inLanguage: SITE_PRIMARY_LANGUAGE,
         publisher: { '@id': `${baseUrl}#organization` },
-        about: [
-            'SEO local',
-            'GEO',
-            'données structurées',
-        ],
-        mentions: [
-            `${baseUrl}/a-propos`,
-            `${baseUrl}/offres`,
-            `${baseUrl}/contact`,
-        ],
+        about: ['SEO local', 'GEO', 'données structurées'],
+        mentions: [`${baseUrl}/a-propos`, `${baseUrl}/offres`, `${baseUrl}/contact`],
         potentialAction: searchPath
             ? {
-                '@type': 'SearchAction',
-                target: `${baseUrl}${searchPath}?q={search_term_string}`,
-                'query-input': 'required name=search_term_string',
-            }
+                  '@type': 'SearchAction',
+                  target: `${baseUrl}${searchPath}?q={search_term_string}`,
+                  'query-input': 'required name=search_term_string',
+              }
             : undefined,
         mainEntityOfPage: baseUrl,
         dateModified: dateModified || SITE_LAST_MODIFIED_ISO,
@@ -308,7 +281,10 @@ function buildServiceSchema(service, baseUrl, dateModified) {
             name: 'Québec, Canada',
         },
         inLanguage: SITE_PRIMARY_LANGUAGE,
-        about: Array.isArray(service.about) && service.about.length > 0 ? service.about : [name, 'visibilité locale', 'réponses IA'],
+        about:
+            Array.isArray(service.about) && service.about.length > 0
+                ? service.about
+                : [name, 'visibilité locale', 'réponses IA'],
         mentions: [`${baseUrl}/offres`, `${baseUrl}/methodologie`],
         mainEntityOfPage: serviceUrl,
         dateModified: dateModified || SITE_LAST_MODIFIED_ISO,
@@ -394,9 +370,7 @@ function buildHowToSchema(howTo, dateModifiedFallback) {
     if (!howTo || typeof howTo !== 'object' || !Array.isArray(howTo.steps)) return undefined;
     const name = normalizeText(howTo.name || '');
     const pageUrl = normalizeText(howTo.url || '');
-    const normalizedSteps = howTo.steps
-        .map((step) => normalizeText(step))
-        .filter(Boolean);
+    const normalizedSteps = howTo.steps.map((step) => normalizeText(step)).filter(Boolean);
 
     if (!name || !pageUrl || normalizedSteps.length < 2) return undefined;
 
@@ -438,15 +412,19 @@ function buildLocalBusinessSchemas(clientProfile, baseUrl, dateModified) {
         description: normalizeText(clientProfile.seo_description || clientProfile.business_details?.short_desc || ''),
         telephone: normalizeText(clientProfile.contact_info?.phone || ''),
         email: normalizeText(clientProfile.contact_info?.public_email || ''),
-        openingHours: Array.isArray(clientProfile.business_details?.opening_hours) ? clientProfile.business_details.opening_hours : undefined,
+        openingHours: Array.isArray(clientProfile.business_details?.opening_hours)
+            ? clientProfile.business_details.opening_hours
+            : undefined,
         sameAs: Array.isArray(clientProfile.social_profiles)
-            ? clientProfile.social_profiles.filter((profile) => typeof profile === 'string' && profile.trim().length > 0)
+            ? clientProfile.social_profiles.filter(
+                  (profile) => typeof profile === 'string' && profile.trim().length > 0,
+              )
             : undefined,
         address: buildAddressSchema(clientProfile.address),
         areaServed: Array.isArray(clientProfile.seo_data?.target_cities)
             ? clientProfile.seo_data.target_cities
-                .filter((city) => typeof city === 'string' && city.trim().length > 0)
-                .map((city) => ({ '@type': 'City', name: city }))
+                  .filter((city) => typeof city === 'string' && city.trim().length > 0)
+                  .map((city) => ({ '@type': 'City', name: city }))
             : undefined,
         inLanguage: SITE_PRIMARY_LANGUAGE,
         mainEntityOfPage: pageUrl,

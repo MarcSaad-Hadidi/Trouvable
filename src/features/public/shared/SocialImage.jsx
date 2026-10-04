@@ -62,8 +62,7 @@ export default function SocialImage() {
                         maxWidth: 800,
                     }}
                 >
-                    Visibilité organique Google et crédibilité dans les réponses IA.
-                    Vous déléguez, nous exécutons.
+                    Visibilité organique Google et crédibilité dans les réponses IA. Vous déléguez, nous exécutons.
                 </div>
             </div>
             <div

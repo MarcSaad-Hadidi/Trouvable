@@ -1,11 +1,18 @@
-﻿"use client";
+﻿'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function ContactModal() {
     const [isOpen, setIsOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', businessType: '', message: '', honeypot: '' });
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        businessType: '',
+        message: '',
+        honeypot: '',
+    });
     const [formStatus, setFormStatus] = useState('idle');
     const [turnstileToken, setTurnstileToken] = useState(null);
     const [turnstileError, setTurnstileError] = useState('');
@@ -29,7 +36,9 @@ export default function ContactModal() {
         } else {
             document.body.style.overflow = '';
         }
-        return () => { document.body.style.overflow = ''; };
+        return () => {
+            document.body.style.overflow = '';
+        };
     }, [isOpen]);
 
     if (!isOpen) return null;
@@ -52,17 +61,25 @@ export default function ContactModal() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.honeypot) { setFormStatus('success'); return; }
-        if (!isTurnstileConfigured) {
-            setTurnstileError("Vérification anti-robot indisponible pour le moment. Merci de réessayer dans quelques instants.");
+        if (formData.honeypot) {
+            setFormStatus('success');
             return;
         }
-        if (!turnstileToken) { alert("Veuillez valider la vérification anti-robot."); return; }
+        if (!isTurnstileConfigured) {
+            setTurnstileError(
+                'Vérification anti-robot indisponible pour le moment. Merci de réessayer dans quelques instants.',
+            );
+            return;
+        }
+        if (!turnstileToken) {
+            alert('Veuillez valider la vérification anti-robot.');
+            return;
+        }
 
         setFormStatus('loading');
         setTurnstileError('');
@@ -73,16 +90,23 @@ export default function ContactModal() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: formData.name, email: formData.email, phone: formData.phone || '',
-                    businessType: formData.businessType || '', message: formData.message,
-                    honeypot: formData.honeypot, turnstileToken,
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone || '',
+                    businessType: formData.businessType || '',
+                    message: formData.message,
+                    honeypot: formData.honeypot,
+                    turnstileToken,
                     page_path: window.location.pathname,
                     utm_source: searchParams.get('utm_source') || '',
                     utm_medium: searchParams.get('utm_medium') || '',
-                    utm_campaign: searchParams.get('utm_campaign') || ''
+                    utm_campaign: searchParams.get('utm_campaign') || '',
                 }),
             });
-            if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || "Erreur lors de l'envoi"); }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Erreur lors de l'envoi");
+            }
             setFormStatus('success');
             setFormData({ name: '', email: '', phone: '', businessType: '', message: '', honeypot: '' });
             setTurnstileToken(null);
@@ -91,8 +115,12 @@ export default function ContactModal() {
         } catch (err) {
             console.error('API error:', err);
             setTurnstileToken(null);
-            if (String(err?.message || '').toLowerCase().includes('anti-robot')) {
-                setTurnstileError("La vérification Cloudflare a expiré ou a échoué. Merci de valider à nouveau.");
+            if (
+                String(err?.message || '')
+                    .toLowerCase()
+                    .includes('anti-robot')
+            ) {
+                setTurnstileError('La vérification Cloudflare a expiré ou a échoué. Merci de valider à nouveau.');
             } else {
                 setApiError(err?.message || '');
             }
@@ -100,14 +128,21 @@ export default function ContactModal() {
         }
     };
 
-    const inputClasses = "w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-[14px] text-white outline-none transition-all duration-200 placeholder:text-white/20 hover:border-white/[0.14] focus:border-[#5b73ff]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#5b73ff]/20";
+    const inputClasses =
+        'w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-[14px] text-white outline-none transition-all duration-200 placeholder:text-white/20 hover:border-white/[0.14] focus:border-[#5b73ff]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#5b73ff]/20';
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-label="Formulaire de contact Trouvable">
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            role="dialog"
+            aria-label="Formulaire de contact Trouvable"
+        >
             <div
                 className="absolute inset-0 bg-black/80 backdrop-blur-xl"
                 onClick={handleClose}
-                onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') handleClose(); }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') handleClose();
+                }}
                 aria-label="Fermer la modale"
                 role="button"
                 tabIndex={0}
@@ -141,10 +176,15 @@ export default function ContactModal() {
 
                 {formStatus === 'success' ? (
                     <div className="p-10 flex flex-col items-center text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5" style={{ animation: 'contactPulse 1.5s ease infinite' }}>
+                        <div
+                            className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5"
+                            style={{ animation: 'contactPulse 1.5s ease infinite' }}
+                        >
                             <CheckCircle2 size={30} className="text-emerald-400" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2" aria-live="polite">Message envoyé</h3>
+                        <h3 className="text-xl font-bold text-white mb-2" aria-live="polite">
+                            Message envoyé
+                        </h3>
                         <p className="text-white/40 text-[14px] leading-relaxed mb-8 max-w-[280px]">
                             Nous avons bien reçu votre demande. Notre équipe vous répondra dans les meilleurs délais.
                         </p>
@@ -163,11 +203,16 @@ export default function ContactModal() {
                                 <div className="w-8 h-8 rounded-lg bg-[#5b73ff]/10 border border-[#5b73ff]/20 flex items-center justify-center">
                                     <Send size={14} className="text-[#5b73ff]" />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#5b73ff]/70">Contact</span>
+                                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#5b73ff]/70">
+                                    Contact
+                                </span>
                             </div>
                             <h2 className="text-[22px] font-bold text-white tracking-[-0.03em] leading-tight">
-                                Parlons de votre<br />
-                                <span className="bg-gradient-to-r from-[#5b73ff] to-[#9333ea] bg-clip-text text-transparent">visibilité IA</span>
+                                Parlons de votre
+                                <br />
+                                <span className="bg-gradient-to-r from-[#5b73ff] to-[#9333ea] bg-clip-text text-transparent">
+                                    visibilité IA
+                                </span>
                             </h2>
                             <p className="text-white/35 text-[13px] mt-2 leading-relaxed">
                                 Nous vous répondrons dans les meilleurs délais.
@@ -202,32 +247,116 @@ export default function ContactModal() {
                                 </div>
                             )}
 
-                            <input id="honeypot" type="hidden" name="honeypot" tabIndex={-1} autoComplete="off" value={formData.honeypot} onChange={handleInputChange} aria-hidden="true" />
+                            <input
+                                id="honeypot"
+                                type="hidden"
+                                name="honeypot"
+                                tabIndex={-1}
+                                autoComplete="off"
+                                value={formData.honeypot}
+                                onChange={handleInputChange}
+                                aria-hidden="true"
+                            />
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="name">
+                                    <label
+                                        className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5"
+                                        htmlFor="name"
+                                    >
                                         Nom complet <span className="text-[#5b73ff]">*</span>
                                     </label>
-                                    <input id="name" type="text" name="name" required autoFocus maxLength={100} autoComplete="name" aria-label="Nom complet" toolparamdescription="Nom complet de la personne qui demande le cadrage." value={formData.name} onChange={handleInputChange} placeholder="Votre nom" className={inputClasses} data-agent-action="contact-name-input" />
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        name="name"
+                                        required
+                                        autoFocus
+                                        maxLength={100}
+                                        autoComplete="name"
+                                        aria-label="Nom complet"
+                                        toolparamdescription="Nom complet de la personne qui demande le cadrage."
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        placeholder="Votre nom"
+                                        className={inputClasses}
+                                        data-agent-action="contact-name-input"
+                                    />
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="phone">Téléphone</label>
-                                    <input id="phone" type="tel" name="phone" maxLength={20} autoComplete="tel-national" aria-label="Téléphone" toolparamdescription="Numéro de téléphone optionnel pour rappeler la personne." value={formData.phone} onChange={handleInputChange} placeholder="Votre numéro" className={inputClasses} data-agent-action="contact-phone-input" />
+                                    <label
+                                        className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5"
+                                        htmlFor="phone"
+                                    >
+                                        Téléphone
+                                    </label>
+                                    <input
+                                        id="phone"
+                                        type="tel"
+                                        name="phone"
+                                        maxLength={20}
+                                        autoComplete="tel-national"
+                                        aria-label="Téléphone"
+                                        toolparamdescription="Numéro de téléphone optionnel pour rappeler la personne."
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        placeholder="Votre numéro"
+                                        className={inputClasses}
+                                        data-agent-action="contact-phone-input"
+                                    />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="email">
+                                <label
+                                    className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5"
+                                    htmlFor="email"
+                                >
                                     Courriel <span className="text-[#5b73ff]">*</span>
                                 </label>
-                                <input id="email" type="email" name="email" required maxLength={100} autoComplete="email" aria-label="Courriel" toolparamdescription="Adresse courriel de réponse pour le cadrage Trouvable." value={formData.email} onChange={handleInputChange} placeholder="votre@courriel.ca" className={inputClasses} data-agent-action="contact-email-input" />
+                                <input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    maxLength={100}
+                                    autoComplete="email"
+                                    aria-label="Courriel"
+                                    toolparamdescription="Adresse courriel de réponse pour le cadrage Trouvable."
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    placeholder="votre@courriel.ca"
+                                    className={inputClasses}
+                                    data-agent-action="contact-email-input"
+                                />
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="businessType">Type de commerce</label>
-                                <select id="businessType" name="businessType" value={formData.businessType} onChange={handleInputChange} autoComplete="organization-title" aria-label="Type de commerce" toolparamdescription="Catégorie d'entreprise ou de service concernée par la demande." data-agent-action="contact-business-type-select" className={`${inputClasses} appearance-none cursor-pointer [&>option]:bg-[#121212] [&>option]:text-white [&>option]:py-2`} style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff40' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center' }}>
-                                    <option value="" className="text-white/40">Sélectionner...</option>
+                                <label
+                                    className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5"
+                                    htmlFor="businessType"
+                                >
+                                    Type de commerce
+                                </label>
+                                <select
+                                    id="businessType"
+                                    name="businessType"
+                                    value={formData.businessType}
+                                    onChange={handleInputChange}
+                                    autoComplete="organization-title"
+                                    aria-label="Type de commerce"
+                                    toolparamdescription="Catégorie d'entreprise ou de service concernée par la demande."
+                                    data-agent-action="contact-business-type-select"
+                                    className={`${inputClasses} appearance-none cursor-pointer [&>option]:bg-[#121212] [&>option]:text-white [&>option]:py-2`}
+                                    style={{
+                                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff40' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 14px center',
+                                    }}
+                                >
+                                    <option value="" className="text-white/40">
+                                        Sélectionner...
+                                    </option>
                                     <option value="Restaurant / Alimentation">Restaurant / Alimentation</option>
                                     <option value="Hébergement / Tourisme">Hébergement / Tourisme</option>
                                     <option value="Boutique / Commerce de détail">Boutique / Commerce de détail</option>
@@ -240,12 +369,32 @@ export default function ContactModal() {
                             </div>
 
                             <div>
-                                <label className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5" htmlFor="message">
+                                <label
+                                    className="block text-[11px] font-semibold text-white/40 uppercase tracking-[0.08em] mb-1.5"
+                                    htmlFor="message"
+                                >
                                     Message <span className="text-[#5b73ff]">*</span>
                                 </label>
-                                <textarea id="message" name="message" required minLength={10} maxLength={1000} rows={3} autoComplete="off" aria-label="Message" toolparamdescription="Contexte du site, de l'entreprise, du marché local et des objectifs de visibilité." data-agent-action="contact-message-input" value={formData.message} onChange={handleInputChange} placeholder="Parlez-nous de votre commerce et de vos objectifs..." className={`${inputClasses} resize-none`} />
+                                <textarea
+                                    id="message"
+                                    name="message"
+                                    required
+                                    minLength={10}
+                                    maxLength={1000}
+                                    rows={3}
+                                    autoComplete="off"
+                                    aria-label="Message"
+                                    toolparamdescription="Contexte du site, de l'entreprise, du marché local et des objectifs de visibilité."
+                                    data-agent-action="contact-message-input"
+                                    value={formData.message}
+                                    onChange={handleInputChange}
+                                    placeholder="Parlez-nous de votre commerce et de vos objectifs..."
+                                    className={`${inputClasses} resize-none`}
+                                />
                                 <div className="flex justify-end mt-1">
-                                    <span className={`text-[10px] tabular-nums ${formData.message.length >= 900 ? 'text-amber-400/60' : formData.message.length >= 1000 ? 'text-red-400 font-bold' : 'text-white/15'}`}>
+                                    <span
+                                        className={`text-[10px] tabular-nums ${formData.message.length >= 900 ? 'text-amber-400/60' : formData.message.length >= 1000 ? 'text-red-400 font-bold' : 'text-white/15'}`}
+                                    >
                                         {formData.message.length}/1000
                                     </span>
                                 </div>
@@ -272,14 +421,20 @@ export default function ContactModal() {
                                             const code = errorCode ? String(errorCode) : '';
                                             setTurnstileErrorCode(code);
                                             if (code === '110200') {
-                                                setTurnstileError("Cloudflare refuse ce domaine pour la clé actuelle. Vérifiez la configuration Turnstile (trouvable.app et www.trouvable.app).");
+                                                setTurnstileError(
+                                                    'Cloudflare refuse ce domaine pour la clé actuelle. Vérifiez la configuration Turnstile (trouvable.app et www.trouvable.app).',
+                                                );
                                             } else {
-                                                setTurnstileError("La vérification Cloudflare n'a pas pu être chargée. Vérifiez votre connexion et réessayez.");
+                                                setTurnstileError(
+                                                    "La vérification Cloudflare n'a pas pu être chargée. Vérifiez votre connexion et réessayez.",
+                                                );
                                             }
                                         }}
                                         onExpire={() => {
                                             setTurnstileToken(null);
-                                            setTurnstileError('La vérification anti-robot a expiré. Merci de valider à nouveau.');
+                                            setTurnstileError(
+                                                'La vérification anti-robot a expiré. Merci de valider à nouveau.',
+                                            );
                                         }}
                                     />
                                 ) : (
@@ -314,25 +469,51 @@ export default function ContactModal() {
                                 tooldescription="Soumettre la demande de contact Trouvable avec les champs fournis."
                                 className="w-full group relative overflow-hidden rounded-xl font-semibold text-[14px] py-3.5 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
                                 style={{
-                                    background: formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured
-                                        ? 'rgba(255,255,255,0.04)'
-                                        : 'linear-gradient(135deg, #5b73ff, #7c3aed)',
-                                    color: formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured ? 'rgba(255,255,255,0.3)' : '#fff',
-                                    boxShadow: formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured ? 'none' : '0 4px 20px rgba(91,115,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+                                    background:
+                                        formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured
+                                            ? 'rgba(255,255,255,0.04)'
+                                            : 'linear-gradient(135deg, #5b73ff, #7c3aed)',
+                                    color:
+                                        formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured
+                                            ? 'rgba(255,255,255,0.3)'
+                                            : '#fff',
+                                    boxShadow:
+                                        formStatus === 'loading' || !turnstileToken || !isTurnstileConfigured
+                                            ? 'none'
+                                            : '0 4px 20px rgba(91,115,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
                                 }}
                             >
                                 {formStatus === 'loading' ? (
                                     <span className="flex items-center justify-center gap-2.5">
-                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                        <svg
+                                            className="animate-spin h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-20"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-80"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                            />
                                         </svg>
                                         Envoi en cours...
                                     </span>
                                 ) : (
                                     <span className="flex items-center justify-center gap-2">
                                         Envoyer le message
-                                        <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                                        <ArrowRight
+                                            size={15}
+                                            className="group-hover:translate-x-0.5 transition-transform"
+                                        />
                                     </span>
                                 )}
                             </button>
@@ -347,5 +528,3 @@ export default function ContactModal() {
         </div>
     );
 }
-
-
