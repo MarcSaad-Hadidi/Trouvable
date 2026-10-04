@@ -188,40 +188,6 @@ export function MetricGrid({
     );
 }
 
-export function buildMetricCardsFromSummaryCards(summaryCards: Array<any> = []) {
-    return summaryCards.map((card) => ({
-        id: card.id,
-        label: card.label,
-        value: formatValue(card.value),
-        detail: card.detail,
-        tone: toneFromStatus(card.status || card.accent),
-    }));
-}
-
-export function ObjectMetricGrid({
-    object,
-    includeKeys,
-    labelMap = {} as Record<string, string>,
-}: {
-    object?: Record<string, any> | null;
-    includeKeys?: string[];
-    labelMap?: Record<string, string>;
-}) {
-    if (!object) return null;
-    const keys = (includeKeys || Object.keys(object)).filter((key) => isPrimitive(object[key]));
-    if (!keys.length) return null;
-    return (
-        <MetricGrid
-            items={keys.map((key) => ({
-                id: key,
-                label: labelMap[key] || key,
-                value: formatValue(object[key]),
-                tone: toneFromStatus(String(object[key])),
-            }))}
-        />
-    );
-}
-
 export function KeyValuePanel({
     title,
     subtitle,
@@ -283,40 +249,6 @@ export function GenericTablePanel({
                     ),
                 )}
             />
-        </CommandChartCard>
-    );
-}
-
-export function GenericListPanel({
-    title,
-    subtitle,
-    items = [],
-    renderItem,
-}: {
-    title: React.ReactNode;
-    subtitle?: React.ReactNode;
-    items?: any[];
-    renderItem?: (item: any, index: number) => React.ReactNode;
-}) {
-    if (!items?.length) return null;
-    return (
-        <CommandChartCard title={title} subtitle={subtitle}>
-            <div className="space-y-3">
-                {items.map((item, index) => (
-                    <div
-                        key={item?.id || `${title}-${index}`}
-                        className="rounded-[18px] border border-white/[0.06] bg-white/[0.02] p-4"
-                    >
-                        {renderItem ? (
-                            renderItem(item, index)
-                        ) : (
-                            <pre className="whitespace-pre-wrap text-[12px] text-white/72">
-                                {JSON.stringify(item, null, 2)}
-                            </pre>
-                        )}
-                    </div>
-                ))}
-            </div>
         </CommandChartCard>
     );
 }
