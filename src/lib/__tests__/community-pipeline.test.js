@@ -5,32 +5,16 @@ vi.mock('@/lib/db/clients', () => ({}));
 vi.mock('@/lib/db/opportunities', () => ({}));
 vi.mock('@/lib/db/community', () => ({}));
 
-import {
-    buildSeedQueries,
-    buildRelevanceAnchors,
-    scoreThemeRelevance,
-    THEME_RELEVANCE_THRESHOLD,
-    extractMentionsFromDocuments,
-    aggregateMentionsToClusters,
-    deriveOpportunitiesFromClusters,
-    getSocialWatchConfig,
-    detectSignalFamilies,
-    classifyCollectionOutcome,
-    buildCollectionDiagnosis,
-    COLLECTION_FAILURE_CLASS,
-} from '@/lib/agent-reach/pipeline';
+import { buildSeedQueries, buildRelevanceAnchors, scoreThemeRelevance, THEME_RELEVANCE_THRESHOLD, getSocialWatchConfig } from '@/lib/agent-reach/community-context';
+import { extractMentionsFromDocuments, aggregateMentionsToClusters, deriveOpportunitiesFromClusters, detectSignalFamilies } from '@/lib/agent-reach/community-signals';
+import { classifyCollectionOutcome, buildCollectionDiagnosis, COLLECTION_FAILURE_CLASS } from '@/lib/agent-reach/community-collection';
 
 import {
     computeCompositeScore,
 } from '@/lib/agent-reach/contracts';
 
 // ──────────────────────────────────────────────────────────────
-// Test helpers — simulate the internal pipeline functions
-// We re-implement the pure functions here for testability since
-// extractMentionsFromDocuments and aggregateMentionsToClusters are
-// not exported. Instead we test the exported building blocks and
-// simulate the pipeline flow.
-// ──────────────────────────────────────────────────────────────
+// Fixtures for the actual exported community transformations.
 
 const TROUVABLE_CLIENT = {
     client_name: 'Trouvable',
