@@ -116,17 +116,23 @@ export function buildLayeredAuditObject(params) {
           }
         : null;
 
+    const scoreDimensions = coerceArray(scoring?.score_dimensions);
+    const dimensionScores =
+        scoring?.dimensions ||
+        (scoreDimensions.length > 0
+            ? Object.fromEntries(scoreDimensions.map((dimension) => [dimension.key, dimension]))
+            : null);
     const finalScore = {
         deterministic_score: Number(hybrid.deterministicScore ?? scoring?.deterministic_score ?? 0),
         hybrid_score: Number(hybrid.hybridScore ?? scoring?.deterministic_score ?? 0),
-        dimension_scores: scoring?.dimensions || null,
+        dimension_scores: dimensionScores,
         weight_profile: scoring?.weight_profile || siteClassification?.weight_profile || null,
         llm_status: hybrid.llmStatus || 'unknown',
     };
 
     const dashboardReportingFields = {
-        seo_score: scoring?.dimensions?.technical_seo?.score ?? null,
-        geo_score: scoring?.dimensions?.local_readiness?.score ?? null,
+        seo_score: dimensionScores?.technical_seo?.score ?? null,
+        geo_score: dimensionScores?.local_readiness?.score ?? null,
         hybrid_score: finalScore.hybrid_score,
         classification_type: siteClassification?.type || null,
         classification_label: siteClassification?.label || null,
