@@ -61,7 +61,7 @@ Après un build sans secrets, le [runner Playwright/CDP](scripts/qa/browser.mjs)
 npm run qa:browser -- --mode all --artifacts "C:\temp\trouvable-qa" --executable "C:\Program Files\Google\Chrome\Application\chrome.exe"
 ```
 
-Adapter ces deux chemins absolus au poste ; le dossier de preuves doit rester hors du dépôt. Le navigateur doit être déjà installé. Le runner ne lance ni installation ni build. Il refuse les fichiers d’environnement que Next chargerait et retire les secrets et hooks hérités du processus. Il démarre ses propres serveurs sur des ports libres et arrête uniquement leurs processus.
+Adapter ces deux chemins absolus au poste ; le dossier de preuves doit rester hors du dépôt. Le navigateur doit être déjà installé. Le runner ne lance ni installation ni build. Il refuse les fichiers d’environnement que Next chargerait et retire les secrets et hooks hérités du processus. Chaque couple mode/viewport démarre un serveur Next neuf sur un port libre, conserve ses propres preuves et arrête uniquement ses processus. Les protections mémoire de Next restent actives.
 
 Le mode `production` utilise `next start`, sans bypass ni clés simulées. Le mode `fixture` utilise des données Supabase synthétiques en lecture seule, le garde d’accès de développement localhost existant et une UI Clerk anonyme simulée. Les requêtes externes et les mutations sont bloquées ; `--allow-fonts` autorise uniquement Google Fonts HTTPS pour la compilation de développement. Ces fixtures ne valident pas une session Clerk, un membership ou la RLS distante.
 

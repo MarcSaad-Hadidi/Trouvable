@@ -574,8 +574,8 @@ async function httpChecks(base, mode, logFile, fixture) {
     return results;
 }
 
-async function runMode(chromium, mode, opts, report) {
-    const out = path.join(opts.artifacts, mode);
+async function runMode(chromium, mode, view, opts, report) {
+    const out = path.join(opts.artifacts, mode, view);
     fs.mkdirSync(out, { recursive: true });
     const fixture = mode === 'fixture' ? await startFixture(opts.fixturePort, out) : null;
     let child;
@@ -608,6 +608,7 @@ async function runMode(chromium, mode, opts, report) {
     process.once('SIGTERM', interrupt);
     const entry = {
         mode,
+        view,
         contract:
             mode === 'fixture'
                 ? 'Synthetic unpublished Supabase profile; read-only GET/HEAD; existing localhost development auth guard; anonymous mock Clerk UI. No proof of live authentication, membership or RLS.'
@@ -701,18 +702,16 @@ async function runMode(chromium, mode, opts, report) {
                   ]
                 : []),
         ];
-        for (const view of Object.keys(VIEWS)) {
-            for (const [index, test] of cases.entries()) {
-                const label = `${index}-${
-                    test.route
-                        .split('?')[0]
-                        .replace(/[^a-z0-9]+/gi, '-')
-                        .replace(/^-|-$/g, '') || 'home'
-                }`;
-                console.log(`[QA ${mode}] ${view} ${test.route}`);
-                entry.cases.push(await browserCase(context, { ...test, label, view }, base, out, mode, logFile));
-                save();
-            }
+        for (const [index, test] of cases.entries()) {
+            const label = `${index}-${
+                test.route
+                    .split('?')[0]
+                    .replace(/[^a-z0-9]+/gi, '-')
+                    .replace(/^-|-$/g, '') || 'home'
+            }`;
+            console.log(`[QA ${mode}] ${view} ${test.route}`);
+            entry.cases.push(await browserCase(context, { ...test, label, view }, base, out, mode, logFile));
+            save();
         }
         await context.close();
         entry.fixtureWritesRejected = fixture?.requests.filter(({ method }) => !['GET', 'HEAD'].includes(method)) || [];
@@ -730,7 +729,7 @@ async function main() {
     const opts = options(process.argv.slice(2));
     if (opts.help) {
         console.log(
-            'node scripts/qa/browser.mjs --artifacts <absolute-directory-outside-repo> [--mode all|production|fixture] [--executable <Chrome-path>] [--port 0] [--fixture-port 0] [--allow-fonts]\nRequires existing dependencies and, for production, a secret-free npm run build. Never builds, installs, loads env files, or submits forms. Default ports are free ephemeral ports. --allow-fonts permits only Google Fonts HTTPS for development compilation. Exit: 0 passed, 1 regression/setup failure, 2 configuration-blocked coverage.',
+            'node scripts/qa/browser.mjs --artifacts <absolute-directory-outside-repo> [--mode all|production|fixture] [--executable <Chrome-path>] [--port 0] [--fixture-port 0] [--allow-fonts]\nRequires existing dependencies and, for production, a secret-free npm run build. Each mode/viewport owns a fresh Next child. Never builds, installs, loads env files, or submits forms. Default ports are free ephemeral ports. --allow-fonts permits only Google Fonts HTTPS for development compilation. Exit: 0 passed, 1 regression/setup failure, 2 configuration-blocked coverage.',
         );
         return;
     }
@@ -739,12 +738,14 @@ async function main() {
     fs.mkdirSync(opts.artifacts, { recursive: true });
     const { chromium } = await import(pathToFileURL(path.join(ROOT, 'node_modules/playwright/index.mjs')).href);
     const report = {
-        method: 'Local Next child; browser Playwright/CDP Network and Performance; server fetch/http/DNS/socket guard; only this invocation’s app/fixture ports allowed. All warnings and blocked requests retained. Desktop 1440x900, mobile 390x844. Artifacts include screenshots and per-case CDP evidence.',
+        method: 'Fresh local Next child per mode/viewport; browser Playwright/CDP Network and Performance; server fetch/http/DNS/socket guard; only this invocation’s app/fixture ports allowed. All warnings and blocked requests retained. Desktop 1440x900, mobile 390x844. Artifacts include screenshots and per-case CDP evidence.',
         startedAt: new Date().toISOString(),
         modes: [],
     };
-    for (const mode of opts.mode === 'all' ? ['production', 'fixture'] : [opts.mode])
-        await runMode(chromium, mode, opts, report);
+    // Release the development compiler between viewports; keep Next memory safeguards active.
+    for (const mode of opts.mode === 'all' ? ['production', 'fixture'] : [opts.mode]) {
+        for (const view of Object.keys(VIEWS)) await runMode(chromium, mode, view, opts, report);
+    }
     const failed = report.modes.some(
         (entry) =>
             entry.error ||
