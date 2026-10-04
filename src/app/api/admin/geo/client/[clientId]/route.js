@@ -1,17 +1,9 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
 import { getOperatorGeoWorkspacePayload } from '@/lib/operator-data';
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export async function GET(_, { params }) {
     try {

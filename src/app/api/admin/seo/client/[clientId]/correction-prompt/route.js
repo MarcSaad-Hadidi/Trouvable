@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
 import {
@@ -7,15 +7,7 @@ import {
     generateCorrectionPromptFromRef,
 } from '@/lib/correction-prompts/service';
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export const dynamic = 'force-dynamic';
 

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth';
@@ -8,15 +8,7 @@ const actionSchema = z.discriminatedUnion('action', [
     z.object({ action: z.literal('clear_errors') }),
 ]);
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export async function POST(request, { params }) {
     const admin = await requireAdmin();

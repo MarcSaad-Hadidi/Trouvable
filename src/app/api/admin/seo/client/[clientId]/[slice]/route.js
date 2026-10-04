@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
 import { getSeoOverviewSlice } from '@/lib/operator-intelligence/seo-overview';
@@ -52,15 +52,7 @@ const LOADERS = {
     },
 };
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export const dynamic = 'force-dynamic';
 

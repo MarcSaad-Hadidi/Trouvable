@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
 // Side-effect: registers the community-briefing task
@@ -14,15 +14,7 @@ import { resolveBusinessType } from '@/lib/ai/business-type-resolver';
 
 export const dynamic = 'force-dynamic';
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export async function POST(_, { params }) {
     const admin = await requireAdmin();

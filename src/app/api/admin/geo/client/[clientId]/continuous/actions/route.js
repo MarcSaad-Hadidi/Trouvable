@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth';
@@ -52,15 +52,7 @@ const actionSchema = z.discriminatedUnion('action', [
     }),
 ]);
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 async function resolveJobForClient(clientId, jobId) {
     const health = await getRecurringJobHealthSlice(clientId);

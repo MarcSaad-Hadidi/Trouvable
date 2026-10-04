@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { noStoreJson } from '@/lib/http-response';
 
 import { requireAdmin } from '@/lib/auth';
 import { hasGeoSlice, loadGeoSlice } from '@/lib/operator-intelligence/geo-slice-loaders';
@@ -15,15 +15,7 @@ function buildVisibilitySliceOptions(searchParams) {
     return options;
 }
 
-function noStoreJson(payload, init = {}) {
-    return NextResponse.json(payload, {
-        ...init,
-        headers: {
-            'Cache-Control': 'no-store',
-            ...(init.headers || {}),
-        },
-    });
-}
+
 
 export async function GET(request, { params }) {
     const admin = await requireAdmin();
