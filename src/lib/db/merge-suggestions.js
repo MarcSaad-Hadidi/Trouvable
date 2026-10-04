@@ -11,14 +11,7 @@ export async function getMergeSuggestions(clientId, status = null) {
     return data || [];
 }
 
-export async function archiveOldMergeSuggestions(clientId) {
-    const { error } = await sb()
-        .from('merge_suggestions')
-        .update({ status: 'rejected' })
-        .eq('client_id', clientId)
-        .eq('status', 'pending');
-    if (error) console.error(`[DB] archiveOldMergeSuggestions: ${error.message}`);
-}
+
 
 export async function archiveOldMergeSuggestionsExceptAudit(clientId, auditId) {
     let query = sb()

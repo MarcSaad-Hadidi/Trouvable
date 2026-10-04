@@ -95,10 +95,7 @@ export function getRunDiagnostic(run = {}) {
     return null;
 }
 
-export function isRunProblematic(run = {}) {
-    const parseStatus = normalizeRunParseStatus(run);
-    return isRunFailureStatus(run?.status) || parseStatus === 'parsed_failed' || parseStatus === 'parsed_partial';
-}
+
 
 export function needsRunOperatorReview(run = {}) {
     const parseStatus = normalizeRunParseStatus(run);

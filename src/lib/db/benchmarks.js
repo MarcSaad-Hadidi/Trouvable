@@ -23,15 +23,7 @@ export async function updateBenchmarkSession(id, updates) {
     return data;
 }
 
-export async function getBenchmarkSessionById(id) {
-    const { data, error } = await db()
-        .from('benchmark_sessions')
-        .select('*')
-        .eq('id', id)
-        .single();
-    if (error) throw new Error(`[DB] getBenchmarkSessionById ${id}: ${error.message}`);
-    return data;
-}
+
 
 export async function getBenchmarkSessionsForClient(clientId, limit = 8) {
     const { data, error } = await db()

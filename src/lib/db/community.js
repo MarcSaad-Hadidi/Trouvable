@@ -44,17 +44,7 @@ export async function getLatestCollectionRun(clientId, source = null) {
     return data;
 }
 
-export async function listCollectionRuns(clientId, { limit = 20 } = {}) {
-    const supabase = getAdminSupabase();
-    const { data, error } = await supabase
-        .from('community_collection_runs')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-    if (error) throw new Error(`[Community] listCollectionRuns: ${error.message}`);
-    return data || [];
-}
+
 
 // ──────────────────────────────────────────────────────────────
 // Documents
@@ -97,15 +87,7 @@ export async function markDocumentsProcessed(documentIds) {
     if (error) throw new Error(`[Community] markDocumentsProcessed: ${error.message}`);
 }
 
-export async function countDocuments(clientId) {
-    const supabase = getAdminSupabase();
-    const { count, error } = await supabase
-        .from('community_documents')
-        .select('id', { count: 'exact', head: true })
-        .eq('client_id', clientId);
-    if (error) throw new Error(`[Community] countDocuments: ${error.message}`);
-    return count || 0;
-}
+
 
 // ──────────────────────────────────────────────────────────────
 // Mentions
@@ -122,19 +104,7 @@ export async function insertMentions(mentions) {
     return data || [];
 }
 
-export async function listMentions(clientId, { mentionType = null, limit = 200 } = {}) {
-    const supabase = getAdminSupabase();
-    let query = supabase
-        .from('community_mentions')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-    if (mentionType) query = query.eq('mention_type', mentionType);
-    const { data, error } = await query;
-    if (error) throw new Error(`[Community] listMentions: ${error.message}`);
-    return data || [];
-}
+
 
 export async function deleteMentionsForDocuments(documentIds) {
     if (!documentIds?.length) return;
@@ -214,17 +184,7 @@ export async function listOpportunities(clientId, { opportunityType = null, stat
     return data || [];
 }
 
-export async function updateOpportunityStatus(opportunityId, status) {
-    const supabase = getAdminSupabase();
-    const { data, error } = await supabase
-        .from('community_opportunities')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', opportunityId)
-        .select('*')
-        .single();
-    if (error) throw new Error(`[Community] updateOpportunityStatus: ${error.message}`);
-    return data;
-}
+
 
 // ──────────────────────────────────────────────────────────────
 // Aggregate stats for social slice

@@ -14,22 +14,7 @@ export async function getLatestAudit(clientId) {
     return data || null;
 }
 
-export async function getLatestAuditByUrl(sourceUrl) {
-    if (!sourceUrl) return null;
-    const normalized = sourceUrl.replace(/\/+$/, '').toLowerCase();
-    const { data, error } = await db()
-        .from('client_site_audits')
-        .select('*')
-        .or(`source_url.ilike.${normalized},source_url.ilike.${normalized}/,resolved_url.ilike.${normalized},resolved_url.ilike.${normalized}/`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    if (error) {
-        console.error(`[DB] getLatestAuditByUrl ${sourceUrl}: ${error.message}`);
-        return null;
-    }
-    return data || null;
-}
+
 
 export async function createAuditRun(auditData) {
     const { data, error } = await db().from('client_site_audits').insert(auditData).select().single();
@@ -37,11 +22,7 @@ export async function createAuditRun(auditData) {
     return data;
 }
 
-export async function updateAuditRun(id, updates) {
-    const { data, error } = await db().from('client_site_audits').update(updates).eq('id', id).select().single();
-    if (error) throw new Error(`[DB] updateAuditRun ${id}: ${error.message}`);
-    return data;
-}
+
 
 export async function getRecentAudits(clientId, limit = 5) {
     const { data, error } = await db()

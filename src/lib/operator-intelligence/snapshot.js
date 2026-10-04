@@ -14,7 +14,6 @@ import { getLatestAudit } from '@/lib/db/audits';
 import { getTrackedQueriesAll } from '@/lib/db/tracked-queries';
 import {
     buildGeoKpiSnapshot,
-    flattenSnapshotToLegacy,
     buildLastRunMap,
     deriveAuditMetrics,
     deriveCitationDiagnosticHistogram,
@@ -170,10 +169,4 @@ export async function getGeoWorkspaceSnapshot(clientId) {
         lastRunMap,
         modelPerformance,
     };
-}
-
-/** Existing flat contract for jobs and reporting; assembly belongs above the DB layer. */
-export async function getClientGeoMetrics(clientId) {
-    const ws = await getGeoWorkspaceSnapshot(clientId);
-    return { ...flattenSnapshotToLegacy(ws.snapshot, ws.latestAudit), modelPerformance: ws.modelPerformance };
 }

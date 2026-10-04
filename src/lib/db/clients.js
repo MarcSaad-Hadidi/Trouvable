@@ -66,16 +66,7 @@ export async function getClientBySlug(slug) {
     return data || null;
 }
 
-export async function listClients(options = {}) {
-    const { includeArchived = false } = options;
-    let q = db().from('client_geo_profiles').select('*').order('updated_at', { ascending: false });
-    if (!includeArchived) {
-        q = q.is('archived_at', null);
-    }
-    const { data, error } = await q;
-    if (error) throw new Error(`[DB] listClients: ${error.message}`);
-    return data || [];
-}
+
 
 export async function createClient({ client_name, client_slug, website_url, business_type, notes, target_region, lifecycle_status }) {
     const row = syncClientProfileCompatibilityFields({

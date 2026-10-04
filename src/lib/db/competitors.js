@@ -17,13 +17,3 @@ export async function getCompetitorAliases(clientId, activeOnly = true) {
     if (error) throw new Error(`[DB] getCompetitorAliases ${clientId}: ${error.message}`);
     return data || [];
 }
-
-export async function upsertCompetitorAliases(rows = []) {
-    if (!Array.isArray(rows) || rows.length === 0) return [];
-    const { data, error } = await db()
-        .from('competitor_aliases')
-        .upsert(rows, { onConflict: 'client_id,alias' })
-        .select('*');
-    if (error) throw new Error(`[DB] upsertCompetitorAliases: ${error.message}`);
-    return data || [];
-}

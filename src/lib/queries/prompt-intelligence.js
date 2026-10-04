@@ -40,36 +40,7 @@ export function normalizeIntentFamily(rawValue, queryText = '') {
     return normalizeOnboardingIntentFamily(rawValue, queryText);
 }
 
-export function evaluatePromptQuality({
-    queryText,
-    clientName = '',
-    city = '',
-    category = '',
-    services = [],
-    knownCompetitors = [],
-    intentFamily,
-}) {
-    const contract = buildCanonicalPromptContract({
-        queryText,
-        clientName,
-        city,
-        region: '',
-        locale: 'fr-CA',
-        promptOrigin: 'quality_evaluation',
-        intentFamily,
-        promptMode: 'user_like',
-        offerAnchor: String(category || ''),
-        userVisibleOffering: Array.isArray(services) && services.length > 0 ? String(services[0]) : '',
-        targetAudience: '',
-        primaryUseCase: '',
-        differentiationAngle: Array.isArray(knownCompetitors) && knownCompetitors.length > 0 ? 'competitive' : '',
-    });
-    return {
-        quality_status: contract.quality_status,
-        quality_score: contract.quality_score,
-        quality_reasons: contract.quality_reasons,
-    };
-}
+
 
 export function buildPromptMetadata({
     queryText,

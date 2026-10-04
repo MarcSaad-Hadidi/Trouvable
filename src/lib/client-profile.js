@@ -73,9 +73,7 @@ export function getPublicationStatus(profile = {}) {
     return profile?.is_published ? 'published' : 'draft';
 }
 
-export function isPublishedProfile(profile = {}) {
-    return getPublicationStatus(profile) === 'published';
-}
+
 
 export function normalizeClientProfileShape(profile) {
     if (!profile || typeof profile !== 'object') return profile;

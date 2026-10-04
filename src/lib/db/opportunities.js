@@ -45,14 +45,7 @@ export async function getOpportunitiesBySource(clientId, source) {
     return data || [];
 }
 
-export async function archiveOldOpportunities(clientId) {
-    const { error } = await sb()
-        .from('opportunities')
-        .update({ status: 'dismissed' })
-        .eq('client_id', clientId)
-        .eq('status', 'open');
-    if (error) console.error(`[DB] archiveOldOpportunities: ${error.message}`);
-}
+
 
 export async function archiveOldOpportunitiesExceptAudit(clientId, auditId) {
     let query = sb()
