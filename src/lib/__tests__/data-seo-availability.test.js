@@ -151,4 +151,18 @@ describe('SEO source availability', () => {
         expect(data.kpis.totalClicks).toBeNull();
         expect(io.liveGsc).not.toHaveBeenCalled();
     });
+
+    it('retains a complete device distribution when a separate GSC query request fails', async () => {
+        io.liveGsc.mockImplementation(async ({ dimensions }) => {
+            if (dimensions.includes('query')) throw new Error('private query failure');
+            return { rows: dimensions.includes('device') ? [
+                { dimensions: { device: 'DESKTOP' }, impressions: 60 },
+                { dimensions: { device: 'MOBILE' }, impressions: 40 },
+            ] : pageRows, meta: { dimensions, complete: true } };
+        });
+        const data = await getVisibilitySlice('client-a');
+        expect(data.dataSources).toMatchObject({ gscQueries: 'unavailable', gscDevices: 'available' });
+        expect(data.deviceSplit).toMatchObject({ status: 'available', totalSearches: 100, detail: null });
+        expect(data.deviceSplit.categories.map(row => row.value)).toEqual([60, 40]);
+    });
 });

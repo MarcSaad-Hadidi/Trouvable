@@ -8,7 +8,7 @@ import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import { hasGscServiceAccountCredentials, queryGscSearchAnalyticsRaw } from '@/lib/connectors/providers/gsc';
 import { getClientSearchIdentity } from '@/lib/db/clients';
-import { resolveGscProperty as resolveGscPropertyShared } from '@/lib/seo/gsc-property';
+import { resolveGscProperty } from '@/lib/seo/gsc-property';
 
 const RANGE_TO_DAYS = {
     '7d': 7,
@@ -466,35 +466,6 @@ function buildDeviceSplit(rows, unavailableDetail = null) {
         ...(categories.length > 0 ? {} : buildUnavailableDeviceSplit(unavailableDetail)),
     };
 
-    /*
-
-    const labels = [
-        { key: 'DESKTOP', name: 'Ordinateur', color: '#818cf8' },
-        { key: 'MOBILE', name: 'Téléphone', color: '#34d399' },
-        { key: 'TABLET', name: 'Tablette', color: '#f59e0b' },
-        { key: 'OTHER', name: 'Autres', color: '#f87171' },
-    ];
-
-    const categories = labels
-        .map((item) => {
-            const count = byDevice.get(item.key) || 0;
-            return {
-                name: item.name,
-                color: item.color,
-                count,
-                value: total > 0 ? Number(((count / total) * 100).toFixed(1)) : 0,
-            };
-        })
-        .filter((item) => item.count > 0);
-
-    return {
-        status: categories.length > 0 ? 'available' : 'unavailable',
-        reliability: categories.length > 0 ? 'measured' : 'unavailable',
-        totalSearches: Math.round(total),
-        categories,
-        ...(categories.length > 0 ? {} : buildUnavailableDeviceSplit(unavailableDetail)),
-    };
-    */
 }
 
 function isBrandQuery(query, tokens = []) {
@@ -511,12 +482,6 @@ function applySegmentFilter(queries, segment, brandTokens) {
     }
     return queries || [];
 }
-
-/* Re-export the shared property resolver under the original local name so
-   the rest of this file stays unchanged. The shared module in
-   `lib/seo/gsc-property.js` is the single source of truth used by both
-   the read-side here and the write-side sync in `gsc-sync.js`. */
-const resolveGscProperty = resolveGscPropertyShared;
 
 function buildGscUnavailableReason({ gscStatus, siteUrl, refreshToken, fetchError, hasServerCredentials = false, clientUnavailable = false }) {
     if (gscStatus?.status === 'unavailable' || clientUnavailable) return 'Données de configuration Search Console temporairement indisponibles.';
