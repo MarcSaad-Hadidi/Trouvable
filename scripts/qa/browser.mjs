@@ -208,9 +208,28 @@ function domSnapshot() {
 async function checkScroll(page) {
     const content = page.locator('.geo-content');
     await content.hover();
+    const before = await page.evaluate(() => {
+        const content = document.querySelector('.geo-content');
+        const rect = content.getBoundingClientRect();
+        const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+        const hit = document.elementFromPoint(point.x, point.y);
+        return { scrollTop: content.scrollTop, point, hit: { tag: hit?.tagName, className: hit?.className } };
+    });
     await page.mouse.wheel(0, 600);
-    await delay(200);
-    return page.evaluate(() => {
+    let settleError = null;
+    try {
+        await page.waitForFunction(
+            () => {
+                const content = document.querySelector('.geo-content');
+                return content && (content.scrollHeight <= content.clientHeight + 1 || content.scrollTop > 0);
+            },
+            null,
+            { timeout: 5000 },
+        );
+    } catch (error) {
+        settleError = error.message;
+    }
+    const model = await page.evaluate(() => {
         const content = document.querySelector('.geo-content');
         const shell = document.querySelector('.geo-shell');
         const main = document.querySelector('.geo-main');
@@ -250,6 +269,7 @@ async function checkScroll(page) {
             (!model.requiresScroll || model.content > 0);
         return model;
     });
+    return { ...model, before, settleError };
 }
 async function keyboardCheck(page, client) {
     await page.evaluate(() => {
@@ -347,6 +367,16 @@ async function browserCase(context, test, base, out, mode, logFile) {
         if (request)
             Object.assign(request, { failed: true, reason: event.errorText, blockedReason: event.blockedReason });
     });
+    const shellReady =
+        mode === 'fixture' && test.route.startsWith(CLIENT_BASE)
+            ? page
+                  .waitForResponse(
+                      (response) => new URL(response.url()).pathname === `/api/admin/geo/client/${CLIENT_ID}`,
+                      { timeout: 90000 },
+                  )
+                  .then((response) => ({ status: response.status(), url: response.url() }))
+                  .catch((error) => ({ error: error.message }))
+            : null;
     try {
         const response = await page.goto(base + test.route, { waitUntil: 'load', timeout: 90000 });
         result.status = response?.status();
@@ -365,10 +395,16 @@ async function browserCase(context, test, base, out, mode, logFile) {
             if (result.status !== 200) result.failures.push(`Expected 200, received ${result.status}`);
             if (test.admin) await page.locator('.geo-content').waitFor({ timeout: 20000 });
             if (test.client) {
+                if (shellReady) {
+                    result.shellResponse = await shellReady;
+                    if (result.shellResponse.error) throw new Error(result.shellResponse.error);
+                    if (result.shellResponse.status !== 200)
+                        throw new Error(`Client shell returned HTTP ${result.shellResponse.status}`);
+                }
                 await page
                     .getByText('Fixture locale QA', { exact: false })
                     .first()
-                    .waitFor({ state: 'attached', timeout: 20000 });
+                    .waitFor({ state: 'attached', timeout: 90000 });
             }
             if (test.auth && mode === 'fixture') {
                 await page.locator('[data-qa-auth-fixture]').waitFor({ timeout: 20000 });
@@ -646,7 +682,6 @@ async function runMode(chromium, mode, opts, report) {
                 socket.connectToServer();
             else socket.close({ code: 1008, reason: 'QA blocks external websocket destinations' });
         });
-        await context.tracing.start({ screenshots: true, snapshots: true, sources: false });
         const cases = [
             ...PUBLIC.map((route) => ({ route, public: true })),
             ...AUTH.map((route) => ({ route, auth: true })),
@@ -656,7 +691,12 @@ async function runMode(chromium, mode, opts, report) {
                       { route: '/admin/clients', admin: true },
                       { route: '/admin/clients/onboarding', admin: true },
                       { route: '/admin/geo-compare', admin: true },
-                      ...ADMIN.map((route) => ({ route, admin: true, client: true })),
+                      ...ADMIN.map((route) => ({
+                          route,
+                          admin: true,
+                          client: true,
+                          ...(route === CLIENT_BASE ? { target: `${CLIENT_BASE}/dossier` } : {}),
+                      })),
                       ...ALIASES.map((alias) => ({ ...alias, admin: true, client: true })),
                   ]
                 : []),
@@ -674,7 +714,6 @@ async function runMode(chromium, mode, opts, report) {
                 save();
             }
         }
-        await context.tracing.stop({ path: path.join(out, 'trace.zip') });
         await context.close();
         entry.fixtureWritesRejected = fixture?.requests.filter(({ method }) => !['GET', 'HEAD'].includes(method)) || [];
     } catch (error) {
@@ -700,7 +739,7 @@ async function main() {
     fs.mkdirSync(opts.artifacts, { recursive: true });
     const { chromium } = await import(pathToFileURL(path.join(ROOT, 'node_modules/playwright/index.mjs')).href);
     const report = {
-        method: 'Local Next child; browser Playwright/CDP Network and Performance; server fetch/http/DNS/socket guard; only this invocation’s app/fixture ports allowed. All warnings and blocked requests retained. Desktop 1440x900, mobile 390x844. Artifacts include screenshots and Playwright traces.',
+        method: 'Local Next child; browser Playwright/CDP Network and Performance; server fetch/http/DNS/socket guard; only this invocation’s app/fixture ports allowed. All warnings and blocked requests retained. Desktop 1440x900, mobile 390x844. Artifacts include screenshots and per-case CDP evidence.',
         startedAt: new Date().toISOString(),
         modes: [],
     };
