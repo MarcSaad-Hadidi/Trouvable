@@ -1,9 +1,6 @@
 import 'server-only';
 
-import { runGeminiCompare, getGeminiCompareModel } from './adapters/gemini';
-import { runGroqCompare, getGroqCompareModel } from './adapters/groq';
-import { runMistralCompare, getMistralCompareModel } from './adapters/mistral';
-import { runOpenRouterCompare, getOpenRouterCompareModel } from './adapters/openrouter';
+import { getCompareModel, runProviderCompare } from './provider-adapters';
 import { extractInputContent } from './extract-content';
 import { buildGoogleGroundingContext } from './google-grounding';
 import {
@@ -16,25 +13,6 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-const PROVIDER_ADAPTERS = {
-    gemini: {
-        run: runGeminiCompare,
-        getModel: getGeminiCompareModel,
-    },
-    groq: {
-        run: runGroqCompare,
-        getModel: getGroqCompareModel,
-    },
-    mistral: {
-        run: runMistralCompare,
-        getModel: getMistralCompareModel,
-    },
-    openrouter: {
-        run: runOpenRouterCompare,
-        getModel: getOpenRouterCompareModel,
-    },
-};
-
 function withTimeout(taskPromise, timeoutMs, provider) {
     let timer = null;
     const timeoutPromise = new Promise((_, reject) => {
@@ -46,18 +24,17 @@ function withTimeout(taskPromise, timeoutMs, provider) {
 }
 
 async function executeProvider({ provider, prompt, content, timeoutMs }) {
-    const adapter = PROVIDER_ADAPTERS[provider];
-    if (!adapter) {
+    if (!COMPARE_PROVIDERS.includes(provider)) {
         throw new LlmComparisonError('runtime_error', `Provider compare inconnu: ${provider}`);
     }
     const start = Date.now();
     try {
-        const output = await withTimeout(adapter.run({ prompt, content }), timeoutMs, provider);
+        const output = await withTimeout(runProviderCompare(provider, { prompt, content }), timeoutMs, provider);
         const latencyMs = Date.now() - start;
         return { output, latencyMs };
     } catch (error) {
         const latencyMs = Date.now() - start;
-        throw new ProviderExecutionError(provider, adapter.getModel(), latencyMs, error);
+        throw new ProviderExecutionError(provider, getCompareModel(provider), latencyMs, error);
     }
 }
 
@@ -105,10 +82,9 @@ export async function compareModels({
     const results = settled.map((entry, index) => {
         if (entry.status === 'fulfilled') {
             const provider = COMPARE_PROVIDERS[index];
-            const adapter = PROVIDER_ADAPTERS[provider];
             return buildProviderSuccessResult({
                 provider,
-                model: entry.value.output.model || adapter.getModel(),
+                model: entry.value.output.model || getCompareModel(provider),
                 latencyMs: entry.value.latencyMs,
                 usage: entry.value.output.usage || null,
                 content: entry.value.output.content || '',
@@ -124,10 +100,9 @@ export async function compareModels({
             });
         }
         const provider = COMPARE_PROVIDERS[index];
-        const adapter = PROVIDER_ADAPTERS[provider];
         return buildProviderErrorResult({
             provider,
-            model: adapter.getModel(),
+            model: getCompareModel(provider),
             latencyMs: 0,
             error: reason,
         });

@@ -12,21 +12,12 @@ const runGroqCompareMock = vi.fn();
 const runMistralCompareMock = vi.fn();
 const runOpenRouterCompareMock = vi.fn();
 const buildGoogleGroundingContextMock = vi.fn();
-vi.mock('@/lib/llm-comparison/adapters/gemini', () => ({
-    runGeminiCompare: runGeminiCompareMock,
-    getGeminiCompareModel: () => 'gemini-test-model',
-}));
-vi.mock('@/lib/llm-comparison/adapters/groq', () => ({
-    runGroqCompare: runGroqCompareMock,
-    getGroqCompareModel: () => 'groq-test-model',
-}));
-vi.mock('@/lib/llm-comparison/adapters/mistral', () => ({
-    runMistralCompare: runMistralCompareMock,
-    getMistralCompareModel: () => 'mistral-test-model',
-}));
-vi.mock('@/lib/llm-comparison/adapters/openrouter', () => ({
-    runOpenRouterCompare: runOpenRouterCompareMock,
-    getOpenRouterCompareModel: () => 'openrouter-test-model',
+vi.mock('@/lib/llm-comparison/provider-adapters', () => ({
+    runProviderCompare: (provider, args) => ({
+        gemini: runGeminiCompareMock, groq: runGroqCompareMock,
+        mistral: runMistralCompareMock, openrouter: runOpenRouterCompareMock,
+    })[provider](args),
+    getCompareModel: (provider) => `${provider}-test-model`,
 }));
 vi.mock('@/lib/llm-comparison/google-grounding', () => ({
     buildGoogleGroundingContext: buildGoogleGroundingContextMock,
