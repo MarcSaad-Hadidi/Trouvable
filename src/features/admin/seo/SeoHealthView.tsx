@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -14,6 +14,7 @@ import { CommandHeader, CommandMetricCard, CommandPageShell } from '@/features/a
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import { COMMAND_BUTTONS, COMMAND_PANEL, cn } from '@/lib/design/tokens';
 import SourceStatusNotice from '@/components/shared/metrics/SourceStatusNotice';
+import { finiteNumberOrNull } from '@/lib/numbers';
 
 function formatDateTime(value) {
     if (!value) return 'n.d.';
@@ -58,10 +59,10 @@ function scoreDetail(history, currentScore) {
     }
 
     const previousEntry = history[history.length - 2];
-    const previousScore = Number(previousEntry?.seoScore);
-    const current = Number(currentScore);
+    const previousScore = finiteNumberOrNull(previousEntry?.seoScore);
+    const current = finiteNumberOrNull(currentScore);
 
-    if (!Number.isFinite(previousScore) || !Number.isFinite(current)) return 'Lecture du dernier audit';
+    if (previousScore === null || current === null) return 'Lecture du dernier audit';
 
     const delta = current - previousScore;
     if (delta === 0) return 'Stable vs audit précédent';
@@ -146,11 +147,13 @@ export default function SeoHealthPage() {
                 value: data?.seoScore != null ? `${data.seoScore}/100` : 'n.d.',
                 detail: scoreDetail(history, data?.seoScore),
                 tone:
-                    data?.seoScore != null && data.seoScore >= 80
-                        ? 'ok'
-                        : data?.seoScore != null && data.seoScore >= 50
-                          ? 'warning'
-                          : 'critical',
+                    data?.seoScore == null
+                        ? 'neutral'
+                        : data.seoScore >= 80
+                          ? 'ok'
+                          : data.seoScore >= 50
+                            ? 'warning'
+                            : 'critical',
             },
             {
                 id: 'critical-issues',

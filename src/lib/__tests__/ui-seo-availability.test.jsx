@@ -109,3 +109,33 @@ describe('SEO source availability', () => {
         }
     });
 });
+
+describe('SEO metric availability in full layouts', () => {
+    it.each(['unavailable', 'not_connected', 'not_observed'])(
+        'keeps the visibility table count unknown for %s queries',
+        (state) => {
+            fixture.data = {
+                trackedKeywordCount: null,
+                topQueries: [],
+                dataSources: { gscQueries: state },
+                gscSource: { mode: 'live' },
+                kpis: { sessions: 0 },
+            };
+            const html = renderToStaticMarkup(createElement(SeoVisibilityView));
+            expect(html).toContain('n.d. mots-clés suivis');
+            expect(html).not.toContain('0 mots-clés suivis');
+        },
+    );
+    it('preserves a genuinely empty query inventory in the table count', () => {
+        fixture.data = { trackedKeywordCount: 0, topQueries: [], dataSources: { gscQueries: 'empty' } };
+        expect(renderToStaticMarkup(createElement(SeoVisibilityView))).toContain('0 mots-clés suivis');
+    });
+    it.each([
+        [null, 'n.d.'],
+        [0, '0'],
+    ])('renders overview audit issue inventory %s without replacing it', (count, label) => {
+        fixture.data = { auditScores: { seoScore: 0, geoScore: 0, issueCount: count } };
+        const html = renderToStaticMarkup(createElement(SeoOverviewView));
+        expect(html.match(/Problèmes détectés<\/div><div[^>]*>(.*?)<\/div>/)?.[1]).toBe(label);
+    });
+});

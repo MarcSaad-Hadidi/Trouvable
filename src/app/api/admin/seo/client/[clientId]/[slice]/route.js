@@ -27,10 +27,7 @@ async function loadShellAudit(clientId) {
 }
 
 const LOADERS = {
-    overview: async (clientId) => {
-        const audit = await loadShellAudit(clientId);
-        return getSeoOverviewSlice(clientId, { audit });
-    },
+    overview: (clientId) => getSeoOverviewSlice(clientId),
     visibility: (clientId, options = {}) => getVisibilitySlice(clientId, options),
     health: async (clientId) => {
         const audit = await loadShellAudit(clientId);

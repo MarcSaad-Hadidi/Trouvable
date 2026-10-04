@@ -368,7 +368,9 @@ export default function SeoVisibilityPage() {
                                     className="w-64 rounded-full border border-white/[0.12] bg-[linear-gradient(180deg,rgba(18,24,34,0.98)_0%,rgba(15,19,28,0.96)_100%)] pl-8 pr-4 py-1.5 text-[12px] text-white outline-none transition-all placeholder:text-white/32 focus:border-indigo-400/45"
                                 />
                             </div>
-                            <span className="text-[11px] text-white/42">{filteredQueries.length} mots-clés suivis</span>
+                            <span className="text-[11px] text-white/42">
+                                {trackedKeywordCount === null ? 'n.d.' : filteredQueries.length} mots-clés suivis
+                            </span>
                         </div>
                     </div>
 

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { readGeoScore, readSeoScore } from '@/lib/audit/scores-facade';
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
+import { getLatestAudit } from '@/lib/db/audits';
 import { getRecentGscRows } from '@/lib/db/gsc';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import { getLatestObservedDate, resolveConnectorStatus } from './seo-gsc';
@@ -26,14 +27,15 @@ function sumField(rows, field) {
  * - local_readiness preview (geo_score)
  * - data freshness
  */
-export async function getSeoOverviewSlice(clientId, { audit } = {}) {
+export async function getSeoOverviewSlice(clientId, { audit: providedAudit } = {}) {
     const { values, dataSources, errors } = await loadIndependentSources({
+        audit: () => (providedAudit === undefined ? getLatestAudit(clientId) : providedAudit),
         connectors: () => getClientConnectorRows(clientId),
         ga4Traffic: () => getTrafficDailyRows(clientId, { days: 28 }),
         ga4TopPages: () => getTopPagesRows(clientId, { limit: 5 }),
         gscRows: () => getRecentGscRows(clientId, { days: 28, limit: 50 }),
     });
-    const { ga4Traffic: trafficRows, ga4TopPages: topPages, gscRows } = values;
+    const { audit, ga4Traffic: trafficRows, ga4TopPages: topPages, gscRows } = values;
     const connector = (provider) =>
         dataSources.connectors === 'unavailable'
             ? { status: 'unavailable', lastSyncedAt: null, lastError: null }
@@ -72,7 +74,7 @@ export async function getSeoOverviewSlice(clientId, { audit } = {}) {
         geoScore: geoReading.value,
         geoScoreLabel: 'Aptitude locale',
         deterministic_score: audit?.seo_breakdown?.overall?.deterministic_score ?? null,
-        issueCount: Array.isArray(audit?.issues) ? audit.issues.length : 0,
+        issueCount: Array.isArray(audit?.issues) ? audit.issues.length : null,
     };
 
     return {

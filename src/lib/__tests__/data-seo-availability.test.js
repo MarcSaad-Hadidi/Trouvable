@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const io = vi.hoisted(() => ({
+    audit: vi.fn(),
     traffic: vi.fn(),
     topPages: vi.fn(),
     connectors: vi.fn(),
@@ -9,6 +10,7 @@ const io = vi.hoisted(() => ({
     client: vi.fn(),
 }));
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/db/audits', () => ({ getLatestAudit: io.audit }));
 vi.mock('@/lib/db/ga4', () => ({ getTrafficDailyRows: io.traffic, getTopPagesRows: io.topPages }));
 vi.mock('@/lib/db/gsc', () => ({ getRecentGscRows: io.storedGsc }));
 vi.mock('@/lib/db/clients', () => ({ getClientSearchIdentity: io.client }));
@@ -25,6 +27,7 @@ const pageRows = [
     { dimensions: { date: '2026-10-02', page: 'https://example.test/page' }, clicks: 2, impressions: 40, position: 4 },
 ];
 beforeEach(() => {
+    io.audit.mockReset().mockResolvedValue(null);
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-03T12:00:00Z'));
     io.traffic.mockReset().mockResolvedValue([{ date: '2026-10-03', sessions: 0, users: 0 }]);
@@ -243,5 +246,52 @@ describe('SEO source availability', () => {
         expect(data.dataSources).toMatchObject({ gscQueries: 'unavailable', gscDevices: 'available' });
         expect(data.deviceSplit).toMatchObject({ status: 'available', totalSearches: 100, detail: null });
         expect(data.deviceSplit.categories.map((row) => row.value)).toEqual([60, 40]);
+    });
+});
+
+describe('overview audit inventory', () => {
+    it.each([
+        [undefined, null],
+        [null, null],
+        [{ seo_score: 0, geo_score: 0 }, null],
+        [{ seo_score: 0, geo_score: 0, issues: [] }, 0],
+        [{ seo_score: 0, geo_score: 0, issues: [{ title: 'Observed issue' }] }, 1],
+    ])('preserves an unknown inventory versus measured inventory %s', async (audit, count) => {
+        const data = await getSeoOverviewSlice('client-a', { audit });
+        expect(data.auditScores.issueCount).toBe(count);
+        expect(data.kpis.sessions).toBe(0);
+        if (audit) expect(data.auditScores.seoScore).toBe(0);
+    });
+});
+
+describe('overview independent audit availability', () => {
+    it('keeps an audit read failure partial while preserving observed zero traffic and dates', async () => {
+        io.audit.mockRejectedValue(new Error('private SQL audit'));
+        const data = await getSeoOverviewSlice('client-a');
+        expect(data.status).toBe('partial');
+        expect(data.dataSources.audit).toBe('unavailable');
+        expect(data.errors).toContainEqual({ source: 'audit', message: 'Données temporairement indisponibles.' });
+        expect(data.auditScores.issueCount).toBeNull();
+        expect(data.kpis.sessions).toBe(0);
+        expect(data.dataFreshness).toMatchObject({ latestTrafficDate: '2026-10-03', lastAuditAt: null });
+        expect(io.audit).toHaveBeenCalledExactlyOnceWith('client-a');
+        expect(JSON.stringify(data)).not.toContain('private SQL');
+    });
+    it('keeps an explicitly absent audit distinct from a failing implicit read', async () => {
+        io.audit.mockRejectedValue(new Error('must not read'));
+        const data = await getSeoOverviewSlice('client-a', { audit: null });
+        expect(data.dataSources.audit).toBe('empty');
+        expect(data.status).toBe('available');
+        expect(data.errors).toEqual([]);
+        expect(data.auditScores.issueCount).toBeNull();
+        expect(io.audit).not.toHaveBeenCalled();
+    });
+    it('uses a provided measured audit without a second read', async () => {
+        const audit = { seo_score: 0, issues: [], created_at: '2026-10-02' };
+        const data = await getSeoOverviewSlice('client-a', { audit });
+        expect(data.dataSources.audit).toBe('available');
+        expect(data.auditScores).toMatchObject({ seoScore: 0, issueCount: 0 });
+        expect(data.dataFreshness.lastAuditAt).toBe('2026-10-02');
+        expect(io.audit).not.toHaveBeenCalled();
     });
 });

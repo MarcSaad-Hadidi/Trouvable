@@ -3,6 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 const fixture = vi.hoisted(() => ({ data: null }));
+const auditReads = vi.hoisted(() => ({ latest: vi.fn(), recent: vi.fn() }));
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/db/audits', () => ({ getLatestAudit: auditReads.latest, getRecentAudits: auditReads.recent }));
 vi.mock('@/features/admin/shared/context/ClientContext', () => ({
     useGeoClient: () => ({ client: { client_name: 'Test' }, clientId: 'test' }),
     useSeoWorkspaceSlice: () => ({ data: fixture.data, loading: false, error: null }),
@@ -17,6 +20,7 @@ vi.mock('next/navigation', () => ({
 import SeoContentView from '@/features/admin/seo/SeoContentView';
 import SeoCannibalizationView from '@/features/admin/seo/SeoCannibalizationView';
 import SeoHealthView from '@/features/admin/seo/SeoHealthView';
+import { getSeoHealthSlice } from '@/lib/operator-intelligence/seo-health';
 import SeoOnPageView from '@/features/admin/seo/SeoOnPageView';
 import SeoOpportunitiesView from '@/features/admin/seo/SeoOpportunitiesView';
 
@@ -84,5 +88,40 @@ describe('cannibalization metrics distinguish an unknown group inventory from ob
         expect(html).toContain('Aucune page en conflit visible');
         expect(html).toContain('Aucun arbitrage encore exploitable');
         expect((html.match(/>0<\/div>/g) || []).length).toBeGreaterThanOrEqual(3);
+    });
+});
+
+describe('health comparisons use the persisted audit history', () => {
+    it.each([
+        [null, 50, 'Lecture du dernier audit'],
+        [null, 0, 'Lecture du dernier audit'],
+        [null, null, 'Score indisponible'],
+        [undefined, 50, 'Lecture du dernier audit'],
+        ['', 50, 'Lecture du dernier audit'],
+        [0, 50, '+50 pts vs audit précédent'],
+        [0, 0, 'Stable vs audit précédent'],
+    ])('compares prior score %s with current %s only when observed', async (previous, current, detail) => {
+        const latest = {
+            id: 'latest',
+            scan_status: 'success',
+            seo_score: current,
+            created_at: '2026-10-03',
+            issues: [],
+        };
+        auditReads.latest.mockResolvedValue(latest);
+        auditReads.recent.mockResolvedValue([
+            latest,
+            { id: 'previous', scan_status: 'success', seo_score: previous, created_at: '2026-10-02', issues: [] },
+        ]);
+        fixture.data = await getSeoHealthSlice('test');
+        expect(fixture.data.history).toHaveLength(2);
+        const html = renderToStaticMarkup(createElement(SeoHealthView));
+        const scoreCard = html.match(/Score technique<\/div>(.*?)<\/div><\/div>/)?.[1];
+        expect(scoreCard).toContain(detail);
+        if (current === null) expect(scoreCard).not.toContain('text-rose');
+        if (previous == null || previous === '') {
+            expect(scoreCard).not.toContain('pts vs audit précédent');
+            expect(scoreCard).not.toContain('Stable vs audit précédent');
+        }
     });
 });
