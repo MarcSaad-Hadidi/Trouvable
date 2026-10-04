@@ -110,7 +110,7 @@ export default async function AdminWorkspaceLayout({ children }) {
                 {/* AdminRail is fixed, so we add left padding to the main content area */}
                 <AdminRail devBypass={isDevBypass} />
 
-                <div className="flex-1 flex min-w-0 pl-[var(--rail-w)]">{children}</div>
+                <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden pl-[var(--rail-w)]">{children}</div>
             </div>
             <IssueActionsDrawer />
             <AdminKeyboardShortcuts />

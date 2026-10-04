@@ -166,7 +166,7 @@ export default async function AdminClientsPage({ searchParams }) {
     );
 
     return (
-        <div className="flex-1 flex flex-col h-screen min-w-0">
+        <div className="geo-main min-h-0">
             <CommandStrip />
             <div className="geo-content flex-1 overflow-y-auto">
                 <CommandPageShell header={header}>

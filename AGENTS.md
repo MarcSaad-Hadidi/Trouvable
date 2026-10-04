@@ -116,7 +116,7 @@ The admin workspace uses a fixed three-tier scroll model. Operator pages
 must respect it or scroll will break in production:
 
 1. **`.geo-shell`** — `height: 100vh; overflow: hidden`. Always full viewport, never scrolls.
-2. **`.geo-main`** — flex column, `overflow: hidden`. Hosts the chrome (MissionBar / MandateRibbon) and the content viewport.
+2. **`.geo-main`** — flex column, `min-height: 0; overflow: hidden`. Hosts the chrome (CommandStrip / MissionCommandHeader) and the content viewport.
 3. **`.geo-content`** — the **single** `overflow-y: auto` viewport. Every operator page is rendered inside it.
 
 Rules for pages and feature components rendered inside `.geo-content`:
@@ -125,9 +125,9 @@ Rules for pages and feature components rendered inside `.geo-content`:
 - Use `min-h-0` on flex children that must shrink (e.g. nested column layouts inside drawers or two-pane shells).
 - Inner `overflow-hidden` is fine on cards, charts, and decorative containers — but never on the page-root element.
 - Drawers (e.g. `EvidenceDrawer`) own their own scroll via a portal and `overscroll-behavior: contain`. Do not duplicate that pattern at page level.
-- The unified `OperatorPageShell` wraps `.operator-shell`, which intentionally has no `overflow` — it is layout-only.
+- [CommandPageShell](src/features/admin/shared/components/command/CommandPageShell.jsx) is a layout-only wrapper with no `overflow`.
 
-When in doubt: render plain content inside `<OperatorPageShell>` and let `.geo-content` scroll the viewport.
+When in doubt: render plain content inside `<CommandPageShell>` and let `.geo-content` scroll the viewport.
 
 ## Validation
 

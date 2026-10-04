@@ -57,7 +57,7 @@ Les [tokens visuels](../../src/lib/design/tokens.ts) et les composants actuels c
 - Gérer chargement, vide, erreur récupérable et données. Les actions destructives gardent confirmation et feedback.
 - Les preuves restent consultables avec provenance, sortie brute adaptée, objets liés, action, historique et niveau de vérification ; aucun secret ni donnée client non autorisée.
 
-Le scroll principal reste `.geo-shell` (100vh, non scrollable) → `.geo-main` (flex, overflow hidden) → `.geo-content` (seul viewport principal scrollable). `OperatorPageShell` reste un conteneur de layout sans overflow ; [AGENTS.md](../../AGENTS.md#admin-shell-scroll-model-do-not-break) décrit les règles de composition et de drawers.
+Le scroll principal reste `.geo-shell` (100vh, non scrollable) → `.geo-main` (flex, min-height: 0, overflow hidden) → `.geo-content` (seul viewport principal scrollable). [CommandPageShell](../../src/features/admin/shared/components/command/CommandPageShell.jsx) reste un conteneur de layout sans overflow ; [AGENTS.md](../../AGENTS.md#admin-shell-scroll-model-do-not-break) décrit les règles de composition et de drawers.
 
 ## 7. Contenu public et intégrité factuelle
 

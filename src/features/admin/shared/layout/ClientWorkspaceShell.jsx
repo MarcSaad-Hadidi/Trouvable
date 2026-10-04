@@ -200,10 +200,10 @@ function ClientShellInner({ children }) {
     const { client } = useGeoClient();
 
     return (
-        <div className="flex w-full h-full">
+        <div className="flex w-full h-full min-h-0">
             <AdminTray client={client} />
 
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="geo-main min-h-0">
                 <CommandStrip />
                 <MissionCommandHeader />
                 <div className="geo-content flex-1 overflow-y-auto">{children}</div>
