@@ -1,40 +1,13 @@
 import 'server-only';
 
-import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
-import { getRecentAudits as dbGetRecentAudits } from '@/lib/db/audits';
-import { getRecentQueryRuns as dbGetRecentQueryRuns } from '@/lib/db/query-runs';
-import { getRecentSafeActivity } from '@/lib/operator-intelligence/activity';
-import { getGeoWorkspaceSnapshot } from '@/lib/operator-intelligence/snapshot';
+import { loadOverviewData } from '@/lib/operator-intelligence/overview-data';
 import { mapOpportunitySourceToProvenance, getProvenanceMeta } from '@/lib/operator-intelligence/provenance';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
 export async function getOverviewSlice(clientId) {
-    const results = await Promise.allSettled([
-        getGeoWorkspaceSnapshot(clientId),
-        dbGetLatestOpportunities(clientId),
-        getRecentSafeActivity(clientId),
-        dbGetRecentAudits(clientId, 24),
-        dbGetRecentQueryRuns(clientId, 120),
-    ]);
-
-    if (results[0].status === 'rejected') throw new Error('Données temporairement indisponibles.');
-    const ws = results[0].value;
-    const latestOpps = results[1].status === 'fulfilled' ? results[1].value : null;
-    const activity = results[2].status === 'fulfilled' ? results[2].value : null;
-    const recentAudits = results[3].status === 'fulfilled' ? results[3].value : [];
-    const recentQueryRuns = results[4].status === 'fulfilled' ? results[4].value : [];
-    const dataSources = { ...ws.snapshot.sources };
-    const errors = [...ws.snapshot.errors];
-    for (const [index, source] of ['opportunities', 'activity', 'auditHistory', 'runHistory'].entries()) {
-        const failed = results[index + 1].status === 'rejected';
-        const value = failed ? null : results[index + 1].value;
-        dataSources[source] = failed ? 'unavailable' : value?.status || 'available';
-        if (failed) errors.push({ source, message: 'Données temporairement indisponibles.' });
-        for (const [key, status] of Object.entries(value?.dataSources || {})) dataSources[`${source}.${key}`] = status;
-        for (const error of value?.errors || [])
-            errors.push({ source: `${source}.${error.source}`, message: 'Données temporairement indisponibles.' });
-    }
+    const { workspace, latestOpps, activity, recentAudits, recentQueryRuns, status, dataSources, errors } =
+        await loadOverviewData(clientId);
     const {
         auditMetrics,
         runMetrics,
@@ -45,16 +18,13 @@ export async function getOverviewSlice(clientId) {
         latestAudit,
         lastRunAt,
         completedRuns,
-    } = ws;
+    } = workspace;
 
     const relevantOpps = latestOpps?.active?.filter((o) => o.status === 'open') ?? [];
     const staleOppsCount = latestOpps?.stale?.length ?? 0;
 
     return {
-        status:
-            errors.length > 0 || Object.values(dataSources).some((state) => ['partial', 'unavailable'].includes(state))
-                ? 'partial'
-                : snapshot.status,
+        status,
         dataSources,
         errors,
         provenance: {

@@ -4,6 +4,7 @@ const io = vi.hoisted(() => ({
     from: vi.fn(),
     results: {},
     overview: vi.fn(),
+    overviewData: vi.fn(),
     readiness: vi.fn(),
     client: vi.fn(),
     audit: vi.fn(),
@@ -16,6 +17,7 @@ const io = vi.hoisted(() => ({
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/supabase-admin', () => ({ getAdminSupabase: () => ({ from: io.from }) }));
 vi.mock('@/lib/operator-intelligence/overview', () => ({ getOverviewSlice: io.overview }));
+vi.mock('@/lib/operator-intelligence/overview-data', () => ({ loadOverviewData: io.overviewData }));
 vi.mock('@/lib/operator-intelligence/geo-readiness', () => ({ getReadinessSlice: io.readiness }));
 vi.mock('@/lib/db/clients', () => ({ getClientById: io.client }));
 vi.mock('@/lib/db/audits', () => ({ getLatestAudit: io.audit, getRecentAudits: io.recentAudits }));
@@ -103,6 +105,23 @@ beforeEach(() => {
     io.results = { client: { data: { id: 'client-a', client_name: 'A', updated_at: '2026-01-01' }, error: null } };
     installShellDatabase();
     io.overview.mockResolvedValue(emptyOverview());
+    io.overviewData.mockResolvedValue({
+        status: 'available',
+        errors: [],
+        dataSources: { trackedQueries: 'empty', totalQueryRuns: 'empty', audit: 'empty' },
+        workspace: {
+            runMetrics: { totalQueryRuns: { value: 0 } },
+            promptMetrics: {
+                total: { value: 0 },
+                active: 0,
+                withTargetFound: 0,
+                withRunNoTarget: 0,
+                noRunYet: 0,
+                mentionRatePercent: { value: null },
+            },
+            mentionMetrics: { confirmedCompetitorMentions: { value: 0 }, genericMentions: { value: 0 } },
+        },
+    });
     io.readiness.mockResolvedValue({ available: false, topBlockers: [] });
     io.client.mockResolvedValue({ id: 'client-a', client_name: 'A' });
     io.audit.mockResolvedValue(null);
@@ -208,15 +227,21 @@ describe('safe independent activity and opportunity sources', () => {
 
 describe('Agent availability through visibility and remediation', () => {
     it('preserves canonical unknown counts and partial source metadata', async () => {
-        io.overview.mockResolvedValue({
+        io.overviewData.mockResolvedValue({
             status: 'partial',
             dataSources: { trackedQueries: 'unavailable', totalQueryRuns: 'unavailable' },
             errors: [{ source: 'trackedQueries', message: 'Données temporairement indisponibles.' }],
-            kpis: {
-                trackedPromptsTotal: null,
-                completedRunsTotal: null,
-                competitorMentionsCount: null,
-                genericMentionsCount: null,
+            workspace: {
+                runMetrics: { totalQueryRuns: { value: null } },
+                promptMetrics: {
+                    total: { value: null },
+                    active: null,
+                    withTargetFound: null,
+                    withRunNoTarget: null,
+                    noRunYet: null,
+                    mentionRatePercent: { value: null },
+                },
+                mentionMetrics: { confirmedCompetitorMentions: { value: null }, genericMentions: { value: null } },
             },
         });
         const visibility = await getAgentVisibilitySlice('client-a');
@@ -239,7 +264,12 @@ describe('Agent availability through visibility and remediation', () => {
         expect(slice.emptyState.description).not.toContain('Aucun audit');
     });
     it('retains numeric legacy visibility payloads without inventing a load error', async () => {
-        io.overview.mockResolvedValue({ kpis: { trackedPromptsTotal: 0, completedRunsTotal: 0 } });
+        io.overviewData.mockResolvedValue({
+            workspace: {
+                runMetrics: { totalQueryRuns: { value: 0 } },
+                promptMetrics: { total: { value: 0 } },
+            },
+        });
         const slice = await getAgentVisibilitySlice('client-a');
         expect(slice.status).toBe('available');
         expect(slice.errors).toEqual([]);
