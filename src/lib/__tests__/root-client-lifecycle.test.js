@@ -75,13 +75,41 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
 
     it.each([
         { data: null, error: null },
-        { data: null, error: { code: 'PGRST116', message: 'zero rows' } },
-        { data: { lifecycle_status: 'active' }, error: { code: '08006', message: 'private database connection' } },
-    ])('characterizes missing client and returned fetch errors (%j)', async (result) => {
+        { data: null, error: { code: 'PGRST116', details: 'The result contains 0 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
+        { data: null, error: { code: 'PGRST116', details: 'Results contain 0 rows, application/vnd.pgrst.object+json requires 1 row', message: 'JSON object requested, multiple (or no) rows returned' } },
+    ])('preserves 404 for confirmed client absence (%j)', async (result) => {
         io.single.mockResolvedValue(result);
         const response = await flow.post(request());
         expect(response.status).toBe(404);
         expect(await response.json()).toEqual({ error: 'Client introuvable.' });
+        expectNoMutation();
+    });
+
+    it.each([
+        { data: null, error: { code: '08006', message: 'private database connection' } },
+        { data: { lifecycle_status: 'active' }, error: { code: '08006', message: 'private database connection' } },
+        { data: null, error: { code: 'PGRST116', details: 'The result contains 2 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
+        { data: null, error: { code: 'PGRST116', details: 'The result contains 10 rows', message: 'JSON object requested, multiple (or no) rows returned' } },
+        { data: null, error: { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' } },
+        { data: null, error: { code: '08006', details: 'The result contains 0 rows', message: 'private database connection' } },
+        { data: null, error: { message: 'private unknown database error' } },
+    ])('returns safe 500 for a failed or ambiguous client lookup (%j)', async (result) => {
+        io.single.mockResolvedValue(result);
+        const response = await flow.post(request());
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: 'Erreur interne du serveur.' });
+        expect(console.error).toHaveBeenCalledExactlyOnceWith(`[clients/${flow.name}]`, result.error);
+        expectNoMutation();
+    });
+
+    it('never reads lifecycle data returned alongside a database error', async () => {
+        const readLifecycle = vi.fn(() => flow.initial);
+        const data = Object.defineProperty({}, 'lifecycle_status', { get: readLifecycle });
+        io.single.mockResolvedValue({ data, error: { code: '08006', message: 'private database connection' } });
+        const response = await flow.post(request());
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: 'Erreur interne du serveur.' });
+        expect(readLifecycle).not.toHaveBeenCalled();
         expectNoMutation();
     });
 
@@ -151,5 +179,6 @@ describe.each(flows)('client lifecycle endpoint $name', (flow) => {
         if (stage === 'journal') expect(flow.mutate).toHaveBeenCalledExactlyOnceWith(CLIENT_A);
     });
 });
+
 
 

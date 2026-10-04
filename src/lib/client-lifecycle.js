@@ -32,7 +32,10 @@ export async function changeClientLifecycle(clientId, targetState, performedBy) 
         .select('lifecycle_status')
         .eq('id', clientId)
         .single();
-    if (fetchErr || !current) {
+    // PGRST116 also covers multiple rows; only confirmed zero rows mean absence.
+    const missingClient = fetchErr?.code === 'PGRST116' && /\b0 rows\b/.test(fetchErr.details || '');
+    if (fetchErr && !missingClient) throw fetchErr;
+    if (missingClient || !current) {
         return { body: { error: 'Client introuvable.' }, status: 404 };
     }
     const fromState = current.lifecycle_status || transition.fallback;
@@ -50,3 +53,4 @@ export async function changeClientLifecycle(clientId, targetState, performedBy) 
     });
     return { body: { success: true, client }, status: 200 };
 }
+
