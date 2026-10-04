@@ -1,7 +1,14 @@
 /** Resolve independent reads without exposing transport or database errors. */
 export async function loadIndependentSources(loaders) {
     const names = Object.keys(loaders);
-    const results = await Promise.allSettled(names.map(name => Promise.resolve().then(loaders[name])));
+    const reads = names.map(name => {
+        try {
+            return loaders[name]();
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    });
+    const results = await Promise.allSettled(reads);
     const values = {};
     const dataSources = {};
     const errors = [];
