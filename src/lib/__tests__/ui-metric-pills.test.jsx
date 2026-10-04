@@ -1,6 +1,11 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('server-only', () => ({}));
+
+import { PROVENANCE_META, getProvenanceMeta as getClientMeta } from '@/lib/operator-intelligence/provenance-meta';
+import { getNotConnectedMeta, getProvenanceMeta, mapOpportunitySourceToProvenance } from '@/lib/operator-intelligence/provenance';
 import ReliabilityPill from '@/components/shared/metrics/ReliabilityPill';
 import { ProvenancePill } from '@/components/shared/metrics/ProvenancePill';
 
@@ -33,4 +38,17 @@ it('preserves each concept’s palette and fallback', () => {
     expect(render(ProvenancePill, { meta: { label: 'Custom', tone: 'blue' } })).toContain('text-white/45');
     expect(render(ReliabilityPill, { value: 'unknown' })).toContain('Indisponible');
     expect(render(ProvenancePill, { value: 'unknown' })).toContain('Dérivé');
+});
+
+it.each(['observed', 'derived', 'inferred', 'not_connected', 'unknown', null, undefined])('uses the same provenance contract for %s on server and client', (value) => {
+    expect(getProvenanceMeta(value)).toBe(getClientMeta(value));
+    expect(getClientMeta(value)).toBe(PROVENANCE_META[value] || PROVENANCE_META.derived);
+});
+
+it('keeps server opportunity mapping and not-connected metadata', () => {
+    expect(mapOpportunitySourceToProvenance('observed')).toBe(PROVENANCE_META.observed);
+    expect(mapOpportunitySourceToProvenance('inferred')).toBe(PROVENANCE_META.inferred);
+    expect(mapOpportunitySourceToProvenance('recommended')).toBe(PROVENANCE_META.derived);
+    expect(mapOpportunitySourceToProvenance('unknown')).toBe(PROVENANCE_META.derived);
+    expect(getNotConnectedMeta()).toBe(PROVENANCE_META.not_connected);
 });
