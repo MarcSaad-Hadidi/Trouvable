@@ -1,13 +1,5 @@
 import 'server-only';
 
-export const RECURRING_JOB_TYPES = [
-    'audit_refresh',
-    'prompt_rerun',
-    'gsc_sync_daily',
-    'ga4_sync_daily',
-    'community_sync',
-];
-export const RECURRING_RUN_STATUS = ['pending', 'running', 'completed', 'failed', 'cancelled'];
 export const RECURRING_TRIGGER_SOURCES = ['cron', 'manual', 'retry', 'system'];
 
 export const DEFAULT_RECURRING_JOB_CONFIG = {
@@ -51,12 +43,3 @@ export const CONNECTOR_STATES = [
 
 /** States valid for DB persistence (matches client_data_connectors CHECK constraint). */
 export const CONNECTOR_STORED_STATES = ['not_connected', 'configured', 'disabled', 'sample_mode', 'error'];
-
-export const METRIC_KEYS = [
-    'seo_score',
-    'geo_score',
-    'visibility_proxy_percent',
-    'mention_rate_percent',
-    'citation_coverage_percent',
-    'competitor_visibility_count',
-];

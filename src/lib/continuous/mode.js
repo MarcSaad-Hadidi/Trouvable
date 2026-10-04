@@ -9,7 +9,7 @@ export function isDailyFirstMode() {
     return !DISABLED_VALUES.has(raw);
 }
 
-export function getDailyCadenceFloorMinutes() {
+function getDailyCadenceFloorMinutes() {
     return 1440;
 }
 
