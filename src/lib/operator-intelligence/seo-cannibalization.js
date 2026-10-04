@@ -8,7 +8,7 @@ import { getLatestAudit as dbGetLatestAudit } from '@/lib/db/audits';
 import { getLatestOpportunities as dbGetLatestOpportunities } from '@/lib/db/opportunities';
 import { getRecentGscRows } from '@/lib/db/gsc';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
-import { getAdminSupabase } from '@/lib/supabase-admin';
+import { getClientSearchIdentity } from '@/lib/db/clients';
 
 const CURRENT_WINDOW_DAYS = 28;
 const COMPARISON_WINDOW_DAYS = 56;
@@ -323,16 +323,6 @@ function buildPagePerformance(rows) {
     }
 
     return performance;
-}
-
-async function getClientName(clientId) {
-    const { data } = await getAdminSupabase()
-        .from('client_geo_profiles')
-        .select('client_name')
-        .eq('id', clientId)
-        .maybeSingle();
-
-    return String(data?.client_name || '').trim();
 }
 
 function extractBrandTokens(clientName) {
@@ -1062,7 +1052,7 @@ export async function getSeoCannibalizationSlice(clientId) {
         dbGetLatestOpportunities(clientId).catch(() => ({ active: [], stale: [], latestAuditId: null })),
         getClientConnectorRows(clientId).catch(() => []),
         getRecentGscRows(clientId, { days: COMPARISON_WINDOW_DAYS, limit: 1600 }).catch(() => []),
-        getClientName(clientId).catch(() => ''),
+        getClientSearchIdentity(clientId).then(identity => identity.clientName).catch(() => ''),
     ]);
 
     const pages = dedupePagesByUrl(toArray(audit?.extracted_data?.page_summaries))

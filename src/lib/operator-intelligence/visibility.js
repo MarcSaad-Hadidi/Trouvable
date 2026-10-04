@@ -5,7 +5,7 @@ import { createSearchMetricBucket, accumulateSearchMetrics, readSearchMetrics, w
 import { getTrafficDailyRows, getTopPagesRows } from '@/lib/db/ga4';
 import { getClientConnectorRows } from '@/lib/connectors/repository';
 import { hasGscServiceAccountCredentials, queryGscSearchAnalyticsRaw } from '@/lib/connectors/providers/gsc';
-import { getAdminSupabase } from '@/lib/supabase-admin';
+import { getClientSearchIdentity } from '@/lib/db/clients';
 import { resolveGscProperty as resolveGscPropertyShared } from '@/lib/seo/gsc-property';
 
 const RANGE_TO_DAYS = {
@@ -539,19 +539,6 @@ function buildRawSample(rows, limit = 20) {
     }));
 }
 
-async function getClientProfile(clientId) {
-    const { data } = await getAdminSupabase()
-        .from('client_geo_profiles')
-        .select('client_name, website_url')
-        .eq('id', clientId)
-        .maybeSingle();
-
-    return {
-        clientName: String(data?.client_name || '').trim(),
-        websiteUrl: String(data?.website_url || '').trim(),
-    };
-}
-
 async function fetchLiveGscData({ siteUrl, refreshToken, window, filters }) {
     const [queryResponse, pageResponse, deviceResponse] = await Promise.all([
         queryGscSearchAnalyticsRaw({
@@ -612,7 +599,7 @@ export async function getVisibilitySlice(clientId, options = {}) {
     const ga4Days = Math.max(56, window.currentDays * 2);
 
     const [clientProfile, connectorRows, trafficRows, ga4TopPages] = await Promise.all([
-        getClientProfile(clientId).catch(() => ({ clientName: '', websiteUrl: '' })),
+        getClientSearchIdentity(clientId).catch(() => ({ clientName: '', websiteUrl: '' })),
         getClientConnectorRows(clientId).catch(() => []),
         getTrafficDailyRows(clientId, { days: ga4Days }).catch(() => []),
         getTopPagesRows(clientId, { limit: 20 }).catch(() => []),

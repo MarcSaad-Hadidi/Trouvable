@@ -11,6 +11,20 @@ export async function getClientById(id) {
     return data;
 }
 
+/** Identity used to resolve search properties and distinguish brand queries. */
+export async function getClientSearchIdentity(id) {
+    const { data, error } = await db()
+        .from('client_geo_profiles')
+        .select('client_name, website_url')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) throw new Error(`[DB/clients] getClientSearchIdentity ${id}: ${error.message}`);
+    return {
+        clientName: String(data?.client_name || '').trim(),
+        websiteUrl: String(data?.website_url || '').trim(),
+    };
+}
+
 export async function listClientsWithSiteUrl({ includeArchived = false } = {}) {
     let query = db()
         .from('client_geo_profiles')
